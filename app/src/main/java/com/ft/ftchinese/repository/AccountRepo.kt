@@ -371,8 +371,52 @@ object AccountRepo {
             .setApiKey()
             .setUserId(ftcId)
             .sendJson(params)
-            .endText()
+            .endOrThrow()
 
         return resp.code == 204
+    }
+
+    suspend fun asyncDeleteAccount(ftcId: String, params: EmailPasswordParams): FetchResult<AccountDropped> {
+        try {
+            val done = withContext(Dispatchers.IO) {
+                deleteAccount(
+                    ftcId = ftcId,
+                    params = params,
+                )
+            }
+
+            return if (done) {
+                FetchResult.Success(AccountDropped.Success)
+            } else {
+                FetchResult.loadingFailed
+            }
+
+        } catch (e: APIError) {
+            return when (e.statusCode) {
+                403 -> {
+                    FetchResult.LocalizedError(R.string.password_not_verified)
+                }
+                404 -> {
+                    FetchResult.LocalizedError(R.string.account_not_found)
+                }
+                422 -> {
+                    when {
+                        e.error?.isFieldMissing("email") == true -> {
+                            FetchResult.LocalizedError(R.string.message_delete_email_mismatch)
+                        }
+                        e.error?.isFieldAlreadyExists("subscription") == true -> {
+                            FetchResult.Success(AccountDropped.SubsExists)
+                        }
+                        else -> {
+                            FetchResult.fromApi(e)
+                        }
+                    }
+                }
+                else -> FetchResult.fromApi(e)
+            }
+
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 }
