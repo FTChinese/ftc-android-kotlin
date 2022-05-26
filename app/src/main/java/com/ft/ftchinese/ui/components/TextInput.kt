@@ -67,6 +67,7 @@ fun TextInput(
     trailingIcon: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean = true,
 ) {
     val isError = remember(state.touched, state.valid) {
         derivedStateOf { state.touched.value && !state.valid.value }
@@ -75,34 +76,70 @@ fun TextInput(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        OutlinedTextField(
-            value = state.field.value,
-            onValueChange = state::onValueChanged,
-            label = {
-                Text(
-                    text = label
-                )
-            },
-            trailingIcon = trailingIcon,
-            isError = isError.value,
-            visualTransformation = visualTransformation,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = keyboardType,
-                autoCorrect = false,
-            ),
+        InputField(
+            label = label,
+            state = state,
             modifier = Modifier.fillMaxWidth(),
-            readOnly = readOnly,
             enabled = enabled,
-            singleLine = true,
+            readOnly = readOnly,
+            trailingIcon = trailingIcon,
+            visualTransformation = visualTransformation,
+            keyboardType = keyboardType,
+            isError = isError.value,
+            singleLine = singleLine,
         )
         if (isError.value) {
-            Text(
-                text = state.error.value,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.body2,
-                color = OColor.claret,
-            )
+            InputInvalid(error = state.error.value)
         }
+    }
+}
+
+@Composable
+fun InputField(
+    label: String,
+    state: InputState,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean,
+) {
+    OutlinedTextField(
+        value = state.field.value,
+        onValueChange = state::onValueChanged,
+        label = {
+            Text(
+                text = label
+            )
+        },
+        trailingIcon = trailingIcon,
+        isError = isError,
+        visualTransformation = visualTransformation,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            autoCorrect = false,
+        ),
+        modifier = modifier,
+        readOnly = readOnly,
+        enabled = enabled,
+        singleLine = singleLine,
+    )
+}
+
+@Composable
+fun InputInvalid(
+    error: String,
+) {
+    if (error.isNotBlank()) {
+        Text(
+            text = error,
+            modifier = Modifier.fillMaxWidth(),
+            style = MaterialTheme.typography.body2,
+            color = OColor.claret,
+        )
     }
 }
 
