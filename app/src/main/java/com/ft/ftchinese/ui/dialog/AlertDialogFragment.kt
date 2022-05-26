@@ -72,24 +72,5 @@ class AlertDialogFragment : DialogFragment() {
             )
         )
 
-        @JvmStatic
-        fun newErrInstance(msg: String) = newInstance(
-            params = DialogArgs(
-                message = msg,
-                positiveButton = R.string.btn_ok,
-                title = R.string.dialog_title_error,
-            )
-        )
-
-        @JvmStatic
-        fun newStripeCustomer(email: String) = newInstance(
-            params = DialogArgs(
-                title = R.string.title_create_stripe_customer,
-                message = "Stripe支付要求提供邮箱地址，是否使用当前邮箱注册(${email})？",
-                positiveButton = R.string.btn_yes,
-                negativeButton = R.string.btn_no,
-            )
-        )
-
     }
 }
