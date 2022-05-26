@@ -124,10 +124,6 @@
             android:name=".ui.wxlink.UnlinkActivity"
             android:label="@string/title_unlink"
             android:parentActivityName=".ui.wxinfo.WxInfoActivity" />
-        <activity
-            android:name=".ui.account.UpdateActivity"
-            android:parentActivityName=".ui.account.AccountActivity"
-            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.MemberActivity" />
         <activity
             android:name=".ui.stripepay.StripeSubActivity"
