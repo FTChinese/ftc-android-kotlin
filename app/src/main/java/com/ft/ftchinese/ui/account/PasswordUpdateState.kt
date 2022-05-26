@@ -71,7 +71,7 @@ fun rememberPasswordState(
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
     connState: State<ConnectionState> = connectivityState()
-) = remember {
+) = remember(scaffoldState, resources, connState) {
     PasswordUpdateState(
         scaffoldState = scaffoldState,
         scope = scope,
