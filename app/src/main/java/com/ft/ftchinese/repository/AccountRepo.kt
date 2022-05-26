@@ -25,6 +25,28 @@ object AccountRepo {
             .body
     }
 
+    suspend fun asyncLoadFtcAccount(ftcId: String): FetchResult<Account> {
+        try {
+            val account = withContext(Dispatchers.IO) {
+                loadFtcAccount(ftcId = ftcId)
+            }
+
+            return if (account == null) {
+                FetchResult.unknownError
+            } else {
+                FetchResult.Success(account)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 404) {
+                FetchResult.accountNotFound
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     /**
      * Account retrieved from here always has loginMethod set to `wechat`.
      * Only used for initial login.
@@ -33,7 +55,7 @@ object AccountRepo {
      * If user logged in with email + password (and the the email is bound to this wechat),
      * WxSession never actually exists.
      */
-    fun loadWxAccount(unionId: String): Account? {
+    private fun loadWxAccount(unionId: String): Account? {
         return Fetch()
             .get(Endpoint.wxAccount)
             .setUnionId(unionId)
@@ -97,7 +119,7 @@ object AccountRepo {
         }
     }
 
-    fun updateEmail(ftcId: String, email: String): BaseAccount? {
+    private fun updateEmail(ftcId: String, email: String): BaseAccount? {
         return Fetch().patch(Endpoint.email)
             .noCache()
             .setApiKey()
@@ -138,7 +160,7 @@ object AccountRepo {
         }
     }
 
-    fun updateUserName(ftcId: String, name: String): BaseAccount? {
+    private fun updateUserName(ftcId: String, name: String): BaseAccount? {
         return Fetch().patch(Endpoint.userName)
             .noCache()
             .setApiKey()
@@ -214,7 +236,7 @@ object AccountRepo {
         }
     }
 
-    fun requestVerification(ftcId: String): Boolean {
+    private fun requestVerification(ftcId: String): Boolean {
         val resp = Fetch()
             .post(Endpoint.emailVrfLetter)
             .setTimeout(30)
@@ -253,7 +275,7 @@ object AccountRepo {
         }
     }
 
-    fun requestSMSCode(ftcId: String, params: SMSCodeParams): Boolean {
+    private fun requestSMSCode(ftcId: String, params: SMSCodeParams): Boolean {
         val resp = Fetch()
             .put(Endpoint.smsCode)
             .noCache()
@@ -402,7 +424,7 @@ object AccountRepo {
         }
     }
 
-    fun updateAddress(ftcId: String, address: Address): Address? {
+    private fun updateAddress(ftcId: String, address: Address): Address? {
         return Fetch()
             .patch(Endpoint.address)
             .setUserId(ftcId)
@@ -429,7 +451,7 @@ object AccountRepo {
         }
     }
 
-    fun deleteAccount(ftcId: String, params: EmailPasswordParams): Boolean {
+    private fun deleteAccount(ftcId: String, params: EmailPasswordParams): Boolean {
         val resp =  Fetch()
             .delete(Endpoint.ftcAccount)
             .noCache()

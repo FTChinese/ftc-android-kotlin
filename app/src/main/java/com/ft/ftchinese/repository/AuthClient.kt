@@ -1,6 +1,7 @@
 package com.ft.ftchinese.repository
 
 import android.util.Log
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
@@ -71,7 +72,7 @@ object AuthClient {
         return resp.code == 204
     }
 
-    suspend fun asyncSMSAuthCode(params: SMSCodeParams): FetchResult<Boolean> {
+    suspend fun asyncRequestSMSCode(params: SMSCodeParams): FetchResult<Boolean> {
         return try {
             val ok = withContext(Dispatchers.IO) {
                 requestSMSCode(params)
@@ -87,8 +88,6 @@ object AuthClient {
         }
     }
 
-
-
     fun verifySMSCode(params: MobileAuthParams): UserFound? {
         return Fetch()
             .post(Endpoint.mobileVerificationCode)
@@ -98,6 +97,18 @@ object AuthClient {
             .sendJson(params)
             .endJson<UserFound>()
             .body
+    }
+
+    suspend fun asyncVerifySMSCode(params: MobileAuthParams): FetchResult<UserFound> {
+        try {
+            val found = withContext(Dispatchers.IO) {
+                verifySMSCode(params)
+            } ?: return FetchResult.unknownError
+
+            return FetchResult.Success(found)
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     fun mobileLinkExistingEmail(params: MobileLinkParams): Account? {
@@ -123,6 +134,38 @@ object AuthClient {
             .sendJson(params)
             .endJson<Account>()
             .body
+    }
+
+    suspend fun asyncMobileSignUp(params: MobileSignUpParams): FetchResult<Account> {
+        try {
+            val account = withContext(Dispatchers.IO) {
+                mobileSignUp(params)
+            }
+
+            return if (account == null) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.Success(account)
+            }
+        } catch (e: APIError) {
+
+            return when(e.statusCode) {
+                422 -> {
+                    if (e.error == null) {
+                        FetchResult.fromApi(e)
+                    } else {
+                        when {
+                            e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_mobile_taken)
+                            e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.signup_invalid_mobile)
+                            else -> FetchResult.fromApi(e)
+                        }
+                    }
+                }
+                else -> FetchResult.fromException(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     fun passwordResetLetter(params: PasswordResetLetterParams): Boolean {

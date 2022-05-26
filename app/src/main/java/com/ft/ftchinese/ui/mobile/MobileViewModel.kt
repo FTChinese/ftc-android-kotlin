@@ -4,13 +4,10 @@ import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.model.request.MobileAuthParams
-import com.ft.ftchinese.model.request.MobileFormParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.repository.AccountRepo
@@ -20,7 +17,10 @@ import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private const val TAG = "MobileViewModel"
 
@@ -128,12 +128,6 @@ class MobileViewModel : BaseViewModel() {
             mobile = mobileLiveData.value ?: "",
         )
 
-    private val updateMobileParams: MobileFormParams
-        get() = MobileFormParams(
-            mobile = mobileLiveData.value ?: "",
-            code = codeLiveData.value ?: "",
-        )
-
     val codeSent: MutableLiveData<FetchResult<Boolean>> by lazy {
         MutableLiveData<FetchResult<Boolean>>()
     }
@@ -158,7 +152,7 @@ class MobileViewModel : BaseViewModel() {
     // Send SMS for login.
     fun requestSMSAuthCode() {
         if (isNetworkAvailable.value != true) {
-            codeSent.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            codeSent.value = FetchResult.notConnected
             return
         }
 
@@ -166,23 +160,12 @@ class MobileViewModel : BaseViewModel() {
         startCounting()
 
         viewModelScope.launch {
-            try {
-                val ok = withContext(Dispatchers.IO) {
-                    AuthClient.requestSMSCode(smsCodeParams)
-                }
-
-                if (ok) {
-                    codeSent.value = FetchResult.Success(true)
-                } else {
-                    codeSent.value = FetchResult.TextError("Unknown error occurred!")
-                }
-
-                progressLiveData.value = false
-            } catch (e: Exception) {
-                progressLiveData.value = false
+             val result = AuthClient.asyncRequestSMSCode(smsCodeParams)
+            if (result !is FetchResult.Success) {
                 clearCounter()
-                codeSent.value = FetchResult.fromException(e)
             }
+            codeSent.value = result
+            progressLiveData.value = false
         }
     }
 
@@ -193,7 +176,7 @@ class MobileViewModel : BaseViewModel() {
     // otherwise use the id to fetch account data.
     fun verifySMSAuthCode(deviceToken: String) {
         if (isNetworkAvailable.value != true) {
-            accountLoaded.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            accountLoaded.value = FetchResult.notConnected
             return
         }
 
@@ -206,61 +189,31 @@ class MobileViewModel : BaseViewModel() {
         )
 
         viewModelScope.launch {
-            try {
-                val found = withContext(Dispatchers.IO) {
-                    AuthClient.verifySMSCode(params)
-                }
+            val result = AuthClient.asyncVerifySMSCode(params)
 
-                if (found == null) {
-                    accountLoaded.value = FetchResult.LocalizedError(R.string.error_unknown)
-                    progressLiveData.value = false
-                    return@launch
-                }
+            progressLiveData.value = false
 
-                if (found.id == null) {
-                    progressLiveData.value = false
-                    mobileNotSet.value = true
-                    return@launch
-                }
-
-                loadByFtcID(found.id)
-            } catch (e: Exception) {
+            if (result !is FetchResult.Success) {
                 progressLiveData.value = false
                 clearCounter()
-                accountLoaded.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    private suspend fun loadByFtcID(id: String) {
-
-        try {
-            val account = withContext(Dispatchers.IO) {
-                AccountRepo.loadFtcAccount(id)
+                return@launch
             }
 
-            if (account == null) {
-                accountLoaded.value = FetchResult.LocalizedError(R.string.loading_failed)
-            } else {
-                accountLoaded.value = FetchResult.Success(account)
+            val id = result.data.id
+            if (id == null) {
+                progressLiveData.value = false
+                mobileNotSet.value = true
+                return@launch
             }
-            progressLiveData.value = false
-        } catch (e: APIError) {
-            progressLiveData.value = false
-            accountLoaded.value = if (e.statusCode == 404) {
-                FetchResult.LocalizedError(R.string.account_not_found)
-            } else {
-                FetchResult.fromApi(e)
-            }
-        } catch (e: Exception) {
-            accountLoaded.value = FetchResult.fromException(e)
+
+            accountLoaded.value = AccountRepo.asyncLoadFtcAccount(id)
             progressLiveData.value = false
         }
     }
 
     fun signUp(deviceToken: String) {
         if (isNetworkAvailable.value != true) {
-            accountLoaded.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            accountLoaded.value = FetchResult.notConnected
             return
         }
 
@@ -274,42 +227,11 @@ class MobileViewModel : BaseViewModel() {
         Log.i(TAG, "$params")
 
         viewModelScope.launch {
-            try {
-                val account = withContext(Dispatchers.IO) {
-                    AuthClient.mobileSignUp(params)
-                }
 
-                progressLiveData.value = false
-
-                if (account == null) {
-                    accountLoaded.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    return@launch
-                } else {
-                    accountLoaded.value = FetchResult.Success(account)
-                }
-
-            } catch (e: APIError) {
-                progressLiveData.value = false
-
-                accountLoaded.value = when(e.statusCode) {
-                    422 -> {
-                        if (e.error == null) {
-                            FetchResult.fromApi(e)
-                        } else {
-                            when {
-                                e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_mobile_taken)
-                                e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.signup_invalid_mobile)
-                                else -> FetchResult.fromApi(e)
-                            }
-                        }
-                    }
-                    else -> FetchResult.fromException(e)
-                }
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                accountLoaded.value = FetchResult.fromException(e)
-            }
+            accountLoaded.value = AuthClient.asyncMobileSignUp(
+                params
+            )
+            progressLiveData.value = false
         }
     }
-
 }

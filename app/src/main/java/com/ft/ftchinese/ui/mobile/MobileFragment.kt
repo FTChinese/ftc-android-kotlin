@@ -93,7 +93,9 @@ class MobileFragment : ScopedFragment() {
 
         viewModel.codeSent.observe(viewLifecycleOwner) {
             when (it) {
-                is FetchResult.LocalizedError -> onSendCodeError(it.msgId)
+                is FetchResult.LocalizedError -> {
+                    onSendCodeError(it.msgId)
+                }
                 is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     toast("验证码已发送")
