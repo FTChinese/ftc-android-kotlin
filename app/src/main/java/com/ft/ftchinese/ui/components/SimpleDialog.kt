@@ -1,7 +1,6 @@
 package com.ft.ftchinese.ui.components
 
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -12,9 +11,10 @@ import com.ft.ftchinese.R
 fun SimpleDialog(
     title: String,
     body: String,
-    confirmText: String = stringResource(id = R.string.btn_ok),
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    confirmText: String = stringResource(id = R.string.btn_ok),
+    dismissText: String = stringResource(id = R.string.btn_cancel)
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -29,7 +29,7 @@ fun SimpleDialog(
             TextButton(
                 onClick = onDismiss
             ) {
-                Text(text = stringResource(id = R.string.btn_cancel))
+                Text(text = dismissText)
             }
         },
         title = {
