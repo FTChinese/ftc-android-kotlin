@@ -25,7 +25,6 @@ import org.jetbrains.anko.support.v4.toast
 
 /**
  * Hosted inside [com.ft.ftchinese.ui.login.AuthActivity]
- * or [com.ft.ftchinese.ui.account.UpdateActivity] depending its usage.
  * Flow chain of UI when used for authorization:
  * If account could be fetched, the hosting activity will be destroyed.
  * If account could not be fetched, show a dialog to give user option:
@@ -40,19 +39,9 @@ class MobileFragment : ScopedFragment() {
     private lateinit var binding: FragmentMobileBinding
     private lateinit var viewModel: MobileViewModel
 
-    // Tells where it is used.
-    private var usage: Int? = null
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         sessionManager = SessionManager.getInstance(context)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            usage = it.getInt(ARG_USAGE)
-        }
     }
 
     override fun onCreateView(
@@ -73,8 +62,7 @@ class MobileFragment : ScopedFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(MobileViewModel::class.java)
+            ViewModelProvider(this)[MobileViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
         connectionLiveData.observe(viewLifecycleOwner) {
@@ -91,11 +79,6 @@ class MobileFragment : ScopedFragment() {
 
         setupViewModel()
 
-        binding.btnName = when (usage) {
-            USAGE_AUTH -> getString(R.string.btn_login)
-            USAGE_UPDATE -> getString(R.string.btn_save)
-            else -> ""
-        }
         binding.mobileInput.requestFocus()
     }
 
@@ -210,45 +193,22 @@ class MobileFragment : ScopedFragment() {
 
     fun onClickRequestCode(view: View) {
         Log.i(TAG, "Request code button clicked")
-
-        when (usage) {
-            USAGE_AUTH -> {
-                viewModel.requestSMSAuthCode()
-            }
-            USAGE_UPDATE -> {
-                sessionManager
-                    .loadAccount()
-                    ?.let {
-                        viewModel.requestCodeForUpdate(it)
-                    }
-            }
-        }
+        viewModel.requestSMSAuthCode()
     }
 
     // Send request to different endpoints depending on how this view is used.
     fun onSubmitForm(view: View) {
-        when (usage) {
-            // For authorization, possibilities depending on the request result:
-            // If user id returned, fetch account data directly;
-            // If user id not found, user could:
-            // * signup with the mobile number as an email
-            // * signup with a new email
-            // * link an existing email.
-            USAGE_AUTH -> {
-                context?.let {
-                    viewModel.verifySMSAuthCode(
-                        TokenManager
-                            .getInstance(it)
-                            .getToken()
-                    )
-                }
-            }
-            USAGE_UPDATE -> {
-                sessionManager.loadAccount()?.let {
-                    viewModel.updateMobile(it)
-                }
-            }
-        }
+        // For authorization, possibilities depending on the request result:
+        // If user id returned, fetch account data directly;
+        // If user id not found, user could:
+        // * signup with the mobile number as an email
+        // * signup with a new email
+        // * link an existing email.
+        viewModel.verifySMSAuthCode(
+            TokenManager
+                .getInstance(requireContext())
+                .getToken()
+        )
     }
 
     companion object {

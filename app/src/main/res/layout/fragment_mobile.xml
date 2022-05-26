@@ -4,9 +4,6 @@
 
     <data>
         <variable
-            name="btnName"
-            type="String" />
-        <variable
             name="handler"
             type="com.ft.ftchinese.ui.mobile.MobileFragment" />
         <variable
@@ -90,7 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@{btnName}"
+            android:text="@string/btn_login"
             android:enabled="@{viewModel.isFormEnabled}"
             android:onClick="@{handler::onSubmitForm}"
             app:layout_constraintTop_toBottomOf="@+id/code_container"
