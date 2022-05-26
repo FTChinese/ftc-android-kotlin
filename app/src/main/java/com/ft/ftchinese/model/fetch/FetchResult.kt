@@ -24,6 +24,7 @@ sealed class FetchResult<out T : Any> {
         val loadingFailed = LocalizedError(R.string.loading_failed)
         val notConnected = LocalizedError(R.string.prompt_no_network)
         val unknownError = LocalizedError(R.string.error_unknown)
+        val accountNotFound = LocalizedError(R.string.account_not_found)
 
         @JvmStatic
         fun fromApi(e: APIError): FetchResult<Nothing> {
