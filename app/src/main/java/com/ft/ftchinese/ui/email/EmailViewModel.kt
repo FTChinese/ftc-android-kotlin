@@ -5,12 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.reader.BaseAccount
-import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
@@ -53,10 +51,6 @@ class EmailViewModel : BaseViewModel() {
         MutableLiveData<FetchResult<Boolean>>()
     }
 
-    val emailUpdated: MutableLiveData<FetchResult<BaseAccount>> by lazy {
-        MutableLiveData<FetchResult<BaseAccount>>()
-    }
-
     val letterSent: MutableLiveData<FetchResult<Boolean>> by lazy {
         MutableLiveData<FetchResult<Boolean>>()
     }
@@ -90,96 +84,6 @@ class EmailViewModel : BaseViewModel() {
             } catch (e: Exception) {
                 existsResult.value = FetchResult.fromException(e)
                 progressLiveData.value = false
-            }
-        }
-    }
-
-    fun updateEmail(userId: String) {
-
-        if (isNetworkAvailable.value != true) {
-            existsResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        progressLiveData.value = true
-        val email = emailLiveData.value ?: ""
-        viewModelScope.launch {
-            try {
-                val baseAccount = withContext(Dispatchers.IO) {
-                    AccountRepo.updateEmail(userId, email)
-                }
-
-                progressLiveData.value = false
-                if (baseAccount == null) {
-                    emailUpdated.value = FetchResult.LocalizedError(R.string.error_unknown)
-                } else {
-                    emailUpdated.value = FetchResult.Success(baseAccount)
-                    clear()
-                }
-            } catch (e: APIError) {
-                progressLiveData.value = false
-
-                emailUpdated.value = when (e.statusCode) {
-                    422 -> {
-                        if (e.error == null) {
-                            FetchResult.fromApi(e)
-                        } else {
-                            when {
-                                e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_email_taken)
-                                e.error.isFieldInvalid("email") -> FetchResult.LocalizedError(R.string.signup_invalid_email)
-                                else -> FetchResult.fromApi(e)
-                            }
-                        }
-                    }
-                    else -> FetchResult.fromApi(e)
-                }
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                emailUpdated.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    fun requestVerification() {
-        if (isNetworkAvailable.value != true) {
-            letterSent.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        val userId = AccountCache.get()?.id ?: return
-        progressLiveData.value = true
-        isLetterBtnEnabled.value = false
-
-        viewModelScope.launch {
-            try {
-                val done = withContext(Dispatchers.IO) {
-                    AccountRepo.requestVerification(userId)
-                }
-
-                letterSent.value = FetchResult.Success(done)
-
-                progressLiveData.value = false
-                isLetterBtnEnabled.value = !done
-            } catch (e: APIError) {
-                val msgId = when (e.statusCode) {
-                    404 -> R.string.account_not_found
-                    422 -> if (e.error?.isResourceMissing("email_server") == true) {
-                        R.string.api_email_server_down
-                    } else null
-                    else -> null
-                }
-
-                letterSent.value = if (msgId != null) {
-                    FetchResult.LocalizedError(msgId)
-                } else {
-                    FetchResult.fromApi(e)
-                }
-                progressLiveData.value = false
-                isLetterBtnEnabled.value = true
-            } catch (e: Exception) {
-                letterSent.value = FetchResult.fromException(e)
-                progressLiveData.value = false
-                isLetterBtnEnabled.value = true
             }
         }
     }
