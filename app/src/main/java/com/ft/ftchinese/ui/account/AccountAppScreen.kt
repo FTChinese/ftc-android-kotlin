@@ -27,6 +27,9 @@ enum class AccountAppScreen(@StringRes val titleId: Int) {
     ),
     Mobile(
         titleId = R.string.title_set_mobile
+    ),
+    DeleteAccount(
+        titleId = R.string.title_delete_account
     );
 
     companion object {
@@ -41,6 +44,7 @@ enum class AccountAppScreen(@StringRes val titleId: Int) {
                 Stripe.name -> Stripe
                 Wechat.name -> Wechat
                 Mobile.name -> Mobile
+                DeleteAccount.name -> DeleteAccount
                 null -> Overview
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
