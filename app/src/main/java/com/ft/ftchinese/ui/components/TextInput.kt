@@ -4,18 +4,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.validator.ValidationRule
 
@@ -129,16 +128,19 @@ fun PasswordInput(
         },
         trailingIcon = {
             val image = if (visible) {
-                Icons.Filled.Visibility
+                painterResource(id = R.drawable.ic_baseline_visibility_24)
             } else {
-                Icons.Filled.VisibilityOff
+                painterResource(id = R.drawable.ic_baseline_visibility_off_24)
             }
 
             val desc = if (visible) "Hide password" else "Show password"
             IconButton(
                 onClick = { setVisible(!visible) }
             ) {
-                Icon(imageVector = image, contentDescription = desc)
+                Icon(
+                    painter = image,
+                    contentDescription = desc
+                )
             }
         }
     )
