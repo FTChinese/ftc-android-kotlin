@@ -175,6 +175,15 @@ fun AccountApp(
                         onDeleted = onLogout,
                     )
                 }
+
+                composable(
+                    route = AccountAppScreen.Mobile.name
+                ) {
+                    MobileActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffold
+                    )
+                }
             }
         }
     }
