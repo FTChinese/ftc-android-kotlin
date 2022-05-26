@@ -44,6 +44,7 @@ class FtcAccountState(
 
         scope.launch {
             asyncRefresh(account)
+            showRefreshed()
             refreshing = false
         }
     }
