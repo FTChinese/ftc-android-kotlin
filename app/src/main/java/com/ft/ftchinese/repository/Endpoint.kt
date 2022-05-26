@@ -105,6 +105,8 @@ object Endpoint {
     val ftcAccount = "${subsBase()}/account"
     val email = "${ftcAccount}/email"
     val emailVrfLetter = "${ftcAccount}/email/request-verification"
+    val smsCode = "${ftcAccount}/mobile/verification"
+    val updateMobile = "${ftcAccount}/mobile"
 
     val userName = "${ftcAccount}/name"
     val passwordUpdate = "${ftcAccount}/password"
