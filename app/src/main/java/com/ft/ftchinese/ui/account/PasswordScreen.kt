@@ -6,10 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.PasswordUpdateParams
-import com.ft.ftchinese.ui.components.PasswordInput
-import com.ft.ftchinese.ui.components.SaveButton
-import com.ft.ftchinese.ui.components.SimpleDialog
-import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.Validator
@@ -84,7 +81,7 @@ fun PasswordScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        SaveButton(
+        BlockButton(
             enabled = oldPwState.valid.value && pwState.valid.value && repeatPwState.valid.value && !loading,
             onClick = {
                 onSave(

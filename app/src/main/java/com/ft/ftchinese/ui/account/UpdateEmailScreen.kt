@@ -60,7 +60,7 @@ fun UpdateEmailScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        SaveButton(
+        BlockButton(
             enabled = emailState.valid.value && !loading,
             onClick = {
                 onSave(emailState.field.value)

@@ -58,20 +58,6 @@ fun SecondaryButton(
     )
 }
 
-@Composable
-fun SaveButton(
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
-    PrimaryButton(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(text = stringResource(id = R.string.btn_save))
-    }
-}
-
 enum class ButtonVariant {
     Primary,
     Outline;
