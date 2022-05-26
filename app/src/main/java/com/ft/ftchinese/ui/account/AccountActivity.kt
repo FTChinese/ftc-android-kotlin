@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.account
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.wxinfo.WxInfoActivityScreen
@@ -41,7 +43,16 @@ class AccountActivity : ComponentActivity() {
         setContent {
             AccountApp(
                 userViewModel = userViewModel,
-                onExit = { finish() }
+                onExit = { finish() },
+                onLogout = {
+                    userViewModel.logout()
+                    Toast.makeText(
+                        this,
+                        R.string.message_account_deleted,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    finish()
+                }
             )
         }
     }
@@ -64,7 +75,8 @@ class AccountActivity : ComponentActivity() {
 @Composable
 fun AccountApp(
     userViewModel: UserViewModel,
-    onExit: () -> Unit
+    onExit: () -> Unit,
+    onLogout: () -> Unit,
 ) {
     val scaffold = rememberScaffoldState()
 
@@ -151,6 +163,16 @@ fun AccountApp(
                     WxInfoActivityScreen(
                         userViewModel = userViewModel,
                         scaffold = scaffold,
+                    )
+                }
+
+                composable(
+                    route = AccountAppScreen.DeleteAccount.name
+                ) {
+                    DeleteAccountActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffold,
+                        onDeleted = onLogout,
                     )
                 }
             }
