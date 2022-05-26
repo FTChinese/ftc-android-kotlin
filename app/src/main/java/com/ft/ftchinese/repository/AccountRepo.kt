@@ -253,29 +253,94 @@ object AccountRepo {
         }
     }
 
-    fun requestSMSCode(account: Account, params: SMSCodeParams): Boolean {
+    fun requestSMSCode(ftcId: String, params: SMSCodeParams): Boolean {
         val resp = Fetch()
-            .put("${Endpoint.subsBase(account.isTest)}/account/mobile/verification")
+            .put(Endpoint.smsCode)
             .noCache()
             .setApiKey()
             .setClient()
-            .setUserId(account.id)
+            .setUserId(ftcId)
             .sendJson(params)
-            .endText()
+            .endOrThrow()
 
         return resp.code == 204
     }
 
-    fun updateMobile(account: Account, params: MobileFormParams): BaseAccount? {
+    suspend fun asyncRequestSMSCode(ftcId: String, params: SMSCodeParams): FetchResult<Boolean> {
+        try {
+            val ok = withContext(Dispatchers.IO) {
+                requestSMSCode(
+                    ftcId,
+                    params
+                )
+            }
+
+            return if (ok) {
+                FetchResult.Success(true)
+            } else {
+                FetchResult.unknownError
+            }
+        } catch (e: APIError) {
+            return when (e.statusCode) {
+                404 -> FetchResult.accountNotFound
+                422 -> if (e.error == null) {
+                    FetchResult.fromApi(e)
+                } else {
+                    when {
+                        // Alert this message
+                        e.error.isFieldAlreadyExists("mobile") -> FetchResult.LocalizedError(R.string.mobile_conflict)
+                        e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.mobile_invalid)
+                        else -> FetchResult.fromApi(e)
+                    }
+                }
+                else -> FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
+    fun updateMobile(ftcId: String, params: MobileFormParams): BaseAccount? {
         return Fetch()
-            .patch("${Endpoint.subsBase(account.isTest)}/account/mobile")
+            .patch(Endpoint.updateMobile)
             .noCache()
             .setApiKey()
             .setClient()
-            .setUserId(account.id)
+            .setUserId(ftcId)
             .sendJson(params)
             .endJson<BaseAccount>()
             .body
+    }
+
+    suspend fun asyncUpdateMobile(ftcId: String, params: MobileFormParams): FetchResult<BaseAccount> {
+        try {
+            val baseAccount = withContext(Dispatchers.IO) {
+                updateMobile(ftcId, params)
+            }
+
+            if (baseAccount == null) {
+                return FetchResult.unknownError
+            } else {
+                return FetchResult.Success(baseAccount)
+            }
+        } catch (e: APIError) {
+            return when (e.statusCode) {
+                404 -> FetchResult.LocalizedError(R.string.mobile_code_not_found)
+                422 -> if (e.error == null) {
+                    FetchResult.fromApi(e)
+                } else {
+                    when {
+                        e.error.isFieldAlreadyExists("mobile") -> FetchResult.LocalizedError(R.string.mobile_already_exists)
+                        e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.mobile_invalid)
+                        e.error.isFieldInvalid("code") -> FetchResult.LocalizedError(R.string.mobile_code_invalid)
+                        else -> FetchResult.fromApi(e)
+                    }
+                }
+                else -> FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     /**
