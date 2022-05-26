@@ -101,33 +101,13 @@ fun AlertDeleteAccount(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            PrimaryButton(
-                onClick = onConfirm
-            ) {
-                Text(text = stringResource(id = R.string.button_delete_account))
-            }
-        },
-        dismissButton = {
-            SecondaryButton(
-                onClick = onDismiss,
-                backgroundColor = OColor.white
-            ) {
-                Text(text = stringResource(id = R.string.button_think_twice))
-            }
-        },
-        title = {
-            Text(
-                text = stringResource(id = R.string.title_confirm_delete_account)
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(id = R.string.message_warn_delete_account)
-            )
-        }
+    SimpleDialog(
+        title = stringResource(id = R.string.title_confirm_delete_account),
+        body = stringResource(id = R.string.message_warn_delete_account),
+        onDismiss = onDismiss,
+        onConfirm = onConfirm,
+        confirmText = stringResource(id = R.string.button_delete_account),
+        dismissText = stringResource(id = R.string.button_think_twice)
     )
 }
 
