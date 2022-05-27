@@ -171,9 +171,6 @@
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings" />
-        <activity
-            android:name=".ui.settings.FCMActivity"
-            android:label="@string/fcm_setting_title" />
         <activity android:name=".ui.release.ReleaseActivity" />
 
         <provider
