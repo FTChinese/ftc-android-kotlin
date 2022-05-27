@@ -3,7 +3,6 @@ package com.ft.ftchinese.ui.ftcpay
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +21,6 @@ import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.product.PriceCard
 import com.ft.ftchinese.ui.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OFont
 
 @Composable
 fun FtcPayScreen(
@@ -39,60 +37,49 @@ fun FtcPayScreen(
 
     val forbidden = cartItem.intent.kind == IntentKind.Forbidden
 
-    ProgressLayout(
-        loading = loading,
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Dimens.dp16),
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .weight(1.0f)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(all = Dimens.dp8)
-                    .weight(1.0f)
+
+            CheckoutHeader(tier = cartItem.price.tier)
+
+            Card(
+                elevation = Dimens.dp4,
             ) {
-
-                CheckoutHeader(tier = cartItem.price.tier)
-
-                Card(
-                    elevation = Dimens.dp4,
-                ) {
-                    PriceCard(
-                        params = PriceCardParams.ofFtc(context, cartItem)
-                    )
-                }
-
-                CheckoutMessage(text = cartItem.intent.message)
-
-                Spacer(modifier = Modifier.height(Dimens.dp16))
-
-                radioOptions.forEach { payMethod ->
-                    PayMethodOption(
-                        method = payMethod,
-                        selected = (payMethod == selectOption),
-                        enabled = !forbidden,
-                        onSelect = onOptionSelected,
-                    )
-                }
+                PriceCard(
+                    params = PriceCardParams.ofFtc(context, cartItem)
+                )
             }
 
-            PrimaryButton(
-                onClick = {
-                    selectOption?.let{
-                        onClickPay(it)
-                    }
-                },
-                enabled = (!loading && selectOption != null && !forbidden),
-                modifier = Modifier
-                    .padding(Dimens.dp16)
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.check_out),
-                    fontSize = OFont.blockButton,
+            CheckoutMessage(text = cartItem.intent.message)
+
+            Spacer(modifier = Modifier.height(Dimens.dp16))
+
+            radioOptions.forEach { payMethod ->
+                PayMethodOption(
+                    method = payMethod,
+                    selected = (payMethod == selectOption),
+                    enabled = !forbidden,
+                    onSelect = onOptionSelected,
                 )
             }
         }
+
+        BlockButton(
+            onClick = {
+                selectOption?.let{
+                    onClickPay(it)
+                }
+            },
+            enabled = (!loading && selectOption != null && !forbidden),
+            text = stringResource(id = R.string.check_out)
+        )
     }
 }
 
