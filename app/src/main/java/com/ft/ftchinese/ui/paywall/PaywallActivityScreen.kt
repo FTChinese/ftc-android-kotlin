@@ -7,16 +7,21 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.*
+import androidx.compose.material.ScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.AddCartParams
-import com.ft.ftchinese.ui.stripepay.StripeSubActivity
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.stripepay.StripeSubActivity
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -48,16 +53,31 @@ private fun launchStripeSubsActivity(
 
 @Composable
 fun PaywallActivityScreen(
-    paywallViewModel: PaywallViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
+    scaffoldState: ScaffoldState,
+    premiumOnTop: Boolean,
     onFtcPay: (item: CartItemFtc) -> Unit,
 ) {
 
     val context = LocalContext.current
-    val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
-    val ftcPaywall by paywallViewModel.ftcPriceLiveData.observeAsState(defaultPaywall)
+    val cache = remember {
+        FileCache(context)
+    }
+    val tracker = remember {
+        StatsTracker.getInstance(context)
+    }
+
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
+
+    val (openDialog, setOpenDialog) = remember {
+        mutableStateOf(false)
+    }
+
+    val paywallState = rememberPaywallState(
+        scaffoldState = scaffoldState
+    )
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
@@ -71,15 +91,13 @@ fun PaywallActivityScreen(
         }
     }
 
-    val (openDialog, setOpenDialog) = remember {
-        mutableStateOf(false)
-    }
-
     LaunchedEffect(key1 = Unit) {
-        paywallViewModel.loadPaywall(
-            account?.isTest ?: false
+        paywallState.loadPaywall(
+            isTest = account?.isTest ?: false,
+            cache = cache
         )
-        paywallViewModel.trackDisplayPaywall()
+
+        tracker.displayPaywall()
     }
 
     if (openDialog ) {
@@ -96,21 +114,27 @@ fun PaywallActivityScreen(
 
     SwipeRefresh(
         state = rememberSwipeRefreshState(
-            isRefreshing = isRefreshing,
+            isRefreshing = paywallState.refreshing,
         ),
-        onRefresh = { paywallViewModel.refresh(account?.isTest ?: false) },
+        onRefresh = {
+            paywallState.refreshPaywall(
+                isTest = account?.isTest ?: false,
+                cache = cache
+            )
+        },
     ) {
         PaywallScreen(
-            paywall = ftcPaywall,
+            paywall = paywallState.paywallData
+                .reOrderProducts(premiumOnTop),
             account = account,
             onFtcPay = {
                 if (!userViewModel.isLoggedIn) {
                     launchLoginActivity(launcher, context)
                     return@PaywallScreen
                 }
-                onFtcPay(it)
 
-                paywallViewModel.trackAddCart(AddCartParams.ofFtc(it.price))
+                tracker.addCart(AddCartParams.ofFtc(it.price))
+                onFtcPay(it)
             },
             onStripePay = {
                 if (!userViewModel.isLoggedIn) {
@@ -123,7 +147,7 @@ fun PaywallActivityScreen(
                 }
                 launchStripeSubsActivity(launcher, context, it)
 
-                paywallViewModel.trackAddCart(AddCartParams.ofStripe(it.recurring))
+                tracker.addCart(AddCartParams.ofStripe(it.recurring))
             },
         ) {
             launchLoginActivity(launcher, context)
