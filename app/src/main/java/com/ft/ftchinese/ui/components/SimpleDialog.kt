@@ -40,3 +40,26 @@ fun SimpleDialog(
         }
     )
 }
+
+@Composable
+fun ErrorDialog(
+    text: String,
+    onDismiss: () -> Unit
+){
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(id = R.string.dialog_title_error))
+        },
+        text = {
+            Text(text = text)
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text(text = stringResource(id = R.string.btn_yes))
+            }
+        },
+    )
+}
