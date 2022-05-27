@@ -23,7 +23,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.components.ShowToast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import org.jetbrains.anko.alert
@@ -152,13 +152,6 @@ class ReleaseActivity : ComponentActivity() {
         registerReceiver(onNotificationClicked, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
         // Broadcast intent action sent by the download manager when a download completes.
         registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-
-        releaseViewModel.toastLiveData.observe(this) {
-            when (it) {
-                is ToastMessage.Resource -> toast(it.id)
-                is ToastMessage.Text -> toast(it.text)
-            }
-        }
     }
 
     // Get the downloaded uri when we try to install it.
@@ -269,6 +262,8 @@ private fun ReleaseActivityScreen(
 
     val progress by releaseViewModel.progressLiveData.observeAsState(true)
     val newRelease by releaseViewModel.newReleaseLiveData.observeAsState()
+    val toast by releaseViewModel.toastLiveData.observeAsState()
+
     val (showDialog, setShowDialog) = remember {
         mutableStateOf(false)
     }
@@ -287,6 +282,10 @@ private fun ReleaseActivityScreen(
         AlertDownloadStart {
             setShowDialog(false)
         }
+    }
+
+    ShowToast(toast = toast) {
+        releaseViewModel.resetToast()
     }
 
     ReleaseScreen(
