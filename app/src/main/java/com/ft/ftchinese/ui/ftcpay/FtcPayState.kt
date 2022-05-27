@@ -16,7 +16,7 @@ import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
-import com.ft.ftchinese.ui.paywall.PaywallRepo
+import com.ft.ftchinese.ui.repo.PaywallRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

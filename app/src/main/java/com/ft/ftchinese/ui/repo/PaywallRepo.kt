@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.repo
 
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.paywall.*
