@@ -40,6 +40,8 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
+private const val TAG = "WxPayEntryActivity"
+
 /**
  * https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5
  * The the callback part of wechat pay.
@@ -106,32 +108,40 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
      *  No this is crap. Use the result of client and schedule a background task to verify against server.
      */
     override fun onResp(resp: BaseResp?) {
-        Log.i(TAG, "onPayFinish, errCode = ${resp?.errCode}")
+        Log.i(TAG, "onPayFinish: type=${resp?.type}, errCode=${resp?.errCode}, errStr=${resp?.errStr}")
 
         val pi = payIntentStore?.load()
 
-        if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
-
-            when (resp.errCode) {
-                // 成功
-                // 展示成功页面
-                BaseResp.ErrCode.ERR_OK -> {
-                    confirmSubscription(pi)
-                }
-                // 错误
-                // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
-                BaseResp.ErrCode.ERR_COMM -> {
-                    statusLiveData.value = WxPayStatus.Error(resp.errStr)
-                    // Tracking failure
-                    pi?.let {
-                        tracker?.payFailed(it.price.edition)
+        when (resp?.type) {
+            ConstantsAPI.COMMAND_PAY_BY_WX -> {
+                when (resp.errCode) {
+                    // 成功
+                    // 展示成功页面
+                    BaseResp.ErrCode.ERR_OK -> {
+                        Log.i(TAG, "Start confirm subscription")
+                        confirmSubscription(pi)
+                    }
+                    // 错误
+                    // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
+                    // Here the error message is possibly nullable.
+                    BaseResp.ErrCode.ERR_COMM -> {
+                        Log.i(TAG, "Call wx sdk failed: ${resp.errStr}")
+                        statusLiveData.value = WxPayStatus.Error(resp.errStr ?: "Incorrect Wxpay SDK configuration! It could only be used in release version.")
+                        // Tracking failure
+                        pi?.let {
+                            tracker?.payFailed(it.price.edition)
+                        }
+                    }
+                    // 用户取消
+                    // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
+                    BaseResp.ErrCode.ERR_USER_CANCEL -> {
+                        Log.i(TAG, "Payment canceled: ${resp.errStr}")
+                        statusLiveData.value = WxPayStatus.Canceled
                     }
                 }
-                // 用户取消
-                // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
-                BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                    statusLiveData.value = WxPayStatus.Canceled
-                }
+            }
+            else -> {
+                statusLiveData.value = WxPayStatus.Error("Unsupported wx sdk usage")
             }
         }
     }
@@ -206,7 +216,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
     }
 
     companion object {
-        private const val TAG = "WxPayEntryActivity"
+
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(
@@ -224,7 +234,7 @@ private fun WxPayActivityScreen(
     onClickDone: () -> Unit,
 ) {
     val status = uiStatusLiveData.observeAsState(WxPayStatus.Loading)
-
+    Log.i(TAG, "Status live data: ${status.value}")
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
