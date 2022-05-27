@@ -4,19 +4,26 @@ import android.content.Context
 import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.marshaller
+import com.ft.ftchinese.model.paywall.Paywall
 import com.jakewharton.byteunits.BinaryByteUnit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 import java.io.File
 import java.io.FileInputStream
 
 object CacheFileNames {
-    const val stripePrices = "subs_stripe_prices.${BuildConfig.VERSION_CODE}.json"
     const val stripeCustomer = "account_stripe_customer.${BuildConfig.VERSION_CODE}.json"
     const val wxAvatar = "wx_avatar.jpg"
     const val splashSchedule = "splash_schedule.json"
+}
 
-    fun paywallFile(isTest: Boolean): String {
-        return "paywall.${BuildConfig.VERSION_CODE}.${if (isTest) "test" else "live"}.json"
-    }
+// The paywall cached file are versioned therefore whenever
+// app updated, it won't be bothered by json parsing failure
+// caused by data structure changes.
+fun paywallFileName(isTest: Boolean): String {
+    return "paywall.${BuildConfig.VERSION_CODE}.${if (isTest) "test" else "live"}.json"
 }
 
 val templateCache: MutableMap<String, String> = HashMap()
@@ -33,14 +40,6 @@ class FileCache (private val context: Context) {
         }
     }
 
-    fun saveFtcPrice(isTest: Boolean, text: String) {
-        saveText(CacheFileNames.paywallFile(isTest), text = text)
-    }
-
-    fun saveStripePrice(text: String) {
-        saveText(CacheFileNames.stripePrices, text)
-    }
-
     fun loadText(name: String?): String? {
         if (name.isNullOrBlank()) {
             return null
@@ -48,11 +47,32 @@ class FileCache (private val context: Context) {
 
         return try {
             context.openFileInput(name)
-                    .bufferedReader()
-                    .readText()
+                .bufferedReader()
+                .readText()
         } catch (e: Exception) {
             Log.i(TAG, "Cannot open file $name due to: ${e.message}")
             null
+        }
+    }
+
+    fun savePaywall(isTest: Boolean, text: String) {
+        Log.i(TAG, "Caching paywall data to file")
+        saveText(paywallFileName(isTest), text = text)
+    }
+
+    suspend fun asyncLoadPaywall(isTest: Boolean): Paywall? {
+        return withContext(Dispatchers.IO) {
+            val data = loadText(paywallFileName(isTest = isTest))
+            if (data.isNullOrBlank()) {
+                null
+            } else {
+                try {
+                    marshaller.decodeFromString<Paywall>(data)
+                } catch (e: Exception) {
+                    e.message?.let { Log.i(TAG, it) }
+                    null
+                }
+            }
         }
     }
 
