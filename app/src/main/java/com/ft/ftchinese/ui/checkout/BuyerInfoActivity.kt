@@ -7,24 +7,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.SimpleDialog
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.ChromeClient
@@ -58,7 +54,7 @@ class BuyerInfoActivity : ComponentActivity() {
                         )
                     }
                 ) {
-                    BuyerInfoScreen(
+                    BuyerInfoActivityScreen(
                         baseUrl = Config.discoverServer(account),
                         infoViewModel = viewModel,
                         wvClient = WVClient(this)
@@ -81,7 +77,7 @@ class BuyerInfoActivity : ComponentActivity() {
 }
 
 @Composable
-fun BuyerInfoScreen(
+fun BuyerInfoActivityScreen(
     baseUrl: String,
     infoViewModel: BuyerInfoViewModel,
     wvClient: WVClient,
@@ -92,7 +88,7 @@ fun BuyerInfoScreen(
         data = "Loading...",
     )
     val exitState by infoViewModel.exitLiveData.observeAsState(false)
-    val alertState by infoViewModel.alertLiveData.observeAsState("")
+    val alertMessage by infoViewModel.alertLiveData.observeAsState("")
 
     val inProgress by infoViewModel.progressLiveData.observeAsState(true)
     val htmlRendered by infoViewModel.htmlRendered.observeAsState()
@@ -102,19 +98,12 @@ fun BuyerInfoScreen(
         return
     }
 
-    if (alertState.isNotBlank()) {
-        AlertDialog(
-            onDismissRequest = { infoViewModel.clearAlert() },
-            text = {
-                Text(text = alertState)
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = { infoViewModel.clearAlert() }
-                ) {
-                    Text(text = stringResource(id = R.string.btn_ok))
-                }
-            }
+    if (alertMessage.isNotBlank()) {
+        SimpleDialog(
+            title = "",
+            body = alertMessage,
+            onDismiss = { infoViewModel.clearAlert() },
+            onConfirm = { infoViewModel.clearAlert() }
         )
     }
 
