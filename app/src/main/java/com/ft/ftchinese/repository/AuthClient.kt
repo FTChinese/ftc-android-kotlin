@@ -19,7 +19,7 @@ object AuthClient {
                 .addQuery("v", email)
                 .noCache()
                 .setApiKey()
-                .endText()
+                .endOrThrow()
 
             // Code below 400
             if (resp.code != 204) {
@@ -176,7 +176,7 @@ object AuthClient {
             .noCache()
             .setApiKey()
             .sendJson(params)
-            .endText()
+            .endOrThrow()
 
         return resp.code == 204
     }
@@ -197,7 +197,7 @@ object AuthClient {
             .noCache()
             .setApiKey()
             .sendJson(params)
-            .endText()
+            .endOrThrow()
 
         return resp.code == 204
     }

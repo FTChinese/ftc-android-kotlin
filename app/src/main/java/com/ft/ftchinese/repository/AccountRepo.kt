@@ -245,7 +245,7 @@ object AccountRepo {
             .setClient()
             .setUserId(ftcId)
             .send()
-            .endText()
+            .endOrThrow()
 
         return resp.code == 204
     }
@@ -378,7 +378,7 @@ object AccountRepo {
             .sendJson(mapOf(
                 "sessionId" to wxSession.sessionId
             ))
-            .endText()
+            .endOrThrow()
 
         // The server API might change and return data in the future.
         return resp.code == 204 || resp.code == 200

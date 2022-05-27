@@ -22,7 +22,7 @@ object LinkRepo {
             .noCache()
             .setApiKey()
             .sendJson(params)
-            .endText()
+            .endOrThrow()
             .code == 204
     }
 
@@ -83,7 +83,7 @@ object LinkRepo {
             .setApiKey()
             .setUnionId(unionId)
             .sendJson(params)
-            .endText()
+            .endOrThrow()
             .code == 204
     }
 
