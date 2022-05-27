@@ -1,9 +1,10 @@
 package com.ft.ftchinese.ui.components
 
+import androidx.annotation.StringRes
 import com.ft.ftchinese.R
 
 enum class SubsScreen(
-    val titleId: Int,
+    @StringRes val titleId: Int,
 ) {
     Paywall(
         titleId = R.string.title_subscription
