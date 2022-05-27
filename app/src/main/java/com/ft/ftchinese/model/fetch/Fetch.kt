@@ -193,6 +193,28 @@ class Fetch {
         )
     }
 
+    fun endString(): HttpResp<String> {
+        val resp = endOrThrow()
+
+        /**
+         * Success response.
+         * @throws IOException when reading body.
+         */
+        return resp.body?.string()?.let {
+            HttpResp(
+                message = resp.message,
+                code = resp.code,
+                body = it,
+                raw = ""
+            )
+        } ?: HttpResp(
+            message = resp.message,
+            code = resp.code,
+            body = null,
+            raw = "",
+        )
+    }
+
     /**
      * NOTE: this only parse json object, not array.
      */
