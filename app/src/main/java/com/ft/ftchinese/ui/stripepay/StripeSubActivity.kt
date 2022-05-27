@@ -13,6 +13,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.paywall.CartItemStripe
@@ -82,8 +83,8 @@ class StripeSubActivity : ScopedAppActivity() {
                 Scaffold(
                     topBar = {
                         Toolbar(
-                            onBack = { finish() }, 
-                            currentScreen = SubsScreen.StripePay
+                            heading = stringResource(id = SubsScreen.StripePay.titleId),
+                            onBack = { finish() },
                         )
                     },
                     scaffoldState = scaffoldState,
