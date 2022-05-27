@@ -6,10 +6,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.PasswordUpdateParams
-import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.components.BlockButton
+import com.ft.ftchinese.ui.components.PasswordInput
+import com.ft.ftchinese.ui.components.SimpleDialog
+import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
-import com.ft.ftchinese.ui.validator.Validator
+import com.ft.ftchinese.ui.validator.passwordRules
+import com.ft.ftchinese.ui.validator.rulePasswordRequired
 
 @Composable
 fun PasswordScreen(
@@ -18,42 +22,21 @@ fun PasswordScreen(
 ) {
     val oldPwState = rememberInputState(
         rules = listOf(
-            ValidationRule(
-                predicate = Validator::notEmpty,
-                message = "必须输入当前密码"
-            )
+            rulePasswordRequired
         )
     )
 
     val pwState = rememberInputState(
-        rules = listOf(
-            ValidationRule(
-                predicate = Validator::notEmpty,
-                message = "新密码不能为空",
-            ),
-            ValidationRule(
-                predicate = Validator.minLength(8),
-                message = "长度不能少于8位"
-            )
-        )
+        rules = passwordRules()
     )
 
     val repeatPwState = rememberInputState(
-        rules = listOf(
-            ValidationRule(
-                predicate = Validator::notEmpty,
-                message = "确认密码不能为空",
-            ),
-            ValidationRule(
-                predicate = Validator.minLength(8),
-                message = "长度不能少于8位"
-            ),
+        rules = passwordRules(repeat = true) + listOf(
             ValidationRule(
                 predicate = {
                     it != null && it == pwState.field.value
                 },
                 message = "两次输入的密码不同"
-
             )
         )
     )
