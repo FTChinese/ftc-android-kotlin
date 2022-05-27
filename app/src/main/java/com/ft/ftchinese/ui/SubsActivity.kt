@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -22,28 +22,24 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.work.*
 import com.alipay.sdk.app.PayTask
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
-import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
+import com.ft.ftchinese.store.InvoiceStore
+import com.ft.ftchinese.store.PayIntentStore
+import com.ft.ftchinese.tracking.PaySuccessParams
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.SubsScreen
-import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.ftcpay.FtcPayActivityScreen
-import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
-import com.ft.ftchinese.ui.ftcpay.OrderResult
 import com.ft.ftchinese.ui.paywall.PaywallActivityScreen
-import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
-import com.tencent.mm.opensdk.openapi.IWXAPI
-import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -51,67 +47,24 @@ import org.jetbrains.anko.toast
 
 class SubsActivity : ScopedComponentActivity() {
 
-    private lateinit var wxApi: IWXAPI
-    private lateinit var ftcPayViewModel: FtcPayViewModel
-    private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        paywallViewModel = ViewModelProvider(this)[PaywallViewModel::class.java]
-        ftcPayViewModel = ViewModelProvider(this)[FtcPayViewModel::class.java]
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
-
-        connectionLiveData.observe(this) {
-            paywallViewModel.isNetworkAvailable.value = it
-        }
 
         val premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
-        paywallViewModel.putPremiumOnTop(premiumFirst)
-
-        wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
-        wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
-
-        ftcPayViewModel.orderLiveData.observe(this) { orderResult ->
-            when (orderResult) {
-                is OrderResult.WxPay -> {
-                    Log.i(TAG, "Wx order ${orderResult.order}")
-                    launchWxPay(orderResult.order)
-                }
-                is OrderResult.AliPay -> {
-                    Log.i(TAG, "Ali order ${orderResult.order}")
-                    launchAliPay(orderResult.order)
-                }
-            }
-        }
-
         setContent {
             SubsApp(
-                paywallViewModel = paywallViewModel,
-                ftcPayViewModel = ftcPayViewModel,
-                onExit = { finish() },
-                wxApi = wxApi,
+                userViewModel = userViewModel,
+                premiumOnTop = premiumFirst,
+                onAliPay = this::launchAliPay,
+                onExit = {
+                    finish()
+                }
             )
-        }
-
-        paywallViewModel.toastLiveData.observe(this) {
-            when (it) {
-                is ToastMessage.Resource -> toast(it.id)
-                is ToastMessage.Text -> toast(it.text)
-            }
-        }
-    }
-
-    private fun launchWxPay(wxPayIntent: WxPayIntent) {
-        val params = wxPayIntent.params.app ?: return
-
-        val result = wxApi.sendReq(params.buildReq())
-
-        if (result) {
-            setResult(Activity.RESULT_OK)
-            finish()
         }
     }
 
@@ -137,14 +90,17 @@ class SubsActivity : ScopedComponentActivity() {
             val resultStatus = payResult["resultStatus"]
             val msg = payResult["memo"] ?: getString(R.string.wxpay_failed)
 
+            val tracker = StatsTracker.getInstance(this@SubsActivity)
             if (resultStatus != "9000") {
                 toast(msg)
-                ftcPayViewModel.trackFailedPay(aliPayIntent.toPayIntent())
+                tracker.payFailed(aliPayIntent.price.edition)
 
                 return@launch
             }
 
+            val pi = aliPayIntent.toPayIntent()
             confirmAliSubscription(aliPayIntent.toPayIntent())
+            tracker.paySuccess(PaySuccessParams.ofFtc(pi))
         }
     }
 
@@ -161,7 +117,9 @@ class SubsActivity : ScopedComponentActivity() {
         // Update membership.
         userViewModel.saveMembership(confirmed.membership)
 
-        ftcPayViewModel.saveConfirmation(confirmed, pi)
+        InvoiceStore.getInstance(this).save(confirmed)
+        PayIntentStore.getInstance(this).save(pi.withConfirmed(confirmed.order))
+
         Log.i(TAG, "New membership: ${confirmed.membership}")
 
         toast(getString(R.string.subs_success))
@@ -189,6 +147,11 @@ class SubsActivity : ScopedComponentActivity() {
         WorkManager.getInstance(this).enqueue(verifyRequest)
     }
 
+    override fun onResume() {
+        super.onResume()
+        userViewModel.reloadAccount()
+    }
+
     companion object {
 
         private const val TAG = "SubsActivity"
@@ -210,14 +173,13 @@ class SubsActivity : ScopedComponentActivity() {
 
 @Composable
 fun SubsApp(
-    paywallViewModel: PaywallViewModel,
-    ftcPayViewModel: FtcPayViewModel,
-    wxApi: IWXAPI,
+    userViewModel: UserViewModel,
+    premiumOnTop: Boolean,
+    onAliPay: (AliPayIntent) -> Unit,
     onExit: () -> Unit,
 ) {
 
     val scaffoldState = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
 
     OTheme {
 
@@ -230,7 +192,7 @@ fun SubsApp(
         Scaffold(
             topBar = {
                 Toolbar(
-                    currentScreen = currentScreen,
+                    heading = stringResource(id = currentScreen.titleId),
                     onBack = {
                         val ok = navController.popBackStack()
                         if (!ok) {
@@ -250,13 +212,16 @@ fun SubsApp(
                     route = SubsScreen.Paywall.name
                 ) {
                     PaywallActivityScreen(
-                        paywallViewModel = paywallViewModel
-                    ) { item: CartItemFtc ->
-                        navigateToFtcPay(
-                            navController = navController,
-                            priceId = item.price.id,
-                        )
-                    }
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffoldState,
+                        premiumOnTop = premiumOnTop,
+                        onFtcPay =  { item: CartItemFtc ->
+                            navigateToFtcPay(
+                                navController = navController,
+                                priceId = item.price.id,
+                            )
+                        }
+                    )
                 }
 
                 composable(
@@ -269,15 +234,10 @@ fun SubsApp(
                 ) { entry ->
                     val priceId = entry.arguments?.getString("priceId")
                     FtcPayActivityScreen(
-                        payViewModel = ftcPayViewModel,
-                        pwViewModel = paywallViewModel,
-                        wxApi = wxApi,
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffoldState,
                         priceId = priceId,
-                        showSnackBar = { msg ->
-                            scope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(msg)
-                            }
-                        }
+                        onAliPay = onAliPay
                     )
                 }
 
