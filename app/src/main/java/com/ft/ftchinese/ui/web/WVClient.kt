@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.webpage
+package com.ft.ftchinese.ui.web
 
 import android.content.Context
 import android.content.Intent
@@ -9,7 +9,6 @@ import android.util.Log
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
@@ -24,6 +23,8 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.share.ShareUtils
+import com.ft.ftchinese.ui.webpage.WebpageActivity
+import com.google.accompanist.web.AccompanistWebViewClient
 import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.toast
 
@@ -55,7 +56,7 @@ interface WebViewListener {
 open class WVClient(
     private val context: Context,
     private val listener: WebViewListener? = null,
-) : WebViewClient() {
+) : AccompanistWebViewClient() {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
@@ -321,10 +322,12 @@ open class WVClient(
 
             else -> {
                 Log.i(TAG, "Loading a plain web page")
-                WebpageActivity.start(context, WebpageMeta(
-                    title = "",
-                    url = uri.toString()
-                ))
+                WebpageActivity.start(
+                    context, WebpageMeta(
+                        title = "",
+                        url = uri.toString()
+                    )
+                )
                 true
             }
         }

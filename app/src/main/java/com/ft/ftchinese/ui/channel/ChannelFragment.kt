@@ -26,7 +26,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.components.ToastMessage
-import com.ft.ftchinese.ui.webpage.*
+import com.ft.ftchinese.ui.web.*
 import kotlinx.coroutines.cancel
 import org.jetbrains.anko.support.v4.toast
 import java.util.*

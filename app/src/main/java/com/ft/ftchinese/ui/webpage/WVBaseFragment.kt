@@ -19,6 +19,8 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
+import com.ft.ftchinese.ui.web.ChromeClient
+import com.ft.ftchinese.ui.web.WVClient
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.serialization.decodeFromString
 

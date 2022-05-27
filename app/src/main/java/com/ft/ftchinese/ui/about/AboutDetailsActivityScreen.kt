@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.webpage.ChromeClient
+import com.ft.ftchinese.ui.web.ChromeClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
 

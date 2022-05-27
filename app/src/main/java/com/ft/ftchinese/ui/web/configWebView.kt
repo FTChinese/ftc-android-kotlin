@@ -1,9 +1,11 @@
-package com.ft.ftchinese.ui.webpage
+package com.ft.ftchinese.ui.web
 
+import android.annotation.SuppressLint
 import android.view.KeyEvent
 import android.webkit.WebView
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 
+@SuppressLint("SetJavaScriptEnabled")
 fun configWebView(webView: WebView, jsInterface: JsInterface, client: WVClient) {
     webView.settings.apply {
         javaScriptEnabled = true

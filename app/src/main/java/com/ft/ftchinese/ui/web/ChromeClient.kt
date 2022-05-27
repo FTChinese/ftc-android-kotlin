@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.webpage
+package com.ft.ftchinese.ui.web
 
 import android.util.Log
 import android.webkit.ConsoleMessage

@@ -26,7 +26,7 @@ import com.ft.ftchinese.ui.share.ScreenshotMeta
 import com.ft.ftchinese.ui.share.ScreenshotActivity
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.ft.ftchinese.ui.util.ImageUtil
-import com.ft.ftchinese.ui.webpage.*
+import com.ft.ftchinese.ui.web.*
 
 private const val TAG = "ArticleFragment"
 
@@ -60,7 +60,7 @@ class ArticleFragment : ScopedFragment() {
         return binding.root
     }
 
-    private val clientListener = object : WebViewListener{
+    private val clientListener = object : WebViewListener {
         override fun onOpenGraph(openGraph: OpenGraphMeta) {
             articleViewModel.lastResortByOG(
                 openGraph,

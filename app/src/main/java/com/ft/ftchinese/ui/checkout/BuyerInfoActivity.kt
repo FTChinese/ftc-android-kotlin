@@ -23,8 +23,8 @@ import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.webpage.ChromeClient
-import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.web.ChromeClient
+import com.ft.ftchinese.ui.web.WVClient
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData

@@ -22,7 +22,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.share.ShareUtils
-import com.ft.ftchinese.ui.webpage.UrlHandler
+import com.ft.ftchinese.ui.web.UrlHandler
 
 private const val EXTRA_MESSAGE_TYPE = "content_type"
 private const val EXTRA_CONTENT_ID = "content_id"
