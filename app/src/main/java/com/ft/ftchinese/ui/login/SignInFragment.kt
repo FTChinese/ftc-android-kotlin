@@ -19,6 +19,7 @@ import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.auth.password.PasswordActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
@@ -229,7 +230,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
     }
 
     fun onClickForgotPassword(view: View) {
-        ForgotPasswordActivity.start(context, loginViewModel.emailLiveData.value ?: "")
+        PasswordActivity.start(context, loginViewModel.emailLiveData.value ?: "")
     }
 
     fun onClickCreateAccount(view: View) {

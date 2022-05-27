@@ -37,6 +37,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".ui.auth.password.PasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+        <activity
             android:name=".ui.share.ScreenshotActivity"
             android:exported="false" />
         <activity
@@ -102,11 +106,6 @@
             android:name=".ui.login.AuthActivity"
             android:label="@string/title_login"
             android:parentActivityName=".ui.main.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.login.ForgotPasswordActivity"
-            android:label="@string/title_forgot_password"
-            android:parentActivityName=".ui.login.AuthActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.account.AccountActivity"
