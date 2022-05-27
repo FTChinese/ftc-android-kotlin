@@ -168,7 +168,7 @@ object AuthClient {
         }
     }
 
-    fun passwordResetLetter(params: PasswordResetLetterParams): Boolean {
+    private fun passwordResetLetter(params: PasswordResetLetterParams): Boolean {
         val resp = Fetch()
             .post(Endpoint.passwordResetLetter)
             .setTimeout(30)
@@ -180,6 +180,22 @@ object AuthClient {
 
         return resp.code == 204
     }
+    suspend fun asyncPasswordResetLetter(params: PasswordResetLetterParams): FetchResult<Boolean> {
+        return try {
+            val ok = withContext(Dispatchers.IO) {
+                passwordResetLetter(params)
+            }
+
+            FetchResult.Success(ok)
+        } catch (e: APIError) {
+            when (e.statusCode) {
+                404 -> FetchResult.LocalizedError(R.string.login_email_not_found)
+                else -> FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
 
     fun verifyPwResetCode(v: PasswordResetVerifier): PwResetBearer? {
         return Fetch()
@@ -188,6 +204,23 @@ object AuthClient {
             .setApiKey()
             .endJson<PwResetBearer>()
             .body
+    }
+
+    suspend fun asyncVerifyPwResetCode(params: PasswordResetVerifier): FetchResult<PwResetBearer> {
+        try {
+            val bearer = withContext(Dispatchers.IO) {
+                verifyPwResetCode(params)
+            } ?: return FetchResult.loadingFailed
+
+            return FetchResult.Success(bearer)
+        } catch (e: APIError) {
+            return when (e.statusCode) {
+                404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
+                else -> FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     fun resetPassword(params: PasswordResetParams): Boolean {
