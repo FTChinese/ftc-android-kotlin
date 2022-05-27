@@ -3,18 +3,14 @@ package com.ft.ftchinese.ui.login
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.request.PasswordResetParams
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PasswordResetViewModel : BaseViewModel() {
     val passwordLiveData = MutableLiveData("")
@@ -76,7 +72,7 @@ class PasswordResetViewModel : BaseViewModel() {
 
     fun resetPassword(token: String) {
         if (isNetworkAvailable.value != true) {
-            resetResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            resetResult.value = FetchResult.notConnected
             return
         }
 
@@ -87,23 +83,9 @@ class PasswordResetViewModel : BaseViewModel() {
         )
 
         viewModelScope.launch {
-            try {
-                val ok = withContext(Dispatchers.IO) {
-                    AuthClient.resetPassword(params)
-                }
-
-                progressLiveData.value = false
-                resetResult.value = FetchResult.Success(ok)
-            } catch (e: APIError) {
-                progressLiveData.value = false
-                resetResult.value = when (e.statusCode) {
-                    404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
-                    else -> FetchResult.fromApi(e)
-                }
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                resetResult.value = FetchResult.fromException(e)
-            }
+            val result = AuthClient.asyncResetPassword(params)
+            progressLiveData.value = false
+            resetResult.value = result
         }
     }
 }

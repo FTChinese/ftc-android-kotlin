@@ -60,7 +60,7 @@ object AuthClient {
             .body
     }
 
-    fun requestSMSCode(params: SMSCodeParams): Boolean {
+    private fun requestSMSCode(params: SMSCodeParams): Boolean {
         val resp = Fetch()
             .put(Endpoint.mobileVerificationCode)
             .noCache()
@@ -88,7 +88,7 @@ object AuthClient {
         }
     }
 
-    fun verifySMSCode(params: MobileAuthParams): UserFound? {
+    private fun verifySMSCode(params: MobileAuthParams): UserFound? {
         return Fetch()
             .post(Endpoint.mobileVerificationCode)
             .noCache()
@@ -125,7 +125,7 @@ object AuthClient {
     /**
      * Create a new account with email derived from phone number.
      */
-    fun mobileSignUp(params: MobileSignUpParams): Account? {
+    private fun mobileSignUp(params: MobileSignUpParams): Account? {
         return Fetch()
             .post(Endpoint.mobileSignUp)
             .noCache()
@@ -202,6 +202,23 @@ object AuthClient {
         return resp.code == 204
     }
 
+    suspend fun asyncResetPassword(params: PasswordResetParams): FetchResult<Boolean> {
+        return try {
+            val ok = withContext(Dispatchers.IO) {
+                resetPassword(params)
+            }
+
+            FetchResult.Success(ok)
+        } catch (e: APIError) {
+            when (e.statusCode) {
+                404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
+                else -> FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
     /**
      * Wecaht login does not return an [Account] instance.
      * It returns a [WxSession] which represents the access
@@ -209,7 +226,7 @@ object AuthClient {
      * Then you can use [WxSession] to retrieve Wechat
      * info or refresh account data.
      */
-    fun wxLogin(params: WxAuthParams): WxSession? {
+    private fun wxLogin(params: WxAuthParams): WxSession? {
         return Fetch().post(Endpoint.wxLogin)
             .setClient()
             .setAppId()
