@@ -14,7 +14,7 @@ fun SimpleDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     confirmText: String = stringResource(id = R.string.btn_ok),
-    dismissText: String = stringResource(id = R.string.btn_cancel)
+    dismissText: String? = stringResource(id = R.string.btn_cancel)
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -26,10 +26,12 @@ fun SimpleDialog(
             }
         },
         dismissButton = {
-            TextButton(
-                onClick = onDismiss
-            ) {
-                Text(text = dismissText)
+            dismissText?.let {
+                TextButton(
+                    onClick = onDismiss
+                ) {
+                    Text(text = it)
+                }
             }
         },
         title = {
