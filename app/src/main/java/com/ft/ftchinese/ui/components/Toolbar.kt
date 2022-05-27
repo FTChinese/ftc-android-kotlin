@@ -7,39 +7,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
-
-@Composable
-fun Toolbar(
-    currentScreen: SubsScreen,
-    isMenu: Boolean = false,
-    onBack: () -> Unit,
-) {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(id = currentScreen.titleId)
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = if (isMenu) Icons.Filled.Menu else Icons.Filled.ArrowBack,
-                    "",
-                    tint = OColor.black90
-                )
-            }
-        },
-        elevation = Dimens.dp4,
-        backgroundColor = OColor.wheat
-    )
-}
 
 @Composable
 fun Toolbar(
@@ -73,7 +45,7 @@ fun Toolbar(
 @Composable
 fun PreviewToolbar() {
     Toolbar(
-        currentScreen = SubsScreen.FtcPay,
+        heading = "Title",
         onBack = {},
     )
 }
