@@ -6,67 +6,31 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.ClickableRow
-import com.ft.ftchinese.ui.components.RightArrow
-import com.ft.ftchinese.ui.components.ToastMessage
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.release.ReleaseActivity
-import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
-import org.jetbrains.anko.toast
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
 class SettingsActivity : ComponentActivity() {
-
-    private lateinit var settingsViewModel: SettingsViewModel
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        settingsViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
-
-        settingsViewModel.toastMessage.observe(this) {
-            when (it) {
-                is ToastMessage.Resource -> toast(it.id)
-                is ToastMessage.Text -> toast(it.text)
-            }
-        }
-
         setContent {
-            OTheme {
-                Scaffold(
-                    topBar = {
-                        Toolbar(
-                            heading = stringResource(id = R.string.action_settings),
-                            onBack = { finish() }
-                        )
-                    }
-                ) {
-                    PreferenceScreen(
-                        settingsViewModel = settingsViewModel
-                    )
-                }
+            SettingsApp {
+                finish()
             }
         }
     }
@@ -78,143 +42,74 @@ class SettingsActivity : ComponentActivity() {
     }
 }
 
-enum class PrefId {
-    ClearCache,
-    ClearHistory,
-    Notification,
-    CheckVersion,
-}
-
 @Composable
-fun PreferenceScreen(
-    settingsViewModel: SettingsViewModel,
+fun SettingsApp(
+    onExit: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val cacheSize by settingsViewModel.cacheSizeLiveData.observeAsState()
-    val readCount by settingsViewModel.articlesReadLiveData.observeAsState()
+    val scaffoldState = rememberScaffoldState()
 
-    LaunchedEffect(key1 = Unit) {
-        settingsViewModel.calculateCacheSize()
-        settingsViewModel.countReadArticles()
-    }
-
-    PreferenceBody(
-        cacheSize = cacheSize,
-        readCount = readCount,
-        onClickRow = { rowId ->
-            when (rowId) {
-                PrefId.ClearCache -> {
-                    settingsViewModel.clearCache()
-                }
-                PrefId.ClearHistory -> {
-                    settingsViewModel.truncateReadArticles()
-                }
-                PrefId.Notification -> {
-                    FCMActivity.start(context)
-                }
-                PrefId.CheckVersion -> {
-                    ReleaseActivity.start(context)
-                }
-            }
-        }
+    val navController = rememberNavController()
+    val backstackEntry = navController.currentBackStackEntryAsState()
+    val currentScreen = SettingScreen.fromRoute(
+        backstackEntry.value?.destination?.route
     )
-}
 
-@Composable
-fun PreferenceBody(
-    cacheSize: String?,
-    readCount: Int?,
-    onClickRow: (PrefId) -> Unit
-) {
-    Column {
-        PreferenceItem(
-            title = stringResource(id = R.string.pref_clear_cache),
-            summary = cacheSize ?: "0 KiB",
-            leadIcon = painterResource(id = R.drawable.ic_clear_24dp),
-            onClick = {
-                onClickRow(PrefId.ClearCache)
-            }
-        )
+    val settingsViewModel: SettingsViewModel = viewModel()
 
-        PreferenceItem(
-            title = stringResource(id = R.string.pref_clear_history),
-            summary = readCount?.let {
-                stringResource(R.string.summary_articles_read, it)
-            } ?: "",
-            leadIcon = painterResource(id = R.drawable.ic_delete_forever_black_24dp),
-            onClick = {
-                onClickRow(PrefId.ClearHistory)
-            }
-        )
-
-        PreferenceItem(
-            title = stringResource(id = R.string.fcm_pref),
-            summary = stringResource(id = R.string.fcm_summary),
-            leadIcon = painterResource(id = R.drawable.ic_notifications_black_24dp),
-            trailIcon = true,
-            onClick = {
-                onClickRow(PrefId.Notification)
-            }
-        )
-
-        PreferenceItem(
-            title = stringResource(id = R.string.pref_check_new_version),
-            summary = stringResource(R.string.current_version, BuildConfig.VERSION_NAME),
-            leadIcon = painterResource(id = R.drawable.ic_update_black_24dp),
-            trailIcon = true,
-            onClick = {
-                onClickRow(PrefId.CheckVersion)
+    OTheme {
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    heading = stringResource(id = currentScreen.titleId),
+                    onBack = {
+                        val ok = navController.popBackStack()
+                        if (!ok) {
+                            onExit()
+                        }
+                    }
+                )
             },
-        )
-    }
-}
+            scaffoldState = scaffoldState,
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = SettingScreen.Overview.name,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(
+                    route = SettingScreen.Overview.name
+                ) {
+                    PreferenceActivityScreen(
+                        settingsViewModel = settingsViewModel
+                    ) { screen ->
+                        navigateToScreen(
+                            navController,
+                            screen,
+                        )
+                    }
+                }
 
-@Composable
-fun PreferenceItem(
-    title: String,
-    summary: String?,
-    leadIcon: Painter,
-    trailIcon: Boolean = false,
-    onClick: () -> Unit,
-) {
-    ClickableRow(
-        modifier = Modifier.padding(Dimens.dp16),
-        startIcon = {
-            Icon(painter = leadIcon, contentDescription = title)
-        },
-        endIcon = { if (trailIcon) { RightArrow() } },
-        onClick = onClick
-    ) {
+                composable(
+                    route = SettingScreen.Notification.name
+                ) {
+                    FcmActivityScreen(
+                        settingsViewModel = settingsViewModel
+                    )
+                }
 
-        Column(
-            modifier = Modifier
-                .padding(
-                    start = Dimens.dp8,
-                    end = Dimens.dp8
-                )
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.body1,
-            )
-            summary?.let {
-                Text(
-                    text = it,
-                    color = OColor.black60,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(top = Dimens.dp8)
-                )
+                composable(
+                    route = SettingScreen.CheckVersion.name
+                ) {
+
+                }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewPreferenceBody() {
-    PreferenceBody(
-        cacheSize = "11.2kb",
-        readCount = 5,
-        onClickRow = {}
-    )
+private fun navigateToScreen(
+    navController: NavController,
+    screen: SettingScreen
+) {
+    navController.navigate(screen.name)
 }

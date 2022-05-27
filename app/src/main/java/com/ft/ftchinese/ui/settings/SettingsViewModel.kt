@@ -10,6 +10,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.components.ToastMessage
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,11 +23,23 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val cache = FileCache(application)
     private val readingHistoryDao = ArticleDb.getInstance(application).readDao()
 
+    val progressLiveData: MutableLiveData<Boolean> by lazy {
+        MutableLiveData(false)
+    }
+
+    val fcmStatusLiveData: MutableLiveData<List<IconTextRow>> by lazy {
+        MutableLiveData(listOf())
+    }
+
     val cacheSizeLiveData = MutableLiveData<String>()
     val articlesReadLiveData = MutableLiveData<Int>()
 
     val toastMessage: MutableLiveData<ToastMessage> by lazy {
         MutableLiveData<ToastMessage>()
+    }
+
+    fun clearToast() {
+        toastMessage.value = null
     }
 
     fun calculateCacheSize() {
@@ -79,6 +95,38 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
             toastMessage.value = ToastMessage.Resource(R.string.prompt_reading_history)
         }
+    }
+
+    fun checkFcm() {
+        val msgBuilder = FcmMessageBuilder()
+        progressLiveData.value = true
+
+        val playAvailable = checkPlayServices()
+        fcmStatusLiveData.value = msgBuilder
+            .addPlayService(playAvailable)
+            .build()
+
+        retrieveRegistrationToken {
+            fcmStatusLiveData.value = msgBuilder
+                .addTokenRetrievable(it.isSuccessful)
+                .build()
+
+            progressLiveData.value = false
+        }
+    }
+
+    private fun checkPlayServices(): Boolean {
+        val googleApiAvailability = GoogleApiAvailability.getInstance()
+        val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(getApplication())
+
+        return resultCode == ConnectionResult.SUCCESS
+    }
+
+    private fun retrieveRegistrationToken(listener: OnCompleteListener<String>) {
+        FirebaseMessaging
+            .getInstance()
+            .token
+            .addOnCompleteListener(listener)
     }
 
     companion object {
