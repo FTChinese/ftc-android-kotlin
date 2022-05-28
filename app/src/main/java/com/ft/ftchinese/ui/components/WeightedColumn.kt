@@ -12,6 +12,7 @@ import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
 fun WeightedColumn(
+    modifier: Modifier = Modifier,
     bottom: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -19,6 +20,7 @@ fun WeightedColumn(
         modifier = Modifier
             .padding(Dimens.dp16)
             .fillMaxSize()
+            .then(modifier)
     ) {
         Column(
             modifier = Modifier
