@@ -7,7 +7,7 @@ enum class PasswordAppScreen(
     @StringRes val titleId: Int
 ) {
     Forgot(titleId = R.string.title_forgot_password),
-    Reset(titleId = R.string.reset_password_title);
+    Reset(titleId = R.string.title_reset_password);
 
     companion object {
         @JvmStatic
