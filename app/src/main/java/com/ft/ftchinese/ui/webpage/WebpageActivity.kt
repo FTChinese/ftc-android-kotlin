@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.padding
@@ -14,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.components.MenuOpenInBrowser
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
@@ -22,7 +22,7 @@ import com.ft.ftchinese.ui.web.JsInterface
 import com.ft.ftchinese.ui.web.SimpleWebView
 import com.google.accompanist.web.rememberWebViewState
 
-class WebpageActivity : ScopedAppActivity() {
+class WebpageActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
