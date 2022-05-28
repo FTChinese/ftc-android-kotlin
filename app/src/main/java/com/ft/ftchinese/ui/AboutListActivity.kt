@@ -8,8 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -17,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,6 +27,7 @@ import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.about.AboutActivityScreen
 import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.theme.OTheme
 
 class AboutListActivity : ComponentActivity() {
@@ -105,7 +103,7 @@ fun AboutApp(
                     },
                     actions = {
                         if (pageMeta.showMenu) {
-                            ToolbarMenu {
+                            MenuOpenInBrowser {
                                 CustomTabsIntent
                                     .Builder()
                                     .build()
@@ -164,16 +162,3 @@ private fun navigateToDetails(
     navController.navigate("${AboutScreen.Details.name}/?url=${url}")
 }
 
-@Composable
-fun ToolbarMenu(
-    onClick: () -> Unit
-) {
-    IconButton(
-        onClick = onClick
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_baseline_open_in_browser_24),
-            contentDescription = "Open in browser"
-        )
-    }
-}
