@@ -1,14 +1,6 @@
 package com.ft.ftchinese.ui.checkout
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
@@ -20,51 +12,10 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
-import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.web.SimpleWebView
 import com.ft.ftchinese.ui.web.rememberJsInterface
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
-
-class BuyerInfoActivity : ComponentActivity() {
-
-    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContent {
-            OTheme {
-
-                val scaffoldState = rememberScaffoldState()
-
-                Scaffold(
-                    topBar = {
-                        Toolbar(
-                            heading = "完善信息",
-                            onBack = { finish() }
-                        )
-                    }
-                ) {
-                    BuyerInfoActivityScreen(
-                        scaffoldState = scaffoldState
-                    ) {
-                        finish()
-                    }
-                }
-            }
-        }
-    }
-
-    companion object {
-        @JvmStatic
-        fun start(context: Context) {
-            context.startActivity(
-                Intent(context, BuyerInfoActivity::class.java)
-            )
-        }
-    }
-}
 
 @Composable
 fun BuyerInfoActivityScreen(
@@ -93,11 +44,6 @@ fun BuyerInfoActivityScreen(
 
     val infoState = rememberBuyerInfoState(
         scaffoldState = scaffoldState
-    )
-
-    val wvState = rememberWebViewStateWithHTMLData(
-        data = infoState.htmlLoaded,
-        baseUrl = baseUrl,
     )
 
     LaunchedEffect(key1 = Unit) {

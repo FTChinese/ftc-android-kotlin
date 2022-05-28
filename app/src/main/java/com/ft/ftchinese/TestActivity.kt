@@ -44,7 +44,6 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
-import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.TextInput
 import com.ft.ftchinese.ui.components.Timer
@@ -318,7 +317,7 @@ class TestActivity : ScopedAppActivity() {
             onClick = {
                 InvoiceStore.getInstance(this@TestActivity)
                     .savePurchaseAction(PurchaseAction.BUY)
-                BuyerInfoActivity.start(this@TestActivity)
+                LatestInvoiceActivity.start(this@TestActivity)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
