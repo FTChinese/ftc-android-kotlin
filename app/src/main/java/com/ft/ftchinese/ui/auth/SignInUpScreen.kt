@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.login
+package com.ft.ftchinese.ui.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -17,59 +17,6 @@ sealed class EmailExists {
     object NotChecked : EmailExists()
     object NotFound : EmailExists()
     object Found : EmailExists()
-}
-
-@Composable
-fun SignInUpScreen(
-    loading: Boolean,
-    emailExists: EmailExists,
-    onCheckEmail: (String) -> Unit
-) {
-    val emailState = rememberInputState(
-        rules = listOf(
-            ValidationRule(
-                predicate = Validator::isEmail,
-                message = "请输入完整的邮箱"
-            )
-        )
-    )
-
-    Column(
-        modifier = Modifier
-            .padding(Dimens.dp16)
-            .fillMaxSize(),
-    ) {
-
-        TextInput(
-            label = stringResource(id = R.string.label_email),
-            state = emailState,
-            enabled = emailExists == EmailExists.NotChecked
-        )
-
-        when (emailExists) {
-            is EmailExists.NotChecked -> {
-                Spacer(modifier = Modifier.height(Dimens.dp16))
-
-                PrimaryButton(
-                    onClick = {
-                        onCheckEmail(emailState.field.value)
-                    },
-                    enabled = !loading && emailState.valid.value,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = stringResource(id = R.string.btn_next))
-                }
-            }
-            is EmailExists.NotFound -> {
-
-
-
-            }
-            is EmailExists.Found -> {
-
-            }
-        }
-    }
 }
 
 @Composable
