@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.web
+package com.ft.ftchinese.ui.webpage
 
 import android.content.Context
 import android.content.Intent
@@ -9,10 +9,9 @@ import android.util.Log
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.repository.Config
@@ -23,31 +22,14 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.share.ShareUtils
-import com.ft.ftchinese.ui.webpage.WebpageActivity
-import com.google.accompanist.web.AccompanistWebViewClient
+import com.ft.ftchinese.ui.web.ArticleKind
+import com.ft.ftchinese.ui.web.JsSnippets
+import com.ft.ftchinese.ui.web.UrlHandler
+import com.ft.ftchinese.ui.web.WebViewListener
 import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.toast
 
-private const val TAG = "WVClient"
-
-private const val TYPE_STORY = "story"
-private const val TYPE_PREMIUM = "premium"
-private const val TYPE_VIDEO = "video"
-private const val TYPE_INTERACTIVE = "interactive"
-private const val TYPE_PHOTO_NEWS = "photonews"
-private const val TYPE_CHANNEL = "channel"
-private const val TYPE_TAG = "tag"
-private const val TYPE_M = "m"
-private const val TYPE_ARCHIVE = "archiver"
-
-interface WebViewListener {
-    // After article page executed js to collect open graph meta data
-    fun onOpenGraph(openGraph: OpenGraphMeta)
-    // When a link in web view point to a channel
-    fun onChannelSelected(source: ChannelSource)
-    // When pagination link in a channel page is clicked
-    fun onPagination(paging: Paging)
-}
+private const val TAG = "WebClient"
 
 /**
  * WVClient is use mostly to handle webUrl clicks loaded into
@@ -56,7 +38,7 @@ interface WebViewListener {
 open class WVClient(
     private val context: Context,
     private val listener: WebViewListener? = null,
-) : AccompanistWebViewClient() {
+) : WebViewClient() {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
@@ -116,7 +98,7 @@ open class WVClient(
             }
 
             "ftchinese" -> {
-                if (uri.pathSegments.size > 0 && uri.pathSegments[0] != TYPE_STORY) {
+                if (uri.pathSegments.size > 0 && uri.pathSegments[0] != ArticleKind.story) {
                     ArticleActivity.start(context, teaserFromFtcSchema(uri))
                 } else {
                     context.toast("Unsupported link!")
@@ -264,13 +246,13 @@ open class WVClient(
              * We could only get an article's type and id from
              * webUrl. No more information could be acquired.
              */
-            TYPE_STORY,
-            TYPE_PREMIUM,
-            TYPE_VIDEO,
+            ArticleKind.story,
+            ArticleKind.premium,
+            ArticleKind.video,
                 // Links on home page under FT商学院
-            TYPE_PHOTO_NEWS,
+            ArticleKind.photoNews,
                 // Links on home page under FT研究院
-            TYPE_INTERACTIVE -> {
+            ArticleKind.interactive -> {
 
                 ArticleActivity.start(context, teaserFromUri(uri))
                 true
@@ -292,7 +274,7 @@ open class WVClient(
              * `/channel/markets.html`
              * `/channel/money.html`
              */
-            TYPE_CHANNEL -> {
+            ArticleKind.channel -> {
                 Log.i(TAG, "Open a channel link: $uri")
                 listener?.onChannelSelected(channelFromUri(uri))
                 true
@@ -303,7 +285,7 @@ open class WVClient(
              * If the path looks like `/m/marketing/intelligence.html`
              * or /m/corp/preview.html?pageid=huawei2018
              */
-            TYPE_M -> {
+            ArticleKind.m -> {
                 Log.i(TAG, "Loading marketing page")
                 listener?.onChannelSelected(marketingChannelFromUri(uri))
                 true
@@ -313,8 +295,8 @@ open class WVClient(
              * If the path looks like `/tag/中美贸易战`, `/archiver/2019-03-05`
              * start a new page listing articles
              */
-            TYPE_TAG,
-            TYPE_ARCHIVE -> {
+            ArticleKind.tag,
+            ArticleKind.archive -> {
                 Log.i(TAG, "Loading tag or archive")
                 listener?.onChannelSelected(tagOrArchiveChannel(uri))
                 true

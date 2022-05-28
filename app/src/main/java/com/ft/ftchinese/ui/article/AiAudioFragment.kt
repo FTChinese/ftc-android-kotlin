@@ -14,8 +14,8 @@ import com.ft.ftchinese.databinding.FragmentAiAudioBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.web.BaseJsEventListener
 import com.ft.ftchinese.ui.web.JsInterface
-import com.ft.ftchinese.ui.web.WVClient
-import com.ft.ftchinese.ui.web.configWebView
+import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.webpage.configWebView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

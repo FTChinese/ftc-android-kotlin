@@ -1,12 +1,16 @@
-package com.ft.ftchinese.ui.web
+package com.ft.ftchinese.ui.webpage
 
 import android.annotation.SuppressLint
 import android.view.KeyEvent
 import android.webkit.WebView
-import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
+import android.webkit.WebViewClient
+import com.ft.ftchinese.ui.web.ChromeClient
+import com.ft.ftchinese.ui.web.JsInterface
+
+const val JS_INTERFACE_NAME = "Android"
 
 @SuppressLint("SetJavaScriptEnabled")
-fun configWebView(webView: WebView, jsInterface: JsInterface, client: WVClient) {
+fun configWebView(webView: WebView, jsInterface: JsInterface, client: WebViewClient) {
     webView.settings.apply {
         javaScriptEnabled = true
         loadsImagesAutomatically = true

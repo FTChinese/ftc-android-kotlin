@@ -27,6 +27,8 @@ import com.ft.ftchinese.ui.share.ScreenshotActivity
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.ft.ftchinese.ui.util.ImageUtil
 import com.ft.ftchinese.ui.web.*
+import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.webpage.configWebView
 
 private const val TAG = "ArticleFragment"
 

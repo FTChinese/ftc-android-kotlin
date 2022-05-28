@@ -4,79 +4,42 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import androidx.activity.compose.setContent
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.ActivityWebpageBinding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.web.JsInterface
+import com.ft.ftchinese.ui.web.SimpleWebView
+import com.google.accompanist.web.rememberWebViewState
 
 class WebpageActivity : ScopedAppActivity() {
 
-    private lateinit var wvViewModel: WVViewModel
-    private lateinit var binding: ActivityWebpageBinding
-    private var pageMeta: WebpageMeta? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_webpage)
-        setSupportActionBar(binding.toolbar.toolbar)
 
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(false)
-        }
-
-        pageMeta = intent.getParcelableExtra(EXTRA_WEB_META)
-
-        supportFragmentManager.commit {
-            replace(R.id.web_view_holder, WebpageFragment.newInstance())
-        }
-
-        wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
-
-        pageMeta?.let {
-            supportActionBar?.title = it.title
-            wvViewModel.urlLiveData.value = it.url
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        if (pageMeta?.showMenu == true) {
-            menuInflater.inflate(R.menu.webpage_menu, menu)
-        }
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                finish()
-                true
+        intent.getParcelableExtra<WebpageMeta>(EXTRA_WEB_META)
+            ?.let {
+                setContent {
+                    WebpageActivityScreen(
+                        pageMeta = it,
+                        onExit = {
+                            finish()
+                        }
+                    )
+                }
             }
-            R.id.open_in_browser -> {
-                openInBrowser()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
-    private fun openInBrowser() {
-        pageMeta?.let {
-            CustomTabsIntent
-                .Builder()
-                .build()
-                .launchUrl(
-                    this,
-                    Uri.parse(it.url)
-                )
-        }
-    }
 
     companion object {
         private const val EXTRA_WEB_META = "extra_webpage_meta"
@@ -89,3 +52,50 @@ class WebpageActivity : ScopedAppActivity() {
         }
     }
 }
+
+@Composable
+fun WebpageActivityScreen(
+    pageMeta: WebpageMeta,
+    onExit: () -> Unit
+) {
+    val context = LocalContext.current
+    val scaffoldState = rememberScaffoldState()
+    val webViewState = rememberWebViewState(url = pageMeta.url)
+
+    OTheme {
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    heading = pageMeta.title,
+                    onBack = onExit,
+                    actions = {
+                        if (pageMeta.showMenu) {
+                            MenuOpenInBrowser {
+                                CustomTabsIntent
+                                    .Builder()
+                                    .build()
+                                    .launchUrl(
+                                        context,
+                                        Uri.parse(pageMeta.url)
+                                    )
+                            }
+                        }
+                    }
+                )
+            },
+            scaffoldState = scaffoldState
+        ) { innerPadding ->
+
+            ProgressLayout(
+                loading = webViewState.isLoading,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                SimpleWebView(
+                    state = webViewState,
+                    jsInterface = JsInterface()
+                )
+            }
+        }
+    }
+}
+
