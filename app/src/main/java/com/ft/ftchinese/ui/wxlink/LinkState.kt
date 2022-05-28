@@ -3,10 +3,7 @@ package com.ft.ftchinese.ui.wxlink
 import android.content.res.Resources
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.UnlinkAnchor
@@ -14,6 +11,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.WxLinkParams
 import com.ft.ftchinese.model.request.WxUnlinkParams
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
@@ -27,6 +25,9 @@ class LinkState(
     resources: Resources,
     connState: State<ConnectionState>
 ) : BaseState(scaffoldState, scope, resources, connState) {
+
+    var accountUpdated by mutableStateOf<Account?>(null)
+        private set
 
     fun link(account: Account) {
         if (!ensureConnected()) {
@@ -54,11 +55,25 @@ class LinkState(
                     showSnackBar(doneResult.text)
                 }
                 is FetchResult.Success -> {
-                    asyncRefresh(account)
-                    progress.value = false
+                    refresh(account)
                 }
             }
         }
+    }
+
+    private suspend fun refresh(account: Account) {
+        when (val result = AccountRepo.asyncRefresh(account)) {
+            is FetchResult.LocalizedError -> {
+                showSnackBar(result.msgId)
+            }
+            is FetchResult.TextError -> {
+                showSnackBar(result.text)
+            }
+            is FetchResult.Success -> {
+                accountUpdated = result.data
+            }
+        }
+        progress.value = false
     }
 
     fun unlink(account: Account, anchor: UnlinkAnchor) {
@@ -94,8 +109,7 @@ class LinkState(
                     showSnackBar(doneResult.text)
                 }
                 is FetchResult.Success -> {
-                    asyncRefresh(account)
-                    progress.value = false
+                    refresh(account)
                 }
             }
         }

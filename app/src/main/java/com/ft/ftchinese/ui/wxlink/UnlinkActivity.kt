@@ -11,6 +11,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -84,9 +85,11 @@ private fun UnlinkActivityScreen(
         return
     }
 
-    linkState.accountRefreshed.value?.let {
-        userViewModel.saveAccount(it)
-        onSuccess()
+    LaunchedEffect(key1 = linkState.accountUpdated) {
+        linkState.accountUpdated?.let {
+            userViewModel.saveAccount(it)
+            onSuccess()
+        }
     }
 
     ProgressLayout(

@@ -6,9 +6,6 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.base.ConnectionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -20,7 +17,6 @@ open class BaseState(
     val connection: State<ConnectionState>
 ) {
     val progress = mutableStateOf(false)
-    val accountRefreshed = mutableStateOf<Account?>(null)
 
     val isConnected: Boolean
         get() = connection.value == ConnectionState.Available
@@ -60,21 +56,4 @@ open class BaseState(
         showSnackBar(R.string.prompt_saved)
     }
 
-    suspend fun asyncRefresh(account: Account): Boolean {
-        accountRefreshed.value = null
-        return when (val refreshed = AccountRepo.asyncRefresh(account)) {
-            is FetchResult.LocalizedError -> {
-                showSnackBar(refreshed.msgId)
-                false
-            }
-            is FetchResult.TextError -> {
-                showSnackBar(refreshed.text)
-                false
-            }
-            is FetchResult.Success -> {
-                accountRefreshed.value = refreshed.data
-                true
-            }
-        }
-    }
 }

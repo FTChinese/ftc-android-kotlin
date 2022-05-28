@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +53,12 @@ fun WxInfoActivityScreen(
 
     val (reAuth, setReAuth) = remember {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(key1 = uiState.refreshed) {
+        uiState.refreshed?.let {
+            userViewModel.saveAccount(it)
+        }
     }
 
     val launcher = rememberLauncherForActivityResult(

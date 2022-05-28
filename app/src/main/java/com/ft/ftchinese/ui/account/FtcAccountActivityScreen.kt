@@ -33,8 +33,8 @@ fun FtcAccountActivityScreen(
         return
     }
 
-    LaunchedEffect(key1 = uiState.accountRefreshed.value) {
-        uiState.accountRefreshed.value?.let {
+    LaunchedEffect(key1 = uiState.refreshed) {
+        uiState.refreshed?.let {
             Log.i(TAG, "Save refreshed account")
             userViewModel.saveAccount(it)
         }

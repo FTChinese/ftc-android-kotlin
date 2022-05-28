@@ -25,6 +25,9 @@ class WxInfoState(
     var refreshing by mutableStateOf(false)
         private set
 
+    var refreshed by mutableStateOf<Account?>(null)
+        private set
+
     fun refresh(a: Account, sess: WxSession) {
         if (!ensureConnected()) {
             return
@@ -51,11 +54,26 @@ class WxInfoState(
                         return@launch
                     }
 
-                    asyncRefresh(a)
-                    refreshing = false
+                    loadAccount(a)
                 }
             }
         }
+    }
+
+    suspend fun loadAccount(account: Account) {
+        when (val result = AccountRepo.asyncRefresh(account)) {
+            is FetchResult.LocalizedError -> {
+                showSnackBar(result.msgId)
+            }
+            is FetchResult.TextError -> {
+                showSnackBar(result.text)
+            }
+            is FetchResult.Success -> {
+                refreshed = result.data
+            }
+        }
+        showRefreshed()
+        refreshing = false
     }
 }
 

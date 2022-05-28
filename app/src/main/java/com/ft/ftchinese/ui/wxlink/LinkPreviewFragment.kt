@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -101,11 +102,13 @@ fun WxLinkEmailScreen(
     val isConnected = connection == ConnectionState.Available
     val linkState = rememberLinkState(scaffoldState = scaffoldState)
 
-    linkState.accountRefreshed.value?.let {
-        userViewModel.saveAccount(it)
+    LaunchedEffect(key1 = linkState.accountUpdated) {
+        linkState.accountUpdated?.let {
+            userViewModel.saveAccount(it)
+        }
     }
 
-    if (linkState.accountRefreshed.value != null) {
+    if (linkState.accountUpdated != null) {
         LinkResultScreen(
             onFinish = onSuccess
         )
