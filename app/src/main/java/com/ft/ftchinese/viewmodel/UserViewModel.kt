@@ -6,8 +6,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.components.ToastMessage
@@ -49,6 +51,16 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
     fun saveMembership(m: Membership) {
         accountLiveData.value = accountLiveData.value?.withMembership(m)
         session.saveMembership(m)
+    }
+
+    fun saveStripeSubs(subsResult: StripeSubsResult) {
+        saveMembership(subsResult.membership)
+        session.saveStripeSubs(subsResult.subs)
+    }
+
+    fun saveIapSubs(subsResult: IAPSubsResult) {
+        saveMembership(subsResult.membership)
+        session.saveIapSus(subsResult.subscription)
     }
 
     fun logout() {
