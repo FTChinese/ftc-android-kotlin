@@ -147,7 +147,7 @@ object AuthClient {
         }
     }
 
-    fun mobileLinkExistingEmail(params: MobileLinkParams): Account? {
+    private fun mobileLinkExistingEmail(params: MobileLinkParams): Account? {
         return Fetch()
             .post(Endpoint.mobileInitialLink)
             .noCache()
