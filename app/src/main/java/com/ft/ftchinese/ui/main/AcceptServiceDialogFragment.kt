@@ -9,15 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentAcceptServiceDialogBinding
-import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.model.legal.legalPages
-import com.ft.ftchinese.ui.webpage.WVViewModel
-import com.ft.ftchinese.ui.webpage.WebpageFragment
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.ft.ftchinese.store.ServiceAcceptance
+import com.ft.ftchinese.ui.web.DumbWebViewClient
+import com.ft.ftchinese.ui.web.JsInterface
+import com.ft.ftchinese.ui.webpage.configWebView
 
 /**
  * https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
@@ -26,22 +24,33 @@ class AcceptServiceDialogFragment : DialogFragment() {
 
     private lateinit var acceptance: ServiceAcceptance
     private lateinit var binding: FragmentAcceptServiceDialogBinding
-    private lateinit var wvViewModel: WVViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         acceptance = ServiceAcceptance.getInstance(context)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_accept_service_dialog, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_accept_service_dialog,
+            container,
+            false
+        )
         return binding.root
     }
 
     override fun onStart() {
         super.onStart()
         dialog?.let {
-            it.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            it.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
         }
     }
 
@@ -49,17 +58,11 @@ class AcceptServiceDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        wvViewModel = activity?.run {
-            ViewModelProvider(this).get(WVViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
-        val page = legalPages[1]
-
-        wvViewModel.urlLiveData.value = page.url
-
-        childFragmentManager.commit {
-            replace(R.id.terms_holder, WebpageFragment.newInstance())
-        }
+        configWebView(
+            webView = binding.termsHolder,
+            jsInterface = JsInterface(),
+            client = DumbWebViewClient()
+        )
 
         binding.declineBtn.setOnClickListener {
             dismiss()
@@ -70,6 +73,8 @@ class AcceptServiceDialogFragment : DialogFragment() {
             dismiss()
             acceptance.accepted()
         }
+
+        binding.termsHolder.loadUrl(legalPages[1].url)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
