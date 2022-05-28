@@ -193,6 +193,7 @@
     <string name="mobile_code_not_found">验证码不存在或已过期</string>
     <string name="mobile_code_invalid">验证码无效</string>
     <string name="mobile_already_exists">该手机号已被使用</string>
+    <string name="sms_code_sent">验证码已发送</string>
 
     <!--  Stripe Customer setting  -->
     <string name="title_create_stripe_customer">注册Stripe用户</string>
