@@ -1,10 +1,15 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.HttpResp
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.CustomerParams
 import com.ft.ftchinese.model.stripesubs.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object StripeClient {
 
@@ -153,6 +158,29 @@ object StripeClient {
             .body
     }
 
+    suspend fun asyncRefreshSub(account: Account): FetchResult<StripeSubsResult> {
+        try {
+            val stripeSub = withContext(Dispatchers.IO) {
+                refreshSub(account)
+            }
+
+            return if (stripeSub == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(stripeSub)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.fromApi(e)
+            }
+
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     fun updateSubs(account: Account, params: SubParams): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
@@ -180,6 +208,29 @@ object StripeClient {
             .body
     }
 
+    suspend fun asyncCancelSub(account: Account): FetchResult<StripeSubsResult> {
+        try {
+            val stripeSub = withContext(Dispatchers.IO) {
+                cancelSub(account)
+            }
+
+            return if (stripeSub == null) {
+                FetchResult.LocalizedError(R.string.stripe_refresh_failed)
+            } else {
+                FetchResult.Success(stripeSub)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.fromApi(e)
+            }
+
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     fun reactivateSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
@@ -191,5 +242,28 @@ object StripeClient {
             .send()
             .endJson<StripeSubsResult>()
             .body
+    }
+
+    suspend fun asyncReactiveSub(account: Account): FetchResult<StripeSubsResult> {
+        try {
+            val stripeSub = withContext(Dispatchers.IO) {
+                reactivateSub(account)
+            }
+
+            return if (stripeSub == null) {
+                FetchResult.LocalizedError(R.string.stripe_refresh_failed)
+            } else {
+                FetchResult.Success(stripeSub)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.fromApi(e)
+            }
+
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 }

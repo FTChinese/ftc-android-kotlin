@@ -105,4 +105,26 @@ object FtcPayClient {
            .endJson<Membership>()
            .body
     }
+
+    suspend fun asyncUseAddOn(account: Account): FetchResult<Membership> {
+        try {
+            val m = withContext(Dispatchers.IO) {
+                useAddOn(account)
+            }
+
+            return if (m == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(m)
+            }
+        } catch (e: APIError) {
+            return  if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
 }
