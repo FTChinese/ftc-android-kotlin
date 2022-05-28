@@ -171,9 +171,9 @@ class MobileViewModel : BaseViewModel() {
 
     // Perform login after SMS cod entered.
     // Server returns UserFound object.
-    // If the id field is null, launch a ui to enter email
-    // so that we could link this mobile to an email account;
-    // otherwise use the id to fetch account data.
+    // If the id field is null, we given user two options:
+    // - Link an existing email;
+    // - Create a new account using this mobile
     fun verifySMSAuthCode(deviceToken: String) {
         if (isNetworkAvailable.value != true) {
             accountLoaded.value = FetchResult.notConnected
