@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -52,6 +53,7 @@ import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
+import com.ft.ftchinese.ui.main.AcceptServiceDialogFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
@@ -135,6 +137,8 @@ class TestActivity : ScopedAppActivity() {
 
                             Spacer(modifier = Modifier.height(Dimens.dp16))
 
+                            ServiceAcceptance()
+
                             TestCountDown()
 
                             TestTimer()
@@ -145,8 +149,6 @@ class TestActivity : ScopedAppActivity() {
 
                             PostPurchaseButton()
 
-                            FullScreenDialog()
-
                             ShowSignInUp()
 
                             SignInFragment()
@@ -154,8 +156,6 @@ class TestActivity : ScopedAppActivity() {
                             SignUpFragment()
 
                             MobileLinkEmail()
-
-                            PostPurchaseButton()
 
                             FreeUser()
 
@@ -323,36 +323,6 @@ class TestActivity : ScopedAppActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Address - Buy")
-        }
-    }
-
-    @Composable
-    fun FullScreenDialog() {
-        val (open, setOpen) = remember {
-            mutableStateOf(false)
-        }
-        Button(
-            onClick = { setOpen(true) },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Compose Alert")
-        }
-
-        if (open) {
-            AlertDialog(
-                onDismissRequest = { setOpen(false) },
-                confirmButton = {
-                    TextButton(onClick = { setOpen(false) }) {
-                        Text(text = "OK")
-                    }
-                },
-                modifier = Modifier.fillMaxSize(),
-                dismissButton = {
-                    TextButton(onClick = { setOpen(false) }) {
-                        Text(text = "Cancel")
-                    }
-                }
-            )
         }
     }
 
@@ -761,7 +731,12 @@ class TestActivity : ScopedAppActivity() {
 
     @Composable
     fun ServiceAcceptance() {
-        Button(onClick = {  }) {
+        Button(onClick = {
+            supportFragmentManager.commit {
+                add(android.R.id.content, AcceptServiceDialogFragment())
+                addToBackStack(null)
+            }
+        }) {
             Text(text = "Service Acceptance")
         }
     }
