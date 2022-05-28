@@ -37,9 +37,12 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".ui.auth.AuthActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.auth.password.PasswordActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.share.ScreenshotActivity"
             android:exported="false" />
