@@ -12,22 +12,17 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.member.MemberActivityScreen
-import com.ft.ftchinese.ui.member.MembershipViewModel
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.RequestCode
 import kotlinx.coroutines.launch
 
 class MemberActivity : ComponentActivity() {
-    private lateinit var membershipViewModel: MembershipViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        membershipViewModel = ViewModelProvider(this)[MembershipViewModel::class.java]
 
         setContent {
             OTheme {
@@ -47,7 +42,7 @@ class MemberActivity : ComponentActivity() {
                     scaffoldState = scaffoldState
                 ) { innerPadding ->
                     MemberActivityScreen(
-                        memberViewModel = membershipViewModel,
+                        scaffoldState = scaffoldState,
                         showSnackBar = { msg ->
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar(msg)

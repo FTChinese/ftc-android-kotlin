@@ -14,7 +14,6 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SubsRuleContent
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
@@ -23,7 +22,6 @@ import org.threeten.bp.LocalDate
 @Composable
 fun MemberScreen(
     member: Membership,
-    loading: Boolean,
     onSubsOption: (SubsOptionRow) -> Unit,
 ) {
     val context = LocalContext.current
@@ -32,38 +30,34 @@ fun MemberScreen(
         m = member
     )
 
-    ProgressLayout(
-        loading = loading
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(Dimens.dp8)
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(Dimens.dp8)
-        ) {
-            Text(
-                text = "下拉刷新",
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                color = OColor.black60,
-                fontSize = 14.sp
-            )
+        Text(
+            text = "下拉刷新",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            color = OColor.black60,
+            fontSize = 14.sp
+        )
 
-            Spacer(modifier = Modifier.height(Dimens.dp8))
+        Spacer(modifier = Modifier.height(Dimens.dp8))
 
-            SubsStatusCard(status = status)
+        SubsStatusCard(status = status)
 
-            Spacer(modifier = Modifier.height(Dimens.dp8))
+        Spacer(modifier = Modifier.height(Dimens.dp8))
 
-            SubsOptions(
-                cancelStripe = member.canCancelStripe,
-                reactivateStripe = status.reactivateStripe,
-                onClickRow = onSubsOption
-            )
+        SubsOptions(
+            cancelStripe = member.canCancelStripe,
+            reactivateStripe = status.reactivateStripe,
+            onClickRow = onSubsOption
+        )
 
-            Spacer(modifier = Modifier.height(Dimens.dp16))
+        Spacer(modifier = Modifier.height(Dimens.dp16))
 
-            SubsRuleContent()
-        }
+        SubsRuleContent()
     }
 }
 
@@ -78,10 +72,8 @@ fun PreviewMemberScreen() {
             payMethod = PayMethod.ALIPAY,
             standardAddOn = 30,
             premiumAddOn = 20,
-        ),
-        loading = false,
-        onSubsOption = {}
-    )
+        )
+    ) {}
 }
 
 
