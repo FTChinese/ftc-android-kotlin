@@ -1,5 +1,6 @@
 package com.ft.ftchinese.repository
 
+import android.util.Log
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
@@ -8,6 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.WxLinkParams
 import com.ft.ftchinese.model.request.WxUnlinkParams
+import com.ft.ftchinese.ui.login.SignUpViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -74,6 +76,24 @@ object LinkRepo {
             .sendJson(c)
             .endJson<Account>()
             .body
+    }
+
+    suspend fun asyncSignUp(c: Credentials, unionId: String): FetchResult<Account> {
+        return try {
+            val account = withContext(Dispatchers.IO) {
+                LinkRepo.signUp(c, unionId)
+            }
+
+            if (account == null) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.Success(account)
+            }
+        } catch (e: APIError) {
+            FetchResult.ofSignUpError(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
     }
 
     fun unlink(unionId: String, params: WxUnlinkParams): Boolean {

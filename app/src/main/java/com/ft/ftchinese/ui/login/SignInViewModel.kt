@@ -1,11 +1,9 @@
 package com.ft.ftchinese.ui.login
 
-import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
@@ -14,11 +12,7 @@ import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-private const val TAG = "SignInViewModel"
 
 class SignInViewModel : BaseViewModel() {
 
@@ -76,29 +70,9 @@ class SignInViewModel : BaseViewModel() {
         )
 
         viewModelScope.launch {
-            try {
-                val account = withContext(Dispatchers.IO) {
-                    AuthClient.emailLogin(credentials)
-                }
-
-                progressLiveData.value = false
-
-                if (account == null) {
-
-                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-
-                accountResult.value = FetchResult.Success(account)
-            } catch (e: APIError) {
-                Log.i(TAG, "$e")
-                progressLiveData.value = false
-                handleLoginError(e)
-            } catch (e: Exception) {
-                Log.i(TAG, "$e")
-                progressLiveData.value = false
-                accountResult.value = FetchResult.fromException(e)
-            }
+            val result = AuthClient.asyncEmailLogin(credentials)
+            progressLiveData.value = false
+            accountResult.value = result
         }
     }
 
@@ -119,41 +93,9 @@ class SignInViewModel : BaseViewModel() {
         )
 
         viewModelScope.launch {
-            try {
-                val account = withContext(Dispatchers.IO) {
-                    AuthClient.mobileLinkExistingEmail(params)
-                }
-
-                progressLiveData.value = false
-
-                if (account == null) {
-
-                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-
-                accountResult.value = FetchResult.Success(account)
-            } catch (e: APIError) {
-                progressLiveData.value = false
-
-                handleLoginError(e)
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                accountResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    private fun handleLoginError(e: APIError) {
-        if (e.error?.isFieldAlreadyExists("mobile") == true) {
-            accountResult.value = FetchResult.LocalizedError(R.string.mobile_link_taken)
-            return
-        }
-
-        accountResult.value = when (e.statusCode) {
-            403 -> FetchResult.LocalizedError(R.string.login_incorrect_password)
-            404 -> FetchResult.LocalizedError(R.string.account_not_found)
-            else -> FetchResult.fromApi(e)
+            val result = AuthClient.asyncMobileLinkEmail(params)
+            progressLiveData.value = false
+            accountResult.value = result
         }
     }
 }

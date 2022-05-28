@@ -1,13 +1,11 @@
 package com.ft.ftchinese.ui.login
 
-import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.repository.AuthClient
@@ -15,9 +13,7 @@ import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SignUpViewModel : ViewModel() {
     val progressLiveData = MutableLiveData<Boolean>()
@@ -91,44 +87,10 @@ class SignUpViewModel : ViewModel() {
         )
 
         viewModelScope.launch {
-            try {
-                val account = withContext(Dispatchers.IO) {
-                    AuthClient.emailSignUp(c)
-                }
 
-                progressLiveData.value = false
-                if (account == null) {
-
-                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-
-                accountResult.value = FetchResult.Success(account)
-            } catch (e: APIError) {
-                progressLiveData.value = false
-                handleSignUpError(e)
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                accountResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    private fun handleSignUpError(e: APIError) {
-        accountResult.value = when (e.statusCode) {
-            422 -> {
-                if (e.error == null) {
-                    FetchResult.fromApi(e)
-                } else {
-                    when {
-                        e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_email_taken)
-                        e.error.isFieldInvalid("email") -> FetchResult.LocalizedError(R.string.signup_invalid_email)
-                        e.error.isFieldInvalid("password") -> FetchResult.LocalizedError(R.string.signup_invalid_password)
-                        else -> FetchResult.fromApi(e)
-                    }
-                }
-            }
-            else -> FetchResult.fromApi(e)
+            val result = AuthClient.asyncEmailSignUp(c)
+            progressLiveData.value = false
+            accountResult.value = result
         }
     }
 
@@ -147,30 +109,9 @@ class SignUpViewModel : ViewModel() {
         )
 
         viewModelScope.launch {
-            try {
-                val account = withContext(Dispatchers.IO) {
-                    LinkRepo.signUp(c, unionId)
-                }
-
-                progressLiveData.value = false
-                if (account == null) {
-                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-
-                accountResult.value = FetchResult.Success(account)
-            } catch (e: APIError) {
-                Log.i(TAG, e.message)
-                progressLiveData.value = false
-                handleSignUpError(e)
-            } catch (e: Exception) {
-                e.message?.let { Log.i(TAG, it) }
-                accountResult.value = FetchResult.fromException(e)
-            }
+            val result = LinkRepo.asyncSignUp(c, unionId)
+            progressLiveData.value = false
+            accountResult.value = result
         }
-    }
-
-    companion object {
-        private const val TAG = "SignUpViewModel"
     }
 }

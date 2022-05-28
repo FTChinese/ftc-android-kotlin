@@ -49,6 +49,24 @@ object AuthClient {
             .body
     }
 
+    suspend fun asyncEmailLogin(c: Credentials): FetchResult<Account> {
+        try {
+            val account = withContext(Dispatchers.IO) {
+                emailLogin(c)
+            }
+
+            return if (account == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(account)
+            }
+        } catch (e: APIError) {
+            return FetchResult.ofLoginError(e)
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     fun emailSignUp(c: Credentials): Account? {
         return Fetch()
             .post(Endpoint.emailSignUp)
@@ -58,6 +76,24 @@ object AuthClient {
             .sendJson(c)
             .endJson<Account>()
             .body
+    }
+
+    suspend fun asyncEmailSignUp(c: Credentials): FetchResult<Account> {
+        try {
+            val account = withContext(Dispatchers.IO) {
+                emailSignUp(c)
+            }
+
+            return if (account == null) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.Success(account)
+            }
+        } catch (e: APIError) {
+            return FetchResult.ofSignUpError(e)
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     private fun requestSMSCode(params: SMSCodeParams): Boolean {
@@ -120,6 +156,23 @@ object AuthClient {
             .sendJson(params)
             .endJson<Account>()
             .body
+    }
+
+    suspend fun asyncMobileLinkEmail(params: MobileLinkParams): FetchResult<Account> {
+        return try {
+            val account = withContext(Dispatchers.IO) {
+                mobileLinkExistingEmail(params)
+            }
+            if (account == null) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.Success(account)
+            }
+        } catch (e: APIError) {
+            FetchResult.ofLoginError(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
     }
 
     /**
