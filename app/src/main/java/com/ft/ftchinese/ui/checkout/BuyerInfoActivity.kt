@@ -6,46 +6,38 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.model.fetch.FetchResult
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
+import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.web.ChromeClient
-import com.ft.ftchinese.ui.web.WVClient
-import com.google.accompanist.web.WebContent
-import com.google.accompanist.web.WebView
+import com.ft.ftchinese.ui.web.SimpleWebView
+import com.ft.ftchinese.ui.web.rememberJsInterface
+import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
 class BuyerInfoActivity : ComponentActivity() {
-
-    private lateinit var viewModel: BuyerInfoViewModel
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val account = SessionManager
-            .getInstance(this)
-            .loadAccount()
-            ?: return
-
-        viewModel = ViewModelProvider(this)[BuyerInfoViewModel::class.java]
-
         setContent {
             OTheme {
+
+                val scaffoldState = rememberScaffoldState()
+
                 Scaffold(
                     topBar = {
                         Toolbar(
@@ -55,9 +47,7 @@ class BuyerInfoActivity : ComponentActivity() {
                     }
                 ) {
                     BuyerInfoActivityScreen(
-                        baseUrl = Config.discoverServer(account),
-                        infoViewModel = viewModel,
-                        wvClient = WVClient(this)
+                        scaffoldState = scaffoldState
                     ) {
                         finish()
                     }
@@ -78,69 +68,79 @@ class BuyerInfoActivity : ComponentActivity() {
 
 @Composable
 fun BuyerInfoActivityScreen(
-    baseUrl: String,
-    infoViewModel: BuyerInfoViewModel,
-    wvClient: WVClient,
+    userViewModel: UserViewModel = viewModel(),
+    scaffoldState: ScaffoldState,
     onExit: () -> Unit,
 ) {
     val context = LocalContext.current
-    val wvState = rememberWebViewStateWithHTMLData(
-        data = "Loading...",
-    )
-    val exitState by infoViewModel.exitLiveData.observeAsState(false)
-    val alertMessage by infoViewModel.alertLiveData.observeAsState("")
-
-    val inProgress by infoViewModel.progressLiveData.observeAsState(true)
-    val htmlRendered by infoViewModel.htmlRendered.observeAsState()
-
-    if (exitState) {
+    val accountState = userViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
+    if (account == null) {
         onExit()
         return
     }
 
-    if (alertMessage.isNotBlank()) {
-        SimpleDialog(
-            title = "",
-            body = alertMessage,
-            onDismiss = { infoViewModel.clearAlert() },
-            onConfirm = { infoViewModel.clearAlert() }
-        )
+    val invoiceStore = remember {
+        InvoiceStore.getInstance(context)
+    }
+    val fileCache = remember {
+        FileCache(context)
     }
 
-    when (val h = htmlRendered) {
-        is FetchResult.LocalizedError -> {
-            wvState.content = WebContent.Data(context.getString(h.msgId), baseUrl = "")
-        }
-        is FetchResult.TextError -> {
-            wvState.content = WebContent.Data(h.text, baseUrl = "")
-        }
-        is FetchResult.Success -> {
-            wvState.content = WebContent.Data(h.data, baseUrl = baseUrl)
-        }
-        else -> { }
+    val baseUrl = remember(account) {
+        Config.discoverServer(account)
     }
+
+    val infoState = rememberBuyerInfoState(
+        scaffoldState = scaffoldState
+    )
+
+    val wvState = rememberWebViewStateWithHTMLData(
+        data = infoState.htmlLoaded,
+        baseUrl = baseUrl,
+    )
 
     LaunchedEffect(key1 = Unit) {
-        infoViewModel.loadPage()
+        val action = invoiceStore.loadPurchaseAction()
+        if (action == null) {
+            onExit()
+            return@LaunchedEffect
+        }
+
+        infoState.loadPage(
+            account = account,
+            action = action,
+            cache = fileCache
+        )
     }
 
-    ProgressLayout(
-        loading = inProgress,
-    ) {
+    if (infoState.exit) {
+        onExit()
+    }
 
-        WebView(
-            state = wvState,
-            modifier = Modifier.fillMaxSize(),
-            captureBackPresses = false,
-            onCreated = {
-                it.settings.javaScriptEnabled = true
-                it.settings.loadsImagesAutomatically = true
-                it.settings.domStorageEnabled = true
-                it.settings.databaseEnabled = true
-                it.addJavascriptInterface(infoViewModel, JS_INTERFACE_NAME)
-                it.webViewClient = wvClient
-                it.webChromeClient = ChromeClient()
-            },
+    if (infoState.alert.isNotBlank()) {
+        SimpleDialog(
+            title = "",
+            body = infoState.alert,
+            onDismiss = infoState::closeAlert,
+            onConfirm = infoState::closeAlert,
+            dismissText = null,
         )
+    }
+
+    val jsInterface = rememberJsInterface(callback = infoState)
+
+    ProgressLayout(
+        loading = infoState.progress.value,
+    ) {
+        if (infoState.htmlLoaded.isNotBlank()) {
+            SimpleWebView(
+                state = rememberWebViewStateWithHTMLData(
+                    data = infoState.htmlLoaded,
+                    baseUrl = baseUrl,
+                ),
+                jsInterface = jsInterface
+            )
+        }
     }
 }
