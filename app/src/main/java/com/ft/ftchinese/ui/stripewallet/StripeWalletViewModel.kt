@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
@@ -14,9 +14,7 @@ import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.viewmodel.StripeViewModel
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.model.SetupIntent
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val TAG = "StripeWalletViewModel"
 
@@ -45,24 +43,6 @@ class StripeWalletViewModel(application: Application) : StripeViewModel(applicat
         paymentSheetParams = null
     }
 
-    private suspend fun asyncCreateSetupIntent(customerId: String): Pair<PaymentSheetParams?, ToastMessage?> {
-        try {
-            val resp = withContext(Dispatchers.IO) {
-                StripeClient.setupWithEphemeral(customerId)
-            }
-
-            if (resp.body == null) {
-                return Pair(null, ToastMessage.errorUnknown)
-            }
-
-            return Pair(resp.body, null)
-        } catch (e: APIError) {
-            return Pair(null, ToastMessage.fromApi(e))
-        } catch (e: Exception) {
-            return Pair(null, ToastMessage.fromException(e))
-        }
-    }
-
     private fun createSetupIntent(account: Account) {
         Log.i(TAG, "Creating setup intent")
 
@@ -76,14 +56,23 @@ class StripeWalletViewModel(application: Application) : StripeViewModel(applicat
 
         viewModelScope.launch {
 
-            val (params, errToast) = asyncCreateSetupIntent(customerId)
+            val result = StripeClient.asyncSetupWithEphemeral(
+                customerId
+            )
 
             progressLiveData.value = false
-            if (errToast != null) {
-                toastLiveData.value = errToast
-            } else if (params != null) {
-                paymentSheetParams = params
-                showPaymentSheet(account)
+
+            when (result) {
+                is FetchResult.LocalizedError -> {
+                    toastLiveData.value = ToastMessage.Resource(result.msgId)
+                }
+                is FetchResult.TextError -> {
+                    toastLiveData.value = ToastMessage.Text(result.text)
+                }
+                is FetchResult.Success -> {
+                    paymentSheetParams = result.data
+                    showPaymentSheet(account)
+                }
             }
         }
     }
@@ -116,38 +105,23 @@ class StripeWalletViewModel(application: Application) : StripeViewModel(applicat
 
         if (pmId != null) {
             viewModelScope.launch {
-                val (pm, errMsg) = asyncLoadPaymentMethod(pmId)
-
-                if (errMsg != null) {
-                    toastLiveData.value = errMsg
-                    return@launch
-                }
-
-                if (pm != null) {
-                    paymentMethodSelected.value = pm
+                val result = StripeClient.asyncRetrievePaymentMethod(pmId)
+                progressLiveData.value = false
+                when (result) {
+                    is FetchResult.LocalizedError -> {
+                        toastLiveData.value = ToastMessage.Resource(result.msgId)
+                    }
+                    is FetchResult.TextError -> {
+                        toastLiveData.value = ToastMessage.Text(result.text)
+                    }
+                    is FetchResult.Success -> {
+                        paymentMethodSelected.value = result.data
+                    }
                 }
             }
         }
 
         progressLiveData.value = false
-    }
-
-    private suspend fun asyncLoadPaymentMethod(id: String): Pair<StripePaymentMethod?, ToastMessage?> {
-        return try {
-            val resp = withContext(Dispatchers.IO) {
-                StripeClient.retrievePaymentMethod(id)
-            }
-
-            if (resp.body == null) {
-                Pair(null, ToastMessage.errorUnknown)
-            } else {
-                Pair(resp.body, null)
-            }
-        } catch (e: APIError) {
-            Pair(null, ToastMessage.fromApi(e))
-        } catch (e: Exception) {
-            Pair(null, ToastMessage.fromException(e))
-        }
     }
 
     // Set default payment method to customer.
@@ -164,31 +138,24 @@ class StripeWalletViewModel(application: Application) : StripeViewModel(applicat
 
         progressLiveData.value = true
         viewModelScope.launch {
-            try {
-                val resp = withContext(Dispatchers.IO) {
-                    StripeClient.setDefaultPaymentMethod(account, pmId)
-                }
 
-                progressLiveData.value = false
+            val result = StripeClient.asyncSetDefaultPaymentMethod(
+                account = account,
+                pmId = pmId,
+            )
 
-                if (resp.body == null) {
-                    toastLiveData.value = ToastMessage.Resource(R.string.stripe_customer_not_found)
-                    return@launch
-                }
+            progressLiveData.value = false
 
-                // Disable set default button
-                defaultPaymentMethod.value = paymentMethod
-            } catch (e: APIError) {
-                toastLiveData.value = if (e.statusCode == 404) {
-                    ToastMessage.Resource(R.string.stripe_customer_not_found)
-                } else {
-                    ToastMessage.fromApi(e)
+            when (result) {
+                is FetchResult.LocalizedError -> {
+                    toastLiveData.value = ToastMessage.Resource(result.msgId)
                 }
-            } catch (e: Exception) {
-                Log.i(TAG, "$e")
-                toastLiveData.value = ToastMessage.fromException(e)
-            } finally {
-                progressLiveData.value = false
+                is FetchResult.TextError -> {
+                    toastLiveData.value = ToastMessage.Text(result.text)
+                }
+                is FetchResult.Success -> {
+                    defaultPaymentMethod.value = paymentMethod
+                }
             }
         }
     }

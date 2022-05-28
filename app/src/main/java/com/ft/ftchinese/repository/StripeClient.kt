@@ -36,6 +36,28 @@ object StripeClient {
             .endJson()
     }
 
+    suspend fun asyncCreateCustomer(account: Account): FetchResult<StripeCustomer> {
+        try {
+            val resp = withContext(Dispatchers.IO) {
+                StripeClient.createCustomer(account)
+            }
+
+            return if (resp.body == null) {
+                FetchResult.LocalizedError(R.string.stripe_customer_not_created)
+            } else {
+                FetchResult.Success(resp.body)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.stripe_customer_not_found)
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     fun retrieveCustomer(account: Account): HttpResp<StripeCustomer> {
         return Fetch()
             .get("${Endpoint.stripeCustomers}/${account.stripeId}")
@@ -53,6 +75,24 @@ object StripeClient {
             .endJson()
     }
 
+    suspend fun asyncRetrievePaymentMethod(id: String): FetchResult<StripePaymentMethod> {
+        return try {
+            val resp = withContext(Dispatchers.IO) {
+                retrievePaymentMethod(id)
+            }
+
+            if (resp.body == null) {
+                FetchResult.unknownError
+            } else {
+                FetchResult.Success(resp.body)
+            }
+        } catch (e: APIError) {
+            FetchResult.fromApi(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
     fun setDefaultPaymentMethod(account: Account, pmId: String): HttpResp<StripeCustomer> {
         return Fetch()
             .post("${Endpoint.stripeCustomers}/${account.stripeId}/default-payment-method")
@@ -63,6 +103,28 @@ object StripeClient {
                 "defaultPaymentMethod" to pmId
             ))
             .endJson()
+    }
+
+    suspend fun asyncSetDefaultPaymentMethod(account: Account, pmId: String): FetchResult<StripeCustomer> {
+        try {
+            val resp = withContext(Dispatchers.IO) {
+                setDefaultPaymentMethod(account, pmId)
+            }
+
+            return if (resp.body == null) {
+                FetchResult.LocalizedError(R.string.stripe_customer_not_found)
+            } else {
+                FetchResult.Success(resp.body)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.stripe_customer_not_found)
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     @Deprecated("")
@@ -89,6 +151,24 @@ object StripeClient {
             .setApiKey()
             .sendJson(CustomerParams(customer = customerId))
             .endJson()
+    }
+
+    suspend fun asyncSetupWithEphemeral(customerId: String): FetchResult<PaymentSheetParams> {
+        return try {
+            val resp = withContext(Dispatchers.IO) {
+                setupWithEphemeral(customerId)
+            }
+
+            if (resp.body == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(resp.body)
+            }
+        } catch (e: APIError) {
+            FetchResult.fromApi(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
     }
 
     private fun subsDefaultPaymentMethod(subsId: String, ftcId: String): HttpResp<StripePaymentMethod> {
@@ -121,6 +201,30 @@ object StripeClient {
             cusId = cusId,
             ftcId = ftcId,
         )
+    }
+
+    suspend fun asyncLoadDefaultPaymentMethod(
+        cusId: String,
+        subsId: String?,
+        ftcId: String,
+    ): FetchResult<StripePaymentMethod> {
+        try {
+            val resp = withContext(Dispatchers.IO) {
+                loadDefaultPaymentMethod(
+                    cusId = cusId,
+                    subsId = subsId,
+                    ftcId = ftcId
+                )
+            }
+
+            return if (resp.body == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(resp.body)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     fun loadSubscription(account: Account, subsId: String): HttpResp<StripeSubs> {
