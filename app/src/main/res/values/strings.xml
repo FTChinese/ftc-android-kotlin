@@ -48,7 +48,7 @@
     <string name="forgot_password_letter_sent">请检查您的邮件，输入邮件中的验证码，验证通过后可以重置密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
     <string name="forgot_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
     <string name="reset_password_guide">重置%1$s的密码</string>
-    <string name="reset_password_title">重置密码</string>
+    <string name="title_reset_password">重置密码</string>
     <string name="reset_password_success">密码重置成功，请登录</string>
     <string name="reset_password_failure">密码重置失败，请稍后重试</string>
     <string name="btn_verify">验证</string>
@@ -111,6 +111,8 @@
 
     <!--  Account  -->
     <string name="title_login">登录FT中文网</string>
+    <string name="title_wx_login">微信登录</string>
+    <string name="title_email_login">邮箱登录</string>
     <string name="title_sign_up">创建FT中文网账号</string>
     <string name="title_login_signup">登录/注册</string>
     <string name="title_activity_profile">我的资料</string>
@@ -122,7 +124,6 @@
     <string name="title_wx_account">微信账号</string>
     <string name="title_unlink">解除绑定</string>
     <string name="title_account">账号与安全</string>
-    <string name="title_wx_login">微信登录</string>
     <string name="formatter_wx_name">微信用户 %1$s</string>
     <string name="oauth_canceled">授权取消！</string>
     <string name="oauth_denied">授权被拒绝！</string>
