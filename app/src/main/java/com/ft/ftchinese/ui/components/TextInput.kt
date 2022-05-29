@@ -150,7 +150,7 @@ fun PasswordInput(
     enabled: Boolean = true,
     readOnly: Boolean = false,
 ) {
-    var (visible, setVisible) = rememberSaveable { mutableStateOf(false) }
+    val (visible, setVisible) = rememberSaveable { mutableStateOf(false) }
 
     TextInput(
         label = label,
