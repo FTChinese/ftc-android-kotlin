@@ -13,22 +13,14 @@ import kotlinx.coroutines.withContext
 object AuthClient {
 
     fun emailExists(email: String): Boolean {
-        try {
-            val resp = Fetch()
-                .get(Endpoint.emailExists)
-                .addQuery("v", email)
-                .noCache()
-                .setApiKey()
-                .endOrThrow()
+        val resp = Fetch()
+            .get(Endpoint.emailExists)
+            .addQuery("v", email)
+            .noCache()
+            .setApiKey()
+            .endOrThrow()
 
-            return resp.code == 204
-        } catch (e: APIError) {
-            if (e.statusCode == 404) {
-                return false
-            }
-
-            throw e
-        }
+        return resp.code == 204
     }
 
     suspend fun asyncEmailExists(email: String): FetchResult<Boolean> {
