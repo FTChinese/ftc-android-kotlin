@@ -20,6 +20,7 @@ import com.ft.ftchinese.ui.validator.ruleEmailValid
 @Composable
 fun EmailForm(
     initialEmail: String,
+    buttonText: String = stringResource(id = R.string.btn_save),
     loading: Boolean,
     onSubmit: (String) -> Unit
 ) {
@@ -53,7 +54,8 @@ fun EmailForm(
             enabled = formValid && !loading,
             onClick = {
                 onSubmit(emailState.field.value)
-            }
+            },
+            text = buttonText,
         )
     }
 }
