@@ -21,9 +21,11 @@ import com.ft.ftchinese.ui.validator.ruleEmailValid
 fun EmailSignUpForm(
     initialEmail: String,
     loading: Boolean,
-    onSubmit: (EmailAuthFormVal) -> Unit
+    onSubmit: (EmailAuthFormVal) -> Unit,
+    agreement: @Composable () -> Unit = {}
 ) {
     val emailState = rememberInputState(
+        initialValue = initialEmail,
         rules = listOf(
             ruleEmailValid,
         )
@@ -63,6 +65,7 @@ fun EmailSignUpForm(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
+        agreement()
         BlockButton(
             enabled = formValid && !loading,
             onClick = {
