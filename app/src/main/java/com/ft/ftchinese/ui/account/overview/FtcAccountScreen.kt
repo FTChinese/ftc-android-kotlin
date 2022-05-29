@@ -50,7 +50,7 @@ fun FtcAccountScreen(
             modifier = Modifier
                 .padding(Dimens.dp16)
                 .fillMaxWidth(),
-            contentColor = OColor.claret,
+            color = OColor.claret,
         ) {
             Text(
                 text = stringResource(id = R.string.title_delete_account)
