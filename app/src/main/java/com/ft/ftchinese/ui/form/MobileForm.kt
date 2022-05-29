@@ -15,6 +15,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.MobileFormValue
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OButton
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.ruleMobileValid
 import com.ft.ftchinese.ui.validator.verifierRule
@@ -24,6 +25,7 @@ fun MobileForm(
     defaultMobile: String,
     loading: Boolean,
     timerState: TimerState,
+    buttonText: String = stringResource(id = R.string.btn_save),
     onRequestCode: (String) -> Unit, // Pass user entered mobile to host.
     onSave: (MobileFormValue) -> Unit, // Pass mobile number and verification code back.
 ) {
@@ -71,6 +73,7 @@ fun MobileForm(
                     onClick = {
                         onRequestCode(mobileState.field.value)
                     },
+                    colors = OButton.textColors(),
                     enabled = mobileState.valid.value && !timerState.isRunning && !loading,
                 ) {
                     Text(text = timerState.text.value)
@@ -88,7 +91,8 @@ fun MobileForm(
                         code = codeState.field.value,
                     )
                 )
-            }
+            },
+            text = buttonText
         )
     }
 }
