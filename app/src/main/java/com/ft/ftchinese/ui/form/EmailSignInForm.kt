@@ -49,7 +49,7 @@ fun EmailSignInForm(
         )
 
         PasswordInput(
-            label = stringResource(id = R.string.label_email),
+            label = stringResource(id = R.string.label_password),
             state = pwState,
         )
 
