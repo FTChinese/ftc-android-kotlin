@@ -463,7 +463,7 @@ class MainActivity : ScopedAppActivity(),
                     return
                 }
 
-                toast(R.string.prompt_logged_in)
+                toast(R.string.login_success)
                 updateSessionUI()
             }
         }
