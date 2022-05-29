@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.ConsentTerms
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.form.EmailSignUpForm
@@ -67,7 +68,8 @@ fun SignUpActivityScreen(
                 loading = signUpState.progress.value,
                 onSubmit = {
                     if (!agreed) {
-                        signUpState.showSnackBar("您需要同意用户协议和隐私政策")
+                        context.toast("您需要同意用户协议和隐私政策")
+                        return@EmailSignUpForm
                     }
                     signUpState.singUp(
                         Credentials(
