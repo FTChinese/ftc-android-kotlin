@@ -21,20 +21,36 @@ object AuthClient {
                 .setApiKey()
                 .endOrThrow()
 
-            // Code below 400
-            if (resp.code != 204) {
-                throw APIError(
-                    message = "Unexpected status code ${resp.code}",
-                    statusCode = resp.code
-                )
-            }
-            return true
+            return resp.code == 204
         } catch (e: APIError) {
             if (e.statusCode == 404) {
                 return false
             }
 
             throw e
+        }
+    }
+
+    suspend fun asyncEmailExists(email: String): FetchResult<Boolean> {
+        try {
+            val ok = withContext(Dispatchers.IO) {
+                emailExists(email)
+            }
+
+            return if (ok) {
+                FetchResult.Success(true)
+            } else {
+                FetchResult.loadingFailed
+            }
+        } catch (e: APIError) {
+
+            return if (e.statusCode == 404) {
+                FetchResult.Success(false)
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
         }
     }
 
@@ -50,20 +66,20 @@ object AuthClient {
     }
 
     suspend fun asyncEmailLogin(c: Credentials): FetchResult<Account> {
-        try {
+        return try {
             val account = withContext(Dispatchers.IO) {
                 emailLogin(c)
             }
 
-            return if (account == null) {
+            if (account == null) {
                 FetchResult.loadingFailed
             } else {
                 FetchResult.Success(account)
             }
         } catch (e: APIError) {
-            return FetchResult.ofLoginError(e)
+            FetchResult.ofLoginError(e)
         } catch (e: Exception) {
-            return FetchResult.fromException(e)
+            FetchResult.fromException(e)
         }
     }
 
