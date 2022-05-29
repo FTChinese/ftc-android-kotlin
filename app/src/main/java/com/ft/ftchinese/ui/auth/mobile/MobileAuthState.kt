@@ -92,7 +92,6 @@ class MobileAuthState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    showSnackBar(R.string.sms_code_sent)
                     val id = result.data.id
                     if (id == null) {
                         mobileNotSet = params.mobile
