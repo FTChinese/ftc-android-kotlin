@@ -23,12 +23,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.ShowToast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.toast
 import java.io.File
 
 class ReleaseActivity : ComponentActivity() {

@@ -35,13 +35,13 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.ToastMessage
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.share.*
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.util.RequestCode
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import org.jetbrains.anko.toast
 import java.util.*
 
 /** The request code for requesting [Manifest.permission.READ_EXTERNAL_STORAGE] permission. */

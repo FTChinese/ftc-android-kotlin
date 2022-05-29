@@ -45,6 +45,7 @@ import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.myft.MyftPagerAdapter
@@ -59,7 +60,6 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.toast
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -454,33 +454,6 @@ class MainActivity : ScopedAppActivity(),
 
         updateSessionUI()
     }
-
-    /**
-     * Deal with the cases that an activity launched by this activity exits.
-     * For example, the LoginActvity will automatically finish when it successfully logged in,
-     * and then it should inform the MainActivity to update UI for a logged in mUser.
-     * `requestCode` is used to identify who this result cam from. We are using it to identify if the result came from LoginActivity or SignupActivity.
-     */
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//
-//        if (BuildConfig.DEBUG) {
-//            Log.i(TAG, "onActivityResult: requestCode $requestCode, resultCode $resultCode")
-//        }
-//
-//        when (requestCode) {
-//            // If the result come from SignIn or SignUp, update UI to show mUser login state.
-//            RequestCode.SIGN_IN, RequestCode.SIGN_UP -> {
-//
-//                if (resultCode != Activity.RESULT_OK) {
-//                    return
-//                }
-//
-//                toast(R.string.login_success)
-//                updateSessionUI()
-//            }
-//        }
-//    }
 
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {

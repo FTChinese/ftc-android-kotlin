@@ -14,10 +14,10 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.login.*
-import org.jetbrains.anko.toast
 
 /**
  * UI for a wx-only user to link to an email account.

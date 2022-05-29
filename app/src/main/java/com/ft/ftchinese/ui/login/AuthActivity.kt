@@ -16,13 +16,13 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.util.RequestCode
 import com.google.android.material.tabs.TabLayoutMediator
-import org.jetbrains.anko.toast
 
 private val tabs = listOf(
     "邮箱",

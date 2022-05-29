@@ -33,6 +33,7 @@ import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.SubsScreen
 import com.ft.ftchinese.ui.components.Toolbar
@@ -43,7 +44,6 @@ import com.ft.ftchinese.viewmodel.UserViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.toast
 
 class SubsActivity : ScopedComponentActivity() {
 

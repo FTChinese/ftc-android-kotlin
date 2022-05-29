@@ -7,9 +7,9 @@ import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessaging
-import org.jetbrains.anko.toast
 
 interface JsEventListener {
     fun onClosePage()

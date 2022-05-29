@@ -27,7 +27,6 @@ import com.ft.ftchinese.ui.web.JsSnippets
 import com.ft.ftchinese.ui.web.UrlHandler
 import com.ft.ftchinese.ui.web.WebViewListener
 import kotlinx.serialization.decodeFromString
-import org.jetbrains.anko.toast
 
 private const val TAG = "WebClient"
 

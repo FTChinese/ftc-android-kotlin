@@ -18,6 +18,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.CreateCustomerDialog
 import com.ft.ftchinese.ui.base.ToastMessage
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -26,7 +27,6 @@ import com.stripe.android.Stripe
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.toast
 
 private const val TAG = "StripeWalletActivity"
 

@@ -10,8 +10,8 @@ import androidx.fragment.app.commit
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityChannelBinding
 import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.ui.base.toast
 import com.google.firebase.analytics.FirebaseAnalytics
-import org.jetbrains.anko.toast
 
 private const val EXTRA_CHANNEL_SOURCE = "extra_channel_source"
 

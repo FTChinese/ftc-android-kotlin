@@ -44,6 +44,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.TextInput
 import com.ft.ftchinese.ui.components.Timer
@@ -62,7 +63,6 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 
 private const val TAG = "TestActivity"
