@@ -153,7 +153,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
         when (kind) {
             AuthKind.EmailLogin,
             AuthKind.MobileLink -> {
-                toast(R.string.prompt_logged_in)
+                toast(R.string.login_success)
                 sessionManager.saveAccount(account)
                 context?.let {
                     StatsTracker
