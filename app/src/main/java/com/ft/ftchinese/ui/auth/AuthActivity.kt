@@ -17,6 +17,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.model.reader.PwResetBearer
+import com.ft.ftchinese.ui.auth.component.AuthScreen
+import com.ft.ftchinese.ui.auth.email.EmailExists
+import com.ft.ftchinese.ui.auth.email.EmailExistsActivityScreen
+import com.ft.ftchinese.ui.auth.mobile.LinkEmailActivityScreen
 import com.ft.ftchinese.ui.auth.mobile.MobileAuthActivityScreen
 import com.ft.ftchinese.ui.auth.password.ForgotActivityScreen
 import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
@@ -102,12 +106,37 @@ fun AuthApp(
                     )
                 ) { entry ->
                     val mobile = entry.arguments?.getString("mobile")
+                    LinkEmailActivityScreen(
+                        scaffoldState = scaffold,
+                        mobile = mobile,
+                        onSuccess = onExit,
+                        onForgotPassword = { email ->
+                            navigateToForgotPassword(
+                                navController,
+                                email,
+                            )
+                        },
+                        onSignUp = {
+                            navigateTo(
+                                navController,
+                                AuthScreen.EmailSignUp,
+                            )
+                        }
+                    )
                 }
 
                 composable(
                     route = AuthScreen.EmailExists.name
                 ) {
-
+                    EmailExistsActivityScreen(
+                        scaffoldState = scaffold,
+                        onSuccess = {
+                            navigateToEmailAuth(
+                                navController,
+                                it,
+                            )
+                        }
+                    )
                 }
 
                 composable(
@@ -130,6 +159,7 @@ fun AuthApp(
                         }
                     )
                 ) { entry ->
+
                     val email = entry.arguments?.getString("email")
                     ForgotActivityScreen(
                         email = email ?: "",
@@ -181,6 +211,19 @@ private fun navigateToMobileLinkEmail(
 ) {
     navController.navigate("${AuthScreen.MobileLinkEmail.name}/${mobile}")
 }
+
+private fun navigateToEmailAuth(
+    navController: NavController,
+    emailExists: EmailExists,
+) {
+    val screen = if (emailExists.exists) {
+        AuthScreen.EmailLogin
+    } else {
+        AuthScreen.EmailSignUp
+    }
+    navController.navigate("${screen.name}/${emailExists.email}")
+}
+
 
 private fun navigateToForgotPassword(
     navController: NavController,
