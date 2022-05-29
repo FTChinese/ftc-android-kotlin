@@ -4,16 +4,13 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class EmailViewModel : BaseViewModel() {
 
@@ -63,28 +60,13 @@ class EmailViewModel : BaseViewModel() {
 
         progressLiveData.value = true
         viewModelScope.launch {
-            try {
-                val ok = withContext(Dispatchers.IO) {
-                    emailLiveData.value?.let {
-                        AuthClient.emailExists(it)
-                    } ?: false
-                }
 
-                existsResult.value = FetchResult.Success(ok)
-                progressLiveData.value = false
-            } catch (e: APIError) {
-                progressLiveData.value = false
+            val result = emailLiveData.value?.let {
+                AuthClient.asyncEmailExists(it)
+            } ?: FetchResult.TextError("Missing email!")
 
-                if (e.statusCode == 404) {
-                    existsResult.value = FetchResult.Success(false)
-                    return@launch
-                }
-
-                existsResult.value = FetchResult.fromApi(e)
-            } catch (e: Exception) {
-                existsResult.value = FetchResult.fromException(e)
-                progressLiveData.value = false
-            }
+            progressLiveData.value = false
+            existsResult.value = result
         }
     }
 
