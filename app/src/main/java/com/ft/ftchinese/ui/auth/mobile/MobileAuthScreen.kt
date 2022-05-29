@@ -1,21 +1,17 @@
 package com.ft.ftchinese.ui.auth.mobile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.MobileFormValue
+import com.ft.ftchinese.ui.auth.component.LoginAlternatives
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.form.MobileForm
 import com.ft.ftchinese.ui.theme.Dimens
@@ -85,41 +81,6 @@ fun AlertMobileNotSet(
     )
 }
 
-@Composable
-fun AlternativeLoginMethods(
-    onClickEmail: () -> Unit,
-    onClickWechat: () -> Unit,
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceAround,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-
-        IconButton(
-            onClick = onClickEmail
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.icons8_circled_envelope_100),
-                contentDescription = stringResource(id = R.string.title_email_login),
-                modifier = Modifier.height(48.dp),
-                contentScale = ContentScale.Fit
-            )
-        }
-
-        IconButton(
-            onClick = onClickWechat
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.wechat_round_100),
-                contentDescription = stringResource(id = R.string.title_wx_login),
-                modifier = Modifier
-                    .height(48.dp),
-                contentScale = ContentScale.Fit
-            )
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewMobileAuthScreen() {
@@ -129,7 +90,7 @@ fun PreviewMobileAuthScreen() {
         onRequestCode = {},
         onSubmit = {}
     ) {
-        AlternativeLoginMethods(
+        LoginAlternatives(
             onClickEmail = { /*TODO*/ }
         ) {
 

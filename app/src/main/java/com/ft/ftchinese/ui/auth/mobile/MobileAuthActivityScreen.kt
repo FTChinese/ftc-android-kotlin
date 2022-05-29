@@ -13,6 +13,7 @@ import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.ui.auth.component.LoginAlternatives
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.ui.wxinfo.launchWxOAuth
@@ -104,7 +105,7 @@ fun MobileAuthActivityScreen(
                 )
             }
         ) {
-            AlternativeLoginMethods(
+            LoginAlternatives(
                 onClickEmail = onEmailLogin,
                 onClickWechat = {
                     launchWxOAuth(wxApi)
