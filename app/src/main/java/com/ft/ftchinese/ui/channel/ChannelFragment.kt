@@ -25,7 +25,7 @@ import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.ui.web.*
 import com.ft.ftchinese.ui.webpage.WVClient
 import com.ft.ftchinese.ui.webpage.configWebView

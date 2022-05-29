@@ -16,7 +16,7 @@ import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.tracking.BeginCheckoutParams
 import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.viewmodel.StripeViewModel
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionData

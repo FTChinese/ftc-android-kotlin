@@ -19,6 +19,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.MemberActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel

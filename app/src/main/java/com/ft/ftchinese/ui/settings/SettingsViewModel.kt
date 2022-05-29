@@ -9,7 +9,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener

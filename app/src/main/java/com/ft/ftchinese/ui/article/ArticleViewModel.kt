@@ -16,7 +16,7 @@ import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ConnectionLiveData
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

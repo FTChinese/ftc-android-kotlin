@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.components
+package com.ft.ftchinese.ui.base
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
@@ -8,7 +8,6 @@ sealed class ToastMessage {
     data class Text(val text: String) : ToastMessage()
 
     companion object {
-        val errorUnknown = Resource(R.string.error_unknown)
 
         @JvmStatic
         fun fromApi(e: APIError): ToastMessage {

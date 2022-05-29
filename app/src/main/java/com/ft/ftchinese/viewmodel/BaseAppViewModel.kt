@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ConnectionLiveData
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 
 open class BaseAppViewModel(application: Application) : AndroidViewModel(application) {
     val connectionLiveData = ConnectionLiveData(application)

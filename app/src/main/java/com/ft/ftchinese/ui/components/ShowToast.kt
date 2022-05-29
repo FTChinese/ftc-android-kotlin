@@ -6,6 +6,7 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import com.ft.ftchinese.ui.base.ToastMessage
 
 @Composable
 fun ShowToast(

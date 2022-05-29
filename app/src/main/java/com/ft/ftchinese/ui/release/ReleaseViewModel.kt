@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.ReleaseStore
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.viewmodel.BaseAppViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

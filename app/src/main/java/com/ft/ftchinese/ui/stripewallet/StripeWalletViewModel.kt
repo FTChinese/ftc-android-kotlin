@@ -10,7 +10,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.viewmodel.StripeViewModel
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.model.SetupIntent

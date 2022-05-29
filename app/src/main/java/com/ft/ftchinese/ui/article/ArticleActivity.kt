@@ -34,7 +34,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.ui.share.*
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.util.RequestCode
