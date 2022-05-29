@@ -5,7 +5,7 @@ import com.ft.ftchinese.R
 
 enum class AuthScreen(@StringRes val titleId: Int) {
     MobileLogin(titleId = R.string.title_login),
-    MobileSignUp(titleId = R.string.title_link_email),
+    MobileLinkEmail(titleId = R.string.title_link_email),
     EmailExists(titleId = R.string.label_email),
     EmailLogin(titleId = R.string.title_email_login),
     EmailSignUp(titleId = R.string.title_sign_up),
@@ -17,7 +17,7 @@ enum class AuthScreen(@StringRes val titleId: Int) {
         fun fromRoute(route: String?): AuthScreen =
             when (route?.substringBefore("/")) {
                 MobileLogin.name -> MobileLogin
-                MobileSignUp.name -> MobileSignUp
+                MobileLinkEmail.name -> MobileLinkEmail
                 EmailExists.name -> EmailExists
                 EmailLogin.name -> EmailLogin
                 EmailSignUp.name -> EmailSignUp
