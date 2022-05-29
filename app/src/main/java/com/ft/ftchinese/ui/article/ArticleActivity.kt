@@ -463,7 +463,7 @@ class ArticleActivity : ScopedAppActivity(),
                     toast("Oops! It seems your data is not updated yet.")
                     return
                 } else {
-                    toast(R.string.prompt_logged_in)
+                    toast(R.string.login_success)
                     refreshAccess()
                 }
             }
