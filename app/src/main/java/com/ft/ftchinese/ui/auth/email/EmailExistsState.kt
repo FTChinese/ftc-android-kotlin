@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.auth.email
 
 import android.content.res.Resources
+import android.util.Log
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -17,6 +18,8 @@ data class EmailExists(
     val email: String,
     val exists: Boolean,
 )
+
+private const val TAG = "EmailExists"
 
 class EmailExistsState(
     scaffoldState: ScaffoldState,
@@ -44,6 +47,7 @@ class EmailExistsState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
+                    Log.i(TAG, "Email exists: ${result.data}")
                     found = EmailExists(
                         email = email,
                         exists = result.data
