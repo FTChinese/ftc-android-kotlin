@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.EmailAuthFormVal
 import com.ft.ftchinese.ui.components.BlockButton
 import com.ft.ftchinese.ui.components.PasswordInput
+import com.ft.ftchinese.ui.components.TextInput
 import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
@@ -52,6 +54,12 @@ fun EmailSignUpForm(
         modifier = Modifier
             .fillMaxWidth()
     ) {
+
+        TextInput(
+            label = stringResource(id = R.string.label_email),
+            state = emailState,
+            keyboardType = KeyboardType.Email
+        )
 
         PasswordInput(
             label = stringResource(id = R.string.label_new_password),
