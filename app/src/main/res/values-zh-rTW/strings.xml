@@ -82,7 +82,7 @@
 
     <!-- Forgot password -->
     <string name="btn_verify">驗證</string>
-    <string name="reset_password_guide">重設%1$s的密码</string>
+    <string name="guild_reset_password">重設%1$s的密码</string>
     <string name="btn_reset_password">重設密碼</string>
     <string name="email_vrf_letter_sent">信件已發送</string>
     <string name="btn_save">保存</string>
@@ -125,7 +125,7 @@
     <string name="prompt_unlinked">帳號已解除綁定</string>
     <string name="prompt_account_updated">帳號已更新</string>
 
-    <string name="forgot_password_guide">我們會您的登入信箱發送一封包含驗證碼的郵件，驗證通過後可以重設密碼</string>
+    <string name="guild_forgot_password">我們會您的登入信箱發送一封包含驗證碼的郵件，驗證通過後可以重設密碼</string>
     <string name="instruct_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
     <string name="forgot_password_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
     <string name="instruct_link_email">您目前使用了微信帳號登入FT中文。为保障帳號安全，建议您綁定在FT中文网註冊的信箱帳號。</string>
@@ -146,9 +146,9 @@
     <string name="unlink_anchor">請選擇解除关联後，會員信息保留在哪一方？</string>
     <string name="progress_request_verification">正在寄送驗證信件…</string>
     <string name="progress_logging">正在登入…</string>
-    <string name="forgot_password_link">忘記密碼?</string>
-    <string name="btn_go_signup">註冊帳號</string>
-    <string name="btn_go_login">已有帳號？登入</string>
+    <string name="link_forgot_password">忘記密碼?</string>
+    <string name="link_to_signup">註冊帳號</string>
+    <string name="link_to_login">已有帳號？登入</string>
     <string name="signup_invalid_email">電子信箱錯誤</string>
 
     <string name="error_email_unchanged">您已經在使用該電子信箱</string>
