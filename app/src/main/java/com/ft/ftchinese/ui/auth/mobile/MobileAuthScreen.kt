@@ -11,7 +11,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.MobileFormValue
-import com.ft.ftchinese.ui.auth.component.LoginAlternatives
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.form.MobileForm
 import com.ft.ftchinese.ui.theme.Dimens
@@ -33,6 +32,7 @@ fun MobileAuthScreen(
             defaultMobile = "",
             loading = loading,
             timerState = timerState,
+            buttonText = stringResource(id = R.string.btn_login),
             onRequestCode = onRequestCode,
             onSave = onSubmit
         )
