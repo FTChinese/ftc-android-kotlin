@@ -259,7 +259,6 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$compose_ui"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.24.9-beta"
     implementation "com.google.accompanist:accompanist-webview:0.24.9-beta"
-    implementation 'com.radusalagean:info-bar-compose:1.0.0'
 
     // UI Tests
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui"
