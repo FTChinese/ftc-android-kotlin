@@ -212,7 +212,7 @@
     <string name="label_confirm_password">确认新密码</string>
     <string name="prompt_exit">再按一次退出程序</string>
     <string name="prompt_ad_timer">跳过 %1$d</string>
-    <string name="prompt_logged_in">登录成功</string>
+    <string name="login_success">登录成功</string>
     <string name="prompt_signed_up">注册成功</string>
     <string name="prompt_login_failed">登录失败，请重试</string>
     <string name="prompt_sign_up_failed">注册失败，请重试</string>

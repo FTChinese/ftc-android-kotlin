@@ -111,7 +111,7 @@
     <string name="label_confirm_password">確認新密碼</string>
     <string name="prompt_exit">再按一次退出程式</string>
     <string name="prompt_ad_timer">跳過 %1$d</string>
-    <string name="prompt_logged_in">登入成功</string>
+    <string name="login_success">登入成功</string>
     <string name="prompt_signed_up">註冊成功</string>
     <string name="prompt_login_failed">登入失敗，請重试</string>
     <string name="prompt_sign_up_failed">注冊失敗，請重试</string>
