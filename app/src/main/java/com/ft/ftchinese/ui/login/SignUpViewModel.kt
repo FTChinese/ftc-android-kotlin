@@ -66,11 +66,10 @@ class SignUpViewModel : ViewModel() {
     }
 
     /**
-     * Handles both a new user signup, or wechat-logged-in
+     * Handles both a new user signup, or mobile phone
      * user trying to link to a new account.
-     * @param mobile - only used when a mobile is creating a new email account.
      */
-    fun emailSignUp(deviceToken: String, mobile: String? = null) {
+    fun emailSignUp(deviceToken: String) {
 
         if (isNetworkAvailable.value == false) {
             accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
@@ -82,7 +81,6 @@ class SignUpViewModel : ViewModel() {
         val c = Credentials(
             email = emailLiveData.value ?: "",
             password = passwordLiveData.value ?: "",
-            mobile = mobile,
             deviceToken = deviceToken
         )
 

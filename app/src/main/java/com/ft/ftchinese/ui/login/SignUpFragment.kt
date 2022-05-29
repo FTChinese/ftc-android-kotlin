@@ -185,18 +185,6 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
             AuthKind.EmailLogin -> {
                 signUpViewModel.emailSignUp(tokenManager.getToken())
             }
-            AuthKind.MobileLink -> {
-                val mobile = mobileViewModel.mobileLiveData.value
-                if (mobile.isNullOrBlank()) {
-                    toast("Mobile number not set!")
-                    return
-                }
-
-                signUpViewModel.emailSignUp(
-                    deviceToken = tokenManager.getToken(),
-                    mobile = mobile,
-                )
-            }
             AuthKind.WechatLink -> sessionManager
                 .loadAccount()
                 ?.unionId
