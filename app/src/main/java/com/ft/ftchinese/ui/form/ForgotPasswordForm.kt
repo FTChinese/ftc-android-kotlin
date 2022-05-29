@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.components
+package com.ft.ftchinese.ui.form
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,58 +10,45 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.request.MobileFormParams
+import com.ft.ftchinese.model.request.PasswordResetVerifier
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.validator.ValidationRule
-import com.ft.ftchinese.ui.validator.Validator
+import com.ft.ftchinese.ui.validator.ruleEmailValid
+import com.ft.ftchinese.ui.validator.verifierRule
 
 @Composable
-fun MobileForm(
-    defaultMobile: String,
+fun ForgotPasswordForm(
+    email: String?,
     loading: Boolean,
     timerState: TimerState,
     onRequestCode: (String) -> Unit, // Pass user entered mobile to host.
-    onSave: (MobileFormParams) -> Unit, // Pass mobile number and verification code back.
+    onSubmit: (PasswordResetVerifier) -> Unit
 ) {
-
-    val mobileState = rememberInputState(
-        initialValue = defaultMobile,
+    val emailState = rememberInputState(
+        initialValue = email ?: "",
         rules = listOf(
-            ValidationRule(
-                predicate = Validator::isMainlandPhone,
-                message = "请输入正确的手机号码"
-            ),
-            ValidationRule(
-                predicate = {
-                    it != defaultMobile
-                },
-                message = "手机已设置"
-            )
+            ruleEmailValid,
         )
     )
 
     val codeState = rememberInputState(
         rules = listOf(
-            ValidationRule(
-                predicate = Validator.minLength(6),
-                message = "请输入验证码"
-            )
+            verifierRule(6)
         )
     )
 
-    val formValid = mobileState.valid.value && codeState.valid.value && !loading
+    val formValid = emailState.valid.value && codeState.valid.value && !loading
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         TextInput(
-            label = stringResource(id = R.string.mobile_phone),
-            state = mobileState,
-            keyboardType = KeyboardType.Number,
+            label = stringResource(id = R.string.label_email),
+            state = emailState,
+            keyboardType = KeyboardType.Email,
         )
-        TipText(text = stringResource(id = R.string.mobile_mainland_only))
 
         Spacer(modifier = Modifier.height(Dimens.dp8))
 
@@ -72,9 +59,9 @@ fun MobileForm(
             trailingIcon = {
                 TextButton(
                     onClick = {
-                        onRequestCode(mobileState.field.value)
+                        onRequestCode(emailState.field.value)
                     },
-                    enabled = mobileState.valid.value && !timerState.isRunning && !loading,
+                    enabled = emailState.valid.value && !timerState.isRunning && !loading,
                 ) {
                     Text(text = timerState.text.value)
                 }
@@ -85,13 +72,26 @@ fun MobileForm(
         BlockButton(
             enabled = formValid && !loading,
             onClick = {
-                onSave(
-                    MobileFormParams(
-                        mobile = mobileState.field.value,
+                onSubmit(
+                    PasswordResetVerifier(
+                        email = emailState.field.value,
                         code = codeState.field.value,
                     )
                 )
-            }
+            },
+            text = stringResource(id = R.string.btn_verify)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewForgotPasswordForm() {
+    ForgotPasswordForm(
+        email = "abc@example.org",
+        loading = false,
+        timerState = rememberTimerState(),
+        onRequestCode = {},
+        onSubmit = {}
+    )
 }
