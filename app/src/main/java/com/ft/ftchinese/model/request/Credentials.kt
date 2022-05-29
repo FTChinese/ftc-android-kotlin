@@ -9,7 +9,7 @@ data class Credentials(
     val deviceToken: String,
 )
 
-data class EmailAuthParams(
+data class EmailAuthFormVal(
     val email: String,
     val password: String,
 )

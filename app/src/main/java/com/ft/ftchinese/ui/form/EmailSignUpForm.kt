@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.request.EmailAuthParams
+import com.ft.ftchinese.model.request.EmailAuthFormVal
 import com.ft.ftchinese.ui.components.BlockButton
 import com.ft.ftchinese.ui.components.PasswordInput
 import com.ft.ftchinese.ui.components.rememberInputState
@@ -20,7 +20,7 @@ import com.ft.ftchinese.ui.validator.ruleEmailValid
 @Composable
 fun EmailSignUpForm(
     loading: Boolean,
-    onSubmit: (EmailAuthParams) -> Unit
+    onSubmit: (EmailAuthFormVal) -> Unit
 ) {
     val emailState = rememberInputState(
         rules = listOf(
@@ -65,7 +65,7 @@ fun EmailSignUpForm(
         BlockButton(
             enabled = formValid && !loading,
             onClick = {
-                onSubmit(EmailAuthParams(
+                onSubmit(EmailAuthFormVal(
                     email = emailState.field.value,
                     password = pwState.field.value,
                 ))
