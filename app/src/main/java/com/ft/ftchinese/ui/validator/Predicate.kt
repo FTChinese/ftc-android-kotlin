@@ -33,4 +33,22 @@ fun requiredRule(msg: String): ValidationRule {
     )
 }
 
+fun verifierRule(minLen: Int): ValidationRule {
+    return ValidationRule(
+        predicate = Validator.minLength(minLen),
+        message = "请输入验证码"
+    )
+}
+
 val rulePasswordRequired = requiredRule("必须输入当前密码")
+
+val ruleEmailValid = ValidationRule(
+    predicate = Validator::isEmail,
+    message = "请输入完整的邮箱"
+)
+
+val ruleMobileValid = ValidationRule(
+    predicate = Validator::isMainlandPhone,
+    message = "请输入正确的手机号码"
+)
+
