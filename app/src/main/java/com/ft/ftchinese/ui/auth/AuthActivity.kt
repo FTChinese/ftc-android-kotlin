@@ -20,8 +20,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.model.reader.PwResetBearer
-import com.ft.ftchinese.ui.auth.component.AuthScreen
-import com.ft.ftchinese.ui.auth.email.EmailExists
 import com.ft.ftchinese.ui.auth.email.EmailExistsActivityScreen
 import com.ft.ftchinese.ui.auth.login.LoginActivityScreen
 import com.ft.ftchinese.ui.auth.mobile.LinkEmailActivityScreen
@@ -31,7 +29,6 @@ import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
 import com.ft.ftchinese.ui.auth.signup.SignUpActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.util.RequestCode
 
 class AuthActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,14 +43,6 @@ class AuthActivity : AppCompatActivity() {
     }
 
     companion object {
-        @JvmStatic
-        fun startForResult(activity: Activity) {
-            activity.startActivityForResult(
-                Intent(activity, AuthActivity::class.java),
-                RequestCode.SIGN_IN
-            )
-        }
-
         @JvmStatic
         fun newIntent(context: Context) = Intent(context, AuthActivity::class.java)
     }
@@ -107,9 +96,8 @@ fun AuthApp(
                         },
                         // Go to the screen of checking email existence.
                         onEmailLogin = {
-                            navigateTo(
+                            navigateToEmailExists(
                                 navController,
-                                AuthScreen.EmailExists
                             )
                         },
                         // Login success. Destroy the activity.
@@ -137,9 +125,9 @@ fun AuthApp(
                             )
                         },
                         onSignUp = {
-                            navigateTo(
+                            navigateToSignUp(
                                 navController,
-                                AuthScreen.EmailSignUp,
+                                "",
                             )
                         }
                     )
@@ -151,16 +139,23 @@ fun AuthApp(
                     EmailExistsActivityScreen(
                         scaffoldState = scaffold,
                         onSuccess = {
-                            navigateToEmailAuth(
-                                navController,
-                                it,
-                            )
+                            if (it.exists) {
+                                navigateToLogin(
+                                    navController,
+                                    it.email
+                                )
+                            } else {
+                                navigateToSignUp(
+                                    navController,
+                                    it.email
+                                )
+                            }
                         }
                     )
                 }
 
                 composable(
-                    route = "${AuthScreen.EmailLogin.name}/{email}",
+                    route = "${AuthScreen.EmailLogin.name}/?email={email}",
                     arguments = listOf(
                         navArgument("email") {
                             type = NavType.StringType
@@ -179,16 +174,16 @@ fun AuthApp(
                             )
                         },
                         onSignUp = {
-                            navigateTo(
+                            navigateToSignUp(
                                 navController,
-                                AuthScreen.EmailSignUp,
+                                "",
                             )
                         }
                     )
                 }
 
                 composable(
-                    route = "${AuthScreen.EmailSignUp.name}/{email}",
+                    route = "${AuthScreen.EmailSignUp.name}/?email={email}",
                     arguments = listOf(
                         navArgument("email") {
                             type = NavType.StringType
@@ -204,14 +199,13 @@ fun AuthApp(
                 }
 
                 composable(
-                    route = "${AuthScreen.ForgotPassword.name}/{email}",
+                    route = "${AuthScreen.ForgotPassword.name}/?email={email}",
                     arguments = listOf(
                         navArgument("email") {
                             type = NavType.StringType
                         }
                     )
                 ) { entry ->
-
                     val email = entry.arguments?.getString("email")
                     ForgotActivityScreen(
                         email = email ?: "",
@@ -250,11 +244,10 @@ fun AuthApp(
     }
 }
 
-private fun navigateTo(
+private fun navigateToEmailExists(
     navController: NavController,
-    screen: AuthScreen,
 ) {
-    navController.navigate(screen.name)
+    navController.navigate(AuthScreen.EmailExists.name)
 }
 
 private fun navigateToMobileLinkEmail(
@@ -264,24 +257,25 @@ private fun navigateToMobileLinkEmail(
     navController.navigate("${AuthScreen.MobileLinkEmail.name}/${mobile}")
 }
 
-private fun navigateToEmailAuth(
+private fun navigateToLogin(
     navController: NavController,
-    emailExists: EmailExists,
+    email: String
 ) {
-    val screen = if (emailExists.exists) {
-        AuthScreen.EmailLogin
-    } else {
-        AuthScreen.EmailSignUp
-    }
-    navController.navigate("${screen.name}/${emailExists.email}")
+    navController.navigate("${AuthScreen.EmailLogin}/?email=${email}")
 }
 
+private fun navigateToSignUp(
+    navController: NavController,
+    email: String
+) {
+    navController.navigate("${AuthScreen.EmailSignUp}/?email=${email}")
+}
 
 private fun navigateToForgotPassword(
     navController: NavController,
     email: String
 ) {
-    navController.navigate("${AuthScreen.ForgotPassword.name}/${email}")
+    navController.navigate("${AuthScreen.ForgotPassword.name}/?email=${email}")
 }
 
 private fun navigateToPasswordReset(
