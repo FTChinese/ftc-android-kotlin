@@ -20,7 +20,7 @@ fun ForgotScreen(
     email: String?,
     loading: Boolean,
     timerState: TimerState,
-    onRequestCode: (String) -> Unit, // Pass user entered mobile to host.
+    onRequestCode: (String) -> Unit,
     onSubmit: (PasswordResetVerifier) -> Unit
 ) {
 
@@ -30,7 +30,7 @@ fun ForgotScreen(
             .padding(Dimens.dp16)
     ) {
         Text(
-            text = stringResource(id = R.string.forgot_password_guide),
+            text = stringResource(id = R.string.guild_forgot_password),
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.body1
         )
@@ -68,9 +68,8 @@ fun PreviewForgotScreen() {
         email = "abc@example.org",
         loading = false,
         timerState = rememberTimerState(),
-        onRequestCode = {},
-        onSubmit = {}
-    )
+        onRequestCode = {}
+    ) {}
 }
 
 @Preview(showBackground = true)

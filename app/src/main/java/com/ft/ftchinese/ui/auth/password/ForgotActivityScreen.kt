@@ -54,10 +54,9 @@ fun ForgotActivityScreen(
                         email = email,
                     )
                 )
-            },
-            onSubmit = {
-                forgotState.verifyCode(it)
             }
-        )
+        ) {
+            forgotState.verifyCode(it)
+        }
     }
 }
