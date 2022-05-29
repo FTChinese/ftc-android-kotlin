@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.theme
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -33,7 +32,7 @@ object OButton {
     ): ButtonColors = ButtonDefaults.buttonColors(
         backgroundColor = backgroundColor,
         contentColor = contentColor,
-        disabledBackgroundColor = backgroundColor.copy(alpha = 04F)
+        disabledBackgroundColor = backgroundColor.copy(alpha = 0.4F)
     )
 
     @Composable
