@@ -17,6 +17,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.model.reader.PwResetBearer
+import com.ft.ftchinese.ui.auth.mobile.MobileAuthActivityScreen
 import com.ft.ftchinese.ui.auth.password.ForgotActivityScreen
 import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
@@ -67,16 +68,40 @@ fun AuthApp(
                 startDestination = AuthScreen.MobileLogin.name,
                 modifier = Modifier.padding(innerPadding)
             ) {
+                // Mobile login screen
                 composable(
                     route = AuthScreen.MobileLogin.name
                 ) {
-
+                    MobileAuthActivityScreen(
+                        scaffoldState = scaffold,
+                        onLinkEmail = {
+                            // Go to collect email + password to link it with the mobile number user provided.
+                            navigateToMobileLinkEmail(
+                                navController = navController,
+                                mobile = it,
+                            )
+                        },
+                        // Go to the screen of checking email existence.
+                        onEmailLogin = {
+                            navigateTo(
+                                navController,
+                                AuthScreen.EmailExists
+                            )
+                        },
+                        // Login success. Destroy the activity.
+                        onSuccess = onExit,
+                    )
                 }
 
                 composable(
-                    route = AuthScreen.MobileSignUp.name
-                ) {
-
+                    route = "${AuthScreen.MobileLinkEmail.name}/{mobile}",
+                    arguments = listOf(
+                        navArgument("mobile") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val mobile = entry.arguments?.getString("mobile")
                 }
 
                 composable(
@@ -141,6 +166,20 @@ fun AuthApp(
             }
         }
     }
+}
+
+private fun navigateTo(
+    navController: NavController,
+    screen: AuthScreen,
+) {
+    navController.navigate(screen.name)
+}
+
+private fun navigateToMobileLinkEmail(
+    navController: NavController,
+    mobile: String,
+) {
+    navController.navigate("${AuthScreen.MobileLinkEmail.name}/${mobile}")
 }
 
 private fun navigateToForgotPassword(
