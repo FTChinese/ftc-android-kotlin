@@ -41,7 +41,7 @@ fun WxOAuthAScreen(
         }
         is AuthStatus.LoginSuccess -> {
             WxRespProgress(
-                title = stringResource(id = R.string.prompt_logged_in),
+                title = stringResource(id = R.string.login_success),
                 subTitle = stringResource(
                     R.string.greeting_wx_login,
                     status.account.wechat.nickname ?: ""
