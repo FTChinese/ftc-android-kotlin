@@ -47,9 +47,6 @@
             android:name=".ui.share.ScreenshotActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.wxinfo.WxInfoActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.stripewallet.StripeWalletActivity"
             android:exported="false" />
         <activity
@@ -121,8 +118,7 @@
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
             android:name=".ui.wxlink.UnlinkActivity"
-            android:label="@string/title_unlink"
-            android:parentActivityName=".ui.wxinfo.WxInfoActivity" />
+            android:label="@string/title_unlink" />
         <activity android:name=".ui.MemberActivity" />
         <activity
             android:name=".ui.stripepay.StripeSubActivity"
