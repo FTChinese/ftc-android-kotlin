@@ -28,7 +28,7 @@ fun ResetScreen(
     ) {
 
         Text(
-            text = stringResource(R.string.reset_password_guide, email),
+            text = stringResource(R.string.guild_reset_password, email),
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
