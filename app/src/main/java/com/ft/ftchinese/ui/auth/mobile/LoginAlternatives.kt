@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.auth.component
+package com.ft.ftchinese.ui.auth.mobile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
