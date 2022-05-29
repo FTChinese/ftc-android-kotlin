@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.delete
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable

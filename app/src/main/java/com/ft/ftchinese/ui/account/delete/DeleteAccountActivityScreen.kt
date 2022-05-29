@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.delete
 
 import android.content.Context
 import androidx.compose.material.ScaffoldState

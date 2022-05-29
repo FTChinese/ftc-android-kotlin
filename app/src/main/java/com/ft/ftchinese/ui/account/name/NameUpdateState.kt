@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.name
 
 import android.content.res.Resources
 import androidx.compose.material.ScaffoldState
@@ -6,8 +6,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.request.AccountDropped
-import com.ft.ftchinese.model.request.EmailPasswordParams
+import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
@@ -15,33 +14,26 @@ import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class DeleteAccountState(
+class NameUpdateState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     resources: Resources,
     connState: State<ConnectionState>,
 ) : BaseState(scaffoldState, scope, resources, connState) {
+    val updated = mutableStateOf<BaseAccount?>(null)
 
-    var dropped by mutableStateOf<AccountDropped?>(null)
-        private set
-
-    fun resetDropped() {
-        dropped = null
-    }
-
-    fun drop(ftcId: String, params: EmailPasswordParams) {
+    fun changeName(ftcId: String, name: String) {
         if (!ensureConnected()) {
             return
         }
 
-        progress.value = false
+        progress.value = true
         scope.launch {
-            val result = AccountRepo.asyncDeleteAccount(
+            val result = AccountRepo.asyncUpdateName(
                 ftcId = ftcId,
-                params = params
+                name = name,
             )
             progress.value = false
-
             when (result) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
@@ -50,7 +42,7 @@ class DeleteAccountState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    dropped = result.data
+                    updated.value = result.data
                 }
             }
         }
@@ -58,13 +50,13 @@ class DeleteAccountState(
 }
 
 @Composable
-fun rememberDeleteAccountState(
+fun rememberNameState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
     connState: State<ConnectionState> = connectivityState()
-) = remember(scaffoldState, resources, connState) {
-    DeleteAccountState(
+) = remember(scaffoldState, resources) {
+    NameUpdateState(
         scaffoldState = scaffoldState,
         scope = scope,
         resources = resources,

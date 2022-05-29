@@ -1,42 +1,41 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.name
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
-fun AddressActivityScreen(
+fun NameActivityScreen(
     userViewModel: UserViewModel,
-    scaffoldState: ScaffoldState,
+    scaffold: ScaffoldState
 ) {
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
 
-    val uiState = rememberAddressState(
-        scaffoldState = scaffoldState
+    val nameState = rememberNameState(
+        scaffoldState = scaffold
     )
 
     if (account == null) {
         return
     }
 
-    LaunchedEffect(key1 = Unit) {
-        uiState.load(account.id)
+    nameState.updated.value?.let {
+        userViewModel.saveAccount(account.withBaseAccount(it))
     }
 
     ProgressLayout(
-        loading = uiState.progress.value
+        loading = nameState.progress.value
     ) {
-        AddressScreen(
-            address = uiState.currentAddress.value,
-            loading = uiState.progress.value,
-            onSave = {
-                uiState.update(
+        NameScreen(
+            userName = account.userName ?: "",
+            loading = nameState.progress.value,
+            onSave = { newName ->
+                nameState.changeName(
                     ftcId = account.id,
-                    address = it,
+                    name = newName
                 )
             }
         )

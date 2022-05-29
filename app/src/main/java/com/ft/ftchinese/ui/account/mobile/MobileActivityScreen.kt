@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.mobile
 
 import android.util.Log
 import androidx.compose.material.ScaffoldState

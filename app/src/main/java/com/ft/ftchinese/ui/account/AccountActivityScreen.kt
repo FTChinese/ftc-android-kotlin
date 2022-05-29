@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.account
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import com.ft.ftchinese.ui.account.overview.FtcAccountActivityScreen
 import com.ft.ftchinese.ui.wxinfo.WxInfoActivityScreen
 import com.ft.ftchinese.viewmodel.UserViewModel
 

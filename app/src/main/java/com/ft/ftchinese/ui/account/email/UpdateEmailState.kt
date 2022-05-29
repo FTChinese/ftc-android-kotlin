@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.email
 
 import android.content.res.Resources
 import androidx.compose.material.ScaffoldState
@@ -7,7 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.reader.Address
+import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
@@ -15,40 +15,53 @@ import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class AddressState(
+class UpdateEmailState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     resources: Resources,
     connState: State<ConnectionState>,
 ) : BaseState(scaffoldState, scope, resources, connState) {
 
-    val currentAddress = mutableStateOf<Address?>(null)
+    val updated = mutableStateOf<BaseAccount?>(null)
 
-    fun load(ftcId: String) {
+    fun requestVrfLetter(ftcId: String) {
         if (!ensureConnected()) {
             return
         }
 
         progress.value = true
+
         scope.launch {
-            val address = AccountRepo.asyncLoadAddress(ftcId)
-            if (address != null) {
-                currentAddress.value = address
-            }
+            val doneResult = AccountRepo.asyncRequestVerification(ftcId)
             progress.value = false
+            when (doneResult) {
+                is FetchResult.LocalizedError -> {
+                    showSnackBar(doneResult.msgId)
+                }
+                is FetchResult.TextError -> {
+                    showSnackBar(doneResult.text)
+                }
+                is FetchResult.Success -> {
+                    if (doneResult.data) {
+                        showSnackBar(R.string.refresh_success)
+                    } else {
+                        showSnackBar(R.string.loading_failed)
+                    }
+                }
+            }
         }
     }
 
-    fun update(ftcId: String, address: Address) {
+    fun updateEmail(ftcId: String, email: String) {
         if (!ensureConnected()) {
             return
         }
 
         progress.value = true
         scope.launch {
-            val result = AccountRepo.asyncUpdateAddress(
+            val result = AccountRepo.asyncUpdateEmail(
                 ftcId = ftcId,
-                address = address,
+                email = email,
             )
 
             progress.value = false
@@ -60,8 +73,7 @@ class AddressState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    currentAddress.value = result.data
-                    showSnackBar(R.string.prompt_saved)
+                    updated.value = result.data
                 }
             }
         }
@@ -69,13 +81,13 @@ class AddressState(
 }
 
 @Composable
-fun rememberAddressState(
+fun rememberUpdateEmailState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
     connState: State<ConnectionState> = connectivityState()
 ) = remember(scaffoldState, resources) {
-    AddressState(
+    UpdateEmailState(
         scaffoldState = scaffoldState,
         scope = scope,
         resources = resources,

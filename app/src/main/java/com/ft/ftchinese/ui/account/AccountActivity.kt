@@ -19,6 +19,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.account.address.AddressActivityScreen
+import com.ft.ftchinese.ui.account.delete.DeleteAccountActivityScreen
+import com.ft.ftchinese.ui.account.email.UpdateEmailActivityScreen
+import com.ft.ftchinese.ui.account.mobile.MobileActivityScreen
+import com.ft.ftchinese.ui.account.name.NameActivityScreen
+import com.ft.ftchinese.ui.account.password.PasswordActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.wxinfo.WxInfoActivityScreen

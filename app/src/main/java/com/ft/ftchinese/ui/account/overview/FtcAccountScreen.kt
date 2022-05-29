@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.overview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +16,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
+import com.ft.ftchinese.ui.account.AccountRow
+import com.ft.ftchinese.ui.account.AccountRowId
+import com.ft.ftchinese.ui.account.buildAccountRows
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor

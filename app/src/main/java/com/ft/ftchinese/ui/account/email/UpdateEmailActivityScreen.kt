@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.email
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
@@ -7,14 +7,14 @@ import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
-fun NameActivityScreen(
+fun UpdateEmailActivityScreen(
     userViewModel: UserViewModel,
     scaffold: ScaffoldState
 ) {
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
 
-    val nameState = rememberNameState(
+    val emailState = rememberUpdateEmailState(
         scaffoldState = scaffold
     )
 
@@ -22,20 +22,24 @@ fun NameActivityScreen(
         return
     }
 
-    nameState.updated.value?.let {
+    emailState.updated.value?.let {
         userViewModel.saveAccount(account.withBaseAccount(it))
     }
 
     ProgressLayout(
-        loading = nameState.progress.value
+        loading = emailState.progress.value
     ) {
-        NameScreen(
-            userName = account.userName ?: "",
-            loading = nameState.progress.value,
-            onSave = { newName ->
-                nameState.changeName(
+        UpdateEmailScreen(
+            email = account.email,
+            isVerified = account.isVerified,
+            loading = emailState.progress.value,
+            onVerify = {
+                emailState.requestVrfLetter(account.id)
+            },
+            onSave = { newEmail ->
+                emailState.updateEmail(
                     ftcId = account.id,
-                    name = newName
+                    newEmail
                 )
             }
         )

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.overview
 
 import android.util.Log
 import androidx.compose.material.ScaffoldState
@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
+import com.ft.ftchinese.ui.account.*
 import com.ft.ftchinese.ui.stripewallet.StripeWalletActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh

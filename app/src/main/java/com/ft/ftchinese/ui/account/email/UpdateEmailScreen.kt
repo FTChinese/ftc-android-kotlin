@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.email
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
@@ -7,13 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.components.SecondaryButton
+import com.ft.ftchinese.ui.form.EmailForm
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.validator.ValidationRule
-import com.ft.ftchinese.ui.validator.Validator
 
 @Composable
 fun UpdateEmailScreen(
@@ -23,21 +21,6 @@ fun UpdateEmailScreen(
     onVerify: () -> Unit,
     onSave: (String) -> Unit,
 ) {
-    val emailState = rememberInputState(
-        initialValue = email,
-        rules = listOf(
-            ValidationRule(
-                predicate = Validator::isEmail,
-                message = "请输入完整的邮箱"
-            ),
-            ValidationRule(
-                predicate = {
-                    it != email
-                },
-                message = "不能使用当前邮箱"
-            )
-        )
-    )
 
     Column(
         modifier = Modifier
@@ -52,19 +35,10 @@ fun UpdateEmailScreen(
             Spacer(modifier = Modifier.height(Dimens.dp16))
         }
 
-        TextInput(
-            label = stringResource(id = R.string.label_email),
-            state = emailState,
-            keyboardType = KeyboardType.Email
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.dp16))
-
-        BlockButton(
-            enabled = emailState.valid.value && !loading,
-            onClick = {
-                onSave(emailState.field.value)
-            }
+        EmailForm(
+            initialEmail = email,
+            loading = loading,
+            onSubmit = onSave
         )
     }
 }

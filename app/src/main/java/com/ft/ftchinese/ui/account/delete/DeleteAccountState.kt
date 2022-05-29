@@ -1,14 +1,13 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.delete
 
 import android.content.res.Resources
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.request.PasswordUpdateParams
-import com.ft.ftchinese.model.request.PwUpdateResult
+import com.ft.ftchinese.model.request.AccountDropped
+import com.ft.ftchinese.model.request.EmailPasswordParams
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
@@ -16,33 +15,33 @@ import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class PasswordUpdateState(
+class DeleteAccountState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     resources: Resources,
     connState: State<ConnectionState>,
 ) : BaseState(scaffoldState, scope, resources, connState) {
 
-    var forgotPassword by mutableStateOf(false)
+    var dropped by mutableStateOf<AccountDropped?>(null)
         private set
 
-    fun closeForgotPassword() {
-        forgotPassword = false
+    fun resetDropped() {
+        dropped = null
     }
 
-    fun changePassword(ftcId: String, params: PasswordUpdateParams) {
+    fun drop(ftcId: String, params: EmailPasswordParams) {
         if (!ensureConnected()) {
             return
         }
 
-        progress.value = true
+        progress.value = false
         scope.launch {
-            val result = AccountRepo.asyncUpdatePassword(
+            val result = AccountRepo.asyncDeleteAccount(
                 ftcId = ftcId,
                 params = params
             )
-
             progress.value = false
+
             when (result) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
@@ -51,14 +50,7 @@ class PasswordUpdateState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    when (result.data) {
-                        PwUpdateResult.Done -> {
-                            showSnackBar(R.string.prompt_saved)
-                        }
-                        PwUpdateResult.Mismatched -> {
-                            forgotPassword = true
-                        }
-                    }
+                    dropped = result.data
                 }
             }
         }
@@ -66,13 +58,13 @@ class PasswordUpdateState(
 }
 
 @Composable
-fun rememberPasswordState(
+fun rememberDeleteAccountState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
     connState: State<ConnectionState> = connectivityState()
 ) = remember(scaffoldState, resources, connState) {
-    PasswordUpdateState(
+    DeleteAccountState(
         scaffoldState = scaffoldState,
         scope = scope,
         resources = resources,

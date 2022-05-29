@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.password
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
