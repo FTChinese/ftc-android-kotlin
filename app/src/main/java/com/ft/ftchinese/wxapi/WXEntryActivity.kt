@@ -20,10 +20,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.ft.ftchinese.ui.wxlink.WxEmailLinkAccounts

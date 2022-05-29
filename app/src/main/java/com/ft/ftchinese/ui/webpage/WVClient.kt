@@ -19,8 +19,8 @@ import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.tracking.*
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.share.ShareUtils
 import com.ft.ftchinese.ui.web.ArticleKind
 import com.ft.ftchinese.ui.web.JsSnippets
@@ -92,7 +92,7 @@ open class WVClient(
             // The `微信登录` button is wrapped in a link with webUrl set to `weixinlogin://www.ftchinese.com/`
             "ftcregister",
             "weixinlogin" -> {
-                AuthActivity.start(context)
+                context.startActivity(AuthActivity.newIntent(context))
                 return true
             }
 

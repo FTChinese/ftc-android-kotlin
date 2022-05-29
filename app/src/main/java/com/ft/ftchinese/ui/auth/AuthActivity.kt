@@ -29,6 +29,7 @@ import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
 import com.ft.ftchinese.ui.auth.signup.SignUpActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.RequestCode
 
 class AuthActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +44,14 @@ class AuthActivity : AppCompatActivity() {
     }
 
     companion object {
+        @JvmStatic
+        fun startForResult(activity: Activity) {
+            activity.startActivityForResult(
+                Intent(activity, AuthActivity::class.java),
+                RequestCode.SIGN_IN
+            )
+        }
+
         @JvmStatic
         fun newIntent(context: Context) = Intent(context, AuthActivity::class.java)
     }

@@ -1,8 +1,5 @@
 package com.ft.ftchinese.ui.login
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.databinding.DataBindingUtil
@@ -21,7 +18,6 @@ import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.util.RequestCode
 import com.google.android.material.tabs.TabLayoutMediator
 
 private val tabs = listOf(
@@ -135,22 +131,6 @@ class AuthActivity : ScopedAppActivity() {
 
     companion object {
         private const val TAG = "AuthActivity"
-
-        @JvmStatic
-        fun start(context: Context) {
-            context.startActivity(Intent(context, AuthActivity::class.java))
-        }
-
-        @JvmStatic
-        fun startForResult(activity: Activity?) {
-            activity?.startActivityForResult(
-                Intent(activity, AuthActivity::class.java),
-                RequestCode.SIGN_IN
-            )
-        }
-
-        @JvmStatic
-        fun intent(context: Context) = Intent(context, AuthActivity::class.java)
     }
 }
 

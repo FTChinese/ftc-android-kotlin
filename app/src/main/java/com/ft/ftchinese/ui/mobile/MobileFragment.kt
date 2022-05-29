@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
@@ -152,23 +151,6 @@ class MobileFragment : ScopedFragment() {
                 }
             }
         }
-
-        // Used for updating mobile.
-        viewModel.mobileUpdated.observe(viewLifecycleOwner) {
-            when (it) {
-                is FetchResult.LocalizedError -> onUpdateError(it.msgId)
-                is FetchResult.TextError -> context?.toast(it.text)
-                is FetchResult.Success -> {
-                    context?.toast(R.string.refresh_success)
-                    sessionManager
-                        .loadAccount()
-                        ?.withBaseAccount(it.data)
-                        ?.let { account ->
-                            sessionManager.saveAccount(account)
-                        }
-                }
-            }
-        }
     }
 
     private fun onSendCodeError(msgId: Int) {
@@ -178,18 +160,6 @@ class MobileFragment : ScopedFragment() {
                 .show(childFragmentManager, "AlertMobileCodeError")
         } else {
             context?.toast(msgId)
-        }
-    }
-
-    private fun onUpdateError(msgId: Int) {
-        when (msgId) {
-            R.string.mobile_code_not_found,
-            R.string.mobile_already_exists -> {
-                AlertDialogFragment
-                    .newMsgInstance(getString(msgId))
-                    .show(childFragmentManager, "AlertUpdateMobileError")
-            }
-            else -> context?.toast(msgId)
         }
     }
 
@@ -214,24 +184,10 @@ class MobileFragment : ScopedFragment() {
     }
 
     companion object {
-        private const val ARG_USAGE = "arg_usage"
-        private const val USAGE_AUTH = 1
-        private const val USAGE_UPDATE = 2
 
         private const val TAG = "MobileFragment"
 
         @JvmStatic
-        fun newInstanceForAuth() = MobileFragment().apply {
-            arguments = bundleOf(
-                ARG_USAGE to USAGE_AUTH
-            )
-        }
-
-        @JvmStatic
-        fun newInstanceForUpdate() = MobileFragment().apply {
-            arguments = bundleOf(
-                ARG_USAGE to USAGE_UPDATE
-            )
-        }
+        fun newInstanceForAuth() = MobileFragment()
     }
 }

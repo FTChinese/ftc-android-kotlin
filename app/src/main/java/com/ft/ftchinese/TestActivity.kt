@@ -146,8 +146,6 @@ class TestActivity : ScopedAppActivity() {
 
                             PostPurchaseButton()
 
-                            ShowSignInUp()
-
                             SignInFragment()
 
                             SignUpFragment()
@@ -320,18 +318,6 @@ class TestActivity : ScopedAppActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Address - Buy")
-        }
-    }
-
-    @Composable
-    private fun ShowSignInUp() {
-        Button(
-            onClick = {
-                AuthActivity.start(this@TestActivity)
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Sign In/Up Activity")
         }
     }
 

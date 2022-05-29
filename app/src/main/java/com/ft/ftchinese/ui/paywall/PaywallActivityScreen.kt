@@ -20,7 +20,7 @@ import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.stripepay.StripeSubActivity
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -32,7 +32,7 @@ private fun launchLoginActivity(
     context: Context,
 ) {
     launcher.launch(
-        AuthActivity.intent(context)
+        AuthActivity.newIntent(context)
     )
 }
 
