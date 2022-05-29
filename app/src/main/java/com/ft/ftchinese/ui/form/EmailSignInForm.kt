@@ -1,9 +1,8 @@
 package com.ft.ftchinese.ui.form
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -15,13 +14,16 @@ import com.ft.ftchinese.ui.components.PasswordInput
 import com.ft.ftchinese.ui.components.TextInput
 import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OButton
 import com.ft.ftchinese.ui.validator.passwordRules
 import com.ft.ftchinese.ui.validator.ruleEmailValid
 
 @Composable
 fun EmailSignInForm(
     loading: Boolean,
-    onSubmit: (EmailAuthFormVal) -> Unit
+    onSubmit: (EmailAuthFormVal) -> Unit,
+    onForgotPassword: (String) -> Unit, // Pass user entered email to next screen,
+    onSignUp: () -> Unit,
 ) {
     val emailState = rememberInputState(
         rules = listOf(
@@ -61,5 +63,30 @@ fun EmailSignInForm(
             },
             text = stringResource(id = R.string.btn_login)
         )
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextButton(
+                onClick = {
+                    onForgotPassword(emailState.field.value)
+                },
+                colors = OButton.textColors()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.link_forgot_password)
+                )
+            }
+
+            TextButton(
+                onClick = onSignUp,
+                colors = OButton.textColors()
+            ) {
+                Text(text = stringResource(id = R.string.link_to_signup))
+            }
+        }
     }
 }
