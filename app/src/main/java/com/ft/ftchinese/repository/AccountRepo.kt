@@ -322,7 +322,7 @@ object AccountRepo {
         }
     }
 
-    fun updateMobile(ftcId: String, params: MobileFormParams): BaseAccount? {
+    fun updateMobile(ftcId: String, params: MobileFormValue): BaseAccount? {
         return Fetch()
             .patch(Endpoint.updateMobile)
             .noCache()
@@ -334,7 +334,7 @@ object AccountRepo {
             .body
     }
 
-    suspend fun asyncUpdateMobile(ftcId: String, params: MobileFormParams): FetchResult<BaseAccount> {
+    suspend fun asyncUpdateMobile(ftcId: String, params: MobileFormValue): FetchResult<BaseAccount> {
         try {
             val baseAccount = withContext(Dispatchers.IO) {
                 updateMobile(ftcId, params)

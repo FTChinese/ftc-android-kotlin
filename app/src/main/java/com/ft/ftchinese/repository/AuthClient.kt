@@ -67,6 +67,12 @@ object AuthClient {
         }
     }
 
+    /**
+     * Create a new account form multiple purposes:
+     * - Signup with email directly
+     * - A mobile phone user is trying to login for the first time and
+     * choose to create a new email account with mobile linked.
+     */
     fun emailSignUp(c: Credentials): Account? {
         return Fetch()
             .post(Endpoint.emailSignUp)
@@ -79,20 +85,20 @@ object AuthClient {
     }
 
     suspend fun asyncEmailSignUp(c: Credentials): FetchResult<Account> {
-        try {
+        return try {
             val account = withContext(Dispatchers.IO) {
                 emailSignUp(c)
             }
 
-            return if (account == null) {
+            if (account == null) {
                 FetchResult.LocalizedError(R.string.loading_failed)
             } else {
                 FetchResult.Success(account)
             }
         } catch (e: APIError) {
-            return FetchResult.ofSignUpError(e)
+            FetchResult.ofSignUpError(e)
         } catch (e: Exception) {
-            return FetchResult.fromException(e)
+            FetchResult.fromException(e)
         }
     }
 
@@ -124,18 +130,18 @@ object AuthClient {
         }
     }
 
-    private fun verifySMSCode(params: MobileAuthParams): UserFound? {
+    private fun verifySMSCode(params: MobileAuthParams): MobileEmailLinked? {
         return Fetch()
             .post(Endpoint.mobileVerificationCode)
             .noCache()
             .setApiKey()
             .setClient()
             .sendJson(params)
-            .endJson<UserFound>()
+            .endJson<MobileEmailLinked>()
             .body
     }
 
-    suspend fun asyncVerifySMSCode(params: MobileAuthParams): FetchResult<UserFound> {
+    suspend fun asyncVerifySMSCode(params: MobileAuthParams): FetchResult<MobileEmailLinked> {
         try {
             val found = withContext(Dispatchers.IO) {
                 verifySMSCode(params)
