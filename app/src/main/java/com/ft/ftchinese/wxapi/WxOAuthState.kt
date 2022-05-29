@@ -74,7 +74,7 @@ class WxOAuthState(
             BaseResp.ErrCode.ERR_SENT_FAILED,
             BaseResp.ErrCode.ERR_UNSUPPORT,
             BaseResp.ErrCode.ERR_BAN -> {
-                authStatus.value = AuthStatus.Failed(resp.errStr)
+                authStatus.value = AuthStatus.Failed(resp.errStr ?: "Wechat SDK error")
             }
             else -> {
                 authStatus.value = AuthStatus.Failed("Unknown errors occurred")

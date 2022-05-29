@@ -16,6 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.WebView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
@@ -46,13 +47,11 @@ import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
-import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.myft.MyftPagerAdapter
 import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageActivity
-import com.ft.ftchinese.ui.util.RequestCode
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -88,6 +87,14 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var wvViewModel: WVViewModel
 
     private lateinit var statsTracker: StatsTracker
+
+    private val startForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            updateSessionUI()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -311,7 +318,8 @@ class MainActivity : ScopedAppActivity(),
         // Set listener on the title text inside drawer's header view
         navHeaderBinding.navHeaderTitle.setOnClickListener {
             if (!sessionManager.isLoggedIn()) {
-                AuthActivity.startForResult(this)
+//                AuthActivity.startForResult(this)
+                startForResult.launch(com.ft.ftchinese.ui.auth.AuthActivity.newIntent(this))
                 return@setOnClickListener
             }
 
@@ -328,7 +336,12 @@ class MainActivity : ScopedAppActivity(),
         // Set a listener that will be notified when a menu item is selected.
         binding.drawerNav.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.action_login ->  AuthActivity.startForResult(this)
+                R.id.action_login -> {
+//                    AuthActivity.startForResult(this)
+                    startForResult.launch(
+                        com.ft.ftchinese.ui.auth.AuthActivity.newIntent(this)
+                    )
+                }
                 R.id.action_account -> AccountActivity.start(this)
                 R.id.action_paywall -> {
                     // Tracking
@@ -448,26 +461,26 @@ class MainActivity : ScopedAppActivity(),
      * and then it should inform the MainActivity to update UI for a logged in mUser.
      * `requestCode` is used to identify who this result cam from. We are using it to identify if the result came from LoginActivity or SignupActivity.
      */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (BuildConfig.DEBUG) {
-            Log.i(TAG, "onActivityResult: requestCode $requestCode, resultCode $resultCode")
-        }
-
-        when (requestCode) {
-            // If the result come from SignIn or SignUp, update UI to show mUser login state.
-            RequestCode.SIGN_IN, RequestCode.SIGN_UP -> {
-
-                if (resultCode != Activity.RESULT_OK) {
-                    return
-                }
-
-                toast(R.string.login_success)
-                updateSessionUI()
-            }
-        }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//
+//        if (BuildConfig.DEBUG) {
+//            Log.i(TAG, "onActivityResult: requestCode $requestCode, resultCode $resultCode")
+//        }
+//
+//        when (requestCode) {
+//            // If the result come from SignIn or SignUp, update UI to show mUser login state.
+//            RequestCode.SIGN_IN, RequestCode.SIGN_UP -> {
+//
+//                if (resultCode != Activity.RESULT_OK) {
+//                    return
+//                }
+//
+//                toast(R.string.login_success)
+//                updateSessionUI()
+//            }
+//        }
+//    }
 
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
