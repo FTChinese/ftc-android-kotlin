@@ -61,8 +61,6 @@ import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.threeten.bp.LocalDate
 
 private const val TAG = "TestActivity"
@@ -696,9 +694,9 @@ class TestActivity : ScopedAppActivity() {
                 .subscribeToTopic("news")
                 .addOnCompleteListener {
                     if (!it.isSuccessful) {
-                        alert(Appcompat, "Subscription failed").show()
+                        toast("Subscription failed")
                     } else {
-                        alert(Appcompat, "Subscribed").show()
+                        toast("Subscribed")
                     }
                 }
         }) {

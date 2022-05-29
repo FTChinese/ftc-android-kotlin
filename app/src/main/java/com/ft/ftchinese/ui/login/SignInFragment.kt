@@ -21,14 +21,13 @@ import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.password.PasswordActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.ft.ftchinese.ui.wxlink.WxEmailLinkAccounts
-import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.toast
 
 /**
  * Authenticate an existing email account.
@@ -134,7 +133,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
         loginViewModel.accountResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> alertError(getString(it.msgId))
-                is FetchResult.TextError -> toast(it.text)
+                is FetchResult.TextError -> context?.toast(it.text)
                 is FetchResult.Success -> onAccountLoaded(it.data)
             }
         }
@@ -153,7 +152,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
         when (kind) {
             AuthKind.EmailLogin,
             AuthKind.MobileLink -> {
-                toast(R.string.login_success)
+                context?.toast(R.string.login_success)
                 sessionManager.saveAccount(account)
                 context?.let {
                     StatsTracker
@@ -183,7 +182,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
     }
 
     private fun setupUI() {
-        binding.toolbar.bottomSheetToolbar.onClick {
+        binding.toolbar.bottomSheetToolbar.setOnClickListener {
             dismiss()
         }
 
@@ -218,7 +217,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
             AuthKind.MobileLink -> {
                 val mobile = mobileViewModel.mobileLiveData.value
                 if (mobile.isNullOrBlank()) {
-                    toast("Missing mobile number!")
+                    context?.toast("Missing mobile number!")
                     return
                 }
                 loginViewModel.mobileLinkEmail(

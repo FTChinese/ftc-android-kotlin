@@ -189,7 +189,6 @@ dependencies {
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.anko:anko:0.10.8"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1"
 
     // See https://firebase.google.com/support/release-notes/android

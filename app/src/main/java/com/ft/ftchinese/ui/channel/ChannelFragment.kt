@@ -26,11 +26,11 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.ToastMessage
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.web.*
 import com.ft.ftchinese.ui.webpage.WVClient
 import com.ft.ftchinese.ui.webpage.configWebView
 import kotlinx.coroutines.cancel
-import org.jetbrains.anko.support.v4.toast
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -158,13 +158,13 @@ class ChannelFragment : ScopedFragment(),
 
         channelViewModel.refreshingLiveData.observe(viewLifecycleOwner) {
             binding.swipeRefresh.isRefreshing = it
-            toast(R.string.refresh_success)
+            context?.toast(R.string.refresh_success)
         }
 
         channelViewModel.errorLiveData.observe(viewLifecycleOwner) {
             when (it) {
-                is ToastMessage.Resource -> toast(it.id)
-                is ToastMessage.Text -> toast(it.text)
+                is ToastMessage.Resource -> context?.toast(it.id)
+                is ToastMessage.Text -> context?.toast(it.text)
             }
         }
 
@@ -174,7 +174,7 @@ class ChannelFragment : ScopedFragment(),
     }
 
     override fun onRefresh() {
-        toast(R.string.refreshing_data)
+        context?.toast(R.string.refreshing_data)
         channelSource?.let {
             channelViewModel.refresh(it, sessionManager.loadAccount())
         }

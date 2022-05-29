@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -23,15 +22,16 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.ShowToast
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.dialog.AlertDialogFragment
+import com.ft.ftchinese.ui.dialog.DialogArgs
 import com.ft.ftchinese.ui.theme.OTheme
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.appcompat.v7.Appcompat
 import java.io.File
 
-class ReleaseActivity : ComponentActivity() {
+class ReleaseActivity : ScopedAppActivity() {
 
     private lateinit var releaseViewModel: ReleaseViewModel
     private lateinit var downloadManager: DownloadManager
@@ -197,16 +197,22 @@ class ReleaseActivity : ComponentActivity() {
         try {
             install(downloadedFile)
         } catch (e: Exception) {
-            alert(Appcompat, "${e.message}", "Installation Failed") {
-                positiveButton("Re-try") {
-                    it.dismiss()
+            AlertDialogFragment.newInstance(
+                    DialogArgs(
+                        message = e.message ?: "",
+                        positiveButton = R.string.btn_retry,
+                        negativeButton = R.string.btn_cancel,
+                        title = R.string.installation_failed
+                    )
+                )
+                .onPositiveButtonClicked { dialog, _ ->
+                    dialog.dismiss()
                     install(downloadedFile)
                 }
-                positiveButton("Cancel") {
-
-                    it.dismiss()
+                .onNegativeButtonClicked { dialog, _ ->
+                    dialog.dismiss()
                 }
-            }.show()
+                .show(supportFragmentManager, "InstallFailed")
         }
     }
 

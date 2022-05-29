@@ -16,7 +16,6 @@ import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.channel.DenialReason
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class PermissionDeniedFragment : BottomSheetDialogFragment() {
 
@@ -55,7 +54,7 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
         binding.isLoggedIn = access.loggedIn
         binding.denied = DenialReason.from(requireContext(), access)
 
-        binding.loginOrSubscribe.onClick {
+        binding.loginOrSubscribe.setOnClickListener {
             if (access.loggedIn) {
                 SubsActivity.start(
                     context = requireContext(),
@@ -74,7 +73,7 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
             setupUI(it)
         }
 
-        binding.showMemberStatus.onClick {
+        binding.showMemberStatus.setOnClickListener() {
             MemberActivity.startForResult(activity)
         }
     }

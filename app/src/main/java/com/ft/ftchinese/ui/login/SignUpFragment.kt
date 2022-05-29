@@ -19,11 +19,10 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import org.jetbrains.anko.sdk27.coroutines.onClick
-import org.jetbrains.anko.support.v4.toast
 
 /**
  * Popup when user signup required.
@@ -115,8 +114,8 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
 
         signUpViewModel.accountResult.observe(this) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.TextError -> toast(it.text)
+                is FetchResult.LocalizedError -> context?.toast(it.msgId)
+                is FetchResult.TextError -> context?.toast(it.text)
                 is FetchResult.Success -> onAccountLoaded(it.data)
             }
         }
@@ -126,10 +125,10 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
         when (usageKind) {
             AuthKind.EmailLogin,
             AuthKind.MobileLink -> {
-                toast(R.string.prompt_signed_up)
+                context?.toast(R.string.prompt_signed_up)
             }
             AuthKind.WechatLink -> {
-                toast(R.string.prompt_linked)
+                context?.toast(R.string.prompt_linked)
             }
         }
 
@@ -145,7 +144,7 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
 
     private fun setupUI() {
 
-        binding.toolbar.bottomSheetToolbar.onClick {
+        binding.toolbar.bottomSheetToolbar.setOnClickListener {
             dismiss()
         }
 
@@ -177,7 +176,7 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
     fun onSubmit(view: View) {
 
         if (!binding.privacyConsent.isChecked) {
-            toast("您需要同意用户协议和隐私政策")
+            context?.toast("您需要同意用户协议和隐私政策")
             return
         }
 

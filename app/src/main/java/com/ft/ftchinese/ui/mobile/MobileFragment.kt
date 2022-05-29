@@ -18,10 +18,10 @@ import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.dialog.DialogArgs
 import com.ft.ftchinese.ui.login.SignInFragment
-import org.jetbrains.anko.support.v4.toast
 
 /**
  * Hosted inside [com.ft.ftchinese.ui.login.AuthActivity]
@@ -96,9 +96,9 @@ class MobileFragment : ScopedFragment() {
                 is FetchResult.LocalizedError -> {
                     onSendCodeError(it.msgId)
                 }
-                is FetchResult.TextError -> toast(it.text)
+                is FetchResult.TextError -> context?.toast(it.text)
                 is FetchResult.Success -> {
-                    toast("验证码已发送")
+                    context?.toast("验证码已发送")
                 }
             }
         }
@@ -135,8 +135,8 @@ class MobileFragment : ScopedFragment() {
         // Used for login.
         viewModel.accountLoaded.observe(viewLifecycleOwner) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.TextError -> toast(it.text)
+                is FetchResult.LocalizedError -> context?.toast(it.msgId)
+                is FetchResult.TextError -> context?.toast(it.text)
                 is FetchResult.Success -> {
 
                     sessionManager.saveAccount(it.data)
@@ -157,9 +157,9 @@ class MobileFragment : ScopedFragment() {
         viewModel.mobileUpdated.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> onUpdateError(it.msgId)
-                is FetchResult.TextError -> toast(it.text)
+                is FetchResult.TextError -> context?.toast(it.text)
                 is FetchResult.Success -> {
-                    toast(R.string.refresh_success)
+                    context?.toast(R.string.refresh_success)
                     sessionManager
                         .loadAccount()
                         ?.withBaseAccount(it.data)
@@ -177,7 +177,7 @@ class MobileFragment : ScopedFragment() {
                 .newMsgInstance(getString(msgId))
                 .show(childFragmentManager, "AlertMobileCodeError")
         } else {
-            toast(msgId)
+            context?.toast(msgId)
         }
     }
 
@@ -189,7 +189,7 @@ class MobileFragment : ScopedFragment() {
                     .newMsgInstance(getString(msgId))
                     .show(childFragmentManager, "AlertUpdateMobileError")
             }
-            else -> toast(msgId)
+            else -> context?.toast(msgId)
         }
     }
 

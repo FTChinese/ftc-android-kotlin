@@ -10,7 +10,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentConsentPrivacyBinding
 import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.webpage.WebpageActivity
-import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class ConsentPrivacyFragment : Fragment() {
 
@@ -31,11 +30,11 @@ class ConsentPrivacyFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnAgreement.onClick {
+        binding.btnAgreement.setOnClickListener {
             WebpageActivity.start(requireContext(), legalPages[0])
         }
 
-        binding.btnPrivacy.onClick {
+        binding.btnPrivacy.setOnClickListener {
             WebpageActivity.start(requireContext(), legalPages[1])
         }
     }

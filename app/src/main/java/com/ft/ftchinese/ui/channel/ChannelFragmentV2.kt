@@ -12,8 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.theme.OTheme
-import org.jetbrains.anko.support.v4.toast
 
 private const val TAG = "ChannelFragment"
 
@@ -70,7 +70,7 @@ class ChannelFragmentV2 : ScopedFragment() {
                         source = channelSource,
                         channelViewModel = channelViewModel,
                         showSnackBar = {
-                            toast(it)
+                            context?.toast(it)
                         }
                     )
                 }
