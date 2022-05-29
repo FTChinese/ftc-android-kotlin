@@ -129,7 +129,7 @@ fun WxInfoActivityScreen(
     }
 }
 
-private fun launchWxOAuth(
+fun launchWxOAuth(
     wxApi: IWXAPI
 ) {
     val stateCode = WxOAuth.generateStateCode(WxOAuthIntent.LINK)
