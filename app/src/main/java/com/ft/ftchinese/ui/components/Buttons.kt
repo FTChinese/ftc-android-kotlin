@@ -9,15 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.theme.OButton
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun PrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = OColor.teal,
+    color: Color = OColor.teal,
     enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit
 ) {
@@ -25,10 +25,8 @@ fun PrimaryButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor,
-            contentColor = OColor.white,
-            disabledBackgroundColor = backgroundColor.copy(alpha = 0.4f)
+        colors = OButton.primaryButtonColors(
+            backgroundColor = color,
         ),
         content = content,
     )
@@ -39,20 +37,20 @@ fun SecondaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    backgroundColor: Color = OColor.paper,
-    contentColor: Color = OColor.teal,
-    content: @Composable RowScope.() -> Unit
+    color: Color = OColor.teal,
+    content: @Composable() (RowScope.() -> Unit)
 ) {
     LocalContentColor
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        border = BorderStroke(1.dp, contentColor),
-        colors = ButtonDefaults.outlinedButtonColors(
-            backgroundColor = backgroundColor,
-            contentColor = contentColor,
-            disabledContentColor = contentColor.copy(alpha = 0.4f)
+        border = BorderStroke(
+            width = ButtonDefaults.OutlinedBorderSize,
+            color = color,
+        ),
+        colors = OButton.outlinedColors(
+            contentColor = color
         ),
         content = content,
     )
