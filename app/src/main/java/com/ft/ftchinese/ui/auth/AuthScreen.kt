@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.auth.component
+package com.ft.ftchinese.ui.auth
 
 import androidx.annotation.StringRes
 import com.ft.ftchinese.R
