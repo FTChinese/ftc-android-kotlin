@@ -15,8 +15,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.request.MobileFormParams
+import com.ft.ftchinese.model.request.MobileFormValue
 import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.form.MobileForm
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
@@ -24,7 +25,8 @@ fun MobileAuthScreen(
     loading: Boolean,
     timerState: TimerState,
     onRequestCode: (String) -> Unit,
-    onSubmit: (MobileFormParams) -> Unit
+    onSubmit: (MobileFormValue) -> Unit,
+    alternative: @Composable () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -49,34 +51,7 @@ fun MobileAuthScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceAround,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-            IconButton(
-                onClick = {  }
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.icons8_circled_envelope_100),
-                    contentDescription = stringResource(id = R.string.title_email_login),
-                    modifier = Modifier.height(48.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
-
-            IconButton(
-                onClick = {  }
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.wechat_round_100),
-                    contentDescription = stringResource(id = R.string.title_wx_login),
-                    modifier = Modifier
-                        .height(48.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
-        }
+        alternative()
     }
 }
 
@@ -110,6 +85,41 @@ fun AlertMobileNotSet(
     )
 }
 
+@Composable
+fun AlternativeLoginMethods(
+    onClickEmail: () -> Unit,
+    onClickWechat: () -> Unit,
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceAround,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
+        IconButton(
+            onClick = onClickEmail
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.icons8_circled_envelope_100),
+                contentDescription = stringResource(id = R.string.title_email_login),
+                modifier = Modifier.height(48.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        IconButton(
+            onClick = onClickWechat
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.wechat_round_100),
+                contentDescription = stringResource(id = R.string.title_wx_login),
+                modifier = Modifier
+                    .height(48.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewMobileAuthScreen() {
@@ -118,7 +128,13 @@ fun PreviewMobileAuthScreen() {
         timerState = rememberTimerState(),
         onRequestCode = {},
         onSubmit = {}
-    )
+    ) {
+        AlternativeLoginMethods(
+            onClickEmail = { /*TODO*/ }
+        ) {
+
+        }
+    }
 }
 
 @Preview(showBackground = true)
