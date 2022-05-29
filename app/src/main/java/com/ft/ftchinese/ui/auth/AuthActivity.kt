@@ -1,5 +1,8 @@
 package com.ft.ftchinese.ui.auth
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -20,12 +23,15 @@ import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.ui.auth.component.AuthScreen
 import com.ft.ftchinese.ui.auth.email.EmailExists
 import com.ft.ftchinese.ui.auth.email.EmailExistsActivityScreen
+import com.ft.ftchinese.ui.auth.login.LoginActivityScreen
 import com.ft.ftchinese.ui.auth.mobile.LinkEmailActivityScreen
 import com.ft.ftchinese.ui.auth.mobile.MobileAuthActivityScreen
 import com.ft.ftchinese.ui.auth.password.ForgotActivityScreen
 import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
+import com.ft.ftchinese.ui.auth.signup.SignUpActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.RequestCode
 
 class AuthActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,9 +39,23 @@ class AuthActivity : AppCompatActivity() {
 
         setContent {
             AuthApp {
+                setResult(Activity.RESULT_OK)
                 finish()
             }
         }
+    }
+
+    companion object {
+        @JvmStatic
+        fun startForResult(activity: Activity) {
+            activity.startActivityForResult(
+                Intent(activity, AuthActivity::class.java),
+                RequestCode.SIGN_IN
+            )
+        }
+
+        @JvmStatic
+        fun newIntent(context: Context) = Intent(context, AuthActivity::class.java)
     }
 }
 
@@ -140,15 +160,47 @@ fun AuthApp(
                 }
 
                 composable(
-                    route = AuthScreen.EmailLogin.name
-                ) {
-
+                    route = "${AuthScreen.EmailLogin.name}/{email}",
+                    arguments = listOf(
+                        navArgument("email") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val email = entry.arguments?.getString("email")
+                    LoginActivityScreen(
+                        scaffoldState = scaffold,
+                        email = email,
+                        onSuccess = onExit,
+                        onForgotPassword = { email1 ->
+                            navigateToForgotPassword(
+                                navController,
+                                email1,
+                            )
+                        },
+                        onSignUp = {
+                            navigateTo(
+                                navController,
+                                AuthScreen.EmailSignUp,
+                            )
+                        }
+                    )
                 }
 
                 composable(
-                    route = AuthScreen.EmailSignUp.name
-                ) {
-
+                    route = "${AuthScreen.EmailSignUp.name}/{email}",
+                    arguments = listOf(
+                        navArgument("email") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val email = entry.arguments?.getString("email")
+                    SignUpActivityScreen(
+                        scaffoldState = scaffold,
+                        email = email,
+                        onSuccess = onExit
+                    )
                 }
 
                 composable(
