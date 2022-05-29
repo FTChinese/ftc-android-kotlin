@@ -20,12 +20,14 @@ import com.ft.ftchinese.ui.validator.ruleEmailValid
 
 @Composable
 fun EmailSignInForm(
+    initialEmail: String,
     loading: Boolean,
     onSubmit: (EmailAuthFormVal) -> Unit,
     onForgotPassword: (String) -> Unit, // Pass user entered email to next screen,
     onSignUp: () -> Unit,
 ) {
     val emailState = rememberInputState(
+        initialValue = initialEmail,
         rules = listOf(
             ruleEmailValid,
         )

@@ -19,6 +19,7 @@ import com.ft.ftchinese.ui.validator.ruleEmailValid
 
 @Composable
 fun EmailSignUpForm(
+    initialEmail: String,
     loading: Boolean,
     onSubmit: (EmailAuthFormVal) -> Unit
 ) {
