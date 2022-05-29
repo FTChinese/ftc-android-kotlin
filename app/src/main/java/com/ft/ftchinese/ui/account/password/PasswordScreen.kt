@@ -37,7 +37,7 @@ fun AlertPasswordMismatch(
     onDismiss: () -> Unit
 ) {
     SimpleDialog(
-        title = stringResource(id = R.string.forgot_password_link),
+        title = stringResource(id = R.string.link_forgot_password),
         body = stringResource(id = R.string.password_current_incorrect),
         confirmText = stringResource(id = R.string.title_forgot_password),
         onConfirm = onConfirm,
