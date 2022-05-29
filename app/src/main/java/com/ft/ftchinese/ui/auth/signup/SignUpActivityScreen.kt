@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.ui.components.ConsentTerms
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.form.EmailSignUpForm
 import com.ft.ftchinese.ui.theme.Dimens
@@ -79,7 +80,7 @@ fun SignUpActivityScreen(
             ) {
                 ConsentTerms(
                     selected = agreed,
-                    onSelect = { setAgreed(true) }
+                    onSelect = { setAgreed(!agreed) }
                 )
             }
         }
