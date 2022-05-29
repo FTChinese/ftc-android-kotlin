@@ -6,26 +6,19 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import com.ft.ftchinese.model.request.EmailAuthFormVal
 import com.ft.ftchinese.ui.components.TipText
-import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.form.EmailSignInForm
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.validator.passwordRules
-import com.ft.ftchinese.ui.validator.ruleEmailValid
 
 @Composable
 fun LinkEmailScreen(
     mobile: String,
+    loading: Boolean,
+    onSubmit: (EmailAuthFormVal) -> Unit,
+    onForgotPassword: (String) -> Unit,
+    onSignUp: () -> Unit,
 ) {
-
-    val emailState = rememberInputState(
-        rules = listOf(
-            ruleEmailValid,
-        )
-    )
-
-    val pwState = rememberInputState(
-        rules = passwordRules()
-    )
 
     Column(
         modifier = Modifier
@@ -44,6 +37,11 @@ fun LinkEmailScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-
+        EmailSignInForm(
+            loading = loading,
+            onSubmit = onSubmit,
+            onForgotPassword = onForgotPassword,
+            onSignUp = onSignUp,
+        )
     }
 }
