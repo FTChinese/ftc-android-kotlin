@@ -38,6 +38,7 @@ fun LinkEmailScreen(
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
         EmailSignInForm(
+            initialEmail = "",
             loading = loading,
             onSubmit = onSubmit,
             onForgotPassword = onForgotPassword,
