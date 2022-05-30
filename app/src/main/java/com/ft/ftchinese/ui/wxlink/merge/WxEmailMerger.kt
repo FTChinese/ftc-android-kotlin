@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.wxlink
+package com.ft.ftchinese.ui.wxlink.merge
 
 import android.content.Context
 import com.ft.ftchinese.R
@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 
-data class WxEmailLinkAccounts(
+data class WxEmailMerger(
     val ftc: Account,
     val wx: Account,
     val loginMethod: LoginMethod,
@@ -86,3 +86,19 @@ data class LinkResult(
     val linked: Account?,
     val denied: String?, // Denial reason
 )
+
+object MergerStore {
+    private var merger: WxEmailMerger? = null
+
+    fun setMerger(m: WxEmailMerger) {
+        merger = m
+    }
+
+    fun getMerger(): WxEmailMerger? {
+        return merger
+    }
+
+    fun clear() {
+        merger = null
+    }
+}

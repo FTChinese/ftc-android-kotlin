@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.wxlink
+package com.ft.ftchinese.ui.wxlink.merge
 
 import android.content.Context
 import androidx.compose.foundation.Image
@@ -28,35 +28,9 @@ import com.ft.ftchinese.ui.theme.Dimens
 import org.threeten.bp.LocalDate
 
 @Composable
-fun LinkResultScreen(
-    onFinish: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .padding(Dimens.dp16)
-            .fillMaxWidth()
-    ) {
-        Text(
-            text = "账号已绑定！",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.dp16))
-
-        PrimaryButton(
-            onClick = onFinish,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = stringResource(id = R.string.btn_ok))
-        }
-    }
-}
-
-@Composable
 fun LinkScreen(
     loading: Boolean,
-    params: WxEmailLinkAccounts,
+    params: WxEmailMerger,
     onLink: (Account) -> Unit,
 ) {
     val context = LocalContext.current
@@ -191,7 +165,7 @@ fun buildSubsDetails(
 fun PreviewLinkScreen() {
     LinkScreen(
         loading = false,
-        params = WxEmailLinkAccounts(
+        params = WxEmailMerger(
             ftc = Account(
                 id = "ftc-id",
                 email = "preview@example.org",
