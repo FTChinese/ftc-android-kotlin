@@ -24,7 +24,7 @@ class SignUpState(
 
     var accountLoaded by mutableStateOf<Account?>(null)
 
-    fun singUp(credentials: Credentials) {
+    fun signUp(credentials: Credentials) {
         if (!ensureConnected()) {
             return
         }
