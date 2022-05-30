@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -57,14 +55,11 @@ fun ForgotPasswordForm(
             state = codeState,
             keyboardType = KeyboardType.Number,
             trailingIcon = {
-                TextButton(
-                    onClick = {
-                        onRequestCode(emailState.field.value)
-                    },
+                OTextButton(
+                    onClick = { onRequestCode(emailState.field.value) },
                     enabled = emailState.valid.value && !timerState.isRunning && !loading,
-                ) {
-                    Text(text = timerState.text.value)
-                }
+                    text = timerState.text.value
+                )
             }
         )
 
