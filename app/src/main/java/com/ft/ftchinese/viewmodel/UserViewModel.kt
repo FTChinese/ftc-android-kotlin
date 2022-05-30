@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.store.SessionManager
 
@@ -50,6 +51,10 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
     fun saveIapSubs(subsResult: IAPSubsResult) {
         saveMembership(subsResult.membership)
         session.saveIapSus(subsResult.subscription)
+    }
+
+    fun saveWxSession(wxSession: WxSession) {
+        session.saveWxSession(wxSession)
     }
 
     fun logout() {
