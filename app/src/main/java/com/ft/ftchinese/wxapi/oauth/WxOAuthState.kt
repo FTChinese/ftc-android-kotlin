@@ -1,7 +1,9 @@
-package com.ft.ftchinese.wxapi
+package com.ft.ftchinese.wxapi.oauth
 
 import android.content.res.Resources
 import android.util.Log
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.R
@@ -13,9 +15,9 @@ import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.request.WxAuthParams
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.AuthClient
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.components.BaseState
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import kotlinx.coroutines.CoroutineScope
@@ -32,23 +34,25 @@ sealed class AuthStatus {
 private const val TAG = "WxOAuthState"
 
 class WxOAuthState(
-    private val scope: CoroutineScope,
-    private val resources: Resources,
-    private val connState: State<ConnectionState>,
-    private val sessionStore: SessionManager,
-) {
+    scaffoldState: ScaffoldState,
+    scope: CoroutineScope,
+    resources: Resources,
+    connState: State<ConnectionState>,
+) : BaseState(scaffoldState, scope, resources, connState) {
 
-    val authStatus = mutableStateOf<AuthStatus>(AuthStatus.Loading)
+    var authStatus by mutableStateOf<AuthStatus>(AuthStatus.Loading)
+        private set
+
+    var wxSession by mutableStateOf<WxSession?>(null)
+        private set
+
     private val codeState = mutableStateOf("")
-
-    private val isConnected: Boolean
-        get() = connState.value == ConnectionState.Available
 
     fun handleWxResp(resp: BaseResp) {
         when (resp.errCode) {
             BaseResp.ErrCode.ERR_OK -> {
                 if (resp !is SendAuth.Resp) {
-                    authStatus.value = AuthStatus.Failed(resp.errStr)
+                    authStatus = AuthStatus.Failed(resp.errStr)
                     return
                 }
                 // 第一步：请求CODE
@@ -58,7 +62,8 @@ class WxOAuthState(
                 Log.i(TAG, "code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
 
                 if (!WxOAuth.codeMatched(resp.state)) {
-                    authStatus.value = AuthStatus.Failed(resources.getString(R.string.oauth_state_mismatch))
+                    authStatus =
+                        AuthStatus.Failed(resources.getString(R.string.oauth_state_mismatch))
                     return
                 }
 
@@ -66,25 +71,25 @@ class WxOAuthState(
                 getSession(code = resp.code)
             }
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                authStatus.value = AuthStatus.Failed(resources.getString(R.string.oauth_canceled))
+                authStatus = AuthStatus.Failed(resources.getString(R.string.oauth_canceled))
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                authStatus.value = AuthStatus.Failed(resources.getString(R.string.oauth_denied))
+                authStatus = AuthStatus.Failed(resources.getString(R.string.oauth_denied))
             }
             BaseResp.ErrCode.ERR_SENT_FAILED,
             BaseResp.ErrCode.ERR_UNSUPPORT,
             BaseResp.ErrCode.ERR_BAN -> {
-                authStatus.value = AuthStatus.Failed(resp.errStr ?: "Wechat SDK error")
+                authStatus = AuthStatus.Failed(resp.errStr ?: "Wechat SDK error")
             }
             else -> {
-                authStatus.value = AuthStatus.Failed("Unknown errors occurred")
+                authStatus = AuthStatus.Failed("Unknown errors occurred")
             }
         }
     }
 
     fun retry() {
         if (codeState.value.isNotBlank()) {
-            authStatus.value = AuthStatus.Loading
+            authStatus = AuthStatus.Loading
 
             getSession(codeState.value)
         }
@@ -92,7 +97,7 @@ class WxOAuthState(
 
     private fun getSession(code: String) {
         if (!isConnected) {
-            authStatus.value = AuthStatus.NotConnected
+            authStatus = AuthStatus.NotConnected
             codeState.value = code
             return
         }
@@ -106,13 +111,13 @@ class WxOAuthState(
 
             when (result) {
                 is FetchResult.LocalizedError -> {
-                    authStatus.value = AuthStatus.Failed(resources.getString(result.msgId))
+                    authStatus = AuthStatus.Failed(resources.getString(result.msgId))
                 }
                 is FetchResult.TextError -> {
-                    authStatus.value = AuthStatus.Failed(result.text)
+                    authStatus = AuthStatus.Failed(result.text)
                 }
                 is FetchResult.Success -> {
-                    sessionStore.saveWxSession(result.data)
+                    wxSession = result.data
                     loadWxAccount(result.data)
                 }
             }
@@ -124,19 +129,18 @@ class WxOAuthState(
 
         when (result) {
             is FetchResult.LocalizedError -> {
-                authStatus.value = AuthStatus.Failed(resources.getString(result.msgId))
+                authStatus = AuthStatus.Failed(resources.getString(result.msgId))
             }
             is FetchResult.TextError -> {
-                authStatus.value = AuthStatus.Failed(result.text)
+                authStatus = AuthStatus.Failed(result.text)
             }
             is FetchResult.Success -> {
                 when (WxOAuth.getLastIntent()) {
                     WxOAuthIntent.LINK -> {
-                        authStatus.value = AuthStatus.LinkLoaded(result.data)
+                        authStatus = AuthStatus.LinkLoaded(result.data)
                     }
                     else -> {
-                        sessionStore.saveAccount(result.data)
-                        authStatus.value = AuthStatus.LoginSuccess(result.data)
+                        authStatus = AuthStatus.LoginSuccess(result.data)
                     }
                 }
             }
@@ -146,15 +150,15 @@ class WxOAuthState(
 
 @Composable
 fun rememberWxOAuthState(
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
-    connState: State<ConnectionState> = connectivityState(),
-    sessionStore: SessionManager,
-) = remember(scope, resources, connState) {
+    connState: State<ConnectionState> = connectivityState()
+) = remember(scaffoldState, resources, connState) {
     WxOAuthState(
+        scaffoldState = scaffoldState,
         scope = scope,
         resources = resources,
         connState = connState,
-        sessionStore = sessionStore
     )
 }

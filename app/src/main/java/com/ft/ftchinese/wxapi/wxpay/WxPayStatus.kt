@@ -1,4 +1,4 @@
-package com.ft.ftchinese.wxapi
+package com.ft.ftchinese.wxapi.wxpay
 
 import com.ft.ftchinese.model.reader.Membership
 

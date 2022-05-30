@@ -1,4 +1,4 @@
-package com.ft.ftchinese.wxapi
+package com.ft.ftchinese.wxapi.oauth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -7,6 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
+import com.ft.ftchinese.wxapi.shared.WxRespProgress
 
 @Composable
 fun WxOAuthAScreen(

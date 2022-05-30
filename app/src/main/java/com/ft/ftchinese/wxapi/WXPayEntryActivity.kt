@@ -9,15 +9,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
@@ -29,10 +31,11 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
+import com.ft.ftchinese.wxapi.wxpay.WxPayActivityScreen
+import com.ft.ftchinese.wxapi.wxpay.WxPayStatus
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -73,12 +76,10 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
         api?.handleIntent(intent, this)
 
         setContent {
-            OTheme {
-                WxPayActivityScreen(
-                    uiStatusLiveData = statusLiveData,
-                    onClickDone = this::onClickDone
-                )
-            }
+            WxPayApp(
+                uiStatusLiveData = statusLiveData,
+                onExit = this::onClickDone
+            )
         }
     }
 
@@ -227,34 +228,50 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
     }
 }
 
-
 @Composable
-private fun WxPayActivityScreen(
+fun WxPayApp(
     uiStatusLiveData: LiveData<WxPayStatus>,
-    onClickDone: () -> Unit,
+    onExit: () -> Unit
 ) {
-    val status = uiStatusLiveData.observeAsState(WxPayStatus.Loading)
-    Log.i(TAG, "Status live data: ${status.value}")
-    val scaffoldState = rememberScaffoldState()
+    val scaffold = rememberScaffoldState()
 
-    Scaffold(
-        topBar = {
-            Toolbar(
-                heading = stringResource(id = R.string.pay_brand_wechat),
-                onBack = onClickDone
-            )
-        },
-        scaffoldState = scaffoldState
-    ) { innerPadding ->
-        ProgressLayout(
-            loading = status.value is WxPayStatus.Loading,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            WxPayScreen(
-                status = status.value,
-                onDone = onClickDone
-            )
+    OTheme {
+        val navController = rememberNavController()
+        val backstackEntry = navController.currentBackStackEntryAsState()
+
+        val currentScreen = PayAppScreen.fromRoute(
+            backstackEntry.value?.destination?.route
+        )
+
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    heading = stringResource(id = currentScreen.titleId),
+                    onBack = {
+                        val ok = navController.popBackStack()
+                        if (!ok) {
+                            onExit()
+                        }
+                    }
+                )
+            },
+            scaffoldState = scaffold
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = OAuthAppScreen.OAuth.name,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(
+                    route = PayAppScreen.PayResponse.name
+                ) {
+                    WxPayActivityScreen(
+                        uiStatusLiveData = uiStatusLiveData,
+                        onClickDone = onExit
+                    )
+                }
+            }
         }
     }
-
 }
+

@@ -9,24 +9,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.R
-import com.ft.ftchinese.model.enums.LoginMethod
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
-import com.ft.ftchinese.ui.wxlink.WxEmailLinkAccounts
+import com.ft.ftchinese.ui.wxlink.merge.MergeActivityScreen
+import com.ft.ftchinese.wxapi.oauth.WxOAuthActivityScreen
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -46,36 +45,16 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler {
         sessionManager = SessionManager.getInstance(this)
 
         setContent {
-            OTheme {
-
-                WxEntryActivityScreen(
-                    sessionStore = sessionManager,
-                    wxRespLiveData = wxRespLiveData,
-                    onFinish = this::onClickDone,
-                    onLink = this::onLink
-                )
-            }
+            OAuthApp(
+                wxRespLiveData = wxRespLiveData,
+                onExit = this::onClickDone
+            )
         }
 
         try {
             api?.handleIntent(intent, this)
         } catch (e: Exception) {
             e.message?.let { Log.i(TAG, it) }
-        }
-    }
-
-    private fun onLink(wxAccount: Account) {
-        sessionManager.loadAccount()?.let { current ->
-            LinkPreviewFragment(
-                WxEmailLinkAccounts(
-                    ftc = current,
-                    wx = wxAccount,
-                    loginMethod = current.loginMethod ?: LoginMethod.EMAIL
-                )
-            ).show(
-                supportFragmentManager,
-                "PreviewEmailLinkWechat",
-            )
         }
     }
 
@@ -135,52 +114,67 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler {
 }
 
 @Composable
-fun WxEntryActivityScreen(
-    sessionStore: SessionManager,
+fun OAuthApp(
     wxRespLiveData: LiveData<BaseResp?>,
-    onFinish: () -> Unit,
-    onLink: (Account) -> Unit
+    onExit: () -> Unit
 ) {
+    val scaffold = rememberScaffoldState()
 
-    val scaffoldState = rememberScaffoldState()
-    val oauthState = rememberWxOAuthState(
-        sessionStore = sessionStore
-    )
+    OTheme {
+        val navController = rememberNavController()
+        val backstackEntry = navController.currentBackStackEntryAsState()
 
-    val wxRespState = wxRespLiveData.observeAsState()
+        val currentScreen = OAuthAppScreen.fromRoute(
+            backstackEntry.value?.destination?.route
+        )
+        
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    heading = stringResource(id = currentScreen.titleId),
+                    onBack = {
+                        val ok = navController.popBackStack()
+                        if (!ok) {
+                            onExit()
+                        }
+                    }
+                )
+            },
+            scaffoldState = scaffold
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = OAuthAppScreen.OAuth.name,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(
+                    route = OAuthAppScreen.OAuth.name
+                ) {
+                    WxOAuthActivityScreen(
+                        wxRespLiveData = wxRespLiveData,
+                        onFinish = onExit
+                    ) {
+                        navigateToLink(
+                            navController
+                        )
+                    }
+                }
 
-    LaunchedEffect(key1 = wxRespState) {
-        wxRespState.value?.let {
-            oauthState.handleWxResp(it)
+                composable(
+                    route = OAuthAppScreen.EmailLink.name
+                ) {
+                    MergeActivityScreen(
+                        scaffoldState = scaffold,
+                        onSuccess = onExit
+                    )
+                }
+            }
         }
     }
+}
 
-    when (val status = oauthState.authStatus.value) {
-        is AuthStatus.LinkLoaded -> {
-            onLink(status.account)
-        }
-        else -> {}
-    }
-
-    Scaffold(
-        topBar = {
-            Toolbar(
-                heading = stringResource(id = R.string.title_wx_login),
-                onBack = onFinish
-            )
-        },
-        scaffoldState = scaffoldState
-    ) { innerPadding ->
-        ProgressLayout(
-            loading = oauthState.authStatus.value is AuthStatus.Loading,
-            modifier = Modifier.padding(innerPadding),
-        ) {
-            WxOAuthAScreen(
-                status = oauthState.authStatus.value,
-                onFinish = onFinish,
-                onLink = onLink,
-                onRetry = oauthState::retry
-            )
-        }
-    }
+private fun navigateToLink(
+    navController: NavController
+) {
+    navController.navigate(OAuthAppScreen.EmailLink.name)
 }

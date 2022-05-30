@@ -1,4 +1,4 @@
-package com.ft.ftchinese.wxapi
+package com.ft.ftchinese.wxapi.wxpay
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -8,6 +8,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.wxapi.shared.WxRespProgress
 import org.threeten.bp.LocalDate
 
 @Composable

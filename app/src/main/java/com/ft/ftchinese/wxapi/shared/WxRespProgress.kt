@@ -1,4 +1,4 @@
-package com.ft.ftchinese.wxapi
+package com.ft.ftchinese.wxapi.shared
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
