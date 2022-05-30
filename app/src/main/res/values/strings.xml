@@ -140,6 +140,7 @@
 
     <!--  Wechat Link  -->
     <string name="title_link_email">绑定邮箱账号</string>
+    <string name="title_link_wx">绑定微信</string>
     <string name="title_merge_accounts">合并账号</string>
     <string name="instruct_sign_in">该邮箱已经注册了FT中文网账号，请输入登录密码</string>
     <string name="link_heading">您选择合并如下账号</string>
