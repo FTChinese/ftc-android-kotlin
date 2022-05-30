@@ -12,6 +12,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,6 +31,7 @@ import com.ft.ftchinese.ui.auth.signup.SignUpActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.RequestCode
+import com.ft.ftchinese.viewmodel.UserViewModel
 
 class AuthActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +64,7 @@ fun AuthApp(
     onExit: () -> Unit
 ) {
     val scaffold = rememberScaffoldState()
+    val userViewModel: UserViewModel = viewModel()
 
     OTheme {
         val navController = rememberNavController()
@@ -109,9 +112,12 @@ fun AuthApp(
                                 navController,
                             )
                         },
-                        // Login success. Destroy the activity.
-                        onSuccess = onExit,
                     )
+                    // Login success. Destroy the activity.
+                    {
+                        userViewModel.saveAccount(it)
+                        onExit()
+                    }
                 }
 
                 composable(
@@ -126,20 +132,22 @@ fun AuthApp(
                     LinkEmailActivityScreen(
                         scaffoldState = scaffold,
                         mobile = mobile,
-                        onSuccess = onExit,
+                        onSuccess = {
+                            userViewModel.saveAccount(it)
+                            onExit()
+                        },
                         onForgotPassword = { email ->
                             navigateToForgotPassword(
                                 navController,
                                 email,
                             )
-                        },
-                        onSignUp = {
-                            navigateToSignUp(
-                                navController,
-                                "",
-                            )
                         }
-                    )
+                    ) {
+                        navigateToSignUp(
+                            navController,
+                            "",
+                        )
+                    }
                 }
 
                 composable(
@@ -175,7 +183,10 @@ fun AuthApp(
                     LoginActivityScreen(
                         scaffoldState = scaffold,
                         email = email,
-                        onSuccess = onExit,
+                        onSuccess = {
+                            userViewModel.saveAccount(it)
+                            onExit()
+                        },
                         onForgotPassword = { email1 ->
                             navigateToForgotPassword(
                                 navController,
@@ -202,9 +213,11 @@ fun AuthApp(
                     val email = entry.arguments?.getString("email")
                     SignUpActivityScreen(
                         scaffoldState = scaffold,
-                        email = email,
-                        onSuccess = onExit
-                    )
+                        email = email
+                    ) {
+                        userViewModel.saveAccount(it)
+                        onExit()
+                    }
                 }
 
                 composable(
@@ -245,7 +258,12 @@ fun AuthApp(
                         email = email ?: "",
                         token = token,
                         scaffoldState = scaffold,
-                        onSuccess = onExit
+                        onSuccess = {
+                            navController.popBackStack(
+                                route = AuthScreen.EmailLogin.name,
+                                inclusive = true,
+                            )
+                        }
                     )
                 }
             }
@@ -270,14 +288,14 @@ private fun navigateToLogin(
     navController: NavController,
     email: String
 ) {
-    navController.navigate("${AuthScreen.EmailLogin}/?email=${email}")
+    navController.navigate("${AuthScreen.EmailLogin.name}/?email=${email}")
 }
 
 private fun navigateToSignUp(
     navController: NavController,
     email: String
 ) {
-    navController.navigate("${AuthScreen.EmailSignUp}/?email=${email}")
+    navController.navigate("${AuthScreen.EmailSignUp.name}/?email=${email}")
 }
 
 private fun navigateToForgotPassword(
