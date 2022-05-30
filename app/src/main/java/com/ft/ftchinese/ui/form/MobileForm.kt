@@ -60,7 +60,7 @@ fun MobileForm(
             state = mobileState,
             keyboardType = KeyboardType.Number,
         )
-        TipText(text = stringResource(id = R.string.mobile_mainland_only))
+        BodyText2(text = stringResource(id = R.string.mobile_mainland_only))
 
         Spacer(modifier = Modifier.height(Dimens.dp8))
 
