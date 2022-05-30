@@ -1,30 +1,28 @@
 package com.ft.ftchinese.ui.auth.login
 
-import android.widget.Toast
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.ui.components.BodyText2
 import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.form.EmailSignInForm
+import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
 fun LoginActivityScreen(
-    userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
     email: String?,
-    onSuccess: () -> Unit,
+    onSuccess: (Account) -> Unit,
     onForgotPassword: (String) -> Unit,
     onSignUp: () -> Unit,
 ) {
@@ -39,41 +37,39 @@ fun LoginActivityScreen(
         scaffoldState = scaffoldState
     )
 
-    LaunchedEffect(key1 = loginState.accountLoaded) {
-        loginState.accountLoaded?.let {
-            userViewModel.saveAccount(it)
-            Toast.makeText(
-                context,
-                R.string.login_success,
-                Toast.LENGTH_SHORT
-            ).show()
-            onSuccess()
+    LaunchedEffect(key1 = loginState.emailAccount) {
+        loginState.emailAccount?.let {
+            onSuccess(it)
         }
     }
 
     ProgressLayout(
         loading = loginState.progress.value
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(Dimens.dp16)
-        ) {
-            EmailSignInForm(
-                initialEmail = email ?: "",
-                loading = loginState.progress.value,
-                onSubmit = {
-                    loginState.authenticate(
-                        Credentials(
-                            email = it.email,
-                            password =  it.password,
-                            deviceToken = tokenStore.getToken()
-                        )
+        LoginScreen(
+            email = email,
+            loading = loginState.progress.value,
+            onSubmit = {
+                loginState.authenticate(
+                    Credentials(
+                        email = it.email,
+                        password =  it.password,
+                        deviceToken = tokenStore.getToken()
                     )
-                },
-                onForgotPassword = onForgotPassword,
-                onSignUp = onSignUp
-            )
+                )
+            },
+            onForgotPassword = onForgotPassword,
+            onSignUp = onSignUp,
+        ) {
+            
+            if (!email.isNullOrBlank()) {
+                SubHeading2(
+                    text = stringResource(id = R.string.instruct_sign_in)
+                )
+                
+                Spacer(modifier = Modifier.height(Dimens.dp8))
+            }
+            
         }
     }
 }
