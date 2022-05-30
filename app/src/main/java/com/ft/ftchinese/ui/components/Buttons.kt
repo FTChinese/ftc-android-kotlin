@@ -56,6 +56,22 @@ fun SecondaryButton(
     )
 }
 
+@Composable
+fun OTextButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    text: String,
+    colors: ButtonColors = OButton.textColors()
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        colors = colors,
+    ) {
+        Text(text = text)
+    }
+}
+
 enum class ButtonVariant {
     Primary,
     Outline;
