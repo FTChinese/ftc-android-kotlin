@@ -1,6 +1,5 @@
 package com.ft.ftchinese.repository
 
-import android.util.Log
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
@@ -9,7 +8,6 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.WxLinkParams
 import com.ft.ftchinese.model.request.WxUnlinkParams
-import com.ft.ftchinese.ui.login.SignUpViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
