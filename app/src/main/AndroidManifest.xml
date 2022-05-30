@@ -99,26 +99,8 @@
         <activity
             android:name=".ui.article.ArticleActivity"
             android:parentActivityName=".ui.main.MainActivity" />
-        <activity
-            android:name=".ui.login.AuthActivity"
-            android:label="@string/title_login"
-            android:parentActivityName=".ui.main.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.account.AccountActivity"
-            android:label="@string/title_account"
-            android:parentActivityName=".ui.main.MainActivity"
-            android:windowSoftInputMode="adjustResize" /> <!-- <activity -->
-        <!-- android:name=".ui.customer.CustomerActivity" -->
-        <!-- android:label="@string/stripe_setting" -->
-        <!-- android:parentActivityName=".ui.account.AccountActivity" /> -->
-        <activity
-            android:name=".ui.wxlink.LinkFtcActivity"
-            android:label="@string/title_link_email"
-            android:parentActivityName=".ui.account.AccountActivity" />
-        <activity
-            android:name=".ui.wxlink.UnlinkActivity"
-            android:label="@string/title_unlink" />
+        <activity android:name=".ui.account.AccountActivity" />
+        <activity android:name=".ui.wxlink.WxLinkEmailActivity"/>
         <activity android:name=".ui.MemberActivity" />
         <activity
             android:name=".ui.stripepay.StripeSubActivity"

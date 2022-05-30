@@ -1,19 +1,10 @@
-package com.ft.ftchinese.ui.login
+package com.ft.ftchinese.ui.validator
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.request.Credentials
-import com.ft.ftchinese.repository.AuthClient
-import com.ft.ftchinese.repository.LinkRepo
-import com.ft.ftchinese.ui.validator.LiveDataValidator
-import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
-import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.launch
 
 class SignUpViewModel : ViewModel() {
     val progressLiveData = MutableLiveData<Boolean>()
@@ -65,51 +56,4 @@ class SignUpViewModel : ViewModel() {
         MutableLiveData<FetchResult<Account>>()
     }
 
-    /**
-     * Handles both a new user signup, or mobile phone
-     * user trying to link to a new account.
-     */
-    fun emailSignUp(deviceToken: String) {
-
-        if (isNetworkAvailable.value == false) {
-            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        progressLiveData.value = true
-
-        val c = Credentials(
-            email = emailLiveData.value ?: "",
-            password = passwordLiveData.value ?: "",
-            deviceToken = deviceToken
-        )
-
-        viewModelScope.launch {
-
-            val result = AuthClient.asyncEmailSignUp(c)
-            progressLiveData.value = false
-            accountResult.value = result
-        }
-    }
-
-    fun wxSignUp(deviceToken: String, unionId: String) {
-        if (isNetworkAvailable.value == false) {
-            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        progressLiveData.value = true
-
-        val c = Credentials(
-            email = emailLiveData.value ?: "",
-            password = passwordLiveData.value ?: "",
-            deviceToken = deviceToken
-        )
-
-        viewModelScope.launch {
-            val result = LinkRepo.asyncSignUp(c, unionId)
-            progressLiveData.value = false
-            accountResult.value = result
-        }
-    }
 }
