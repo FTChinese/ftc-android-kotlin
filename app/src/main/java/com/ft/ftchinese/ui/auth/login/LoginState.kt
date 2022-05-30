@@ -15,13 +15,21 @@ import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class LoginState(
+/**
+ * LoginState could in used in 2 cases:
+ * - Direct login with email account. In such case you should save the account returned from API;
+ * -A wechat-only user wants to link to an existing email account. In such case you should
+ *  first verify the email account and DO NOT save the returned account; otherwise you are risking
+ *  overriding current account save on device. Use the returned account to show a screen to perform
+ *  link.
+ */
+open class LoginState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     resources: Resources,
     connState: State<ConnectionState>,
 ) : BaseState(scaffoldState, scope, resources, connState) {
-    var accountLoaded by mutableStateOf<Account?>(null)
+    var emailAccount by mutableStateOf<Account?>(null)
 
     fun authenticate(credentials: Credentials) {
         if (!ensureConnected()) {
@@ -40,7 +48,7 @@ class LoginState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    accountLoaded = result.data
+                    emailAccount = result.data
                 }
             }
         }
