@@ -1,14 +1,12 @@
 package com.ft.ftchinese.ui.auth.mobile
 
-import android.widget.Toast
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
@@ -16,16 +14,14 @@ import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.ui.wxinfo.launchWxOAuth
-import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
 fun MobileAuthActivityScreen(
-    userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
-    onLinkEmail: (String) -> Unit, // Pass mobile number to next screen.
-    onEmailLogin: () -> Unit,
-    onSuccess: () -> Unit,
+    onLinkEmail: (String) -> Unit,
+    onEmailLogin: () -> Unit, // Pass mobile number to next screen.
+    onSuccess: (Account) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -54,13 +50,7 @@ fun MobileAuthActivityScreen(
 
     LaunchedEffect(key1 = authState.accountLoaded) {
         authState.accountLoaded?.let {
-            userViewModel.saveAccount(it)
-            Toast.makeText(
-                context,
-                R.string.login_success,
-                Toast.LENGTH_SHORT
-            ).show()
-            onSuccess()
+            onSuccess(it)
         }
     }
 
