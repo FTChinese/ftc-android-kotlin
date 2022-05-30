@@ -6,7 +6,7 @@ import com.ft.ftchinese.R
 enum class AuthScreen(@StringRes val titleId: Int) {
     MobileLogin(titleId = R.string.title_login),
     MobileLinkEmail(titleId = R.string.title_link_email),
-    EmailExists(titleId = R.string.label_email),
+    EmailExists(titleId = R.string.title_email_login),
     EmailLogin(titleId = R.string.title_email_login),
     EmailSignUp(titleId = R.string.title_sign_up),
     ForgotPassword(titleId = R.string.title_forgot_password),
