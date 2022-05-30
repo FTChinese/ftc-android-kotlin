@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.wxlink
+package com.ft.ftchinese.ui.account.unlinkwx
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
