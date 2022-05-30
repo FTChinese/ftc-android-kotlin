@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.wxinfo
+package com.ft.ftchinese.ui.account.wechat
 
 import android.content.res.Resources
 import androidx.compose.material.ScaffoldState

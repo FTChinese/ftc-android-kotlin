@@ -30,6 +30,18 @@ enum class AccountAppScreen(@StringRes val titleId: Int) {
     ),
     DeleteAccount(
         titleId = R.string.title_delete_account
+    ),
+    // Verify an existing email + password. If valid, go to Merge screen.
+    LinkCurrentEmail(titleId = R.string.title_link_email),
+    // This is used when both accounts exists. Linking to newly created account does not need this.
+    MergeWxEmail(titleId = R.string.title_merge_accounts),
+    // Create a new email account and link to logged-in wechat.
+    LinkNewEmail(titleId = R.string.title_sign_up),
+    // If user forgot password when linking to current email.
+    ForgotPassword(titleId = R.string.title_forgot_password),
+    ResetPassword(titleId = R.string.title_reset_password),
+    UnlinkWx(
+        titleId = R.string.title_unlink
     );
 
     companion object {
@@ -45,6 +57,12 @@ enum class AccountAppScreen(@StringRes val titleId: Int) {
                 Wechat.name -> Wechat
                 Mobile.name -> Mobile
                 DeleteAccount.name -> DeleteAccount
+                LinkCurrentEmail.name -> LinkCurrentEmail
+                MergeWxEmail.name -> MergeWxEmail
+                LinkNewEmail.name -> LinkNewEmail
+                ForgotPassword.name -> ForgotPassword
+                ResetPassword.name -> ResetPassword
+                UnlinkWx.name -> UnlinkWx
                 null -> Overview
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }

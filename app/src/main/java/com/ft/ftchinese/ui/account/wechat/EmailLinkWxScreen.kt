@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.wxinfo
+package com.ft.ftchinese.ui.account.wechat
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -8,12 +8,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.theme.Dimens
 
-
 /**
  * Used when email is not linked to wechat.
  */
 @Composable
-fun AlertEmailLinkWx(
+fun EmailLinkWxScreen(
     onLinkWx: () -> Unit
 ) {
     Column(
@@ -35,11 +34,10 @@ fun AlertEmailLinkWx(
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewAlertEmailLinkWx() {
-    AlertEmailLinkWx {
+    EmailLinkWxScreen {
 
     }
 }

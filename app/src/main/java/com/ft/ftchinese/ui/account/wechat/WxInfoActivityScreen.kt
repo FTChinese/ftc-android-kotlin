@@ -1,11 +1,7 @@
-package com.ft.ftchinese.ui.wxinfo
+package com.ft.ftchinese.ui.account.wechat
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
@@ -15,22 +11,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.model.reader.WxOAuth
-import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
-import com.ft.ftchinese.ui.wxlink.UnlinkActivity
+import com.ft.ftchinese.ui.wxinfo.AlertWxLoginExpired
+import com.ft.ftchinese.ui.wxinfo.launchWxOAuth
+import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.tencent.mm.opensdk.modelmsg.SendAuth
-import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
 fun WxInfoActivityScreen(
     userViewModel: UserViewModel,
     scaffold: ScaffoldState,
+    onUnlink: () -> Unit,
 ) {
     val context = LocalContext.current
     val accountState = userViewModel.accountLiveData.observeAsState()
@@ -90,7 +84,7 @@ fun WxInfoActivityScreen(
     }
 
     if (account.isEmailOnly) {
-        AlertEmailLinkWx(
+        EmailLinkWxScreen(
             onLinkWx = {
                 launchWxOAuth(wxApi)
             }
@@ -113,48 +107,14 @@ fun WxInfoActivityScreen(
                 wechat = account.wechat,
                 isLinked = account.isLinked,
                 onLinkEmail = {
-                    launchLinkEmailActivity(
+                    launchWxLinkEmailActivity(
                         launcher = launcher,
                         context = context
                     )
                 },
-                onUnlinkEmail = {
-                    launchUnlinkEmailActivity(
-                        launcher = launcher,
-                        context = context
-                    )
-                }
+                onUnlinkEmail = onUnlink
             )
         }
     }
 }
 
-fun launchWxOAuth(
-    wxApi: IWXAPI
-) {
-    val stateCode = WxOAuth.generateStateCode(WxOAuthIntent.LINK)
-
-    val req = SendAuth.Req()
-    req.scope = WxOAuth.SCOPE
-    req.state = stateCode
-
-    wxApi.sendReq(req)
-}
-
-fun launchLinkEmailActivity(
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context,
-) {
-    launcher.launch(
-        LinkFtcActivity.intent(context)
-    )
-}
-
-fun launchUnlinkEmailActivity(
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context,
-) {
-    launcher.launch(
-        UnlinkActivity.newIntent(context)
-    )
-}

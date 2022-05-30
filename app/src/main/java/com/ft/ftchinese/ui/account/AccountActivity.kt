@@ -25,9 +25,10 @@ import com.ft.ftchinese.ui.account.email.UpdateEmailActivityScreen
 import com.ft.ftchinese.ui.account.mobile.MobileActivityScreen
 import com.ft.ftchinese.ui.account.name.NameActivityScreen
 import com.ft.ftchinese.ui.account.password.PasswordActivityScreen
+import com.ft.ftchinese.ui.account.unlinkwx.UnlinkActivityScreen
+import com.ft.ftchinese.ui.account.wechat.WxInfoActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.wxinfo.WxInfoActivityScreen
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 /**
@@ -113,6 +114,7 @@ fun AccountApp(
                 startDestination = AccountAppScreen.Overview.name,
                 modifier = Modifier.padding(innerPadding)
             ) {
+                // A list of rows
                 composable(
                     route = AccountAppScreen.Overview.name
                 ) {
@@ -127,6 +129,7 @@ fun AccountApp(
                     }
                 }
 
+                // Switch email.
                 composable(
                     route = AccountAppScreen.Email.name
                 ) {
@@ -136,6 +139,7 @@ fun AccountApp(
                     )
                 }
 
+                // Modify username
                 composable(
                     route = AccountAppScreen.UserName.name
                 ) {
@@ -145,6 +149,7 @@ fun AccountApp(
                     )
                 }
 
+                // Change password.
                 composable(
                     route = AccountAppScreen.Password.name
                 ) {
@@ -154,6 +159,7 @@ fun AccountApp(
                     )
                 }
 
+                // Set address
                 composable(
                     route = AccountAppScreen.Address.name
                 ) {
@@ -163,15 +169,45 @@ fun AccountApp(
                     )
                 }
 
+                // Show wechat details if linked.
                 composable(
                     route = AccountAppScreen.Wechat.name
                 ) {
                     WxInfoActivityScreen(
                         userViewModel = userViewModel,
                         scaffold = scaffold,
+                        onUnlink = {
+                            navigateToScreen(
+                                navController,
+                                AccountAppScreen.UnlinkWx
+                            )
+                        }
                     )
                 }
 
+                // Switch mobile phone.
+                composable(
+                    route = AccountAppScreen.Mobile.name
+                ) {
+                    MobileActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffold
+                    )
+                }
+
+                composable(
+                    route = AccountAppScreen.UnlinkWx.name
+                ) {
+                    UnlinkActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffold,
+                        onSuccess = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                // Verify password to delete account.
                 composable(
                     route = AccountAppScreen.DeleteAccount.name
                 ) {
@@ -182,14 +218,6 @@ fun AccountApp(
                     )
                 }
 
-                composable(
-                    route = AccountAppScreen.Mobile.name
-                ) {
-                    MobileActivityScreen(
-                        userViewModel = userViewModel,
-                        scaffoldState = scaffold
-                    )
-                }
             }
         }
     }
@@ -201,5 +229,4 @@ private fun navigateToScreen(
 ) {
     navController.navigate(screen.name)
 }
-
 

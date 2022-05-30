@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.wxinfo
+package com.ft.ftchinese.ui.account.wechat
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -30,8 +30,8 @@ import com.ft.ftchinese.ui.theme.Dimens
 fun WxInfoScreen(
     wechat: Wechat,
     isLinked: Boolean,
-    onLinkEmail: () -> Unit,
-    onUnlinkEmail: () -> Unit,
+    onLinkEmail: () -> Unit, // For wechat-only user to link an email account
+    onUnlinkEmail: () -> Unit, // For linked account to unlink.
 ) {
     Column(
         modifier = Modifier
@@ -50,7 +50,8 @@ fun WxInfoScreen(
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
         // If current wechat is not linked to email,
-        // show a button to start email activity.
+        // show a button so that user could launch a new screen
+        // to verify or create an email account.
         if (!isLinked) {
             Text(
                 text = stringResource(id = R.string.instruct_link_email),
