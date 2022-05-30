@@ -7,6 +7,10 @@ import com.ft.ftchinese.model.request.EmailAuthFormVal
 import com.ft.ftchinese.ui.form.EmailSignInForm
 import com.ft.ftchinese.ui.theme.Dimens
 
+/**
+ * LoginScreen is used verify email + password either for login,
+ * or for wechat-user to link email.
+ */
 @Composable
 fun LoginScreen(
     email: String?,
