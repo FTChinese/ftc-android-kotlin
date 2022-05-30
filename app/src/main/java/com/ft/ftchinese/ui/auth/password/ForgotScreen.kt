@@ -1,14 +1,15 @@
 package com.ft.ftchinese.ui.auth.password
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.PasswordResetVerifier
+import com.ft.ftchinese.ui.components.ScreenHeader
 import com.ft.ftchinese.ui.components.SimpleDialog
 import com.ft.ftchinese.ui.components.TimerState
 import com.ft.ftchinese.ui.components.rememberTimerState
@@ -29,14 +30,11 @@ fun ForgotScreen(
             .fillMaxSize()
             .padding(Dimens.dp16)
     ) {
-        Text(
-            text = stringResource(id = R.string.guild_forgot_password),
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.body1
+
+        ScreenHeader(
+            title = "",
+            subTitle = stringResource(id = R.string.guild_forgot_password)
         )
-
-        Spacer(modifier = Modifier.height(Dimens.dp16))
-
 
         ForgotPasswordForm(
             email = email,
