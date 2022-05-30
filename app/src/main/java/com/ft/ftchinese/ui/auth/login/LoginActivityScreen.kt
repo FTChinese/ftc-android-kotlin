@@ -13,7 +13,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.store.TokenManager
-import com.ft.ftchinese.ui.components.BodyText2
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
@@ -66,7 +65,7 @@ fun LoginActivityScreen(
                 SubHeading2(
                     text = stringResource(id = R.string.instruct_sign_in)
                 )
-                
+
                 Spacer(modifier = Modifier.height(Dimens.dp8))
             }
             
