@@ -17,13 +17,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ft.ftchinese.model.content.Teaser
@@ -50,11 +48,7 @@ import com.ft.ftchinese.ui.components.TextInput
 import com.ft.ftchinese.ui.components.Timer
 import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.components.rememberTimerState
-import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.login.SignInFragment
-import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.main.AcceptServiceDialogFragment
-import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
@@ -71,8 +65,6 @@ class TestActivity : ScopedAppActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var workManager: WorkManager
 
-    private lateinit var mobileViewModel: MobileViewModel
-
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,8 +72,6 @@ class TestActivity : ScopedAppActivity() {
         sessionManager = SessionManager.getInstance(this)
         payIntentStore = PayIntentStore.getInstance(this)
         workManager = WorkManager.getInstance(this)
-
-        mobileViewModel = ViewModelProvider(this)[MobileViewModel::class.java]
 
         setContent {
             OTheme {
@@ -145,12 +135,6 @@ class TestActivity : ScopedAppActivity() {
                             WxMiniButton()
 
                             PostPurchaseButton()
-
-                            SignInFragment()
-
-                            SignUpFragment()
-
-                            MobileLinkEmail()
 
                             FreeUser()
 
@@ -237,38 +221,6 @@ class TestActivity : ScopedAppActivity() {
             Text(text = timerState.text.value)
         }
     }
-    
-    @Composable
-    fun Alert(
-        title: String,
-        body: String,
-        onConfirm: () -> Unit,
-        onDismiss: () -> Unit,
-    ) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = {
-                Text(text = title)
-            },
-            text = {
-                Text(text = body)
-            },
-            dismissButton = {
-                Button(
-                    onClick = onDismiss
-                ) {
-                    Text(text = stringResource(id = R.string.btn_cancel))
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = onConfirm
-                ) {
-                    Text(text = stringResource(id = R.string.btn_ok))
-                }
-            }
-        )
-    }
 
     @Composable
     fun NetworkStatus() {
@@ -318,49 +270,6 @@ class TestActivity : ScopedAppActivity() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Address - Buy")
-        }
-    }
-
-    @Composable
-    private fun SignInFragment() {
-        Button(
-            onClick = {
-                SignInFragment
-                    .forEmailLogin()
-                    .show(supportFragmentManager, "SignInFragment")
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Login")
-        }
-    }
-
-    @Composable
-    private fun SignUpFragment() {
-        Button(
-            onClick = {
-                SignUpFragment
-                    .forEmailLogin()
-                    .show(supportFragmentManager, "SignUpFragment")
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Sign Up")
-        }
-    }
-
-    @Composable
-    private fun MobileLinkEmail() {
-        Button(
-            onClick = {
-                mobileViewModel.mobileLiveData.value = "1234567890"
-                SignInFragment
-                    .forMobileLink().
-                    show(supportFragmentManager, "TestMobileLinkExistingEmail")
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Mobile Link Existing Email")
         }
     }
 
