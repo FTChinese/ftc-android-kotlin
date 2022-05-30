@@ -5,15 +5,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.EmailAuthFormVal
-import com.ft.ftchinese.ui.components.BlockButton
-import com.ft.ftchinese.ui.components.PasswordInput
-import com.ft.ftchinese.ui.components.TextInput
-import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.passwordRules
@@ -23,9 +24,10 @@ import com.ft.ftchinese.ui.validator.ruleEmailValid
 fun EmailSignUpForm(
     initialEmail: String,
     loading: Boolean,
-    onSubmit: (EmailAuthFormVal) -> Unit,
-    agreement: @Composable () -> Unit = {}
+    onSubmit: (EmailAuthFormVal) -> Unit
 ) {
+    val context = LocalContext.current
+
     val emailState = rememberInputState(
         initialValue = initialEmail,
         rules = listOf(
@@ -50,6 +52,10 @@ fun EmailSignUpForm(
 
     val formValid = emailState.valid.value && pwState.valid.value && repeatPwState.valid.value
 
+    val (agreed, setAgreed) = remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,10 +79,18 @@ fun EmailSignUpForm(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        agreement()
+        ConsentTerms(
+            selected = agreed,
+            onSelect = { setAgreed(!agreed) }
+        )
+
         BlockButton(
             enabled = formValid && !loading,
             onClick = {
+                if (!agreed) {
+                    context.toast("您需要同意用户协议和隐私政策")
+                    return@BlockButton
+                }
                 onSubmit(EmailAuthFormVal(
                     email = emailState.field.value,
                     password = pwState.field.value,
