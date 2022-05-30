@@ -92,6 +92,7 @@ class MainActivity : ScopedAppActivity(),
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
+            toast(R.string.login_success)
             updateSessionUI()
         }
     }
