@@ -38,9 +38,10 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ui.auth.AuthActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name=".ui.auth.password.PasswordActivity"
+            android:name=".ui.auth.PasswordActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity

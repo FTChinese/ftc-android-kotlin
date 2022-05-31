@@ -4,7 +4,7 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.ui.auth.password.PasswordActivity
+import com.ft.ftchinese.ui.auth.PasswordActivity
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 
