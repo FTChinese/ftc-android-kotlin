@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -26,16 +25,17 @@ fun CustomerService() {
                 style = MaterialTheme.typography.h6,
             )
             Divider(color = OColor.teal)
-            TextButton(onClick = {
-                val intent = IntentsUtil.emailCustomerService("FT中文网会员订阅")
-                if (intent.resolveActivity(context.packageManager) != null) {
-                    context.startActivity(intent)
-                } else {
-                    context.longToast(R.string.prompt_no_email_app)
-                }
-            }) {
-                Text(text = stringResource(id = R.string.customer_service_email))
-            }
+            OTextButton(
+                onClick = {
+                    val intent = IntentsUtil.emailCustomerService("FT中文网会员订阅")
+                    if (intent.resolveActivity(context.packageManager) != null) {
+                        context.startActivity(intent)
+                    } else {
+                        context.longToast(R.string.prompt_no_email_app)
+                    }
+                },
+                text = stringResource(id = R.string.customer_service_email)
+            )
         }
     }
 
