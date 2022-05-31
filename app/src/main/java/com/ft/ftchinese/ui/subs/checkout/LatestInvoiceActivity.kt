@@ -9,17 +9,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 
 /**
@@ -81,10 +79,10 @@ fun CheckoutResultApp(
                     route = CheckoutScreen.Invoices.name
                 ) {
                     LatestInvoiceActivityScreen(
-                        onNavigate = { screen ->
+                        onNext = {
                             navigateTo(
                                 navController = navController,
-                                screen = screen,
+                                screen = CheckoutScreen.BuyerInfo,
                             )
                         }
                     )
@@ -104,26 +102,6 @@ private fun navigateTo(
     screen: CheckoutScreen
 ) {
     navController.navigate(screen.name)
-}
-
-@Composable
-fun LatestInvoiceActivityScreen(
-    onNavigate: (CheckoutScreen) -> Unit
-) {
-    val context = LocalContext.current
-
-    val invoiceStore = remember {
-        InvoiceStore.getInstance(context)
-    }
-
-    invoiceStore.loadInvoices()?.let {
-        LatestInvoiceScreen(
-            invoice = it,
-            onClickNext = {
-                onNavigate(CheckoutScreen.BuyerInfo)
-            }
-        )
-    }
 }
 
 

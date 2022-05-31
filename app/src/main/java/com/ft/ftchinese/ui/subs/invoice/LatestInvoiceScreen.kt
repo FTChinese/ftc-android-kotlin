@@ -1,7 +1,8 @@
-package com.ft.ftchinese.ui.subs.checkout
+package com.ft.ftchinese.ui.subs.invoice
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,14 +14,20 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.invoice.Invoice
-import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.ui.components.BlockButton
+import com.ft.ftchinese.ui.components.BodyText1
 import com.ft.ftchinese.ui.formatter.FormatHelper
+import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
+import com.ft.ftchinese.ui.subs.mysubs.SubsStatusCard
 import com.ft.ftchinese.ui.theme.Dimens
+import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 
 @Composable
 fun LatestInvoiceScreen(
-    invoice: Invoices,
+    invoices: Invoices?,
+    membership: Membership,
     onClickNext: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -31,26 +38,33 @@ fun LatestInvoiceScreen(
                 .weight(1f)
                 .padding(Dimens.dp8)
         ) {
-            InvoiceTable(data = invoiceRow(context, invoice.purchased))
+            invoices?.let { inv ->
+                InvoiceTable(data = invoiceRow(context, inv.purchased))
+
+                Spacer(modifier = Modifier.height(Dimens.dp16))
+
+                inv.carriedOver?.let {
+                    BodyText1(
+                        text = "购买前会员剩余 ${it.totalDays} 天，将在当前会员到期后继续使用",
+                        modifier = Modifier.padding(Dimens.dp8)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
 
-            invoice.carriedOver?.let {
-                Text(
-                    text = "购买前会员剩余 ${it.totalDays} 天，将在当前会员到期后继续使用",
-                    modifier = Modifier.padding(Dimens.dp8)
+            SubsStatusCard(
+                status = SubsStatus.newInstance(
+                    context,
+                    membership,
                 )
-            }
+            )
         }
 
-        PrimaryButton(
+        BlockButton(
             onClick = onClickNext,
-            modifier = Modifier
-                .padding(Dimens.dp16)
-                .fillMaxWidth()
-        ) {
-            Text(text = "下一步，确认或完善个人信息")
-        }
+            text = "下一步，确认或完善个人信息"
+        )
     }
 }
 
@@ -67,11 +81,13 @@ private fun InvoiceTable(
                     text = pair.first,
                     modifier = Modifier
                         .weight(1f)
-                        .padding()
+                        .padding(),
+                    style = MaterialTheme.typography.subtitle2
                 )
                 Text(
                     text = pair.second,
-                    modifier = Modifier.weight(2f)
+                    modifier = Modifier.weight(2f),
+                    style = MaterialTheme.typography.body1
                 )
             }
         }
@@ -117,7 +133,7 @@ private fun invoiceRow(ctx: Context, inv: Invoice): List<Pair<String, String>> {
 @Composable
 fun PreviewLatestInvoiceScreen() {
     LatestInvoiceScreen(
-        invoice = Invoices(
+        invoices = Invoices(
             purchased = Invoice(
                 id = "FT1234567890",
                 compoundId = "",
@@ -141,6 +157,12 @@ fun PreviewLatestInvoiceScreen() {
                 days = 99,
                 paidAmount = 0.0,
             )
+        ),
+        membership = Membership(
+            tier = Tier.STANDARD,
+            cycle = Cycle.YEAR,
+            expireDate = LocalDate.now().plusYears(1),
+            payMethod = PayMethod.ALIPAY,
         ),
         onClickNext = {}
     )
