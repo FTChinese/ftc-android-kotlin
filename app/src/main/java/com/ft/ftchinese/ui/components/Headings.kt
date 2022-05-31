@@ -57,12 +57,13 @@ fun Heading3(
 @Composable
 fun SubHeading1(
     text: String,
+    modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
     color: Color = OColor.black
 ) {
     Text(
         text = text,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         textAlign = textAlign,
         style = MaterialTheme.typography.subtitle1,
         color = color,
@@ -72,12 +73,13 @@ fun SubHeading1(
 @Composable
 fun SubHeading2(
     text: String,
+    modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
     color: Color = OColor.black
 ) {
     Text(
         text = text,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         textAlign = textAlign,
         style = MaterialTheme.typography.subtitle2,
         color = color,
