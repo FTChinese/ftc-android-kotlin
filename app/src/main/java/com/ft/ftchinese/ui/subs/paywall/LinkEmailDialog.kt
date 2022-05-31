@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.subs.paywall
 
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text

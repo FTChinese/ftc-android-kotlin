@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.subs.paywall
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

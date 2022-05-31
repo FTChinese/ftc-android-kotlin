@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.subs.paywall
 
 import android.content.res.Resources
 import android.util.Log
