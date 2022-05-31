@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.product
+package com.ft.ftchinese.ui.subs.product
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*

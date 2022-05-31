@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.product
+package com.ft.ftchinese.ui.subs.product
 
 import android.content.Context
 import com.ft.ftchinese.R

@@ -26,8 +26,8 @@ import com.ft.ftchinese.model.stripesubs.StripeSubs
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.form.AutoRenewAgreement
 import com.ft.ftchinese.ui.formatter.FormatHelper
-import com.ft.ftchinese.ui.product.PriceCard
-import com.ft.ftchinese.ui.product.PriceCardParams
+import com.ft.ftchinese.ui.subs.product.PriceCard
+import com.ft.ftchinese.ui.subs.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 

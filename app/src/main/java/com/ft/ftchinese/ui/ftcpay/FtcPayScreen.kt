@@ -18,8 +18,8 @@ import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.ui.components.*
-import com.ft.ftchinese.ui.product.PriceCard
-import com.ft.ftchinese.ui.product.PriceCardParams
+import com.ft.ftchinese.ui.subs.product.PriceCard
+import com.ft.ftchinese.ui.subs.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
