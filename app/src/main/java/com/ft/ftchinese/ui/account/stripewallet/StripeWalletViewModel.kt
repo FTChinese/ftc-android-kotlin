@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.stripewallet
+package com.ft.ftchinese.ui.account.stripewallet
 
 import android.app.Application
 import android.util.Log

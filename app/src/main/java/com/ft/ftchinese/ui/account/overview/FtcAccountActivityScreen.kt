@@ -7,7 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.account.*
-import com.ft.ftchinese.ui.stripewallet.StripeWalletActivity
+import com.ft.ftchinese.ui.account.stripewallet.StripeWalletActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState

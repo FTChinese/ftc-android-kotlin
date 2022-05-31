@@ -1,8 +1,6 @@
-package com.ft.ftchinese.ui.stripewallet
+package com.ft.ftchinese.ui.account.stripewallet
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod

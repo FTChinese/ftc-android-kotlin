@@ -47,7 +47,7 @@
             android:name=".ui.share.ScreenshotActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.stripewallet.StripeWalletActivity"
+            android:name="com.ft.ftchinese.ui.account.stripewallet.StripeWalletActivity"
             android:exported="false" />
         <activity
             android:name=".ui.SubsActivity"
