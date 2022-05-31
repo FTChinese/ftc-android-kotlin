@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.ftcpay
+package com.ft.ftchinese.ui.subs.ftcpay
 
 import android.content.res.Resources
 import androidx.compose.material.ScaffoldState

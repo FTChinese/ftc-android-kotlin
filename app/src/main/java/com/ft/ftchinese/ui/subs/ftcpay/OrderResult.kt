@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.ftcpay
+package com.ft.ftchinese.ui.subs.ftcpay
 
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent

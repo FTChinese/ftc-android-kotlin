@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.ftcpay
+package com.ft.ftchinese.ui.subs.ftcpay
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*

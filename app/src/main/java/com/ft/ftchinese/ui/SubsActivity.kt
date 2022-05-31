@@ -37,7 +37,7 @@ import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.subs.SubsScreen
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.ftcpay.FtcPayActivityScreen
+import com.ft.ftchinese.ui.subs.ftcpay.FtcPayActivityScreen
 import com.ft.ftchinese.ui.subs.paywall.PaywallActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
