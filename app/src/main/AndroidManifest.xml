@@ -53,12 +53,12 @@
             android:name=".ui.SubsActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.AboutListActivity"
+            android:name=".ui.about.AboutListActivity"
             android:label="@string/title_about_us"
             android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.webpage.WebpageActivity"
-            android:parentActivityName=".ui.AboutListActivity" />
+            android:parentActivityName=".ui.about.AboutListActivity" />
         <activity
             android:name=".TestActivity"
             android:label="Test"

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui
+package com.ft.ftchinese.ui.about
 
 import android.content.Context
 import android.content.Intent
@@ -24,8 +24,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.ui.about.AboutActivityScreen
-import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.theme.OTheme

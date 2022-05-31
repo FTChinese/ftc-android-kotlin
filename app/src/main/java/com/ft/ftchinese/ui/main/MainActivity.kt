@@ -38,7 +38,7 @@ import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.AboutListActivity
+import com.ft.ftchinese.ui.about.AboutListActivity
 import com.ft.ftchinese.ui.MemberActivity
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.account.AccountActivity
