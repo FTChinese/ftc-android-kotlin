@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -30,8 +31,11 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.components.OTextButton
 import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.subs.checkout.BuyerInfoActivityScreen
+import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.ft.ftchinese.wxapi.wxpay.WxPayActivityScreen
@@ -217,7 +221,6 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
     }
 
     companion object {
-
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(
@@ -252,26 +255,73 @@ fun WxPayApp(
                         if (!ok) {
                             onExit()
                         }
+                    },
+                    actions = {
+                        if (currentScreen == PayAppScreen.BuyerInfo) {
+                            OTextButton(
+                                onClick = onExit,
+                                text = "跳过"
+                            )
+                        }
                     }
                 )
             },
-            scaffoldState = scaffold
+            scaffoldState = scaffold,
         ) { innerPadding ->
             NavHost(
                 navController = navController,
                 startDestination = OAuthAppScreen.OAuth.name,
                 modifier = Modifier.padding(innerPadding)
             ) {
+
                 composable(
                     route = PayAppScreen.PayResponse.name
                 ) {
                     WxPayActivityScreen(
                         uiStatusLiveData = uiStatusLiveData,
-                        onClickDone = onExit
+                        onClickDone = onExit,
+                        onSuccess = {
+                            navigateToInvoice(
+                                navController
+                            )
+                        }
                     )
                 }
+
+                composable(
+                    route = PayAppScreen.Invoices.name
+                ) {
+                    LatestInvoiceActivityScreen(
+                        onNext = {
+                            navigateToBuyerInfo(
+                                navController
+                            )
+                        }
+                    )
+                }
+
+                composable(
+                    route = PayAppScreen.BuyerInfo.name
+                ) {
+                    BuyerInfoActivityScreen(
+                        scaffoldState = scaffold,
+                        onExit = onExit
+                    )
+                }
+
             }
         }
     }
 }
 
+private fun navigateToInvoice(
+    navController: NavController
+) {
+    navController.navigate(PayAppScreen.Invoices.name)
+}
+
+private fun navigateToBuyerInfo(
+    navController: NavController
+) {
+    navController.navigate(PayAppScreen.BuyerInfo.name)
+}
