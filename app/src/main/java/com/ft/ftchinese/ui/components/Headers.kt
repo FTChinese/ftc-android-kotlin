@@ -32,7 +32,7 @@ fun ScreenHeader(
 
 @Composable
 fun ProductHeader(text: String) {
-    Heading1(
+    Heading2(
         text = text,
     )
     Divider(color = OColor.teal)
