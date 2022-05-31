@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun ScreenHeader(
@@ -26,4 +28,13 @@ fun ScreenHeader(
             Spacer(modifier = Modifier.height(Dimens.dp8))
         }
     }
+}
+
+@Composable
+fun ProductHeader(text: String) {
+    Heading1(
+        text = text,
+    )
+    Divider(color = OColor.teal)
+    Spacer(modifier = Modifier.height(Dimens.dp16))
 }

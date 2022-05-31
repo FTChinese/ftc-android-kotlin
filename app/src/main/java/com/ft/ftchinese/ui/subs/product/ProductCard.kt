@@ -21,6 +21,7 @@ import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.ProductItem
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.ui.components.ProductHeader
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
@@ -38,7 +39,7 @@ fun ProductCard(
             modifier = Modifier
                 .padding(Dimens.dp16),
         ) {
-            ProductHeading(text = item.content.heading)
+            ProductHeader(text = item.content.heading)
 
             item.ftcItems.forEach { cartItem ->
                 Card(
