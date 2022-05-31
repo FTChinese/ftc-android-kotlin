@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.member
+package com.ft.ftchinese.ui.subs.member
 
 import android.content.Context
 import com.ft.ftchinese.R

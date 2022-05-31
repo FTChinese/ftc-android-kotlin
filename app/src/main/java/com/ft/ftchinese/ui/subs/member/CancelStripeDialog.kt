@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.member
+package com.ft.ftchinese.ui.subs.member
 
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button

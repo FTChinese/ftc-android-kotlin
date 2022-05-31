@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.member.MemberActivityScreen
+import com.ft.ftchinese.ui.subs.member.MemberActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.RequestCode
 import kotlinx.coroutines.launch
