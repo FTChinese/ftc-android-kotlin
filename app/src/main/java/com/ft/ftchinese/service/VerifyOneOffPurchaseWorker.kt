@@ -9,7 +9,7 @@ import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
 
-class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
+class VerifyOneOffPurchaseWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
 
     private val ctx = appContext
 
@@ -40,7 +40,9 @@ class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParam
         }
 
         try {
-            val result = FtcPayClient.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
+            val result = FtcPayClient
+                .verifyOrder(account, pr.ftcOrderId)
+                ?: return Result.failure()
             Log.i(TAG, "$result")
 
             InvoiceStore.getInstance(ctx).savePayResult(result.payment)
