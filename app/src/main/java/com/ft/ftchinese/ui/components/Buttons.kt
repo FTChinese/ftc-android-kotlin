@@ -59,9 +59,9 @@ fun SecondaryButton(
 @Composable
 fun OTextButton(
     onClick: () -> Unit,
-    enabled: Boolean,
+    enabled: Boolean = true,
+    colors: ButtonColors = OButton.textColors(),
     text: String,
-    colors: ButtonColors = OButton.textColors()
 ) {
     TextButton(
         onClick = onClick,
