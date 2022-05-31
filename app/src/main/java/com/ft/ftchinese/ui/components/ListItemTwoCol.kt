@@ -13,18 +13,20 @@ import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun ListItemTwoCol(
+    modifier: Modifier = Modifier,
     lead: String,
     tail: String,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = Dimens.dp8),
+            .padding(bottom = Dimens.dp8)
+            .then(modifier),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
             text = lead,
-            style = MaterialTheme.typography.body1
+            style = MaterialTheme.typography.subtitle2
         )
         Text(
             text = tail,
