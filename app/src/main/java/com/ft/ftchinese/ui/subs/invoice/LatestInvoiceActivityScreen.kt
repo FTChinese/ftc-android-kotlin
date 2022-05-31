@@ -1,10 +1,14 @@
 package com.ft.ftchinese.ui.subs.invoice
 
+import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.work.*
+import com.ft.ftchinese.service.VerifyOneOffPurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -26,6 +30,10 @@ fun LatestInvoiceActivityScreen(
         InvoiceStore.getInstance(context)
     }
 
+    LaunchedEffect(key1 = Unit) {
+        verifyPayment(context)
+    }
+
     LatestInvoiceScreen(
         invoices = invoiceStore.loadInvoices(),
         membership = account.membership,
@@ -33,4 +41,20 @@ fun LatestInvoiceActivityScreen(
             onNext()
         }
     )
+}
+
+private fun verifyPayment(
+    context: Context
+) {
+    // Schedule VerifySubsWorker
+    val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifyOneOffPurchaseWorker>()
+        .setConstraints(
+            Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build())
+        .build()
+
+    WorkManager
+        .getInstance(context)
+        .enqueue(verifyRequest)
 }
