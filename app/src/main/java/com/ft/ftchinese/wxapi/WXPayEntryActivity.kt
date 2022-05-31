@@ -177,7 +177,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
 
         userViewModel.saveMembership(confirmed.membership)
 
-        statusLiveData.value = WxPayStatus.Success(confirmed.membership)
+        statusLiveData.value = WxPayStatus.Success
         verifyPayment()
 
         tracker?.paySuccess(PaySuccessParams.ofFtc(pi))
@@ -284,7 +284,7 @@ fun WxPayApp(
                 ) {
                     WxPayActivityScreen(
                         uiStatusLiveData = uiStatusLiveData,
-                        onClickDone = onExit,
+                        onFailure = onExit,
                         onSuccess = {
                             navigateToInvoice(
                                 navController

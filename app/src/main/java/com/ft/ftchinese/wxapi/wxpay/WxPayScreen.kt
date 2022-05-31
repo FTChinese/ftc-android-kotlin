@@ -4,17 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.wxapi.shared.WxRespProgress
-import org.threeten.bp.LocalDate
 
 @Composable
 fun WxPayScreen(
     status: WxPayStatus,
-    onDone: () -> Unit,
+    onFailure: () -> Unit,
+    onSuccess: () -> Unit,
 ) {
 
     when (status) {
@@ -30,22 +26,22 @@ fun WxPayScreen(
             WxRespProgress(
                 title = stringResource(id = R.string.payment_done),
                 subTitle = "",
-                buttonText = stringResource(id = R.string.btn_done),
-                onClickButton = onDone,
+                buttonText = "查看结果",
+                onClickButton = onSuccess,
             )
         }
         is WxPayStatus.Canceled -> {
             WxRespProgress(
                 title = stringResource(id = R.string.wxpay_cancelled),
                 subTitle = "",
-                onClickButton = onDone
+                onClickButton = onFailure
             )
         }
         is WxPayStatus.Error -> {
             WxRespProgress(
                 title = stringResource(id = R.string.wxpay_failed),
                 subTitle = "Error: ${status.message}",
-                onClickButton = onDone
+                onClickButton = onFailure
             )
         }
     }
@@ -56,7 +52,8 @@ fun WxPayScreen(
 fun PreviewWxPayScreenLoading() {
     WxPayScreen(
         status = WxPayStatus.Loading,
-        onDone = {}
+        onFailure = {},
+        onSuccess = {}
     )
 }
 
@@ -64,13 +61,9 @@ fun PreviewWxPayScreenLoading() {
 @Composable
 fun PreviewWxPayScreenSuccess() {
     WxPayScreen(
-        status = WxPayStatus.Success(Membership(
-            tier = Tier.STANDARD,
-            cycle = Cycle.YEAR,
-            payMethod = PayMethod.WXPAY,
-            expireDate = LocalDate.now().plusYears(1)
-        )),
-        onDone = {}
+        status = WxPayStatus.Success,
+        onFailure = {},
+        onSuccess = {}
     )
 }
 
@@ -79,7 +72,8 @@ fun PreviewWxPayScreenSuccess() {
 fun PreviewWxPayScreenError() {
     WxPayScreen(
         status = WxPayStatus.Error("Unknown"),
-        onDone = {}
+        onFailure = {},
+        onSuccess = {}
     )
 }
 
@@ -88,6 +82,7 @@ fun PreviewWxPayScreenError() {
 fun PreviewWxPayScreenCanceled() {
     WxPayScreen(
         status = WxPayStatus.Canceled,
-        onDone = {}
+        onFailure = {},
+        onSuccess = {}
     )
 }
