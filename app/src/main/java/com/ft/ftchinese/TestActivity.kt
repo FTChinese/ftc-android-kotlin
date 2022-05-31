@@ -27,8 +27,10 @@ import androidx.work.WorkManager
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
+import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
@@ -43,15 +45,13 @@ import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.components.TextInput
-import com.ft.ftchinese.ui.components.Timer
-import com.ft.ftchinese.ui.components.rememberInputState
-import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.ui.main.AcceptServiceDialogFragment
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
+import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
@@ -132,6 +132,8 @@ class TestActivity : ScopedAppActivity() {
 
                             PaywallButton()
 
+                            TestWxPay()
+
                             WxMiniButton()
 
                             PostPurchaseButton()
@@ -176,6 +178,47 @@ class TestActivity : ScopedAppActivity() {
                 Log.i(TAG, "Key: $key Value: $value")
             }
         }
+    }
+
+    @Composable
+    fun TestWxPay() {
+        BlockButton(
+            onClick = {
+                PayIntentStore.getInstance(this)
+                    .save(FtcPayIntent(
+                        price = defaultPaywall.products[0].prices[0],
+                        order = Order(
+                            id = "test-order",
+                            ftcId = "test-user",
+                            unionId = null,
+                            tier = Tier.STANDARD,
+                            kind = OrderKind.AddOn,
+                            payableAmount = 298.0,
+                            payMethod = PayMethod.WXPAY,
+                            yearsCount = 1,
+                            monthsCount = 0,
+                            daysCount = 0,
+                        )
+                    ))
+
+                WXPayEntryActivity.start(
+                    this,
+                    true
+                )
+            },
+            text = "Launch Wx Pay Entry Activity"
+        )
+    }
+
+    @Composable
+    fun ShowPaymentResult() {
+        BlockButton(
+            onClick = {
+                createPaymentResult()
+                LatestInvoiceActivity.start(this@TestActivity)
+            },
+            text ="Show Payment Result"
+        )
     }
 
     @Composable
@@ -599,16 +642,6 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
-    @Composable
-    fun ShowPaymentResult() {
-        Button(onClick = {
-            createPaymentResult()
-            LatestInvoiceActivity.start(this@TestActivity)
-        }) {
-            Text(text = "Show Payment Result")
-        }
-    }
-
 
     @Composable
     fun ShowUpgradeResult() {
@@ -685,28 +718,28 @@ class TestActivity : ScopedAppActivity() {
 
     private fun createPaymentResult() {
         InvoiceStore.
-        getInstance(this@TestActivity).
-        saveInvoices(
-            ConfirmationParams(
-                order = Order(
-                    id = "order-id",
-                    ftcId = "ftc-user-id",
-                    unionId = null,
-                    originalPrice = 298.0,
-                    tier = Tier.STANDARD,
-                    payableAmount = 298.0,
-                    kind = OrderKind.Create,
-                    payMethod = PayMethod.ALIPAY,
-                    yearsCount = 1,
-                    monthsCount = 0,
-                    daysCount = 0,
-                    confirmedAt = null,
-                    startDate = null,
-                    endDate =  null
-                ),
-                member = Membership()
-            ).invoices
-        )
+            getInstance(this@TestActivity).
+            saveInvoices(
+                ConfirmationParams(
+                    order = Order(
+                        id = "order-id",
+                        ftcId = "ftc-user-id",
+                        unionId = null,
+                        originalPrice = 298.0,
+                        tier = Tier.STANDARD,
+                        payableAmount = 298.0,
+                        kind = OrderKind.Create,
+                        payMethod = PayMethod.ALIPAY,
+                        yearsCount = 1,
+                        monthsCount = 0,
+                        daysCount = 0,
+                        confirmedAt = null,
+                        startDate = null,
+                        endDate =  null
+                    ),
+                    member = Membership()
+                ).invoices
+            )
     }
 
     private fun createUpgradeResult() {
