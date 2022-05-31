@@ -18,6 +18,7 @@ object FtcPayClient {
     fun verifyOrder(account: Account, orderId: String):  VerificationResult? {
         return Fetch()
             .post(Endpoint.subsBase(account.isTest) + "/orders/$orderId/verify-payment")
+            .addHeaders(account.headers())
             .noCache()
             .setApiKey()
             .send()
