@@ -143,7 +143,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.checkout.LatestInvoiceActivity"
+            android:name="com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity"
             android:label="@string/title_latest_invoice" />
         <activity
             android:name=".ui.settings.SettingsActivity"

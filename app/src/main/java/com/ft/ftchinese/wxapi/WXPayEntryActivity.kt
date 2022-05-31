@@ -30,7 +30,7 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
+import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel

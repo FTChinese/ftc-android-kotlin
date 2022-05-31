@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.checkout
+package com.ft.ftchinese.ui.subs.checkout
 
 import androidx.annotation.StringRes
 import com.ft.ftchinese.R

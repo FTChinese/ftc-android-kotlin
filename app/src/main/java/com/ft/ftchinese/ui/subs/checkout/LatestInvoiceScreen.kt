@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.checkout
+package com.ft.ftchinese.ui.subs.checkout
 
 import android.content.Context
 import androidx.compose.foundation.layout.*

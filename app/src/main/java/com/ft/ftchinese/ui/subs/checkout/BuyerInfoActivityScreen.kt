@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.checkout
+package com.ft.ftchinese.ui.subs.checkout
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable

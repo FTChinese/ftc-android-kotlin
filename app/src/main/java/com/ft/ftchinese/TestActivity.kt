@@ -43,7 +43,7 @@ import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.base.toast
-import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
+import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.TextInput
 import com.ft.ftchinese.ui.components.Timer
 import com.ft.ftchinese.ui.components.rememberInputState
