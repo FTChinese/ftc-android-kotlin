@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.ReleaseStore
-import com.ft.ftchinese.ui.release.ReleaseActivity
+import com.ft.ftchinese.ui.settings.release.ReleaseActivity
 import org.threeten.bp.ZonedDateTime
 
 /**

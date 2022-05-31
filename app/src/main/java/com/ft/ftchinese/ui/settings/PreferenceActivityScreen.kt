@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.components.ShowToast
-import com.ft.ftchinese.ui.release.ReleaseActivity
+import com.ft.ftchinese.ui.settings.release.ReleaseActivity
 
 @Composable
 fun PreferenceActivityScreen(

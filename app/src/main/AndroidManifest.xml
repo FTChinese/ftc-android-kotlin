@@ -148,7 +148,7 @@
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings" />
-        <activity android:name=".ui.release.ReleaseActivity" />
+        <activity android:name="com.ft.ftchinese.ui.settings.release.ReleaseActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

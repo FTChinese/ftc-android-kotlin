@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.release
+package com.ft.ftchinese.ui.settings.release
 
 import android.app.Application
 import android.util.Log

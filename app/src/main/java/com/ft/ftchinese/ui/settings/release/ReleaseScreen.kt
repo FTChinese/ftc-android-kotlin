@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.release
+package com.ft.ftchinese.ui.settings.release
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.AlertDialog
