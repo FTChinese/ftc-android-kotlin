@@ -21,7 +21,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.AuthActivity
-import com.ft.ftchinese.ui.stripepay.StripeSubActivity
+import com.ft.ftchinese.ui.subs.stripepay.StripeSubActivity
 import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh

@@ -103,7 +103,7 @@
         <activity android:name=".ui.wxlink.WxLinkEmailActivity"/>
         <activity android:name=".ui.MemberActivity" />
         <activity
-            android:name=".ui.stripepay.StripeSubActivity"
+            android:name="com.ft.ftchinese.ui.subs.stripepay.StripeSubActivity"
             android:exported="true"
             android:label="@string/pay_method_stripe"
             android:launchMode="singleTask">

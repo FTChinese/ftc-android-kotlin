@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.stripepay
+package com.ft.ftchinese.ui.subs.stripepay
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme

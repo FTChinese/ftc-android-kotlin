@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.stripepay
+package com.ft.ftchinese.ui.subs.stripepay
 
 import android.app.Application
 import android.util.Log
