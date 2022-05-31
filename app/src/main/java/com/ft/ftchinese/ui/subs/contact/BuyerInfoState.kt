@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.subs.checkout
+package com.ft.ftchinese.ui.subs.contact
 
 import android.content.res.Resources
 import android.util.Log
