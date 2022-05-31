@@ -32,7 +32,6 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.OTextButton
-import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.checkout.BuyerInfoActivityScreen
 import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
@@ -84,6 +83,11 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
                 uiStatusLiveData = statusLiveData,
                 onExit = this::onClickDone
             )
+        }
+
+        val isTest = intent.getBooleanExtra(EXTRA_TEST, false)
+        if (isTest) {
+            onResp(MockResp())
         }
     }
 
@@ -199,8 +203,6 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
         }
 
         if (pi.order.isConfirmed()) {
-            LatestInvoiceActivity.start(this)
-        } else {
             PaywallTracker.from = null
             SubsActivity.start(this)
         }
@@ -221,12 +223,15 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
     }
 
     companion object {
+        private const val EXTRA_TEST = "extra_test"
         @JvmStatic
-        fun start(context: Context) {
+        fun start(context: Context, isTest: Boolean = false) {
             context.startActivity(Intent(
                 context,
                 WXPayEntryActivity::class.java
-            ))
+            ).apply {
+                putExtra(EXTRA_TEST, isTest)
+            })
         }
     }
 }
@@ -270,7 +275,7 @@ fun WxPayApp(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = OAuthAppScreen.OAuth.name,
+                startDestination = PayAppScreen.PayResponse.name,
                 modifier = Modifier.padding(innerPadding)
             ) {
 
