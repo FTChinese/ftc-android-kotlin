@@ -6,15 +6,11 @@ import com.ft.ftchinese.R
 enum class SubsAppScreen(
     @StringRes val titleId: Int,
 ) {
-    Paywall(
-        titleId = R.string.title_subscription
-    ),
-    FtcPay(
-        titleId = R.string.check_out
-    ),
-    StripePay(
-        titleId = R.string.pay_method_stripe
-    );
+    Paywall(titleId = R.string.title_subscription),
+    FtcPay(titleId = R.string.check_out),
+    StripePay(titleId = R.string.pay_method_stripe),
+    Invoices(titleId = R.string.title_latest_invoice),
+    BuyerInfo(titleId = R.string.title_buyer_info);
 
     companion object {
         fun fromRoute(route: String?): SubsAppScreen =
@@ -22,6 +18,8 @@ enum class SubsAppScreen(
                 Paywall.name -> Paywall
                 FtcPay.name -> FtcPay
                 StripePay.name -> StripePay
+                Invoices.name -> Invoices
+                BuyerInfo.name -> BuyerInfo
                 null -> Paywall
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
