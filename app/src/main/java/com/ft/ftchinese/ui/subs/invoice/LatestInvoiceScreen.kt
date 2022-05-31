@@ -17,6 +17,7 @@ import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.BlockButton
 import com.ft.ftchinese.ui.components.BodyText1
+import com.ft.ftchinese.ui.components.WeightedColumn
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatusCard
@@ -32,40 +33,37 @@ fun LatestInvoiceScreen(
 ) {
     val context = LocalContext.current
 
-    Column {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(Dimens.dp8)
-        ) {
-            invoices?.let { inv ->
-                InvoiceTable(data = invoiceRow(context, inv.purchased))
-
-                Spacer(modifier = Modifier.height(Dimens.dp16))
-
-                inv.carriedOver?.let {
-                    BodyText1(
-                        text = "购买前会员剩余 ${it.totalDays} 天，将在当前会员到期后继续使用",
-                        modifier = Modifier.padding(Dimens.dp8)
-                    )
-                }
-            }
+    WeightedColumn(
+        bottom = {
+            BlockButton(
+                onClick = onClickNext,
+                text = "下一步，确认或完善个人信息"
+            )
+        }
+    ) {
+        invoices?.let { inv ->
+            InvoiceTable(data = invoiceRow(context, inv.purchased))
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
 
-            SubsStatusCard(
-                status = SubsStatus.newInstance(
-                    context,
-                    membership,
+            inv.carriedOver?.let {
+                BodyText1(
+                    text = "购买前会员剩余 ${it.totalDays} 天，将在当前会员到期后继续使用",
+                    modifier = Modifier.padding(Dimens.dp8)
                 )
-            )
+            }
         }
 
-        BlockButton(
-            onClick = onClickNext,
-            text = "下一步，确认或完善个人信息"
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+
+        SubsStatusCard(
+            status = SubsStatus.newInstance(
+                context,
+                membership,
+            )
         )
     }
+
 }
 
 @Composable
