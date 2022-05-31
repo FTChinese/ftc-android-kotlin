@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.ui.components.ListItemTwoCol
-import com.ft.ftchinese.ui.subs.product.ProductHeading
+import com.ft.ftchinese.ui.components.ProductHeader
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
@@ -23,7 +23,7 @@ fun SubsStatusCard(
                 .fillMaxWidth()
                 .padding(Dimens.dp16)
         ) {
-            ProductHeading(text = status.productName)
+            ProductHeader(text = status.productName)
 
             status.reminder?.let {
                 RemindMessage(message = it)
