@@ -10,6 +10,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.ui.components.ListItemTwoCol
 import com.ft.ftchinese.ui.components.ProductHeader
+import com.ft.ftchinese.ui.components.SubHeading1
+import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
@@ -41,18 +43,16 @@ fun SubsStatusCard(
             if (status.addOns.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(Dimens.dp16))
 
-                Text(
+                SubHeading1(
                     text = "待启用订阅时长",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.subtitle1
                 )
                 Spacer(modifier = Modifier.height(Dimens.dp8))
-                Text(
+                SubHeading2(
                     text = "以下订阅时间将在现有订阅服务到期后使用",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.subtitle2,
                     color = OColor.black60
                 )
                 Spacer(modifier = Modifier.height(Dimens.dp8))
