@@ -17,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.ui.MemberActivity
+import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.ui.base.toast

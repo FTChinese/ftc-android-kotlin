@@ -39,8 +39,8 @@ import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.about.AboutListActivity
-import com.ft.ftchinese.ui.MemberActivity
-import com.ft.ftchinese.ui.SubsActivity
+import com.ft.ftchinese.ui.subs.MemberActivity
+import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages

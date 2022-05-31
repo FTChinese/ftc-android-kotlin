@@ -18,7 +18,7 @@ import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.MemberActivity
+import com.ft.ftchinese.ui.subs.MemberActivity
 
 /**
  * Verify subscription status each time the app launches.

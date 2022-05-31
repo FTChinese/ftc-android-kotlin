@@ -51,7 +51,7 @@
             android:name="com.ft.ftchinese.ui.account.stripewallet.StripeWalletActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.SubsActivity"
+            android:name=".ui.subs.SubsActivity"
             android:exported="false" />
         <activity
             android:name=".ui.about.AboutListActivity"
@@ -102,7 +102,7 @@
             android:parentActivityName=".ui.main.MainActivity" />
         <activity android:name=".ui.account.AccountActivity" />
         <activity android:name=".ui.wxlink.WxLinkEmailActivity"/>
-        <activity android:name=".ui.MemberActivity" />
+        <activity android:name=".ui.subs.MemberActivity" />
         <activity
             android:name="com.ft.ftchinese.ui.subs.stripepay.StripeSubActivity"
             android:exported="true"

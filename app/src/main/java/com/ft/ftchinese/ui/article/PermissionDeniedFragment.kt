@@ -11,8 +11,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPermissionDeniedBinding
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.ui.MemberActivity
-import com.ft.ftchinese.ui.SubsActivity
+import com.ft.ftchinese.ui.subs.MemberActivity
+import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.channel.DenialReason
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
