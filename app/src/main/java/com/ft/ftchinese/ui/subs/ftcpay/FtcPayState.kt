@@ -13,6 +13,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.request.OrderParams
 import com.ft.ftchinese.repository.FtcPayClient
+import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -45,7 +46,7 @@ class FtcPayState(
         progress.value = false
     }
 
-    fun createOrder(account: Account, payMethod: PayMethod) {
+    fun createOrder(account: Account, payMethod: PayMethod, store: PayIntentStore) {
         val item = cartItem ?: return
         if (!ensureConnected()) {
             return
@@ -58,10 +59,10 @@ class FtcPayState(
 
         when (payMethod) {
             PayMethod.ALIPAY -> {
-                createAliOrder(account, params)
+                createAliOrder(account, params, store)
             }
             PayMethod.WXPAY -> {
-                createWxOrder(account, params)
+                createWxOrder(account, params, store)
             }
             else -> {
                 showSnackBar(R.string.toast_no_pay_method)
@@ -69,7 +70,7 @@ class FtcPayState(
         }
     }
 
-    private fun createWxOrder(account: Account, params: OrderParams) {
+    private fun createWxOrder(account: Account, params: OrderParams, store: PayIntentStore) {
         progress.value = true
         scope.launch {
             val result = FtcPayClient.asyncCreateWxOrder(
@@ -77,8 +78,6 @@ class FtcPayState(
                 params = params
             )
 
-            progress.value = false
-
             when (result) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
@@ -87,13 +86,16 @@ class FtcPayState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
+                    store.save(result.data.toPayIntent())
                     paymentIntent = OrderResult.WxPay(result.data)
                 }
             }
+
+            progress.value = false
         }
     }
 
-    private fun createAliOrder(account: Account, params: OrderParams) {
+    private fun createAliOrder(account: Account, params: OrderParams, store: PayIntentStore) {
         progress.value = true
         scope.launch {
             val result = FtcPayClient.asyncCreateAliOrder(
@@ -101,8 +103,6 @@ class FtcPayState(
                 params = params
             )
 
-            progress.value = false
-
             when (result) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
@@ -111,9 +111,12 @@ class FtcPayState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
+                    store.save(result.data.toPayIntent())
                     paymentIntent = OrderResult.AliPay(result.data)
                 }
             }
+
+            progress.value = false
         }
     }
 }
