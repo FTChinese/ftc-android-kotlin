@@ -11,14 +11,12 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
-import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.tracking.BeginCheckoutParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.Build
-import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
@@ -63,11 +61,13 @@ fun FtcPayActivityScreen(
         ftcPayState.paymentIntent?.let {
             when (it) {
                 is OrderResult.WxPay -> {
-                    payIntentStore.save(it.intent.toPayIntent())
-                    launchWxPay(
-                        wxApi = wxApi,
-                        wxPayIntent = it.intent
-                    )
+                    val params = it.intent.params.app
+                    if (params == null) {
+                        ftcPayState.showSnackBar("Wx order missing required parameters")
+                        return@LaunchedEffect
+                    }
+
+                    wxApi.sendReq(params.buildReq())
                 }
                 is OrderResult.AliPay -> {
                     onAliPay(it.intent)
@@ -98,7 +98,8 @@ fun FtcPayActivityScreen(
 
                     ftcPayState.createOrder(
                         account = account,
-                        payMethod = payMethod
+                        payMethod = payMethod,
+                        store = payIntentStore,
                     )
 
                     tracker.beginCheckOut(
@@ -111,14 +112,5 @@ fun FtcPayActivityScreen(
             )
         }
     }
-}
-
-private fun launchWxPay(
-    wxApi: IWXAPI,
-    wxPayIntent: WxPayIntent
-): Boolean {
-    val params = wxPayIntent.params.app ?: return false
-
-    return wxApi.sendReq(params.buildReq())
 }
 
