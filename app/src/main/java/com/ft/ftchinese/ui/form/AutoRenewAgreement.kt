@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.components
+package com.ft.ftchinese.ui.form
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.ClickableText

@@ -24,6 +24,7 @@ import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.model.stripesubs.StripeSubs
 import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.form.AutoRenewAgreement
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.product.PriceCard
 import com.ft.ftchinese.ui.product.PriceCardParams

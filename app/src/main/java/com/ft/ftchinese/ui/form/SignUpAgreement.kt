@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.components
+package com.ft.ftchinese.ui.form
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +12,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.legal.legalPages
+import com.ft.ftchinese.ui.components.CheckButton
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 
