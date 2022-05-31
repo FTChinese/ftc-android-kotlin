@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.components
+package com.ft.ftchinese.ui.subs
 
 import androidx.annotation.StringRes
 import com.ft.ftchinese.R
