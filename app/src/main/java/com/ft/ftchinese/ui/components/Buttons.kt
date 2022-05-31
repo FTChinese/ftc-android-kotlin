@@ -79,7 +79,7 @@ enum class ButtonVariant {
 
 @Composable
 fun BlockButton(
-    enabled: Boolean,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     text: String = stringResource(id = R.string.btn_save),
     variant: ButtonVariant = ButtonVariant.Primary,
