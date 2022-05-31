@@ -183,16 +183,6 @@ class StripeSubActivity : ScopedAppActivity() {
         private const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, item: CartItemStripe) {
-            activity.startActivityForResult(
-                Intent(activity, StripeSubActivity::class.java).apply {
-                    putExtra(EXTRA_CHECKOUT_ITEM, item)
-                },
-                requestCode,
-            )
-        }
-
-        @JvmStatic
         fun intent(context: Context, item: CartItemStripe) = Intent(context, StripeSubActivity::class.java).apply {
             putExtra(EXTRA_CHECKOUT_ITEM, item)
         }
