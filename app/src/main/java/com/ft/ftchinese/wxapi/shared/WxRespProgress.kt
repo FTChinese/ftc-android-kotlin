@@ -12,8 +12,8 @@ import androidx.compose.ui.text.style.TextAlign
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.SecondaryButton
-import com.ft.ftchinese.ui.subs.member.SubsStatus
-import com.ft.ftchinese.ui.subs.member.SubsStatusCard
+import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
+import com.ft.ftchinese.ui.subs.mysubs.SubsStatusCard
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable

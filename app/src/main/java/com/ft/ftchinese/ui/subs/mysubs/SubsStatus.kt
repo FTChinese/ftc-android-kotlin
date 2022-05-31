@@ -1,8 +1,7 @@
-package com.ft.ftchinese.ui.subs.member
+package com.ft.ftchinese.ui.subs.mysubs
 
 import android.content.Context
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.reader.AutoRenewMoment
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.formatter.FormatHelper
@@ -126,27 +125,6 @@ data class SubsStatus(
             }
         }
     }
-}
-
-fun formatAutoRenewDate(ctx: Context, moment: AutoRenewMoment): String {
-    val monthDate =  if (moment.month != null) {
-        ctx.getString(
-            R.string.formatter_month_date,
-            moment.month,
-            moment.date
-        )
-    } else {
-        ctx.getString(
-            R.string.formatter_date,
-            moment.date
-        )
-    }
-
-    return ctx.getString(
-        R.string.formatter_edition,
-        monthDate,
-        ctx.getString(moment.cycle.stringRes)
-    )
 }
 
 

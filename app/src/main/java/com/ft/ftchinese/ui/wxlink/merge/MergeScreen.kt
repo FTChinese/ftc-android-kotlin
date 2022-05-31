@@ -23,7 +23,7 @@ import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.ui.components.ListItemTwoCol
 import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.components.WeightedColumn
-import com.ft.ftchinese.ui.subs.member.SubsStatus
+import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
 import com.ft.ftchinese.ui.theme.Dimens
 import org.threeten.bp.LocalDate
 

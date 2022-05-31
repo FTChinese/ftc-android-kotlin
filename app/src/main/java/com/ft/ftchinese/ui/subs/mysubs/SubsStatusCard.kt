@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.subs.member
+package com.ft.ftchinese.ui.subs.mysubs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card

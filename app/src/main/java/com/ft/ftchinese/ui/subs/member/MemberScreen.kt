@@ -15,6 +15,8 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.SubsRuleContent
+import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
+import com.ft.ftchinese.ui.subs.mysubs.SubsStatusCard
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
