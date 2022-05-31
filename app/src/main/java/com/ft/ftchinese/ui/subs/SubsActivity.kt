@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.subs
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -20,24 +19,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.work.*
 import com.alipay.sdk.app.PayTask
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
-import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
-import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.paywall.CartItemFtc
-import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
-import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.store.PayIntentStore
-import com.ft.ftchinese.tracking.PaySuccessParams
-import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
-import com.ft.ftchinese.ui.base.toast
-import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.subs.SubsAppScreen
+import com.ft.ftchinese.ui.components.OTextButton
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.subs.contact.BuyerInfoActivityScreen
+import com.ft.ftchinese.ui.subs.ftcpay.AliPayResult
 import com.ft.ftchinese.ui.subs.ftcpay.FtcPayActivityScreen
+import com.ft.ftchinese.ui.subs.ftcpay.FtcPayViewModel
+import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.subs.paywall.PaywallActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -48,17 +40,20 @@ import kotlinx.coroutines.withContext
 class SubsActivity : ScopedComponentActivity() {
 
     private lateinit var userViewModel: UserViewModel
+    private lateinit var ftcPayViewModel: FtcPayViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+        ftcPayViewModel = ViewModelProvider(this)[FtcPayViewModel::class.java]
 
         val premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
         setContent {
             SubsApp(
                 userViewModel = userViewModel,
+                payViewModel = ftcPayViewModel,
                 premiumOnTop = premiumFirst,
                 onAliPay = this::launchAliPay,
                 onExit = {
@@ -87,64 +82,11 @@ class SubsActivity : ScopedComponentActivity() {
 
             Log.i(TAG, "Alipay result: $payResult")
 
-            val resultStatus = payResult["resultStatus"]
-            val msg = payResult["memo"] ?: getString(R.string.wxpay_failed)
-
-            val tracker = StatsTracker.getInstance(this@SubsActivity)
-            if (resultStatus != "9000") {
-                toast(msg)
-                tracker.payFailed(aliPayIntent.price.edition)
-
-                return@launch
-            }
-
-            val pi = aliPayIntent.toPayIntent()
-            confirmAliSubscription(aliPayIntent.toPayIntent())
-            tracker.paySuccess(PaySuccessParams.ofFtc(pi))
+            ftcPayViewModel.setAliPayResult(AliPayResult(
+                intent = aliPayIntent,
+                result = payResult
+            ))
         }
-    }
-
-    private fun confirmAliSubscription(pi: FtcPayIntent) {
-        val account = userViewModel.accountLiveData.value ?: return
-        val member = account.membership
-
-        // Build confirmation result locally
-        val confirmed = ConfirmationParams(
-            order = pi.order,
-            member = member
-        ).buildResult()
-
-        // Update membership.
-        userViewModel.saveMembership(confirmed.membership)
-
-        InvoiceStore.getInstance(this).save(confirmed)
-        PayIntentStore.getInstance(this).save(pi.withConfirmed(confirmed.order))
-
-        Log.i(TAG, "New membership: ${confirmed.membership}")
-
-        toast(getString(R.string.subs_success))
-
-        // Show the order details.
-        LatestInvoiceActivity.start(this)
-        setResult(Activity.RESULT_OK)
-
-        // Schedule a worker to verify this order.
-        verifyPayment()
-
-        finish()
-    }
-
-    // Verify payment after alipay succeeded.
-    private fun verifyPayment() {
-        // Schedule VerifySubsWorker
-        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifyOneTimePurchaseWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build())
-            .build()
-
-        WorkManager.getInstance(this).enqueue(verifyRequest)
     }
 
     override fun onResume() {
@@ -174,6 +116,7 @@ class SubsActivity : ScopedComponentActivity() {
 @Composable
 fun SubsApp(
     userViewModel: UserViewModel,
+    payViewModel: FtcPayViewModel,
     premiumOnTop: Boolean,
     onAliPay: (AliPayIntent) -> Unit,
     onExit: () -> Unit,
@@ -199,6 +142,12 @@ fun SubsApp(
                             onExit()
                         }
                     },
+                    actions = {
+                        OTextButton(
+                            onClick = onExit,
+                            text = "跳过"
+                        )
+                    }
                 )
             },
             scaffoldState = scaffoldState
@@ -235,9 +184,37 @@ fun SubsApp(
                     val priceId = entry.arguments?.getString("priceId")
                     FtcPayActivityScreen(
                         userViewModel = userViewModel,
+                        payViewModel = payViewModel,
                         scaffoldState = scaffoldState,
                         priceId = priceId,
-                        onAliPay = onAliPay
+                        onAliPay = onAliPay,
+                        onSuccess = {
+                            navigateToInvoices(
+                                navController
+                            )
+                        }
+                    )
+                }
+
+                composable(
+                    route = SubsAppScreen.Invoices.name
+                ) {
+                    LatestInvoiceActivityScreen(
+                        userViewModel = userViewModel,
+                        onNext = {
+                            navigateToBuyerInfo(
+                                navController
+                            )
+                        }
+                    )
+                }
+
+                composable(
+                    route = SubsAppScreen.BuyerInfo.name
+                ) {
+                    BuyerInfoActivityScreen(
+                        scaffoldState = scaffoldState,
+                        onExit = onExit
                     )
                 }
 
@@ -289,4 +266,14 @@ private fun navigateToFtcPay(
 //    navController.navigate("${SubsScreen.StripePay.name}/$priceId?trialId=${trialId}")
 //}
 
+private fun navigateToInvoices(
+    navController: NavHostController
+) {
+    navController.navigate(SubsAppScreen.Invoices.name)
+}
 
+private fun navigateToBuyerInfo(
+    navController: NavHostController
+) {
+    navController.navigate(SubsAppScreen.BuyerInfo.name)
+}

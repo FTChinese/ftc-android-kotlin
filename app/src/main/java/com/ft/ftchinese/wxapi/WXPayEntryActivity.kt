@@ -19,21 +19,19 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
-import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.OTextButton
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.subs.checkout.BuyerInfoActivityScreen
+import com.ft.ftchinese.ui.subs.SubsActivity
+import com.ft.ftchinese.ui.subs.contact.BuyerInfoActivityScreen
 import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -178,19 +176,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
         userViewModel.saveMembership(confirmed.membership)
 
         statusLiveData.value = WxPayStatus.Success
-        verifyPayment()
 
         tracker?.paySuccess(PaySuccessParams.ofFtc(pi))
-    }
-
-    private fun verifyPayment() {
-        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifyOneTimePurchaseWorker>()
-            .setConstraints(Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build())
-            .build()
-
-        WorkManager.getInstance(this).enqueue(verifyRequest)
     }
 
     private fun onClickDone() {

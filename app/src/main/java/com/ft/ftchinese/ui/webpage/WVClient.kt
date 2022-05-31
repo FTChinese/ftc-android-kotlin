@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.tracking.*
-import com.ft.ftchinese.ui.SubsActivity
+import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.*

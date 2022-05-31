@@ -39,15 +39,14 @@ import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.*
-import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.main.AcceptServiceDialogFragment
+import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
@@ -136,8 +135,6 @@ class TestActivity : ScopedAppActivity() {
 
                             WxMiniButton()
 
-                            PostPurchaseButton()
-
                             FreeUser()
 
                             WxOnlyFreeUser()
@@ -207,17 +204,6 @@ class TestActivity : ScopedAppActivity() {
                 )
             },
             text = "Launch Wx Pay Entry Activity"
-        )
-    }
-
-    @Composable
-    fun ShowPaymentResult() {
-        BlockButton(
-            onClick = {
-                createPaymentResult()
-                LatestInvoiceActivity.start(this@TestActivity)
-            },
-            text ="Show Payment Result"
         )
     }
 
@@ -299,20 +285,6 @@ class TestActivity : ScopedAppActivity() {
             },
         ) {
             Text(text = "Test Wechat Mini Program")
-        }
-    }
-
-    @Composable
-    fun PostPurchaseButton() {
-        Button(
-            onClick = {
-                InvoiceStore.getInstance(this@TestActivity)
-                    .savePurchaseAction(PurchaseAction.BUY)
-                LatestInvoiceActivity.start(this@TestActivity)
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Address - Buy")
         }
     }
 
@@ -642,18 +614,6 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
-
-    @Composable
-    fun ShowUpgradeResult() {
-        Button(onClick = {
-            createUpgradeResult()
-            LatestInvoiceActivity.start(this@TestActivity)
-        }) {
-            Text(text = "Show Upgrade Result")
-        }
-    }
-
-
     @Composable
     fun ServiceAcceptance() {
         Button(onClick = {
@@ -685,16 +645,6 @@ class TestActivity : ScopedAppActivity() {
             workManager.enqueue(request)
         }) {
             Text(text = "One Time Work Manager")
-        }
-    }
-
-    @Composable
-    fun ShowLatestOrderActivity() {
-        Button(onClick = {
-            LatestInvoiceActivity
-                .start(this@TestActivity)
-        }) {
-            Text(text = "Latest Order Activity")
         }
     }
 
