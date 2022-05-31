@@ -11,9 +11,6 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
-import com.ft.ftchinese.store.PayIntentStore
-import com.ft.ftchinese.tracking.BeginCheckoutParams
-import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.Build
@@ -22,9 +19,11 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 @Composable
 fun FtcPayActivityScreen(
     userViewModel: UserViewModel = viewModel(),
+    payViewModel: FtcPayViewModel,
     scaffoldState: ScaffoldState,
     priceId: String?,
-    onAliPay: (AliPayIntent) -> Unit
+    onAliPay: (AliPayIntent) -> Unit,
+    onSuccess: () -> Unit,
 ) {
     val context = LocalContext.current
     val wxApi = remember {
@@ -33,12 +32,9 @@ fun FtcPayActivityScreen(
             BuildConfig.WX_SUBS_APPID
         )
     }
-    val tracker = remember {
-        StatsTracker.getInstance(context)
-    }
-    val payIntentStore = remember {
-        PayIntentStore.getInstance(context)
-    }
+
+    val aliPayState = payViewModel.aliPayResult.observeAsState()
+    val aliPayResult = aliPayState.value
 
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
@@ -57,6 +53,14 @@ fun FtcPayActivityScreen(
         return
     }
 
+    LaunchedEffect(key1 = Unit) {
+        ftcPayState.loadFtcCheckoutItem(
+            priceId = priceId,
+            membership = account.membership
+        )
+    }
+
+    // After order created
     LaunchedEffect(key1 = ftcPayState.paymentIntent) {
         ftcPayState.paymentIntent?.let {
             when (it) {
@@ -76,11 +80,24 @@ fun FtcPayActivityScreen(
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
-        ftcPayState.loadFtcCheckoutItem(
-            priceId = priceId,
-            membership = account.membership
-        )
+    // After alipay sdk is called
+    LaunchedEffect(key1 = aliPayResult) {
+        aliPayResult?.let {
+            ftcPayState.handleAliPayResult(
+                account = account,
+                aliPayIntent = it.intent,
+                payResult = it.result
+            )
+            payViewModel.clear()
+        }
+    }
+
+    // After alipay is confirmed.
+    LaunchedEffect(key1 = ftcPayState.membershipUpdated) {
+        ftcPayState.membershipUpdated?.let {
+            userViewModel.saveMembership(it)
+            onSuccess()
+        }
     }
 
     ProgressLayout(
@@ -99,18 +116,12 @@ fun FtcPayActivityScreen(
                     ftcPayState.createOrder(
                         account = account,
                         payMethod = payMethod,
-                        store = payIntentStore,
-                    )
-
-                    tracker.beginCheckOut(
-                        BeginCheckoutParams.ofFtc(
-                            item = item,
-                            method = payMethod
-                        )
+                        item = item,
                     )
                 }
             )
         }
     }
 }
+
 

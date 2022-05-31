@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.subs.ftcpay
 
-import android.content.res.Resources
+import android.content.Context
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -8,25 +8,38 @@ import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.ftcsubs.AliPayIntent
+import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.request.OrderParams
 import com.ft.ftchinese.repository.FtcPayClient
+import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
+import com.ft.ftchinese.tracking.BeginCheckoutParams
+import com.ft.ftchinese.tracking.PaySuccessParams
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.repo.PaywallRepo
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class FtcPayState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
-    resources: Resources,
     connState: State<ConnectionState>,
-) : BaseState(scaffoldState, scope, resources, connState) {
+    context: Context
+) : BaseState(scaffoldState, scope, context.resources, connState) {
+
+    private val tracker = StatsTracker.getInstance(context)
+    private val payIntentStore = PayIntentStore.getInstance(context)
+    private val invoiceStore = InvoiceStore.getInstance(context)
+
+    var membershipUpdated by mutableStateOf<Membership?>(null)
 
     var cartItem by mutableStateOf<CartItemFtc?>(null)
         private set
@@ -46,8 +59,7 @@ class FtcPayState(
         progress.value = false
     }
 
-    fun createOrder(account: Account, payMethod: PayMethod, store: PayIntentStore) {
-        val item = cartItem ?: return
+    fun createOrder(account: Account, payMethod: PayMethod, item: CartItemFtc) {
         if (!ensureConnected()) {
             return
         }
@@ -57,12 +69,21 @@ class FtcPayState(
             discountId = item.discount?.id
         )
 
+        scope.launch(Dispatchers.IO) {
+            tracker.beginCheckOut(
+                BeginCheckoutParams.ofFtc(
+                    item = item,
+                    method = payMethod
+                )
+            )
+        }
+
         when (payMethod) {
             PayMethod.ALIPAY -> {
-                createAliOrder(account, params, store)
+                createAliOrder(account, params)
             }
             PayMethod.WXPAY -> {
-                createWxOrder(account, params, store)
+                createWxOrder(account, params)
             }
             else -> {
                 showSnackBar(R.string.toast_no_pay_method)
@@ -70,7 +91,7 @@ class FtcPayState(
         }
     }
 
-    private fun createWxOrder(account: Account, params: OrderParams, store: PayIntentStore) {
+    private fun createWxOrder(account: Account, params: OrderParams) {
         progress.value = true
         scope.launch {
             val result = FtcPayClient.asyncCreateWxOrder(
@@ -86,7 +107,7 @@ class FtcPayState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    store.save(result.data.toPayIntent())
+                    payIntentStore.save(result.data.toPayIntent())
                     paymentIntent = OrderResult.WxPay(result.data)
                 }
             }
@@ -95,7 +116,7 @@ class FtcPayState(
         }
     }
 
-    private fun createAliOrder(account: Account, params: OrderParams, store: PayIntentStore) {
+    private fun createAliOrder(account: Account, params: OrderParams) {
         progress.value = true
         scope.launch {
             val result = FtcPayClient.asyncCreateAliOrder(
@@ -111,7 +132,7 @@ class FtcPayState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    store.save(result.data.toPayIntent())
+                    payIntentStore.save(result.data.toPayIntent())
                     paymentIntent = OrderResult.AliPay(result.data)
                 }
             }
@@ -119,20 +140,57 @@ class FtcPayState(
             progress.value = false
         }
     }
+
+    fun handleAliPayResult(
+        account: Account,
+        aliPayIntent: AliPayIntent,
+        payResult: Map<String, String>
+    ) {
+        progress.value = true
+
+        val resultStatus = payResult["resultStatus"]
+
+        if (resultStatus != "9000") {
+            val msg = payResult["memo"] ?: resources.getString(R.string.wxpay_failed)
+            showSnackBar(msg)
+            tracker.payFailed(aliPayIntent.price.edition)
+
+            progress.value = false
+            return
+        }
+
+        // Confirm on device.
+        val currentMember = account.membership
+        val confirmed = ConfirmationParams(
+            order = aliPayIntent.order,
+            member = currentMember
+        ).buildResult()
+
+        invoiceStore.save(confirmed)
+        val pi = aliPayIntent.toPayIntent()
+        payIntentStore.save(pi.withConfirmed(confirmed.order))
+
+        showSnackBar(R.string.subs_success)
+        progress.value = false
+
+        membershipUpdated = confirmed.membership
+
+        tracker.paySuccess(PaySuccessParams.ofFtc(pi))
+    }
 }
 
 
 @Composable
 fun rememberFtcPaySate(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
+    connState: State<ConnectionState> = connectivityState(),
     scope: CoroutineScope = rememberCoroutineScope(),
-    resources: Resources = LocalContext.current.resources,
-    connState: State<ConnectionState> = connectivityState()
-) = remember(scaffoldState, resources, connState) {
+    context: Context = LocalContext.current,
+) = remember(scaffoldState, connState) {
     FtcPayState(
         scaffoldState = scaffoldState,
         scope = scope,
-        resources = resources,
-        connState = connState
+        connState = connState,
+        context = context
     )
 }
