@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.subs
 import androidx.annotation.StringRes
 import com.ft.ftchinese.R
 
-enum class SubsScreen(
+enum class SubsAppScreen(
     @StringRes val titleId: Int,
 ) {
     Paywall(
@@ -17,7 +17,7 @@ enum class SubsScreen(
     );
 
     companion object {
-        fun fromRoute(route: String?): SubsScreen =
+        fun fromRoute(route: String?): SubsAppScreen =
             when (route?.substringBefore("/")) {
                 Paywall.name -> Paywall
                 FtcPay.name -> FtcPay

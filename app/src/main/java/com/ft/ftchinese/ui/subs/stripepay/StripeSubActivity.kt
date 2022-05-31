@@ -22,7 +22,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.*
-import com.ft.ftchinese.ui.subs.SubsScreen
+import com.ft.ftchinese.ui.subs.SubsAppScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.stripe.android.*
@@ -85,7 +85,7 @@ class StripeSubActivity : ScopedAppActivity() {
                 Scaffold(
                     topBar = {
                         Toolbar(
-                            heading = stringResource(id = SubsScreen.StripePay.titleId),
+                            heading = stringResource(id = SubsAppScreen.StripePay.titleId),
                             onBack = { finish() },
                         )
                     },

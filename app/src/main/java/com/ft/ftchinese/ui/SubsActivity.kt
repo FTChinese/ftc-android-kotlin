@@ -35,7 +35,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.subs.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.subs.SubsScreen
+import com.ft.ftchinese.ui.subs.SubsAppScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.ftcpay.FtcPayActivityScreen
 import com.ft.ftchinese.ui.subs.paywall.PaywallActivityScreen
@@ -185,7 +185,7 @@ fun SubsApp(
 
         val navController = rememberNavController()
         val backstackEntry = navController.currentBackStackEntryAsState()
-        val currentScreen = SubsScreen.fromRoute(
+        val currentScreen = SubsAppScreen.fromRoute(
             backstackEntry.value?.destination?.route
         )
 
@@ -205,11 +205,11 @@ fun SubsApp(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = SubsScreen.Paywall.name,
+                startDestination = SubsAppScreen.Paywall.name,
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(
-                    route = SubsScreen.Paywall.name
+                    route = SubsAppScreen.Paywall.name
                 ) {
                     PaywallActivityScreen(
                         userViewModel = userViewModel,
@@ -225,7 +225,7 @@ fun SubsApp(
                 }
 
                 composable(
-                    route = "${SubsScreen.FtcPay.name}/{priceId}",
+                    route = "${SubsAppScreen.FtcPay.name}/{priceId}",
                     arguments = listOf(
                         navArgument("priceId") {
                             type = NavType.StringType
@@ -278,7 +278,7 @@ private fun navigateToFtcPay(
     navController: NavHostController,
     priceId: String,
 ) {
-    navController.navigate("${SubsScreen.FtcPay.name}/$priceId")
+    navController.navigate("${SubsAppScreen.FtcPay.name}/$priceId")
 }
 
 //private fun navigateToStripePay(
