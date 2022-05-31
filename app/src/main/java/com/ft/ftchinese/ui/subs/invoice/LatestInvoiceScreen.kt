@@ -121,7 +121,7 @@ private fun invoiceRow(ctx: Context, inv: Invoice): List<Pair<String, String>> {
                     inv.years > 0 -> FormatHelper.getCycleN(ctx, Cycle.YEAR, inv.years)
                     inv.months > 0 -> FormatHelper.getCycleN(ctx, Cycle.MONTH, inv.months)
                     else -> FormatHelper.getCycleN(ctx, inv.period.toCycle(), 1)
-                } + "(当前订阅过期后启用)"
+                }
             } else {
                 "${inv.startUtc?.toLocalDate()} 至 ${inv.endUtc?.toLocalDate()}"
             }
