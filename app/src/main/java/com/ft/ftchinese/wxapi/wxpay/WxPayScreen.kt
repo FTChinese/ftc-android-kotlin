@@ -32,7 +32,6 @@ fun WxPayScreen(
                 subTitle = "",
                 buttonText = stringResource(id = R.string.btn_done),
                 onClickButton = onDone,
-                subscribed = status.membership
             )
         }
         is WxPayStatus.Canceled -> {
