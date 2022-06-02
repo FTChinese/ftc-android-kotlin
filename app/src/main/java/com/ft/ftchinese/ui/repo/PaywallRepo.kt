@@ -21,7 +21,11 @@ object PaywallRepo {
         return price.buildCartItem(m)
     }
 
-    fun stripeCheckoutItem(priceId: String, trialId: String?, m: Membership): CartItemStripe? {
+    fun stripeCheckoutItem(
+        priceId: String,
+        trialId: String?,
+        m: Membership
+    ): CartItemStripe? {
         val pwItem = stripeItems[priceId] ?: return null
 
         return CartItemStripe(
