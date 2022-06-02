@@ -185,7 +185,7 @@ dependencies {
     def room_version = '2.4.2'
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
-    def compose_ui = "1.2.0-beta02"
+    def compose_ui = "1.2.0-beta03"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -220,14 +220,14 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:2.4.1"
 
     implementation 'androidx.work:work-runtime:2.7.1'
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation "androidx.work:work-runtime-ktx:$work_version"
     implementation "androidx.work:work-gcm:$work_version"
 
     //  UI
-    implementation "androidx.appcompat:appcompat:1.4.1"
-    implementation "com.google.android.material:material:1.7.0-alpha01"
+    implementation "androidx.appcompat:appcompat:1.4.2"
+    implementation "com.google.android.material:material:1.7.0-alpha02"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "androidx.browser:browser:1.4.0"
     // The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.
