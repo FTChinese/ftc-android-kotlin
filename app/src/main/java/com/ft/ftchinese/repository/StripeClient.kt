@@ -247,6 +247,24 @@ object StripeClient {
             .body
     }
 
+    suspend fun asyncCreateSubs(account: Account, params: SubParams): FetchResult<StripeSubsResult> {
+        return try {
+            val result = withContext(Dispatchers.IO) {
+                createSubscription(account, params)
+            }
+
+            if (result == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(result)
+            }
+        } catch (e: APIError) {
+            FetchResult.fromApi(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
     // Ask API to update user's Stripe subscription data.
     fun refreshSub(account: Account): StripeSubsResult? {
 
@@ -297,6 +315,22 @@ object StripeClient {
             .sendJson(params)
             .endJson<StripeSubsResult>()
             .body
+    }
+
+    suspend fun asyncUpdateSubs(account: Account, params: SubParams): FetchResult<StripeSubsResult> {
+        return try {
+            val result = withContext(Dispatchers.IO) {
+                StripeClient.updateSubs(account, params)
+            }
+
+            if (result == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(result)
+            }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
     }
 
     fun cancelSub(account: Account): StripeSubsResult? {
