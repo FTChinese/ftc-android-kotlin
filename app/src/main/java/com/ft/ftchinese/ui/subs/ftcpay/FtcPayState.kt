@@ -40,6 +40,7 @@ class FtcPayState(
     private val invoiceStore = InvoiceStore.getInstance(context)
 
     var membershipUpdated by mutableStateOf<Membership?>(null)
+        private set
 
     var cartItem by mutableStateOf<CartItemFtc?>(null)
         private set
