@@ -17,15 +17,13 @@ fun StripeWalletScreen(
     onSetDefault: (StripePaymentMethod) -> Unit,
     onAddCard: () -> Unit
 ) {
-    ProgressLayout(
-        loading = loading
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Dimens.dp8)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(Dimens.dp8)
-        ) {
-            paymentMethod?.card?.let { card ->
+        paymentMethod?.card?.let { card ->
 
 //                Row(
 //                    modifier = Modifier
@@ -44,20 +42,19 @@ fun StripeWalletScreen(
 //                    }
 //                }
 
-                BankCard(
-                    brand = card.brand,
-                    last4 = card.last4,
-                    expYear = card.expYear,
-                    expMonth = card.expMonth,
-                )
-
-                Spacer(modifier = Modifier.height(Dimens.dp8))
-            }
-
-            AddBankCard(
-                enabled = !loading,
-                onClick = onAddCard,
+            BankCard(
+                brand = card.brand,
+                last4 = card.last4,
+                expYear = card.expYear,
+                expMonth = card.expMonth,
             )
+
+            Spacer(modifier = Modifier.height(Dimens.dp8))
         }
+
+        AddBankCard(
+            enabled = !loading,
+            onClick = onAddCard,
+        )
     }
 }

@@ -25,6 +25,7 @@ import com.ft.ftchinese.ui.account.email.UpdateEmailActivityScreen
 import com.ft.ftchinese.ui.account.mobile.MobileActivityScreen
 import com.ft.ftchinese.ui.account.name.NameActivityScreen
 import com.ft.ftchinese.ui.account.password.PasswordActivityScreen
+import com.ft.ftchinese.ui.account.stripewallet.StripeWalletActivityScreen
 import com.ft.ftchinese.ui.account.unlinkwx.UnlinkActivityScreen
 import com.ft.ftchinese.ui.account.wechat.WxInfoActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
@@ -50,17 +51,16 @@ class AccountActivity : ComponentActivity() {
         setContent {
             AccountApp(
                 userViewModel = userViewModel,
-                onExit = { finish() },
-                onLogout = {
-                    userViewModel.logout()
-                    Toast.makeText(
-                        this,
-                        R.string.message_account_deleted,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    finish()
-                }
-            )
+                onExit = { finish() }
+            ) {
+                userViewModel.logout()
+                Toast.makeText(
+                    this,
+                    R.string.message_account_deleted,
+                    Toast.LENGTH_SHORT
+                ).show()
+                finish()
+            }
         }
     }
 
@@ -166,6 +166,16 @@ fun AccountApp(
                     AddressActivityScreen(
                         userViewModel = userViewModel,
                         scaffoldState = scaffold,
+                    )
+                }
+
+                composable(
+                    route = AccountAppScreen.Stripe.name
+                ) {
+                    StripeWalletActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffold,
+                        onExit = onExit,
                     )
                 }
 

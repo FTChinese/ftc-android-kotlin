@@ -48,15 +48,10 @@
             android:name=".ui.share.ScreenshotActivity"
             android:exported="false" />
         <activity
-            android:name="com.ft.ftchinese.ui.account.stripewallet.StripeWalletActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.subs.SubsActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.about.AboutListActivity"
-            android:label="@string/title_about_us"
-            android:parentActivityName=".ui.main.MainActivity" />
+            android:name=".ui.about.AboutListActivity" />
         <activity
             android:name=".ui.webpage.WebpageActivity"
             android:parentActivityName=".ui.about.AboutListActivity" />

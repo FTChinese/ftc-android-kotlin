@@ -1,11 +1,13 @@
 package com.ft.ftchinese.ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -64,6 +66,12 @@ fun AddBankCard(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
+    val contentColor = if (enabled) {
+        OColor.teal
+    } else {
+        OColor.teal.copy(alpha = 0.4F)
+    }
+
     Card(
         enabled = enabled,
         onClick = onClick
@@ -75,14 +83,14 @@ fun AddBankCard(
         ) {
 
             IconAddCircle(
-                tint = OColor.teal
+                tint = contentColor
             )
 
             Text(
                 text = stringResource(id = R.string.add_or_select_payment_method),
                 style = MaterialTheme.typography.body1,
                 modifier = Modifier.padding(start = Dimens.dp8),
-                color = OColor.teal
+                color = contentColor
             )
         }
     }
