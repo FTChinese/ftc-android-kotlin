@@ -10,18 +10,14 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.CreateCustomerDialog
 import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.viewmodel.UserViewModel
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -144,64 +140,5 @@ class StripeWalletActivity : ComponentActivity() {
             context?.startActivity(Intent(context, StripeWalletActivity::class.java))
         }
     }
-}
-
-@Composable
-private fun StripeSetupActivityScreen(
-    walletViewModel: StripeWalletViewModel,
-    userViewModel: UserViewModel = viewModel(),
-    onExit: () -> Unit,
-    showSnackBar: (String) -> Unit
-) {
-
-    val loading by walletViewModel.progressLiveData.observeAsState(false)
-    val paymentMethod by walletViewModel.paymentMethodInUse.observeAsState()
-    val customer by walletViewModel.customerLiveData.observeAsState()
-
-    val accountState = userViewModel.accountLiveData.observeAsState()
-    val account = accountState.value
-
-    if (account == null) {
-        showSnackBar("Not logged in")
-        return
-    }
-
-    LaunchedEffect(key1 = customer) {
-        customer?.let {
-            userViewModel.saveAccount(account.withCustomerID(it.id))
-        }
-    }
-
-    // Show dialog if user is not a stripe customer yet.
-    // If user clicked cancel button, exit this activity.
-    if (account.stripeId.isNullOrBlank()) {
-        CreateCustomerDialog(
-            email = account.email,
-            onDismiss = onExit,
-            onConfirm = {
-                walletViewModel.createCustomer(account)
-            }
-        )
-    }
-
-    // Upon initial loading, fetch user's default payment method.
-    LaunchedEffect(key1 = Unit) {
-        walletViewModel.loadDefaultPaymentMethod(account)
-    }
-
-    StripeWalletScreen(
-        loading = loading,
-        paymentMethod = paymentMethod?.current,
-        isDefault = paymentMethod?.isDefault ?: false,
-        onSetDefault = {
-           walletViewModel.setDefaultPaymentMethod(
-               account = account,
-               paymentMethod = it,
-           )
-        },
-        onAddCard = {
-            walletViewModel.showPaymentSheet(account)
-        }
-    )
 }
 
