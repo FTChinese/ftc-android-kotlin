@@ -62,8 +62,8 @@ android {
         // Target sdk version 30 cannot call wechat SDK.
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 32
-        versionCode 96
-        versionName "6.3.6"
+        versionCode 97
+        versionName "6.3.7"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
