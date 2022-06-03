@@ -56,7 +56,7 @@
             android:name=".ui.webpage.WebpageActivity"
             android:parentActivityName=".ui.about.AboutListActivity" />
         <activity
-            android:name=".TestActivity"
+            android:name=".ui.test.TestActivity"
             android:label="Test"
             android:parentActivityName=".ui.main.MainActivity" />
         <activity
