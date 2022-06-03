@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "StripeWallet"
 
-class StripeWalletState(
+open class StripeWalletState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     resources: Resources,
