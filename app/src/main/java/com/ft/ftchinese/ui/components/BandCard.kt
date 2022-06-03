@@ -22,7 +22,9 @@ fun BankCard(
     expYear: Int,
     expMonth: Int,
 ) {
-    Card {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Column(
             modifier = Modifier.padding(Dimens.dp16)
         ) {
