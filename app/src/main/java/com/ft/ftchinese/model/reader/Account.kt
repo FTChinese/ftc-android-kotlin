@@ -15,7 +15,7 @@ import kotlinx.serialization.encodeToString
 data class Account(
     val id: String,
     val unionId: String? = null,
-    val stripeId: String? = null,
+    val stripeId: String? = null, // stripe customer id
     val userName: String? = null,
     val email: String,
     val mobile: String? = null,
