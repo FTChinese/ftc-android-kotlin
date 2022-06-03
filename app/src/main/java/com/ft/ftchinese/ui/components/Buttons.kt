@@ -38,9 +38,9 @@ fun SecondaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     color: Color = OColor.teal,
-    content: @Composable() (RowScope.() -> Unit)
+    content: @Composable (RowScope.() -> Unit)
 ) {
-    LocalContentColor
+
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
