@@ -143,10 +143,12 @@ fun SubsApp(
                         }
                     },
                     actions = {
-                        OTextButton(
-                            onClick = onExit,
-                            text = "跳过"
-                        )
+                        if (currentScreen == SubsAppScreen.BuyerInfo) {
+                            OTextButton(
+                                onClick = onExit,
+                                text = "跳过"
+                            )
+                        }
                     }
                 )
             },
