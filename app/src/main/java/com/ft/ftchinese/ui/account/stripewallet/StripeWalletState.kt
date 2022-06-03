@@ -117,7 +117,9 @@ class StripeWalletState(
         }
     }
 
-    fun setDefaultPaymentMethod(account: Account, paymentMethod: StripePaymentMethod) {
+    // When user do not have a valid stripe subscription, we should still permit
+    // setting a default payment method.
+    fun setCustomerDefaultPayment(account: Account, paymentMethod: StripePaymentMethod) {
         if (!ensureConnected()) {
             return
         }
@@ -130,9 +132,44 @@ class StripeWalletState(
 
         progress.value = true
         scope.launch {
-            val result = StripeClient.asyncSetDefaultPaymentMethod(
+            val result = StripeClient.asyncSetCusDefaultPayment(
                 account = account,
-                pmId = pmId,
+                paymentMethodId = pmId,
+            )
+
+            progress.value = false
+
+            when (result) {
+                is FetchResult.LocalizedError -> {
+                    showSnackBar(result.msgId)
+                }
+                is FetchResult.TextError -> {
+                    showSnackBar(result.text)
+                }
+                is FetchResult.Success -> {
+                    defaultPaymentMethod = paymentMethod
+                }
+            }
+        }
+    }
+
+    // Set default payment method when user still has a valid subscription.
+    fun setSubsDefaultPayment(account: Account, paymentMethod: StripePaymentMethod) {
+        if (!ensureConnected()) {
+            return
+        }
+
+        val pmId = paymentMethod.id
+        if (pmId.isBlank()) {
+            showSnackBar(R.string.stripe_no_payment_selected)
+            return
+        }
+
+        progress.value = true
+        scope.launch {
+            val result = StripeClient.asyncSetSubsDefaultPayment(
+                account = account,
+                paymentMethodId = pmId,
             )
 
             progress.value = false
@@ -188,6 +225,11 @@ class StripeWalletState(
         }
     }
 
+    // Retrieve setup intent after it is being used so that
+    // we could know which payment method was handled.
+    // The payment method is retrieved from two sources:
+    // 1. Use stripe SDK, which might given null, then
+    // 2. Use the payment method id to retrieve it from our server.
     fun retrieveSetupIntent(stripe: Stripe) {
         paymentSheetSetup?.let {
             Log.i(TAG, "Retrieving setup intent")
@@ -216,6 +258,8 @@ class StripeWalletState(
         }
 
         override fun onSuccess(result: SetupIntent) {
+            // The SetupIntent#paymentMethod might be null.
+            // SetupIntent#paymentMethodId should always exists.
             Log.i(TAG, "Setup intent retrieved $result")
             Log.i(TAG, "Payment method ${result.paymentMethod}, id ${result.paymentMethodId}")
 
@@ -240,7 +284,7 @@ class StripeWalletState(
         }
 
         scope.launch {
-            val result = StripeClient.asyncRetrievePaymentMethod(pmId)
+            val result = StripeClient.asyncRetrievePaymentMethod(pmId, true)
             progress.value = false
             when (result) {
                 is FetchResult.LocalizedError -> {

@@ -6,11 +6,13 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
+import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.CreateCustomerDialog
 import com.ft.ftchinese.ui.components.ProgressLayout
@@ -79,6 +81,12 @@ fun StripeWalletActivityScreen(
         }
     }
 
+    // When user is trying to change current subscription's
+    // default payment method, ask for confirmation.
+    val (alertPayMethod, setAlertPayMethod) = remember {
+        mutableStateOf<StripePaymentMethod?>(null)
+    }
+
     // Show dialog if user is not a stripe customer yet.
     // If user clicked cancel button, exit this activity.
     if (account.stripeId.isNullOrBlank()) {
@@ -87,6 +95,19 @@ fun StripeWalletActivityScreen(
             onDismiss = onExit,
             onConfirm = {
                 walletState.createCustomer(account)
+            }
+        )
+    }
+
+    if (alertPayMethod != null) {
+        AlertModifySubsPaymentMethod(
+            onDismiss = { setAlertPayMethod(null) },
+            onConfirm = {
+                walletState.setSubsDefaultPayment(
+                    account = account,
+                    paymentMethod = alertPayMethod
+                )
+                setAlertPayMethod(null)
             }
         )
     }
@@ -102,7 +123,6 @@ fun StripeWalletActivityScreen(
         walletState.loadDefaultPaymentMethod(account)
     }
 
-
     ProgressLayout(
         loading = walletState.progress.value
     ) {
@@ -111,10 +131,20 @@ fun StripeWalletActivityScreen(
             paymentMethod = paymentMethodInUse?.current,
             isDefault = paymentMethodInUse?.isDefault ?: true,
             onSetDefault = {
-                walletState.setDefaultPaymentMethod(
-                    account = account,
-                    paymentMethod = it,
-                )
+                if (account.membership.isInvalidStripe) {
+                    // If not a valid stripe subscription,
+                    // set this payment method as default
+                    // under customer object
+                    walletState.setCustomerDefaultPayment(
+                        account = account,
+                        paymentMethod = it,
+                    )
+                } else {
+                    // Otherwise we are should obtain
+                    // user's permission since we are updating
+                    // a valid subscription.
+                    setAlertPayMethod(it)
+                }
             },
             onAddCard = {
                 walletState.showPaymentSheet(account)
