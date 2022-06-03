@@ -107,6 +107,10 @@ class Fetch {
         headers["Authorization"] = "Bearer ${Endpoint.accessToken}"
     }
 
+    fun setBearer(v: String) = apply {
+        headers["Authorization"] = "Bearer $v"
+    }
+
     private fun setUserAgent(ua: String) = apply {
         headers["User-Agent"] = ua
     }
