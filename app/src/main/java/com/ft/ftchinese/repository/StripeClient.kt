@@ -7,6 +7,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.HttpResp
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.CustomerParams
+import com.ft.ftchinese.model.request.PaymentMethodParams
 import com.ft.ftchinese.model.stripesubs.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,7 +27,7 @@ object StripeClient {
             .endJson(withRaw = true)
     }
 
-    fun createCustomer(account: Account): HttpResp<StripeCustomer> {
+    private fun createCustomer(account: Account): HttpResp<StripeCustomer> {
         return Fetch()
             .post(Endpoint.stripeCustomers)
             .setUserId(account.id)
@@ -39,7 +40,7 @@ object StripeClient {
     suspend fun asyncCreateCustomer(account: Account): FetchResult<StripeCustomer> {
         try {
             val resp = withContext(Dispatchers.IO) {
-                StripeClient.createCustomer(account)
+                createCustomer(account)
             }
 
             return if (resp.body == null) {
@@ -67,18 +68,19 @@ object StripeClient {
             .endJson()
     }
 
-    fun retrievePaymentMethod(id: String): HttpResp<StripePaymentMethod> {
+    private fun retrievePaymentMethod(id: String, refresh: Boolean): HttpResp<StripePaymentMethod> {
         return Fetch()
             .get("${Endpoint.stripePaymentMethod}/$id")
+            .addQuery("refresh", "$refresh")
             .noCache()
             .setApiKey()
             .endJson()
     }
 
-    suspend fun asyncRetrievePaymentMethod(id: String): FetchResult<StripePaymentMethod> {
+    suspend fun asyncRetrievePaymentMethod(id: String, refresh: Boolean): FetchResult<StripePaymentMethod> {
         return try {
             val resp = withContext(Dispatchers.IO) {
-                retrievePaymentMethod(id)
+                retrievePaymentMethod(id, refresh)
             }
 
             if (resp.body == null) {
@@ -93,26 +95,64 @@ object StripeClient {
         }
     }
 
-    fun setDefaultPaymentMethod(account: Account, pmId: String): HttpResp<StripeCustomer> {
+    // Set default payment method under customer.
+    private fun setCusDefaultPayment(account: Account, pmId: String): HttpResp<StripeCustomer> {
         return Fetch()
             .post("${Endpoint.stripeCustomers}/${account.stripeId}/default-payment-method")
             .setUserId(account.id)
             .noCache()
             .setApiKey()
-            .sendJson(mapOf(
-                "defaultPaymentMethod" to pmId
+            .sendJson(
+                PaymentMethodParams(
+                    defaultPaymentMethod = pmId
+                )
+            )
+            .endJson()
+    }
+
+    suspend fun asyncSetCusDefaultPayment(account: Account, paymentMethodId: String): FetchResult<StripeCustomer> {
+        try {
+            val resp = withContext(Dispatchers.IO) {
+                setCusDefaultPayment(account, paymentMethodId)
+            }
+
+            return if (resp.body == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(resp.body)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.stripe_customer_not_found)
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
+    private fun setSubsDefaultPayment(account: Account, paymentMethodId: String): HttpResp<StripeSubs> {
+        val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
+        return Fetch()
+            .post("${Endpoint.stripeSubs}/$subsId/default-payment-method")
+            .setUserId(account.id)
+            .noCache()
+            .setApiKey()
+            .sendJson(PaymentMethodParams(
+                defaultPaymentMethod = paymentMethodId
             ))
             .endJson()
     }
 
-    suspend fun asyncSetDefaultPaymentMethod(account: Account, pmId: String): FetchResult<StripeCustomer> {
+    suspend fun asyncSetSubsDefaultPayment(account: Account, paymentMethodId: String): FetchResult<StripeSubs> {
         try {
             val resp = withContext(Dispatchers.IO) {
-                setDefaultPaymentMethod(account, pmId)
+                setSubsDefaultPayment(account, paymentMethodId)
             }
 
             return if (resp.body == null) {
-                FetchResult.LocalizedError(R.string.stripe_customer_not_found)
+                FetchResult.loadingFailed
             } else {
                 FetchResult.Success(resp.body)
             }
@@ -144,7 +184,7 @@ object StripeClient {
             .body
     }
 
-    fun setupWithEphemeral(customerId: String): HttpResp<PaymentSheetParams> {
+    private fun setupWithEphemeral(customerId: String): HttpResp<PaymentSheetParams> {
         return Fetch()
             .post("${Endpoint.stripePaymentSheet}/setup")
             .noCache()
@@ -189,7 +229,7 @@ object StripeClient {
             .endJson()
     }
 
-    fun loadDefaultPaymentMethod(cusId: String, subsId: String?, ftcId: String): HttpResp<StripePaymentMethod> {
+    private fun loadDefaultPaymentMethod(cusId: String, subsId: String?, ftcId: String): HttpResp<StripePaymentMethod> {
         if (subsId != null) {
             return subsDefaultPaymentMethod(
                 subsId = subsId,
@@ -333,7 +373,7 @@ object StripeClient {
         }
     }
 
-    fun cancelSub(account: Account): StripeSubsResult? {
+    private fun cancelSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         return Fetch()
