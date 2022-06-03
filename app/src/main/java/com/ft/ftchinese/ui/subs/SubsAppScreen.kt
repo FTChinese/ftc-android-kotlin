@@ -13,6 +13,7 @@ enum class SubsAppScreen(
     BuyerInfo(titleId = R.string.title_buyer_info);
 
     companion object {
+        @JvmStatic
         fun fromRoute(route: String?): SubsAppScreen =
             when (route?.substringBefore("/")) {
                 Paywall.name -> Paywall
