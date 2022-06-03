@@ -12,9 +12,10 @@ object PaywallClient {
     private const val TAG = "Paywall"
 
     fun retrieve(isTest: Boolean): HttpResp<Paywall> {
+        val api = ApiConfig.ofSubs(isTest)
         return Fetch()
-            .setApiKey()
-            .get(Endpoint.paywall(isTest))
+            .setBearer(api.accessToken)
+            .get(api.paywall)
             .endJson(withRaw = true)
     }
 

@@ -68,7 +68,7 @@ fun StripeWalletActivityScreen(
                 context.toast("支付设置失败")
             }
             is PaymentSheetResult.Completed -> {
-                walletState.retrieveSetupIntent(stripe)
+                walletState.retrieveSetupIntent(stripe, account)
             }
         }
     }

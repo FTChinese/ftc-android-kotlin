@@ -14,10 +14,11 @@ object AppleClient {
 
         val origTxId = account.membership.appleSubsId ?: throw Exception("Not an Apple subscription")
 
+        val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .patch(Endpoint.refreshIAP(account.isTest, origTxId))
+            .setBearer(api.accessToken)
+            .patch(api.refreshIAP(origTxId))
             .noCache()
-            .setApiKey()
             .endJson<IAPSubsResult>()
             .body
     }

@@ -71,9 +71,7 @@ class StripeSubState(
         scope.launch {
 
             val result = StripeClient.asyncLoadDefaultPaymentMethod(
-                cusId = cusId,
-                subsId = account.membership.stripeSubsId,
-                ftcId = account.id
+                account = account
             )
             progress.value = false
 

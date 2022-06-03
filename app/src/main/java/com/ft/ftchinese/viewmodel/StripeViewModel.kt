@@ -98,9 +98,7 @@ open class StripeViewModel(application: Application) : BaseAppViewModel(applicat
         viewModelScope.launch {
 
             val result = StripeClient.asyncLoadDefaultPaymentMethod(
-                cusId = cusId,
-                subsId = account.membership.stripeSubsId,
-                ftcId = account.id
+                account = account
             )
             progressLiveData.value = false
 

@@ -16,26 +16,30 @@ import kotlinx.coroutines.withContext
 object FtcPayClient {
 
     fun verifyOrder(account: Account, orderId: String):  VerificationResult? {
+
+        val api = ApiConfig.ofSubs(account.isTest)
+
         return Fetch()
-            .post(Endpoint.subsBase(account.isTest) + "/orders/$orderId/verify-payment")
+            .setBearer(api.accessToken)
+            .post(api.verifyOrder(orderId))
             .addHeaders(account.headers())
             .noCache()
-            .setApiKey()
             .send()
             .endJson<VerificationResult>()
             .body
     }
 
-    fun createWxOrder(account: Account, params: OrderParams): WxPayIntent? {
+    private fun createWxOrder(account: Account, params: OrderParams): WxPayIntent? {
+
+        val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .post(Endpoint.subsBase(account.isTest) + "/wxpay/app")
+            .setBearer(api.accessToken)
+            .post(api.wxOrder)
             .addHeaders(account.headers())
             .setTimeout(30)
             .noCache()
             .setClient()
-            .setApiKey()
-            .setAppId() // Deprecated
             .sendJson(params)
             .endJson<WxPayIntent>()
             .body
@@ -63,14 +67,14 @@ object FtcPayClient {
         }
     }
 
-    fun createAliOrder(account: Account, params: OrderParams): AliPayIntent? {
-
+    private fun createAliOrder(account: Account, params: OrderParams): AliPayIntent? {
+        val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .post(Endpoint.subsBase(account.isTest) + "/alipay/app")
+            .setBearer(api.accessToken)
+            .post(api.aliOrder)
             .setTimeout(30)
             .addHeaders(account.headers())
             .noCache()
-            .setApiKey()
             .setClient()
             .sendJson(params)
             .endJson<AliPayIntent>()
@@ -97,11 +101,13 @@ object FtcPayClient {
 
     // Request api to add add-on to expiration date.
     fun useAddOn(account: Account): Membership? {
-       return Fetch()
-           .post(Endpoint.subsBase(account.isTest) + "/membership/addons")
+        val api = ApiConfig.ofSubs(account.isTest)
+
+        return Fetch()
+            .setBearer(api.accessToken)
+           .post(api.addOn)
            .addHeaders(account.headers())
            .noCache()
-           .setApiKey()
            .send()
            .endJson<Membership>()
            .body

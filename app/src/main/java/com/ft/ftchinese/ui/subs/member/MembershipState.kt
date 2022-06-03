@@ -170,7 +170,7 @@ class MembershipState(
         refreshing = true
         scope.launch {
 
-            val result = StripeClient.asyncRefreshSub(account)
+            val result = StripeClient.asyncCancelSub(account)
             refreshing = false
             when (result) {
                 is FetchResult.LocalizedError -> {

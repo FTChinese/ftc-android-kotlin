@@ -16,23 +16,13 @@ object StripeClient {
 
     const val TAG = "StripeClient"
 
-    // Retrieve a list of stripe prices.
-    // If use is logged-in and it is a test account, use sandbox
-    // api to get test prices; otherwise retrieve prices from live mode.
-    fun listPrices(): HttpResp<List<StripePrice>> {
-        return Fetch()
-            .get(Endpoint.stripePrices)
-            .noCache()
-            .setApiKey()
-            .endJson(withRaw = true)
-    }
-
     private fun createCustomer(account: Account): HttpResp<StripeCustomer> {
+        val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .post(Endpoint.stripeCustomers)
+            .setBearer(api.accessToken)
+            .post(api.stripeCustomers)
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .send()
             .endJson()
     }
@@ -60,27 +50,43 @@ object StripeClient {
     }
 
     fun retrieveCustomer(account: Account): HttpResp<StripeCustomer> {
+        val api = ApiConfig.ofSubs(account.isTest)
+
         return Fetch()
-            .get("${Endpoint.stripeCustomers}/${account.stripeId}")
+            .setBearer(api.accessToken)
+            .get("${api.stripeCustomers}/${account.stripeId}")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .endJson()
     }
 
-    private fun retrievePaymentMethod(id: String, refresh: Boolean): HttpResp<StripePaymentMethod> {
+    private fun retrievePaymentMethod(
+        isTest: Boolean,
+        id: String,
+        refresh: Boolean
+    ): HttpResp<StripePaymentMethod> {
+        val api = ApiConfig.ofSubs(isTest)
+
         return Fetch()
-            .get("${Endpoint.stripePaymentMethod}/$id")
+            .setBearer(api.accessToken)
+            .get("${api.stripePaymentMethod}/$id")
             .addQuery("refresh", "$refresh")
             .noCache()
-            .setApiKey()
             .endJson()
     }
 
-    suspend fun asyncRetrievePaymentMethod(id: String, refresh: Boolean): FetchResult<StripePaymentMethod> {
+    suspend fun asyncRetrievePaymentMethod(
+        isTest: Boolean,
+        id: String,
+        refresh: Boolean
+    ): FetchResult<StripePaymentMethod> {
         return try {
             val resp = withContext(Dispatchers.IO) {
-                retrievePaymentMethod(id, refresh)
+                retrievePaymentMethod(
+                    isTest,
+                    id,
+                    refresh
+                )
             }
 
             if (resp.body == null) {
@@ -97,11 +103,12 @@ object StripeClient {
 
     // Set default payment method under customer.
     private fun setCusDefaultPayment(account: Account, pmId: String): HttpResp<StripeCustomer> {
+        val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .post("${Endpoint.stripeCustomers}/${account.stripeId}/default-payment-method")
+            .setBearer(api.accessToken)
+            .post("${api.stripeCustomers}/${account.stripeId}/default-payment-method")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .sendJson(
                 PaymentMethodParams(
                     defaultPaymentMethod = pmId
@@ -134,8 +141,11 @@ object StripeClient {
 
     private fun setSubsDefaultPayment(account: Account, paymentMethodId: String): HttpResp<StripeSubs> {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
+
+        val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .post("${Endpoint.stripeSubs}/$subsId/default-payment-method")
+            .setBearer(api.accessToken)
+            .post("${api.stripeSubs}/$subsId/default-payment-method")
             .setUserId(account.id)
             .noCache()
             .setApiKey()
@@ -173,30 +183,33 @@ object StripeClient {
             return null
         }
 
+        val api = ApiConfig.ofSubs(account.isTest)
+
         return Fetch()
-            .post("${Endpoint.stripeCustomers}/${account.stripeId}/ephemeral-keys")
+            .setBearer(api.accessToken)
+            .post("${api.stripeCustomers}/${account.stripeId}/ephemeral-keys")
             .setUserId(account.id)
             .addQuery("api_version", apiVersion)
             .noCache()
-            .setApiKey()
             .send()
             .endText()
             .body
     }
 
-    private fun setupWithEphemeral(customerId: String): HttpResp<PaymentSheetParams> {
+    private fun setupWithEphemeral(isTest: Boolean, customerId: String): HttpResp<PaymentSheetParams> {
+        val api = ApiConfig.ofSubs(isTest)
         return Fetch()
-            .post("${Endpoint.stripePaymentSheet}/setup")
+            .setBearer(api.accessToken)
+            .post("${api.stripePaymentSheet}/setup")
             .noCache()
-            .setApiKey()
             .sendJson(CustomerParams(customer = customerId))
             .endJson()
     }
 
-    suspend fun asyncSetupWithEphemeral(customerId: String): FetchResult<PaymentSheetParams> {
+    suspend fun asyncSetupWithEphemeral(isTest: Boolean, customerId: String): FetchResult<PaymentSheetParams> {
         return try {
             val resp = withContext(Dispatchers.IO) {
-                setupWithEphemeral(customerId)
+                setupWithEphemeral(isTest, customerId)
             }
 
             if (resp.body == null) {
@@ -211,77 +224,94 @@ object StripeClient {
         }
     }
 
-    private fun subsDefaultPaymentMethod(subsId: String, ftcId: String): HttpResp<StripePaymentMethod> {
+    private fun subsDefaultPaymentMethod(
+        api: ApiConfig,
+        subsId: String,
+        ftcId: String
+    ): HttpResp<StripePaymentMethod> {
         return Fetch()
-            .get("${Endpoint.stripeSubs}/${subsId}/default-payment-method")
+            .setBearer(api.accessToken)
+            .get("${api.stripeSubs}/${subsId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
-            .setApiKey()
             .endJson()
     }
 
-    private fun cusDefaultPaymentMethod(cusId: String, ftcId: String): HttpResp<StripePaymentMethod> {
+    private fun cusDefaultPaymentMethod(
+        api: ApiConfig,
+        cusId: String,
+        ftcId: String
+    ): HttpResp<StripePaymentMethod> {
+
         return Fetch()
-            .get("${Endpoint.stripeCustomers}/${cusId}/default-payment-method")
+            .setBearer(api.accessToken)
+            .get("${api.stripeCustomers}/${cusId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
-            .setApiKey()
             .endJson()
     }
 
-    private fun loadDefaultPaymentMethod(cusId: String, subsId: String?, ftcId: String): HttpResp<StripePaymentMethod> {
-        if (subsId != null) {
+    private fun loadDefaultPaymentMethod(
+        account: Account
+    ): HttpResp<StripePaymentMethod> {
+        val api = ApiConfig.ofSubs(account.isTest)
+
+        if (account.membership.stripeSubsId != null) {
             return subsDefaultPaymentMethod(
-                subsId = subsId,
-                ftcId = ftcId,
+                api,
+                subsId = account.membership.stripeSubsId,
+                ftcId = account.id,
             )
         }
 
+        account.stripeId ?: throw Exception("Not a stripe customer")
+
         return cusDefaultPaymentMethod(
-            cusId = cusId,
-            ftcId = ftcId,
+            api,
+            cusId = account.stripeId,
+            ftcId = account.id,
         )
     }
 
     suspend fun asyncLoadDefaultPaymentMethod(
-        cusId: String,
-        subsId: String?,
-        ftcId: String,
+        account: Account
     ): FetchResult<StripePaymentMethod> {
-        try {
+        return try {
             val resp = withContext(Dispatchers.IO) {
                 loadDefaultPaymentMethod(
-                    cusId = cusId,
-                    subsId = subsId,
-                    ftcId = ftcId
+                    account
                 )
             }
 
-            return if (resp.body == null) {
+            if (resp.body == null) {
                 FetchResult.loadingFailed
             } else {
                 FetchResult.Success(resp.body)
             }
         } catch (e: Exception) {
-            return FetchResult.fromException(e)
+            FetchResult.fromException(e)
         }
     }
 
     fun loadSubscription(account: Account, subsId: String): HttpResp<StripeSubs> {
-        return Fetch().get("${Endpoint.stripeSubs}/${subsId}")
+        val api = ApiConfig.ofSubs(account.isTest)
+        return Fetch()
+            .setBearer(api.accessToken)
+            .get("${api.stripeSubs}/${subsId}")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .endJson()
     }
 
     fun createSubscription(account: Account, params: SubParams): StripeSubsResult? {
 
+        val api = ApiConfig.ofSubs(account.isTest)
+
         return Fetch()
-            .post(Endpoint.stripeSubs)
+            .setBearer(api.accessToken)
+            .post(api.stripeSubs)
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .sendJson(params)
             .endJson<StripeSubsResult>()
             .body
@@ -309,12 +339,12 @@ object StripeClient {
     fun refreshSub(account: Account): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
-
+        val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .post("${Endpoint.stripeSubs}/$subsId/refresh")
+            .setBearer(api.accessToken)
+            .post("${api.stripeSubs}/$subsId/refresh")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .send()
             .endJson<StripeSubsResult>()
             .body
@@ -347,11 +377,13 @@ object StripeClient {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
+        val api = ApiConfig.ofSubs(account.isTest)
+
         return Fetch()
-            .post("${Endpoint.stripeSubs}/$subsId")
+            .setBearer(api.accessToken)
+            .post("${api.stripeSubs}/$subsId")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .sendJson(params)
             .endJson<StripeSubsResult>()
             .body
@@ -376,11 +408,13 @@ object StripeClient {
     private fun cancelSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
+        val api = ApiConfig.ofSubs(account.isTest)
+
         return Fetch()
-            .post("${Endpoint.stripeSubs}/$subsId/cancel")
+            .setBearer(api.accessToken)
+            .post("${api.stripeSubs}/$subsId/cancel")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .send()
             .endJson<StripeSubsResult>()
             .body
@@ -409,11 +443,13 @@ object StripeClient {
         }
     }
 
-    fun reactivateSub(account: Account): StripeSubsResult? {
+    private fun reactivateSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
+        val api = ApiConfig.ofSubs(account.isTest)
+
         return Fetch()
-            .post("${Endpoint.stripeSubs}/$subsId/reactivate")
+            .post("${api.stripeSubs}/$subsId/reactivate")
             .setUserId(account.id)
             .noCache()
             .setApiKey()
