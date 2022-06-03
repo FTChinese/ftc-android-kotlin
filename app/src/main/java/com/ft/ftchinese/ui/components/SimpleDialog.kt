@@ -27,11 +27,10 @@ fun SimpleDialog(
         },
         dismissButton = {
             dismissText?.let {
-                TextButton(
-                    onClick = onDismiss
-                ) {
-                    Text(text = it)
-                }
+                OTextButton(
+                    onClick = onDismiss,
+                    text = it
+                )
             }
         },
         title = {
