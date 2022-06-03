@@ -53,12 +53,10 @@
         <activity
             android:name=".ui.about.AboutListActivity" />
         <activity
-            android:name=".ui.webpage.WebpageActivity"
-            android:parentActivityName=".ui.about.AboutListActivity" />
+            android:name=".ui.webpage.WebpageActivity" />
         <activity
             android:name=".ui.test.TestActivity"
-            android:label="Test"
-            android:parentActivityName=".ui.main.MainActivity" />
+            android:label="Test" />
         <activity
             android:name=".ui.main.SplashActivity"
             android:configChanges="orientation"
@@ -98,22 +96,6 @@
         <activity android:name=".ui.account.AccountActivity" />
         <activity android:name=".ui.wxlink.WxLinkEmailActivity"/>
         <activity android:name=".ui.subs.MemberActivity" />
-<!--        <activity-->
-<!--            android:name="com.ft.ftchinese.ui.subs.stripepay.StripeSubActivity"-->
-<!--            android:exported="true"-->
-<!--            android:label="@string/pay_method_stripe"-->
-<!--            android:launchMode="singleTask">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.VIEW" />-->
-
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--                <category android:name="android.intent.category.BROWSABLE" />-->
-
-<!--                <data-->
-<!--                    android:host="stripe-post-authentication-return-url"-->
-<!--                    android:scheme="ftc" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
