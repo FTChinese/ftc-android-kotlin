@@ -6,12 +6,8 @@ import kotlinx.serialization.Serializable
 data class PaymentIntent(
     val id: String,
     val amount: Double,
-//    @KDateTime
-//    val canceledAtUtc: ZonedDateTime? = null,
     val cancellationReason: String,
     val clientSecret: String?,
-//    @KDateTime
-//    val createdUtc: ZonedDateTime? = null,
     val currency: String,
     val customerId: String,
     val invoiceId: String,
