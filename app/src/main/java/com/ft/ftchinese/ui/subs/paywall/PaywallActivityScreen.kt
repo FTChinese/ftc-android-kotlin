@@ -21,7 +21,6 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.AuthActivity
-import com.ft.ftchinese.ui.subs.stripepay.StripeSubActivity
 import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -36,20 +35,13 @@ private fun launchLoginActivity(
     )
 }
 
-private fun launchStripeSubsActivity(
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context,
-    item: CartItemStripe,
-) {
-    launcher.launch(StripeSubActivity.intent(context, item))
-}
-
 @Composable
 fun PaywallActivityScreen(
     userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
     premiumOnTop: Boolean,
     onFtcPay: (item: CartItemFtc) -> Unit,
+    onStripePay: (item: CartItemStripe) -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -138,9 +130,8 @@ fun PaywallActivityScreen(
                     setOpenDialog(true)
                     return@PaywallScreen
                 }
-                launchStripeSubsActivity(launcher, context, it)
-
                 tracker.addCart(AddCartParams.ofStripe(it.recurring))
+                onStripePay(it)
             },
         ) {
             launchLoginActivity(launcher, context)

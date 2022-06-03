@@ -98,22 +98,22 @@
         <activity android:name=".ui.account.AccountActivity" />
         <activity android:name=".ui.wxlink.WxLinkEmailActivity"/>
         <activity android:name=".ui.subs.MemberActivity" />
-        <activity
-            android:name="com.ft.ftchinese.ui.subs.stripepay.StripeSubActivity"
-            android:exported="true"
-            android:label="@string/pay_method_stripe"
-            android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+<!--        <activity-->
+<!--            android:name="com.ft.ftchinese.ui.subs.stripepay.StripeSubActivity"-->
+<!--            android:exported="true"-->
+<!--            android:label="@string/pay_method_stripe"-->
+<!--            android:launchMode="singleTask">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
 
-                <data
-                    android:host="stripe-post-authentication-return-url"
-                    android:scheme="ftc" />
-            </intent-filter>
-        </activity>
+<!--                <data-->
+<!--                    android:host="stripe-post-authentication-return-url"-->
+<!--                    android:scheme="ftc" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"

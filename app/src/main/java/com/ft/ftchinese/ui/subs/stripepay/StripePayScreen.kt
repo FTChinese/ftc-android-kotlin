@@ -46,69 +46,65 @@ fun StripePayScreen(
 
     val forbidden = cartItem.intent.kind == IntentKind.Forbidden
 
-    ProgressLayout(
-        loading = loading,
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = Dimens.dp16),
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(all = Dimens.dp16),
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState())
+            CheckoutHeader(tier = cartItem.recurring.tier)
+
+            Card(
+                elevation = Dimens.dp4
             ) {
-                CheckoutHeader(tier = cartItem.recurring.tier)
-
-                Card(
-                    elevation = Dimens.dp4
-                ) {
-                    PriceCard(
-                        params = PriceCardParams.ofStripe(context, cartItem)
-                    )
-                }
-
-                CheckoutMessage(text = cartItem.intent.message)
-
-                PaymentMethodSelector(
-                    card = paymentMethod?.card,
-                    clickable = !loading,
-                    onClick = onPaymentMethod
+                PriceCard(
+                    params = PriceCardParams.ofStripe(context, cartItem)
                 )
-
-                Footnote()
-                
-                subs?.let {
-                    StripeSubsDetails(subs = it)
-                }
             }
 
-            if (subs == null) {
-                AutoRenewAgreement()
+            CheckoutMessage(text = cartItem.intent.message)
 
-                PrimaryButton(
-                    onClick = onSubscribe,
-                    enabled = (!loading && paymentMethod != null && !forbidden),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = FormatHelper.stripeIntentText(
-                            context,
-                            cartItem.intent.kind
-                        ),
-                    )
-                }
-            } else {
-                PrimaryButton(
-                    onClick = onDone,
-                    modifier = Modifier
-                        .padding(Dimens.dp16)
-                        .fillMaxWidth(),
-                ) {
-                    Text(text = stringResource(id = R.string.btn_done))
-                }
+            PaymentMethodSelector(
+                card = paymentMethod?.card,
+                clickable = !loading,
+                onClick = onPaymentMethod
+            )
+
+            Footnote()
+
+            subs?.let {
+                StripeSubsDetails(subs = it)
+            }
+        }
+
+        if (subs == null) {
+            AutoRenewAgreement()
+
+            PrimaryButton(
+                onClick = onSubscribe,
+                enabled = (!loading && paymentMethod != null && !forbidden),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = FormatHelper.stripeIntentText(
+                        context,
+                        cartItem.intent.kind
+                    ),
+                )
+            }
+        } else {
+            PrimaryButton(
+                onClick = onDone,
+                modifier = Modifier
+                    .padding(Dimens.dp16)
+                    .fillMaxWidth(),
+            ) {
+                Text(text = stringResource(id = R.string.btn_done))
             }
         }
     }

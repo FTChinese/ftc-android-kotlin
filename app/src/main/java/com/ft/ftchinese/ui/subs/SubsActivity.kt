@@ -22,6 +22,7 @@ import androidx.navigation.navArgument
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.components.OTextButton
 import com.ft.ftchinese.ui.components.Toolbar
@@ -31,6 +32,7 @@ import com.ft.ftchinese.ui.subs.ftcpay.FtcPayActivityScreen
 import com.ft.ftchinese.ui.subs.ftcpay.FtcPayViewModel
 import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.subs.paywall.PaywallActivityScreen
+import com.ft.ftchinese.ui.subs.stripepay.StripeSubActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
 import kotlinx.coroutines.Dispatchers
@@ -171,6 +173,12 @@ fun SubsApp(
                                 navController = navController,
                                 priceId = item.price.id,
                             )
+                        },
+                        onStripePay = { item: CartItemStripe ->
+                            navigateToStripePay(
+                                navController,
+                                item
+                            )
                         }
                     )
                 }
@@ -220,33 +228,29 @@ fun SubsApp(
                     )
                 }
 
-//                composable(
-//                    route = "${SubsScreen.StripePay.name}/{priceId}?trialId={trialId}",
-//                    arguments = listOf(
-//                        navArgument("priceId") {
-//                            type = NavType.StringType
-//                        },
-//                        navArgument("trialId") {
-//                            type = NavType.StringType
-//                        }
-//                    )
-//                ) { entry ->
-//                    val priceId = entry.arguments?.getString("priceId")
-//                    val trialId = entry.arguments?.getString("trialId")
-//                    StripePayActivityScreen(
-//                        pwViewModel = paywallViewModel,
-//                        priceId = priceId,
-//                        trialId = trialId,
-//                        showSnackBar = { msg ->
-//                            scope.launch {
-//                                scaffoldState.snackbarHostState.showSnackbar(msg)
-//                            }
-//                        },
-//                        onExit = {
-//                            navController.popBackStack()
-//                        }
-//                    )
-//                }
+                composable(
+                    route = "${SubsAppScreen.StripePay.name}/{priceId}?trialId={trialId}",
+                    arguments = listOf(
+                        navArgument("priceId") {
+                            type = NavType.StringType
+                        },
+                        navArgument("trialId") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val priceId = entry.arguments?.getString("priceId")
+                    val trialId = entry.arguments?.getString("trialId")
+                    StripeSubActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffoldState,
+                        priceId = priceId,
+                        trialId = trialId,
+                        onExit = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
             }
         }
     }
@@ -260,13 +264,12 @@ private fun navigateToFtcPay(
     navController.navigate("${SubsAppScreen.FtcPay.name}/$priceId")
 }
 
-//private fun navigateToStripePay(
-//    navController: NavHostController,
-//    priceId: String,
-//    trialId: String?,
-//) {
-//    navController.navigate("${SubsScreen.StripePay.name}/$priceId?trialId=${trialId}")
-//}
+private fun navigateToStripePay(
+    navController: NavHostController,
+    item: CartItemStripe,
+) {
+    navController.navigate("${SubsAppScreen.StripePay.name}/${item.recurring.id}?trialId=${item.trial?.id}")
+}
 
 private fun navigateToInvoices(
     navController: NavHostController
