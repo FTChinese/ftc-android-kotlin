@@ -12,13 +12,14 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
+import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
@@ -54,8 +55,6 @@ fun SettingsApp(
         backstackEntry.value?.destination?.route
     )
 
-    val settingsViewModel: SettingsViewModel = viewModel()
-
     OTheme {
         Scaffold(
             topBar = {
@@ -80,21 +79,20 @@ fun SettingsApp(
                     route = SettingScreen.Overview.name
                 ) {
                     PreferenceActivityScreen(
-                        settingsViewModel = settingsViewModel
-                    ) { screen ->
-                        navigateToScreen(
-                            navController,
-                            screen,
-                        )
-                    }
+                        scaffoldState = scaffoldState,
+                        onNavigateTo =  { screen ->
+                            navigateToScreen(
+                                navController,
+                                screen,
+                            )
+                        }
+                    )
                 }
 
                 composable(
                     route = SettingScreen.Notification.name
                 ) {
-                    FcmActivityScreen(
-                        settingsViewModel = settingsViewModel
-                    )
+                    FcmActivityScreen()
                 }
 
                 composable(
