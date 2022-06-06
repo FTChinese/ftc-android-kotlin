@@ -18,7 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
@@ -121,29 +126,12 @@ class ReleaseActivity : ScopedAppActivity() {
         downloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
         setContent {
-            OTheme {
-                val scaffoldState = rememberScaffoldState()
-
-                Scaffold(
-                    topBar = {
-                        Toolbar(
-                            heading = stringResource(id = R.string.pref_check_new_version),
-                            onBack = { finish() }
-                        )
-                    },
-                    scaffoldState = scaffoldState
-                ) { innerPadding ->
-                    ReleaseActivityScreen(
-                        releaseViewModel = releaseViewModel,
-                        modifier = Modifier.padding(innerPadding),
-                        downloadManager = downloadManager,
-                        onInstall = {
-                            releaseViewModel.loadDownloadId()?.let {
-                                initInstall(it)
-                            }
-                        }
-                    )
-                }
+            ReleaseApp(
+                releaseViewModel = releaseViewModel,
+                downloadManager = downloadManager,
+                onInstall = this::initInstall
+            ) {
+                finish()
             }
         }
 
@@ -222,6 +210,8 @@ class ReleaseActivity : ScopedAppActivity() {
         // Do not use ACTION_VIEW you found on most
         // stack overflow answers. It's too old.
         // Nor should you use ACTION_INSTALL_PACKAGE.
+        // https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/content/InstallApk.java
+        // New API: https://android.googlesource.com/platform/development/+/master/samples/ApiDemos/src/com/example/android/apis/content/InstallApkSessionApi.java
         val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
             setDataAndType(contentUri, "application/vnd.android.package-archive")
             // The permission must be added, otherwise you
@@ -250,9 +240,70 @@ class ReleaseActivity : ScopedAppActivity() {
         }
 
         @JvmStatic
+        fun deepLinkIntent(context: Context) = Intent(
+            Intent.ACTION_VIEW,
+            deepLinkUri.toUri(),
+            context,
+            ReleaseActivity::class.java
+        )
+
+        @JvmStatic
         fun start(context: Context?) {
             val intent = Intent(context, ReleaseActivity::class.java)
             context?.startActivity(intent)
+        }
+    }
+}
+
+private const val deepLinkUri = "https://www.ftchinese.com/android/release"
+
+@Composable
+private fun ReleaseApp(
+    releaseViewModel: ReleaseViewModel,
+    downloadManager: DownloadManager,
+    onInstall: (Long) -> Unit,
+    onExit: () -> Unit
+) {
+    val navController = rememberNavController()
+
+    OTheme {
+        val scaffoldState = rememberScaffoldState()
+
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    heading = stringResource(id = R.string.pref_check_new_version),
+                    onBack = onExit
+                )
+            },
+            scaffoldState = scaffoldState
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = "release",
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(
+                    route = "release",
+                    deepLinks = listOf(
+                        navDeepLink {
+                            uriPattern = deepLinkUri
+                        }
+                    )
+                ) {
+                    ReleaseActivityScreen(
+                        releaseViewModel = releaseViewModel,
+                        modifier = Modifier.padding(innerPadding),
+                        downloadManager = downloadManager,
+                        onInstall = {
+                            releaseViewModel.loadDownloadId()?.let {
+                                onInstall(it)
+                            }
+                        }
+                    )
+                }
+            }
+
         }
     }
 }

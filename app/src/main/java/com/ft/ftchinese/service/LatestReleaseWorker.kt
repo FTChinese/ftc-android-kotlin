@@ -13,7 +13,6 @@ import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.ReleaseStore
 import com.ft.ftchinese.ui.settings.release.ReleaseActivity
-import org.threeten.bp.ZonedDateTime
 
 /**
  * Background worker to check for latest release upon app launch.
@@ -25,16 +24,10 @@ import org.threeten.bp.ZonedDateTime
 class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
     Worker(appContext, workerParams) {
 
-    private val ctx = appContext
     private val store = ReleaseStore(appContext)
 
     override fun doWork(): Result {
         Log.i(TAG, "Start LatestReleaseWorker")
-
-        if (!meetMinInterval()) {
-            Log.i(TAG, "Last checked within an hour")
-            return Result.success()
-        }
 
         try {
             val resp = ReleaseRepo.getLatest()
@@ -61,23 +54,22 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
         return Result.success()
     }
 
-    private fun meetMinInterval(): Boolean {
-        val checkedAt = store.getLastCheckTime() ?: return true
-
-        return checkedAt.plusHours(1).isBefore(ZonedDateTime.now())
-    }
-
     private fun urgeUpdate(release: AppRelease) {
 
         Log.i(TAG, "Send notification for latest release")
 
-        val intent = ReleaseActivity.newIntent(ctx)
+        val intent = ReleaseActivity.deepLinkIntent(applicationContext)
 
-        val pendingIntent: PendingIntent? = TaskStackBuilder.create(ctx)
-            .addNextIntentWithParentStack(intent)
-            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent: PendingIntent? = TaskStackBuilder.create(applicationContext).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
 
-        val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.news_notification_channel_id))
+
+        val builder = NotificationCompat.Builder(
+            applicationContext,
+            applicationContext.getString(R.string.news_notification_channel_id)
+        )
             .setSmallIcon(R.drawable.logo_round)
             .setContentTitle("发现新版本！")
             .setContentText("新版本${release.versionName}已发布，点击获取")
@@ -85,7 +77,7 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
-        with(NotificationManagerCompat.from(ctx)) {
+        with(NotificationManagerCompat.from(applicationContext)) {
             notify(1, builder.build())
         }
     }
