@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.settings
+package com.ft.ftchinese.ui.settings.fcm
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes

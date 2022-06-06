@@ -1,34 +1,29 @@
-package com.ft.ftchinese.ui.settings
+package com.ft.ftchinese.ui.settings.fcm
 
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.ProgressLayout
 
 @Composable
-fun FcmActivityScreen(
-    settingsViewModel: SettingsViewModel
-) {
+fun FcmActivityScreen() {
     val context = LocalContext.current
-    val progress by settingsViewModel.progressLiveData.observeAsState(false)
-    val fcmStatus by settingsViewModel.fcmStatusLiveData.observeAsState(listOf())
+    val fcmState = rememberFcmState()
 
     ProgressLayout(
-        loading = progress
+        loading = fcmState.progress
     ) {
         FcmScreen(
-            loading = progress,
-            messageRows = fcmStatus,
+            loading = fcmState.progress,
+            messageRows = fcmState.messages,
             onSetting = {
                 launchNotificationSetting(context)
             },
-            onCheck = settingsViewModel::checkFcm,
+            onCheck = fcmState::checkFcm,
         )
     }
 
