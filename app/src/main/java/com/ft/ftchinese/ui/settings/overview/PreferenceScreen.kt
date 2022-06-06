@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.settings
+package com.ft.ftchinese.ui.settings.overview
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -15,6 +15,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.RightArrow
+import com.ft.ftchinese.ui.settings.SettingScreen
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 

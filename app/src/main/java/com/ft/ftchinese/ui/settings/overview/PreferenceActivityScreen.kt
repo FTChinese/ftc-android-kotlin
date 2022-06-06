@@ -1,44 +1,37 @@
-package com.ft.ftchinese.ui.settings
+package com.ft.ftchinese.ui.settings.overview
 
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.ui.components.ShowToast
+import com.ft.ftchinese.ui.settings.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivity
 
 @Composable
 fun PreferenceActivityScreen(
-    settingsViewModel: SettingsViewModel,
+    scaffoldState: ScaffoldState,
     onNavigateTo: (SettingScreen) -> Unit
 ) {
     val context = LocalContext.current
-    val cacheSize by settingsViewModel.cacheSizeLiveData.observeAsState()
-    val readCount by settingsViewModel.articlesReadLiveData.observeAsState()
-    val toast by settingsViewModel.toastMessage.observeAsState()
+    val prefState = rememberPrefState(
+        scaffoldState = scaffoldState
+    )
 
     LaunchedEffect(key1 = Unit) {
-        settingsViewModel.calculateCacheSize()
-        settingsViewModel.countReadArticles()
-    }
-
-    ShowToast(
-        toast = toast
-    ) {
-        settingsViewModel.clearToast()
+        prefState.calculateCacheSize()
+        prefState.countReadArticles()
     }
 
     PreferenceScreen(
-        cacheSize = cacheSize,
-        readCount = readCount,
+        cacheSize = prefState.cacheSize,
+        readCount = prefState.readCount,
         onClickRow = { rowId ->
             when (rowId) {
                 SettingScreen.ClearCache -> {
-                    settingsViewModel.clearCache()
+                    prefState.clearCache()
                 }
                 SettingScreen.ClearHistory -> {
-                    settingsViewModel.truncateReadArticles()
+                    prefState.truncateReadArticles()
                 }
                 SettingScreen.CheckVersion -> {
                     ReleaseActivity.start(context)
