@@ -114,6 +114,12 @@ class FileCache (private val context: Context) {
         }
     }
 
+    suspend fun asyncSpace(): String {
+        return withContext(Dispatchers.IO) {
+            space()
+        }
+    }
+
     fun clear(): Boolean {
         return try {
             for (name in context.fileList()) {
@@ -123,6 +129,12 @@ class FileCache (private val context: Context) {
             true
         } catch (e: Exception) {
             false
+        }
+    }
+
+    suspend fun asyncClear(): Boolean {
+        return withContext(Dispatchers.IO) {
+            clear()
         }
     }
 
