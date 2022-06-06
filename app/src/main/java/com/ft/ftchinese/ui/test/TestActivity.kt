@@ -52,6 +52,7 @@ import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.main.AcceptServiceDialogFragment
+import com.ft.ftchinese.ui.main.MainApp
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
@@ -95,7 +96,8 @@ class TestActivity : ScopedAppActivity() {
         workManager = WorkManager.getInstance(this)
 
         setContent {
-            TestApp()
+//            TestApp()
+            MainApp()
         }
 
         intent.extras?.let {
@@ -366,20 +368,13 @@ private fun TestActivityScreen(
 
         BlockButton(onClick = { onNavigate(TestAppScreen.ModalBottomSheet) })
 
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-        ) {
+        ServiceAcceptance(fragmentManager)
 
-            ServiceAcceptance(fragmentManager)
+        TestCountDown()
 
-            TestCountDown()
+        TestTimer()
 
-            TestTimer()
-
-            TestWxPay()
-
-        }
+        TestWxPay()
     }
 }
 

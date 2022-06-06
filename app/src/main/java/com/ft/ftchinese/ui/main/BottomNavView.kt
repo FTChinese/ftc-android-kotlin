@@ -7,87 +7,81 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.theme.OColor
 
-enum class BottomNavId {
-    News,
-    English,
-    FtAcademy,
-    Video,
-    MyFt;
+sealed class BottomNavScreen(
+    val route: String,
+    @StringRes val titleId: Int,
+    @DrawableRes val iconId: Int,
+) {
+    object News : BottomNavScreen("news", R.string.nav_news, R.drawable.news_inactive)
+    object English : BottomNavScreen("english", R.string.nav_english, R.drawable.english_inactive)
+    object FtAcademy : BottomNavScreen("ftacademy", R.string.nav_ftacademy, R.drawable.fta_inactive)
+    object Video : BottomNavScreen("video", R.string.nav_video, R.drawable.video_inactive)
+    object MyFt: BottomNavScreen("myft", R.string.nav_myft, R.drawable.myft_inactive)
+
+    companion object {
+        @JvmStatic
+        fun fromRoute(route: String?): BottomNavScreen =
+            when (route?.substringBefore("/")) {
+                News.route -> News
+                English.route -> English
+                FtAcademy.route -> FtAcademy
+                Video.route -> Video
+                MyFt.route -> MyFt
+                null -> News
+                else -> throw IllegalArgumentException("Route $route is not recognized")
+            }
+    }
 }
 
-private data class NavItem(
-    val id: BottomNavId,
-    @DrawableRes val icon: Int,
-    @StringRes val title: Int,
+val bottomNavItems = listOf(
+    BottomNavScreen.News,
+    BottomNavScreen.English,
+    BottomNavScreen.FtAcademy,
+    BottomNavScreen.Video,
+    BottomNavScreen.MyFt,
 )
 
+/**
+ * See https://developer.android.com/reference/kotlin/androidx/compose/material/package-summary#BottomNavigation(androidx.compose.ui.Modifier,androidx.compose.ui.graphics.Color,androidx.compose.ui.graphics.Color,androidx.compose.ui.unit.Dp,kotlin.Function1)
+ */
 @Composable
 fun BottomNavView(
-    modifier: Modifier = Modifier,
-    onSelect: (BottomNavId) -> Unit
+    selected: BottomNavScreen,
+    onClick: (BottomNavScreen) -> Unit
 ) {
-    val (selectedItem, setSelectedItem) = remember {
-        mutableStateOf(0)
-    }
-    val items = listOf(
-        NavItem(
-            id = BottomNavId.News,
-            icon = R.drawable.news_inactive,
-            title = R.string.nav_news
-        ),
-        NavItem(
-            id = BottomNavId.English,
-            icon = R.drawable.english_inactive,
-            title = R.string.nav_english
-        ),
-        NavItem(
-            id = BottomNavId.FtAcademy,
-            icon = R.drawable.fta_inactive,
-            title = R.string.nav_ftacademy
-        ),
-        NavItem(
-            id = BottomNavId.Video,
-            icon = R.drawable.video_inactive,
-            title = R.string.nav_video
-        ),
-        NavItem(
-            id = BottomNavId.MyFt,
-            icon = R.drawable.myft_inactive,
-            title = R.string.nav_myft
-        )
-    )
 
     BottomNavigation(
         backgroundColor = OColor.wheat,
-        modifier = modifier,
     ) {
-        items.forEachIndexed { index, item ->
+        bottomNavItems.forEach { item ->
             BottomNavigationItem(
                 icon = {
                    Icon(
-                       painter = painterResource(id = item.icon), 
-                       contentDescription = stringResource(id = item.title)
+                       painter = painterResource(id = item.iconId),
+                       contentDescription = stringResource(id = item.titleId)
                    )
                 },
                 label = {
-                    Text(text = stringResource(id = item.title))
+                    Text(
+                        text = stringResource(id = item.titleId),
+                        softWrap = false,
+                        fontSize = 12.sp
+                    )
                 },
-                selected = selectedItem == index,
+                selected = selected == item,
                 onClick = {
-                    setSelectedItem(index)
-                    onSelect(item.id)
-              },
+                    onClick(item)
+                },
                 selectedContentColor = OColor.claret,
-                unselectedContentColor = OColor.black60
+                unselectedContentColor = OColor.black60,
+                alwaysShowLabel = false,
             )
         }
     }
@@ -96,8 +90,9 @@ fun BottomNavView(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewMainScreen() {
+fun PreviewBottomNavView() {
     BottomNavView(
-        onSelect = {}
+        selected = BottomNavScreen.News,
+        onClick = {}
     )
 }
