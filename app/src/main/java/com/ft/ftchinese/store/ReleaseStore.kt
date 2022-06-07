@@ -9,6 +9,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 private const val FILE_NAME_DOWNLOAD = "com.ft.ftchinese.app_release"
+private const val KEY_CHECK_ON_LAUNCH = "check_on_launch"
 private const val PREF_KEY_DOWNLOAD_ID = "download_id"
 private const val PREF_KEY_LATEST = "latest_release"
 private const val PREF_KEY_DOWNLOADING = "downloading_version"
@@ -19,6 +20,16 @@ class ReleaseStore(context: Context) {
             FILE_NAME_DOWNLOAD,
             Context.MODE_PRIVATE,
         )
+
+    fun saveCheckOnLaunch(on: Boolean) {
+        sharedPref.edit(commit = true) {
+            putBoolean(KEY_CHECK_ON_LAUNCH, on)
+        }
+    }
+
+    fun getCheckOnLaunch(): Boolean {
+        return sharedPref.getBoolean(KEY_CHECK_ON_LAUNCH, true)
+    }
 
     fun saveLatest(release: AppRelease): AppDownloaded {
 
