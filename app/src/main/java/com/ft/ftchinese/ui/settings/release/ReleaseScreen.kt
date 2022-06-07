@@ -5,21 +5,20 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.ui.components.BlockButton
 import com.ft.ftchinese.ui.components.Heading3
-import com.ft.ftchinese.ui.components.OTextButton
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OButton
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun ReleaseScreen(
     loading: Boolean,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
     downloadStage: DownloadStage,
     newRelease: AppRelease?,
     onClick: (AppRelease) -> Unit,
@@ -27,94 +26,85 @@ fun ReleaseScreen(
     onViewDownloads: () -> Unit,
 ) {
 
-    newRelease?.let { release ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "App启动时检查新版本",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(Dimens.dp16)
+            )
+
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+            )
+        }
+
+        Divider(startIndent = Dimens.dp16)
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(Dimens.dp16),
+            modifier = Modifier.padding(Dimens.dp16)
         ) {
+            newRelease?.let { release ->
 
-            Spacer(modifier = Modifier.height(Dimens.dp16))
+                Heading3(
+                    text = if (release.isNew) {
+                        stringResource(
+                            R.string.found_new_release,
+                            release.versionName
+                        )
+                    } else {
+                        stringResource(
+                            R.string.already_latest_release
+                        )
+                    },
+                    color = OColor.black
+                )
 
-            Heading3(
-                text = if (release.isNew) {
-                    stringResource(
-                        R.string.found_new_release,
-                        release.versionName
+                if (release.isNew) {
+                    Spacer(modifier = Modifier.height(Dimens.dp16))
+
+                    BlockButton(
+                        onClick = {
+                            onClick(newRelease)
+                        },
+
+                        enabled = !loading && (downloadStage !is DownloadStage.Progress),
+                        text = when (downloadStage) {
+                            is DownloadStage.NotStarted -> {
+                                stringResource(id = R.string.btn_download_now)
+                            }
+                            is DownloadStage.Progress -> {
+                                stringResource(id = R.string.btn_downloading)
+                            }
+                            is DownloadStage.Completed -> {
+                                stringResource(id = R.string.btn_download_complete)
+                            }
+                        }
                     )
-                } else {
-                    stringResource(
-                        R.string.already_latest_release
-                    )
+                }
+            }
+        }
+
+        if (downloadStage is DownloadStage.Completed) {
+            Divider(startIndent = Dimens.dp16)
+
+            ReleaseMenu(
+                onClickDelete = {
+                    onDelete(downloadStage.downloadId)
                 },
-                color = OColor.black
+                onViewDownloads = onViewDownloads
             )
-
-            if (release.isNew) {
-                Spacer(modifier = Modifier.height(Dimens.dp16))
-
-                BlockButton(
-                    onClick = {
-                        onClick(newRelease)
-                    },
-
-                    enabled = !loading && (downloadStage !is DownloadStage.Progress),
-                    text = when (downloadStage) {
-                        is DownloadStage.NotStarted -> {
-                            stringResource(id = R.string.btn_download_now)
-                        }
-                        is DownloadStage.Progress -> {
-                            stringResource(id = R.string.btn_downloading)
-                        }
-                        is DownloadStage.Completed -> {
-                            stringResource(id = R.string.btn_download_complete)
-                        }
-                    }
-                )
-            }
-
-            if (downloadStage is DownloadStage.Completed) {
-                Spacer(modifier = Modifier.height(Dimens.dp4))
-
-                DeleteApk(
-                    onDelete = {
-                        onDelete(downloadStage.downloadId)
-                    },
-                    onViewDownloads = onViewDownloads
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DeleteApk(
-    onDelete: () -> Unit,
-    onViewDownloads: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        TextButton(
-            onClick = onDelete,
-            modifier = Modifier.align(Alignment.End),
-            colors = OButton.textColors(
-                contentColor = OColor.claret
-            )
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_delete_forever_black_24dp),
-                contentDescription = "Delete",
-            )
-            Text(text = "删除下载的文件")
         }
 
-        OTextButton(
-            onClick = onViewDownloads,
-            text = "打开下载文件夹",
-            modifier = Modifier.align(Alignment.End),
-        )
     }
 }
 
@@ -145,6 +135,8 @@ fun AlertDownloadStart(
 fun PreviewReleaseScreen() {
     ReleaseScreen(
         loading = false,
+        checked = true,
+        onCheckedChange = {},
         downloadStage = DownloadStage.Completed(1),
         newRelease = AppRelease(
             versionName = "v6.9.0",

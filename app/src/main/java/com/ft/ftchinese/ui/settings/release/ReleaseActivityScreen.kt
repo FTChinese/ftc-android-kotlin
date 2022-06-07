@@ -88,6 +88,8 @@ fun ReleaseActivityScreen(
     ) {
         ReleaseScreen(
             loading = releaseState.progress.value,
+            checked = releaseState.checkOnLaunch,
+            onCheckedChange = releaseState::switchCheckOnLaunch,
             downloadStage = releaseState.downloadStage,
             newRelease = releaseState.newRelease,
             onClick = { release ->
