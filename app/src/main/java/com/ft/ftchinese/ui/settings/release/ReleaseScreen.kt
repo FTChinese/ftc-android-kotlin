@@ -1,82 +1,117 @@
 package com.ft.ftchinese.ui.settings.release
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.ui.components.PrimaryButton
-import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.BlockButton
+import com.ft.ftchinese.ui.components.BodyText2
+import com.ft.ftchinese.ui.components.Heading3
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OFont
+import com.ft.ftchinese.ui.theme.OButton
+import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun ReleaseScreen(
     loading: Boolean,
-    downloadStatus: DownloadStatus,
+    downloadStage: DownloadStage,
     newRelease: AppRelease?,
-    currentVersion: Int,
-    modifier: Modifier = Modifier,
-    onClick: (DownloadStatus, AppRelease) -> Unit,
+    onClick: (AppRelease) -> Unit,
+    onDelete: (Long) -> Unit,
 ) {
 
-    ProgressLayout(
-        loading = loading,
-        modifier = modifier,
-    ) {
-        newRelease?.let {
-            val isNew = newRelease.versionCode > currentVersion
+    newRelease?.let { release ->
 
-            Column(
-                modifier = Modifier.fillMaxSize(),
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(Dimens.dp16),
+        ) {
 
+            Spacer(modifier = Modifier.height(Dimens.dp16))
+
+            Heading3(
+                text = if (release.isNew) {
+                    stringResource(
+                        R.string.found_new_release,
+                        release.versionName
+                    )
+                } else {
+                    stringResource(
+                        R.string.already_latest_release
+                    )
+                },
+                color = OColor.black
+            )
+
+            if (release.isNew) {
                 Spacer(modifier = Modifier.height(Dimens.dp16))
 
-                Text(
-                    text = if (isNew) {
-                        stringResource(
-                            R.string.found_new_release,
-                            newRelease.versionName
-                        )
-                    } else {
-                        stringResource(
-                            R.string.already_latest_release
-                        )
+                BlockButton(
+                    onClick = {
+                        onClick(newRelease)
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.h6
-                )
 
-                if (isNew) {
-                    PrimaryButton(
-                        onClick = {
-                            onClick(downloadStatus, newRelease)
-                        },
-                        modifier = Modifier
-                            .padding(Dimens.dp16)
-                            .fillMaxWidth(),
-                        enabled = downloadStatus != DownloadStatus.Progress,
-                    ) {
-                        Text(
-                            text = stringResource(id = downloadStatus.id),
-                            fontSize = OFont.blockButton,
-                        )
+                    enabled = !loading && (downloadStage !is DownloadStage.Progress),
+                    text = when (downloadStage) {
+                        is DownloadStage.NotStarted -> {
+                            stringResource(id = R.string.btn_download_now)
+                        }
+                        is DownloadStage.Progress -> {
+                            stringResource(id = R.string.btn_downloading)
+                        }
+                        is DownloadStage.Completed -> {
+                            stringResource(id = R.string.btn_download_complete)
+                        }
                     }
-                }
+                )
             }
 
+            if (downloadStage is DownloadStage.Completed) {
+                Spacer(modifier = Modifier.height(Dimens.dp4))
+
+                DeleteApk {
+                    onDelete(downloadStage.downloadId)
+                }
+            }
         }
     }
 }
 
+@Composable
+private fun DeleteApk(
+    onDelete: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TextButton(
+            onClick = onDelete,
+            modifier = Modifier.align(Alignment.End),
+            colors = OButton.textColors(
+                contentColor = OColor.claret
+            )
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_delete_forever_black_24dp),
+                contentDescription = "Delete",
+            )
+            Text(text = "删除下载的文件")
+        }
+
+        BodyText2(
+            text = "下载文件位于手机存储/Download文件夹下",
+            textAlign = TextAlign.End
+        )
+    }
+}
 
 @Composable
 fun AlertDownloadStart(
@@ -96,5 +131,22 @@ fun AlertDownloadStart(
         text = {
             Text(text = stringResource(id = R.string.wait_download_finish))
         }
+    )
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewReleaseScreen() {
+    ReleaseScreen(
+        loading = false,
+        downloadStage = DownloadStage.Completed(1),
+        newRelease = AppRelease(
+            versionName = "v6.9.0",
+            versionCode = 100,
+            apkUrl = "https://www.ftchinese.com"
+        ),
+        onClick = {},
+        onDelete = {}
     )
 }
