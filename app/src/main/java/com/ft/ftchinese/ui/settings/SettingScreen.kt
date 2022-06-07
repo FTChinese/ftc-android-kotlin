@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.settings
 
 import androidx.annotation.StringRes
 import com.ft.ftchinese.R
+import com.ft.ftchinese.repository.Config
 
 enum class SettingScreen(@StringRes val titleId: Int) {
     Overview(titleId = R.string.action_settings),
@@ -11,6 +12,12 @@ enum class SettingScreen(@StringRes val titleId: Int) {
     CheckVersion(titleId = R.string.pref_check_new_version);
 
     companion object {
+
+        val releaseRoutePattern = "${CheckVersion.name}/?cached={cached}"
+        val releaseDeepLinkPattern = "${Config.canonicalUrl}/${releaseRoutePattern}"
+        const val newReleaseDeepLink = "${Config.canonicalUrl}/cached=true"
+
+        @JvmStatic
         fun fromRoute(route: String?): SettingScreen =
             when (route?.substringBefore("/")) {
                 Overview.name -> Overview
