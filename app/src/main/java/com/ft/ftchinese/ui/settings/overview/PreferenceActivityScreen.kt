@@ -3,16 +3,13 @@ package com.ft.ftchinese.ui.settings.overview
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.settings.SettingScreen
-import com.ft.ftchinese.ui.settings.release.ReleaseActivity
 
 @Composable
 fun PreferenceActivityScreen(
     scaffoldState: ScaffoldState,
     onNavigateTo: (SettingScreen) -> Unit
 ) {
-    val context = LocalContext.current
     val prefState = rememberPrefState(
         scaffoldState = scaffoldState
     )
@@ -32,9 +29,6 @@ fun PreferenceActivityScreen(
                 }
                 SettingScreen.ClearHistory -> {
                     prefState.truncateReadArticles()
-                }
-                SettingScreen.CheckVersion -> {
-                    ReleaseActivity.start(context)
                 }
                 else -> {
                     onNavigateTo(rowId)
