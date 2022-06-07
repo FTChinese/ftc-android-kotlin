@@ -14,8 +14,9 @@ enum class SettingScreen(@StringRes val titleId: Int) {
     companion object {
 
         val releaseRoutePattern = "${CheckVersion.name}/?cached={cached}"
+        val newReleaseRoute = "${CheckVersion}/?cached=false"
         val releaseDeepLinkPattern = "${Config.canonicalUrl}/${releaseRoutePattern}"
-        const val newReleaseDeepLink = "${Config.canonicalUrl}/cached=true"
+        val newReleaseDeepLink = "${Config.canonicalUrl}/${CheckVersion.name}/?cached=true"
 
         @JvmStatic
         fun fromRoute(route: String?): SettingScreen =
