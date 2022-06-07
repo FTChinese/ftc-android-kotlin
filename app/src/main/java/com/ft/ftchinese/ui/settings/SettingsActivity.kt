@@ -12,14 +12,19 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
 import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
+import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
@@ -37,6 +42,16 @@ class SettingsActivity : ComponentActivity() {
     }
 
     companion object {
+
+        @JvmStatic
+        fun deepLinkIntent(context: Context) = Intent(
+            Intent.ACTION_VIEW,
+            SettingScreen.newReleaseDeepLink.toUri(),
+            context,
+            SettingsActivity::class.java
+        )
+
+        @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(context, SettingsActivity::class.java))
         }
@@ -96,9 +111,24 @@ fun SettingsApp(
                 }
 
                 composable(
-                    route = SettingScreen.CheckVersion.name
-                ) {
-
+                    route = SettingScreen.releaseRoutePattern,
+                    arguments = listOf(
+                        navArgument("cached") {
+                            type = NavType.BoolType
+                            defaultValue = false
+                        }
+                    ),
+                    deepLinks = listOf(
+                        navDeepLink {
+                            uriPattern = SettingScreen.releaseDeepLinkPattern
+                        }
+                    )
+                ) { entry ->
+                    val cached = entry.arguments?.getBoolean("cached") ?: false
+                    ReleaseActivityScreen(
+                        scaffoldState = scaffoldState,
+                        cached = cached
+                    )
                 }
             }
         }
@@ -109,5 +139,12 @@ private fun navigateToScreen(
     navController: NavController,
     screen: SettingScreen
 ) {
-    navController.navigate(screen.name)
+    when (screen) {
+        SettingScreen.CheckVersion -> {
+            navController.navigate(SettingScreen.newReleaseRoute)
+        }
+        else -> {
+            navController.navigate(screen.name)
+        }
+    }
 }
