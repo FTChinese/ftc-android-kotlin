@@ -391,7 +391,7 @@
     <string name="download_running">下載中</string>
     <string name="download_successful">下載成功</string>
     <string name="download_failed">下载失敗，請重试</string>
-    <string name="wait_download_finish">开始後臺下載，請稍候。下载完成後会提示您安装，或者點擊通知栏的下载完成通知开始安装。您也可以下载完成後手动安装，文件位于手机存儲的下载文件夹下。</string>
+    <string name="wait_download_finish">开始後臺下載，請稍候。下载完成後会提示您安装，或者點擊通知栏的下载完成通知开始安装。下载的文件位于手机存儲/Download文件夹下。</string>
     <string name="action_open_download">打開下載文件夾</string>
     <string name="summary_articles_read">已閱讀 %1$d 篇文章</string>
 
