@@ -26,6 +26,36 @@ fun IconAddCircle(
 }
 
 @Composable
+fun RightArrow() {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_keyboard_arrow_right_gray_24dp),
+        contentDescription = "Details"
+    )
+}
+
+@Composable
+fun IconCancel(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
+        contentDescription = "Cancel",
+        tint = tint
+    )
+}
+
+@Composable
+fun IconRedo(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_redo_24),
+        contentDescription = "Redo",
+        tint = tint
+    )
+}
+
+@Composable
 fun IconCheck(
     checked: Boolean,
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
