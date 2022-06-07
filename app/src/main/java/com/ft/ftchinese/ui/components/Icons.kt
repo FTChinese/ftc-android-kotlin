@@ -56,6 +56,28 @@ fun IconRedo(
 }
 
 @Composable
+fun IconDelete(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_delete_forever_black_24dp),
+        contentDescription = "Delete",
+        tint = tint
+    )
+}
+
+@Composable
+fun IconFolderOpen(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_folder_open_24),
+        contentDescription = "Folder",
+        tint = tint,
+    )
+}
+
+@Composable
 fun IconCheck(
     checked: Boolean,
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
