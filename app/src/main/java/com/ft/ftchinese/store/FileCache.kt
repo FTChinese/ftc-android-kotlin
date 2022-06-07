@@ -14,7 +14,6 @@ import java.io.File
 import java.io.FileInputStream
 
 object CacheFileNames {
-    const val stripeCustomer = "account_stripe_customer.${BuildConfig.VERSION_CODE}.json"
     const val wxAvatar = "wx_avatar.jpg"
     const val splashSchedule = "splash_schedule.json"
 }
