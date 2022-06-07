@@ -40,8 +40,6 @@ fun verifierRule(minLen: Int): ValidationRule {
     )
 }
 
-val rulePasswordRequired = requiredRule("必须输入当前密码")
-
 val ruleEmailValid = ValidationRule(
     predicate = Validator::isEmail,
     message = "请输入完整的邮箱"

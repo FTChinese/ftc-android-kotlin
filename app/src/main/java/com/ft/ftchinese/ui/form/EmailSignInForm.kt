@@ -15,7 +15,7 @@ import com.ft.ftchinese.ui.components.TextInput
 import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OButton
-import com.ft.ftchinese.ui.validator.passwordRules
+import com.ft.ftchinese.ui.validator.requiredRule
 import com.ft.ftchinese.ui.validator.ruleEmailValid
 
 @Composable
@@ -34,7 +34,9 @@ fun EmailSignInForm(
     )
 
     val pwState = rememberInputState(
-        rules = passwordRules()
+        rules = listOf(
+            requiredRule("请输入密码")
+        )
     )
 
     val formValid = emailState.valid.value && pwState.valid.value

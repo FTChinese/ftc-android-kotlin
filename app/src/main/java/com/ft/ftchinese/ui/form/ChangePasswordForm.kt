@@ -1,6 +1,9 @@
 package com.ft.ftchinese.ui.form
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -12,7 +15,7 @@ import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.passwordRules
-import com.ft.ftchinese.ui.validator.rulePasswordRequired
+import com.ft.ftchinese.ui.validator.requiredRule
 
 @Composable
 fun ChangePasswordForm(
@@ -22,7 +25,7 @@ fun ChangePasswordForm(
 
     val oldPwState = rememberInputState(
         rules = listOf(
-            rulePasswordRequired
+            requiredRule("必须输入当前密码")
         )
     )
 
