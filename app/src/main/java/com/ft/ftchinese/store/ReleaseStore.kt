@@ -2,6 +2,7 @@ package com.ft.ftchinese.store
 
 import android.content.Context
 import androidx.core.content.edit
+import com.ft.ftchinese.model.AppDownloaded
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.model.fetch.marshaller
 import kotlinx.serialization.decodeFromString
@@ -19,8 +20,35 @@ class ReleaseStore(context: Context) {
             Context.MODE_PRIVATE,
         )
 
-    fun saveLatest(release: AppRelease) {
+    fun saveLatest(release: AppRelease): AppDownloaded {
+
+        val cached = loadDownload()
+        if (cached == null) {
+            clearAndSave(release)
+            return AppDownloaded(
+                downloadId = -1,
+                release = release
+            )
+        }
+
+        return if (release.versionCode == cached.release.versionCode && cached.downloadId > 0) {
+            saveDownload(cached.downloadId, release)
+            AppDownloaded(
+                downloadId = cached.downloadId,
+                release = release
+            )
+        } else {
+            clearAndSave(release)
+            AppDownloaded(
+                downloadId = -1,
+                release = release,
+            )
+        }
+    }
+
+    private fun clearAndSave(release: AppRelease) {
         sharedPref.edit(commit = true) {
+            clear()
             putString(
                 PREF_KEY_LATEST,
                 marshaller.encodeToString(release),
@@ -28,27 +56,22 @@ class ReleaseStore(context: Context) {
         }
     }
 
-    fun loadLatest(): AppRelease? {
-        val release = sharedPref
-            .getString(PREF_KEY_LATEST, null)
-            ?: return null
-
-        return marshaller.decodeFromString(release)
-    }
-
-    fun saveDownloadId(id: Long, release: AppRelease) {
+    fun saveDownload(id: Long, release: AppRelease) {
         sharedPref.edit(commit = true) {
             putLong(PREF_KEY_DOWNLOAD_ID, id)
             putString(PREF_KEY_DOWNLOADING, marshaller.encodeToString(release))
         }
     }
 
-    fun loadDownloadId(): Pair<Long, AppRelease>? {
+    fun loadDownload(): AppDownloaded? {
         val id = sharedPref.getLong(PREF_KEY_DOWNLOAD_ID, -1)
         val releaseStr = sharedPref
             .getString(PREF_KEY_DOWNLOADING, null) ?: return null
 
-        return Pair(id, marshaller.decodeFromString(releaseStr))
+        return AppDownloaded(
+            release = marshaller.decodeFromString(releaseStr),
+            downloadId = id,
+        )
     }
 
     fun clear() {
