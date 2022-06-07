@@ -39,11 +39,19 @@ class ReleaseState(
     private val releaseStore = ReleaseStore(context)
     private val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
+    var checkOnLaunch by mutableStateOf(releaseStore.getCheckOnLaunch())
+        private set
+
     var newRelease by mutableStateOf<AppRelease?>(null)
         private set
 
     var downloadStage by mutableStateOf<DownloadStage>(DownloadStage.NotStarted)
         private set
+
+    fun switchCheckOnLaunch(on: Boolean) {
+        checkOnLaunch = on
+        releaseStore.saveCheckOnLaunch(on)
+    }
 
     private suspend fun loadCachedRelease(): AppDownloaded? {
         return try {
