@@ -1,17 +1,19 @@
 package com.ft.ftchinese.ui.subs.member
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.components.ClickableRow
+import com.ft.ftchinese.ui.components.IconCancel
+import com.ft.ftchinese.ui.components.IconRedo
 import com.ft.ftchinese.ui.components.RightArrow
 import com.ft.ftchinese.ui.theme.Dimens
 
@@ -21,35 +23,6 @@ enum class SubsOptionRow {
     ReactivateStripe;
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun OptionRow(
-    text: String,
-    onClick: () -> Unit,
-) {
-    Card(
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = Dimens.dp16,
-                    vertical = Dimens.dp8
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = text,
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.body1
-            )
-
-            RightArrow()
-        }
-    }
-}
-
 @Composable
 fun SubsOptions(
     cancelStripe: Boolean,
@@ -57,34 +30,56 @@ fun SubsOptions(
     onClickRow: (SubsOptionRow) -> Unit
 ) {
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        OptionRow(
-            text = "购买订阅或更改自动续订"
+    Card {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
-            onClickRow(SubsOptionRow.GoToPaywall)
-        }
 
-        Spacer(modifier = Modifier.height(1.dp))
-
-        if (reactivateStripe) {
-            OptionRow(
-                text = stringResource(id = R.string.stripe_reactivate_auto_renew)
+            ClickableRow(
+                onClick = {
+                    onClickRow(SubsOptionRow.GoToPaywall)
+                },
+                endIcon = {
+                    RightArrow()
+                },
+                modifier = Modifier.padding(Dimens.dp8)
             ) {
-                onClickRow(SubsOptionRow.ReactivateStripe)
+                Text(text = "购买订阅或更改自动续订")
             }
 
-        }
 
-        if (cancelStripe) {
-            OptionRow(
-                text = stringResource(id = R.string.stripe_cancel)
-            ) {
-                onClickRow(SubsOptionRow.CancelStripe)
+            if (reactivateStripe) {
+                Divider(startIndent = Dimens.dp8)
+
+                ClickableRow(
+                    onClick = {
+                        onClickRow(SubsOptionRow.ReactivateStripe)
+                    },
+                    modifier = Modifier.padding(Dimens.dp8),
+                    endIcon = {
+                        IconRedo()
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.stripe_reactivate_auto_renew))
+                }
             }
 
+            if (cancelStripe) {
+                Divider(startIndent = Dimens.dp8)
+                ClickableRow(
+                    onClick = {
+                        onClickRow(SubsOptionRow.CancelStripe)
+                    },
+                    modifier = Modifier.padding(Dimens.dp8),
+                    endIcon = {
+                        IconCancel()
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.stripe_cancel))
+                }
+
+            }
         }
     }
 }
