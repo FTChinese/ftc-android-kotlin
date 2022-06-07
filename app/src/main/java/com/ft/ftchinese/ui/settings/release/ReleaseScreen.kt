@@ -7,13 +7,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.ui.components.BlockButton
-import com.ft.ftchinese.ui.components.BodyText2
 import com.ft.ftchinese.ui.components.Heading3
+import com.ft.ftchinese.ui.components.OTextButton
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OButton
 import com.ft.ftchinese.ui.theme.OColor
@@ -25,6 +24,7 @@ fun ReleaseScreen(
     newRelease: AppRelease?,
     onClick: (AppRelease) -> Unit,
     onDelete: (Long) -> Unit,
+    onViewDownloads: () -> Unit,
 ) {
 
     newRelease?.let { release ->
@@ -77,9 +77,12 @@ fun ReleaseScreen(
             if (downloadStage is DownloadStage.Completed) {
                 Spacer(modifier = Modifier.height(Dimens.dp4))
 
-                DeleteApk {
-                    onDelete(downloadStage.downloadId)
-                }
+                DeleteApk(
+                    onDelete = {
+                        onDelete(downloadStage.downloadId)
+                    },
+                    onViewDownloads = onViewDownloads
+                )
             }
         }
     }
@@ -87,7 +90,8 @@ fun ReleaseScreen(
 
 @Composable
 private fun DeleteApk(
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onViewDownloads: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -106,9 +110,10 @@ private fun DeleteApk(
             Text(text = "删除下载的文件")
         }
 
-        BodyText2(
-            text = "下载文件位于手机存储/Download文件夹下",
-            textAlign = TextAlign.End
+        OTextButton(
+            onClick = onViewDownloads,
+            text = "打开下载文件夹",
+            modifier = Modifier.align(Alignment.End),
         )
     }
 }
@@ -147,6 +152,7 @@ fun PreviewReleaseScreen() {
             apkUrl = "https://www.ftchinese.com"
         ),
         onClick = {},
-        onDelete = {}
+        onDelete = {},
+        onViewDownloads = {}
     )
 }
