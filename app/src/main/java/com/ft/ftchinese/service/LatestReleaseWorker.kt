@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.ReleaseStore
-import com.ft.ftchinese.ui.settings.release.ReleaseActivity
+import com.ft.ftchinese.ui.settings.SettingsActivity
 
 /**
  * Background worker to check for latest release upon app launch.
@@ -58,7 +58,7 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
 
         Log.i(TAG, "Send notification for latest release")
 
-        val intent = ReleaseActivity.deepLinkIntent(applicationContext)
+        val intent = SettingsActivity.deepLinkIntent(applicationContext)
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(applicationContext).run {
             addNextIntentWithParentStack(intent)

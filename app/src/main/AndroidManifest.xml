@@ -120,10 +120,9 @@
                 <data android:scheme="wxacddf1c20516eb69" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.settings.SettingsActivity" />
         <activity
-            android:name=".ui.settings.release.ReleaseActivity"
-            android:parentActivityName=".ui.settings.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
+            android:parentActivityName=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <data android:scheme="https" android:host="www.ftchinese.com"/>
