@@ -33,8 +33,6 @@ fun AboutActivityScreen(
                     text = pageMeta.title,
                 )
             }
-
-            Divider(startIndent = Dimens.dp16)
         }
     }
 }
