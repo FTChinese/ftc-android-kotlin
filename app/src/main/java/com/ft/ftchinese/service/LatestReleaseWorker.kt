@@ -29,6 +29,10 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
     override fun doWork(): Result {
         Log.i(TAG, "Start LatestReleaseWorker")
 
+        if (!store.getCheckOnLaunch()) {
+            return Result.success()
+        }
+
         try {
             val resp = ReleaseRepo.getLatest()
 
