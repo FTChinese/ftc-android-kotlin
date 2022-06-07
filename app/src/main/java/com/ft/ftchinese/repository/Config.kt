@@ -15,6 +15,8 @@ object Config {
 
     private const val urlScheme = "https://"
 
+    const val canonicalUrl = "${urlScheme}${HOST_FTC}"
+
     private val internalHost = listOf(
         HOST_FTC,
         BuildConfig.BASE_URL_FALLBACK.removePrefix(urlScheme),
