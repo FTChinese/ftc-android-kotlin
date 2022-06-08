@@ -192,6 +192,7 @@ dependencies {
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
     def compose_ui = "1.2.0-beta03"
+    def accompanist = "0.24.10-beta"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -262,8 +263,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$compose_ui"
-    implementation "com.google.accompanist:accompanist-swiperefresh:0.24.9-beta"
-    implementation "com.google.accompanist:accompanist-webview:0.24.9-beta"
+    implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist"
+    implementation "com.google.accompanist:accompanist-webview:$accompanist"
+    implementation "com.google.accompanist:accompanist-flowlayout:$accompanist"
 
     // UI Tests
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui"
