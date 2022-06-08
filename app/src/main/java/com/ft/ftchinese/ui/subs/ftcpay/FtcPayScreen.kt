@@ -17,6 +17,7 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.repository.ApiMode
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.subs.product.PriceCard
 import com.ft.ftchinese.ui.subs.product.PriceCardParams
@@ -26,6 +27,7 @@ import com.ft.ftchinese.ui.theme.Dimens
 fun FtcPayScreen(
     cartItem: CartItemFtc,
     loading: Boolean,
+    mode: ApiMode,
     onClickPay: (PayMethod) -> Unit,
 ) {
     val context = LocalContext.current
@@ -46,6 +48,10 @@ fun FtcPayScreen(
             modifier = Modifier
                 .weight(1.0f)
         ) {
+
+            if (mode != ApiMode.Live) {
+                Mode(mode = mode)
+            }
 
             CheckoutHeader(tier = cartItem.price.tier)
 
@@ -124,6 +130,7 @@ fun PreviewFtcPayBody() {
             discount = null,
             isIntro = false,
         ),
+        mode = ApiMode.Debug,
         loading = true,
         onClickPay = {}
     )

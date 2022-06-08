@@ -23,7 +23,11 @@ import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.model.stripesubs.StripeSubs
-import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.repository.ApiMode
+import com.ft.ftchinese.ui.components.CheckoutHeader
+import com.ft.ftchinese.ui.components.CheckoutMessage
+import com.ft.ftchinese.ui.components.Mode
+import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.form.AutoRenewAgreement
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.subs.product.PriceCard
@@ -35,6 +39,7 @@ import com.ft.ftchinese.ui.theme.OColor
 fun StripePayScreen(
     cartItem: CartItemStripe,
     loading: Boolean,
+    mode: ApiMode,
     paymentMethod: StripePaymentMethod?,
     subs: StripeSubs?,
     onPaymentMethod: () -> Unit,
@@ -56,6 +61,10 @@ fun StripePayScreen(
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
         ) {
+            if (mode != ApiMode.Live) {
+                Mode(mode = mode)
+            }
+
             CheckoutHeader(tier = cartItem.recurring.tier)
 
             Card(
@@ -151,5 +160,6 @@ fun PreviewStripePayScreen() {
         onPaymentMethod = {  },
         onSubscribe = {},
         onDone = {},
+        mode = ApiMode.Sandbox,
     )
 }

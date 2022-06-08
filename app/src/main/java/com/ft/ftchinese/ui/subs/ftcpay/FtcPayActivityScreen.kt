@@ -11,6 +11,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
+import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.Build
@@ -51,6 +52,10 @@ fun FtcPayActivityScreen(
     if (priceId.isNullOrBlank()) {
         ftcPayState.showSnackBar("Price id not passed in")
         return
+    }
+
+    val apiConfig = remember {
+        ApiConfig.ofSubs(account.isTest)
     }
 
     LaunchedEffect(key1 = Unit) {
@@ -118,7 +123,8 @@ fun FtcPayActivityScreen(
                         payMethod = payMethod,
                         item = item,
                     )
-                }
+                },
+                mode = apiConfig.mode
             )
         }
     }

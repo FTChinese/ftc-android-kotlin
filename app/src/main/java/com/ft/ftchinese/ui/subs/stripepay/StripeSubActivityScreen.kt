@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
+import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.CreateCustomerDialog
 import com.ft.ftchinese.ui.components.ErrorDialog
@@ -40,6 +41,10 @@ fun StripeSubActivityScreen(
     if (account == null) {
         context.toast("Not logged in")
         return
+    }
+
+    val apiConfig = remember {
+        ApiConfig.ofSubs(account.isTest)
     }
 
     val paymentState = rememberStripeSubState(
@@ -143,6 +148,7 @@ fun StripeSubActivityScreen(
             StripePayScreen(
                 cartItem = it,
                 loading = paymentState.progress.value,
+                mode = apiConfig.mode,
                 paymentMethod = paymentState.paymentMethodSelected,
                 subs = paymentState.subsResult?.subs,
                 onPaymentMethod = {
