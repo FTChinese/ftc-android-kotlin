@@ -79,7 +79,7 @@ fun SubHeading2(
 ) {
     Text(
         text = text,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         textAlign = textAlign,
         style = MaterialTheme.typography.subtitle2,
         color = color,

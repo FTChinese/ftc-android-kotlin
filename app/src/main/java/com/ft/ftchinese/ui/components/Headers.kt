@@ -24,7 +24,10 @@ fun ScreenHeader(
         }
 
         if (subTitle.isNotBlank()) {
-            SubHeading2(text = subTitle)
+            SubHeading2(
+                text = subTitle,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.height(Dimens.dp8))
         }
     }

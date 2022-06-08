@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.auth.login
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
@@ -63,7 +64,8 @@ fun LoginActivityScreen(
             
             if (!email.isNullOrBlank()) {
                 SubHeading2(
-                    text = stringResource(id = R.string.instruct_sign_in)
+                    text = stringResource(id = R.string.instruct_sign_in),
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(Dimens.dp8))

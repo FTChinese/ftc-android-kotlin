@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.auth.signup
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
@@ -56,7 +57,10 @@ fun SignUpActivityScreen(
             }
         ) {
             if (!email.isNullOrBlank()) {
-                SubHeading2(text = stringResource(id = R.string.instruct_sign_up))
+                SubHeading2(
+                    text = stringResource(id = R.string.instruct_sign_up),
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Spacer(modifier = Modifier.height(Dimens.dp8))
             }
         }
