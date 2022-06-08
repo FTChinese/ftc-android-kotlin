@@ -160,6 +160,12 @@ android {
             dimension "appStore"
             versionNameSuffix "-wechat"
         }
+
+        // Use the debug version to test stripe pay.
+        stripe {
+            dimension "appStore"
+            versionNameSuffix "-stripe"
+        }
     }
 
     testOptions {
