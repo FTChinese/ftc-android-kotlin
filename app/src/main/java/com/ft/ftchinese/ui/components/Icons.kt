@@ -78,6 +78,17 @@ fun IconFolderOpen(
 }
 
 @Composable
+fun IconSearch(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_search_black_24dp),
+        contentDescription = "Search",
+        tint = tint,
+    )
+}
+
+@Composable
 fun IconCheck(
     checked: Boolean,
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
