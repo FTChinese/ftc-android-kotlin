@@ -102,10 +102,10 @@ open class StripeWalletState(
             progress.value = false
             when (result) {
                 is FetchResult.LocalizedError -> {
-                    showSnackBar(result.msgId)
+//                    showSnackBar(result.msgId)
                 }
                 is FetchResult.TextError -> {
-                    showSnackBar(result.text)
+//                    showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
                      defaultPaymentMethod = result.data
