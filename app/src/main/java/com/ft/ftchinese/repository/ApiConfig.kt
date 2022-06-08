@@ -18,7 +18,6 @@ data class ApiConfig(
 ) {
     companion object {
         private const val flavorWx = "wechat"
-        private const val flavorStripe = "stripe"
 
         // Used for development.
         private val debugApi = ApiConfig(
@@ -57,14 +56,7 @@ data class ApiConfig(
                 }
                 // For other Build Variants xxxDebug
                 BuildConfig.DEBUG -> {
-                    // For Build Variants stripeDebug and test account,
-                    // requests sent to sandbox api.
-                    if (isTest && BuildConfig.FLAVOR == flavorStripe) {
-                        releaseSandboxApi
-                    } else {
-                        // otherwise local ip
-                        debugApi
-                    }
+                    debugApi
                 }
                 // For Build Variants xxxRelease.
                 // Sandbox is dynamically determined by user's account.
