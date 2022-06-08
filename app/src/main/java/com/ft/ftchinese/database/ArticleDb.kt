@@ -6,11 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-        entities = [
-            StarredArticle::class,
-            ReadArticle::class
-        ],
-        version = 9
+    entities = [
+        StarredArticle::class,
+        ReadArticle::class
+    ],
+    version = 9
 )
 abstract class ArticleDb : RoomDatabase() {
     abstract fun starredDao(): StarredArticleDao

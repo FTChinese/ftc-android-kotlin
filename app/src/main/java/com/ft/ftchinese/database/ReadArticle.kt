@@ -15,10 +15,10 @@ import org.threeten.bp.LocalDateTime
 import java.util.*
 
 @Entity(
-        tableName = "reading_history",
-        indices = [
-                Index(value = ["id", "type"], unique = true)
-        ]
+    tableName = "reading_history",
+    indices = [
+            Index(value = ["id", "type"], unique = true)
+    ]
 )
 data class ReadArticle(
     @PrimaryKey(autoGenerate = true)

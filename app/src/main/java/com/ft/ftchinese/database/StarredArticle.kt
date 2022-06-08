@@ -7,10 +7,10 @@ import com.ft.ftchinese.model.content.Teaser
 
 
 @Entity(
-        tableName = "starred_article",
-        indices = [
-            Index(value = ["id", "type"], unique = true)
-        ]
+    tableName = "starred_article",
+    indices = [
+        Index(value = ["id", "type"], unique = true)
+    ]
 )
 data class StarredArticle(
         @PrimaryKey(autoGenerate = true)
