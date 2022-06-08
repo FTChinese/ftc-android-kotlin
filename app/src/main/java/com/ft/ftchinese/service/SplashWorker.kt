@@ -7,13 +7,13 @@ import androidx.work.WorkerParameters
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.splash.Schedule
-import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.repository.AdClient
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.repository.Endpoint
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.store.SplashStore
 import kotlinx.serialization.decodeFromString
 
 private const val TAG = "SplashWorker"
@@ -21,7 +21,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
 
     private val cache = FileCache(appContext)
     private val userSession = SessionManager.getInstance(appContext)
-    private val store = SplashScreenManager.getInstance(appContext)
+    private val store = SplashStore.getInstance(appContext)
 
     override fun doWork(): Result {
         val downloaded = downloadSchedule()

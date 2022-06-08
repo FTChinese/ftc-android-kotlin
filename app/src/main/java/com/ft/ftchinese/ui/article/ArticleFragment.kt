@@ -15,9 +15,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentArticleBinding
 import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
@@ -38,12 +38,12 @@ class ArticleFragment : ScopedFragment() {
 
     private lateinit var screenshotViewModel: ScreenshotViewModel
     private lateinit var articleViewModel: ArticleViewModel
-    private lateinit var followingManager: FollowingManager
+    private lateinit var followedTopics: FollowedTopics
     private lateinit var session: SessionManager
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        followingManager = FollowingManager.getInstance(context)
+        followedTopics = FollowedTopics.getInstance(context)
         session = SessionManager.getInstance(context)
     }
 

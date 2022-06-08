@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Following
-import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.channel.ChannelActivity
@@ -44,7 +44,7 @@ open class BaseJsEventListener(
     private val context: Context,
     private val channelSource: ChannelSource? = null
 ) : JsEventListener {
-    private val topicStore = FollowingManager.getInstance(context)
+    private val topicStore = FollowedTopics.getInstance(context)
 
     override fun onClosePage() {
 

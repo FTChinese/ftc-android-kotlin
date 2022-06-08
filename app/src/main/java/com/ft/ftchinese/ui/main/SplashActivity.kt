@@ -12,10 +12,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySplashBinding
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.enums.ArticleType
-import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.SplashWorker
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.store.SplashStore
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -28,13 +28,12 @@ private const val EXTRA_MESSAGE_TYPE = "content_type"
 private const val EXTRA_CONTENT_ID = "content_id"
 private const val TAG = "SplashActivity"
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class SplashActivity : ScopedAppActivity() {
 
     private lateinit var cache: FileCache
     private lateinit var sessionManager: SessionManager
     private lateinit var statsTracker: StatsTracker
-    private lateinit var splashManager: SplashScreenManager
+    private lateinit var splashManager: SplashStore
     private lateinit var splashViewModel: SplashViewModel
     // Why this?
     private var customTabsOpened: Boolean = false
@@ -49,7 +48,7 @@ class SplashActivity : ScopedAppActivity() {
 
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
-        splashManager = SplashScreenManager.getInstance(this)
+        splashManager = SplashStore.getInstance(this)
         statsTracker = StatsTracker.getInstance(this)
 
         workManager = WorkManager.getInstance(this)

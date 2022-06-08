@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.ui.base.ConnectionLiveData
 import com.ft.ftchinese.ui.base.ToastMessage
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ private const val TAG = "ArticleViewModel"
 
 class ArticleViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val topicStore = FollowingManager.getInstance(application)
+    private val topicStore = FollowedTopics.getInstance(application)
     private val cache: FileCache = FileCache(application)
     private val db: ArticleDb = ArticleDb.getInstance(application)
 

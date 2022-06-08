@@ -4,13 +4,12 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.model.splash.ScreenAd
-import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.repository.AdClient
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.SplashStore
 import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.*
 import java.io.InputStream
-import java.util.*
 
 private const val TAG = "SplashViewModel"
 
@@ -51,7 +50,7 @@ class SplashViewModel : BaseViewModel() {
         job?.cancel()
     }
 
-    fun loadAd(store: SplashScreenManager, cache: FileCache) {
+    fun loadAd(store: SplashStore, cache: FileCache) {
 
         viewModelScope.launch {
 

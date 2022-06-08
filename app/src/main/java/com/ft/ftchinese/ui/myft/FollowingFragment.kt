@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -52,7 +51,6 @@ class FollowingFragment : Fragment() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FollowScreen(
     followViewModel: FollowingViewModel
