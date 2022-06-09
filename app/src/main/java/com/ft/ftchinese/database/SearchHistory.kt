@@ -5,28 +5,40 @@ import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 
 @Entity(
-    tableName = "search_entry",
+    tableName = "keyword_history",
     indices = [
-        Index(value = ["keyword"], unique = true)
+        Index(value = ["keyword"], unique = true),
+        Index(value = ["modified_at"])
     ]
 )
-data class SearchEntry(
+data class KeywordEntry(
     @PrimaryKey(autoGenerate = true)
     val _id: Int = 0,
 
     @ColumnInfo
     val keyword: String,
-)
+
+    @ColumnInfo(name = "modified_at")
+    val modifierAt: Long
+) {
+    companion object {
+        @JvmStatic
+        fun newInstance(keyword: String) = KeywordEntry(
+            keyword = keyword,
+            modifierAt = System.currentTimeMillis() / 1000
+        )
+    }
+}
 
 @Dao
-interface SearchEntryDao {
+interface KeywordHistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertOne(entry: SearchEntry)
+    fun insertOne(entry: KeywordEntry)
 
-    @Query("Select * FROM search_entry ORDER BY _id DESC LIMIT 10")
-    fun getAll(): List<SearchEntry>
+    @Query("Select * FROM keyword_history ORDER BY modified_at DESC LIMIT 10")
+    fun getAll(): List<KeywordEntry>
 
-    @Query("DELETE FROM search_entry")
+    @Query("DELETE FROM keyword_history")
     fun deleteAll()
 
     @RawQuery
@@ -35,12 +47,12 @@ interface SearchEntryDao {
 
 @Database(
     entities = [
-        SearchEntry::class
+        KeywordEntry::class
     ],
-    version = 1
+    version = 2
 )
 abstract class SearchDb : RoomDatabase() {
-    abstract fun searchEntryDao(): SearchEntryDao
+    abstract fun keywordHistoryDao(): KeywordHistoryDao
 
     companion object {
         private var instance: SearchDb? = null
