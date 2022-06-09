@@ -1,27 +1,27 @@
 package com.ft.ftchinese.ui.search
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Chip
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.database.SearchEntry
 import com.ft.ftchinese.ui.components.IconDelete
-import com.ft.ftchinese.ui.components.IconSearch
 import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
 import com.google.accompanist.flowlayout.FlowRow
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun KeywordHistoryList(
     entries: List<SearchEntry>,
-    onClear: () -> Unit
+    onClear: () -> Unit,
+    onClick: (String) -> Unit
 ) {
 
     Column(
@@ -47,8 +47,16 @@ fun KeywordHistoryList(
             modifier = Modifier.fillMaxWidth()
         ) {
             entries.forEach { entry ->
-                Text(text = entry.keyword)
-                Spacer(modifier = Modifier.width(Dimens.dp16))
+
+                Chip(
+                    onClick = {
+                        onClick(entry.keyword)
+                    }
+                ) {
+                    Text(text = entry.keyword)
+                }
+
+                Spacer(modifier = Modifier.width(Dimens.dp4))
             }
         }
     }
@@ -97,6 +105,7 @@ fun PreviewKeywordHistoryList() {
                 keyword = "通胀",
             )
         ),
-        onClear = {}
+        onClear = {},
+        onClick = {}
     )
 }
