@@ -52,7 +52,7 @@ import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.main.AcceptServiceDialogFragment
-import com.ft.ftchinese.ui.main.MainApp
+import com.ft.ftchinese.ui.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
@@ -69,13 +69,17 @@ private enum class TestAppScreen(
 ) {
     Home("Test"),
     ModalBottomSheet("ModalBottomSheet"),
-    MockUser("MockUser");
+    MockUser("MockUser"),
+    Search("Search");
 
     companion object {
         @JvmStatic
         fun fromRoute(route: String?): TestAppScreen =
             when (route?.substringBefore("/")) {
                 Home.name -> Home
+                ModalBottomSheet.name -> ModalBottomSheet
+                MockUser.name -> MockUser
+                Search.name -> Search
                 null -> Home
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
@@ -96,8 +100,8 @@ class TestActivity : ScopedAppActivity() {
         workManager = WorkManager.getInstance(this)
 
         setContent {
-//            TestApp()
-            MainApp()
+            TestApp()
+//            MainApp()
         }
 
         intent.extras?.let {
@@ -162,6 +166,17 @@ class TestActivity : ScopedAppActivity() {
                         route = TestAppScreen.MockUser.name
                     ) {
                         MockUserScreen()
+                    }
+
+                    composable(
+                        route = TestAppScreen.Search.name
+                    ) {
+                        SearchActivityScreen(
+                            scaffoldState = scaffoldState,
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
                     }
                 }
             }
@@ -366,7 +381,10 @@ private fun TestActivityScreen(
     ) {
         NetworkStatus()
 
-        BlockButton(onClick = { onNavigate(TestAppScreen.ModalBottomSheet) })
+        BlockButton(
+            onClick = { onNavigate(TestAppScreen.ModalBottomSheet) },
+            text = "Show Bottom Sheet"
+        )
 
         ServiceAcceptance(fragmentManager)
 
@@ -375,6 +393,11 @@ private fun TestActivityScreen(
         TestTimer()
 
         TestWxPay()
+
+        BlockButton(
+            onClick = { onNavigate(TestAppScreen.Search) },
+            text = "Test Search Bar"
+        )
     }
 }
 
@@ -394,14 +417,15 @@ fun NetworkStatus() {
 
 @Composable
 fun ServiceAcceptance(fragmentManager: FragmentManager) {
-    Button(onClick = {
-        fragmentManager.commit {
-            add(android.R.id.content, AcceptServiceDialogFragment())
-            addToBackStack(null)
-        }
-    }) {
-        Text(text = "Service Acceptance")
-    }
+    BlockButton(
+        onClick = {
+            fragmentManager.commit {
+                add(android.R.id.content, AcceptServiceDialogFragment())
+                addToBackStack(null)
+            }
+        },
+        text = "Service Acceptance"
+    )
 }
 
 @Composable
