@@ -153,6 +153,10 @@ android {
             dimension "appStore"
             versionNameSuffix "-oppo"
         }
+        vivo {
+            dimension "appStore"
+            versionNameSuffix "-vivo"
+        }
         // For test only. This flavor sets server API to local development environment
         // for release to make Wechat SDK testable.
         // Use release build variants for this purpose.
