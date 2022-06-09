@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "cbda3ba29364ffd64ca592112f4cace1",
+    "identityHash": "e9824a401d4ae7cce4a728c5012b4fd1",
     "entities": [
       {
-        "tableName": "search_entry",
+        "tableName": "keyword_history",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `keyword` TEXT NOT NULL)",
         "fields": [
           {
@@ -29,13 +29,13 @@
         },
         "indices": [
           {
-            "name": "index_search_entry_keyword",
+            "name": "index_keyword_history_keyword",
             "unique": true,
             "columnNames": [
               "keyword"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_search_entry_keyword` ON `${TABLE_NAME}` (`keyword`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_keyword_history_keyword` ON `${TABLE_NAME}` (`keyword`)"
           }
         ],
         "foreignKeys": []
@@ -44,7 +44,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cbda3ba29364ffd64ca592112f4cace1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e9824a401d4ae7cce4a728c5012b4fd1')"
     ]
   }
 }
