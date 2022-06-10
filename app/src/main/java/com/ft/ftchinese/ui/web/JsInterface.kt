@@ -54,9 +54,10 @@ class JsInterface(
 
         val channelMeta = channelContent.meta
 
-        teasers = articleList.map {
-            it.withMeta(channelMeta)
-        }
+        teasers = articleList
+            .map {
+                it.withMeta(channelMeta)
+            }
     }
 
     /**
