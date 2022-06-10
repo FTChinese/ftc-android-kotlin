@@ -134,6 +134,8 @@ class JsInterface(
 }
 
 @Composable
-fun rememberJsInterface(callback: JsEventListener) = remember {
+fun rememberJsInterface(
+    callback: JsEventListener = rememberJsEventListener()
+) = remember(callback) {
     JsInterface(callback)
 }
