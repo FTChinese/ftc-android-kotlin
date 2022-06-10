@@ -2,11 +2,12 @@ package com.ft.ftchinese.ui.account.address
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import com.ft.ftchinese.ui.base.BaseViewModel
+import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
 
-class DeleteAccountViewModel : BaseViewModel() {
+class DeleteAccountViewModel : ViewModel() {
+    val progressLiveData = MutableLiveData<Boolean>()
     val passwordLiveData = MutableLiveData("")
     val passwordValidator = LiveDataValidator(passwordLiveData).apply {
         addRule("密码必填", Validator::notEmpty)

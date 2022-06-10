@@ -2,14 +2,15 @@ package com.ft.ftchinese.ui.account.address
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.reader.Address
-import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
 
-class AddressViewModel : BaseViewModel() {
+class AddressViewModel : ViewModel() {
 
+    val progressLiveData = MutableLiveData<Boolean>()
     private var current = Address()
     private val updated: Address
         get() = Address(
