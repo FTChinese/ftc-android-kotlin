@@ -13,7 +13,7 @@ const val WX_AVATAR_NAME = "wx_avatar.jpg"
  * for LOGIN, account data will be saved;
  * for LINK, account data will be used for display; never save it!
  */
-enum class WxOAuthIntent {
+enum class WxOAuthKind {
     LOGIN,
     LINK
 }
@@ -21,19 +21,19 @@ enum class WxOAuthIntent {
 object WxOAuth {
     const val SCOPE = "snsapi_userinfo"
     private var code: String? = null
-    private var intent: WxOAuthIntent? = null
+    private var authKind: WxOAuthKind? = null
 
     fun codeMatched(respCode: String): Boolean {
         return code == respCode
     }
 
-    fun getLastIntent(): WxOAuthIntent? {
-        return intent
+    fun getLastIntent(): WxOAuthKind? {
+        return authKind
     }
 
-    fun generateStateCode(usedFor: WxOAuthIntent): String {
+    fun generateStateCode(kind: WxOAuthKind): String {
         code = generateNonce(5)
-        intent = usedFor
+        authKind = kind
         return code!!
     }
 }
