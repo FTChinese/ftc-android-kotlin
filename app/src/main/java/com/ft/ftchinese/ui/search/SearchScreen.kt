@@ -1,69 +1,81 @@
 package com.ft.ftchinese.ui.search
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import com.ft.ftchinese.ui.components.rememberSearchInputState
+import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OColor
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchScreen(
-    keywords: List<String>,
-    onClearKeywords: () -> Unit,
-    onSearch: (String) -> Unit,
-    onBack: () -> Unit,
+    loading: Boolean,
+    noResult: Boolean,
+    inputFocused: Boolean,
+    history: List<String>,
+    onClearHistory: () -> Unit,
+    onClickHistory: (String) -> Unit,
+    searchBar: @Composable ColumnScope.() -> Unit,
+    content: @Composable BoxScope.() -> Unit
 ) {
-    val inputState = rememberSearchInputState()
-
-    LaunchedEffect(key1 = Unit) {
-        inputState.requestFocus()
-    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
-        SearchBar(
-            state = inputState,
-            onBack = {
-                inputState.clearFocus()
-                onBack()
-            },
-            onSubmit = {
-                inputState.clearFocus()
-                onSearch(inputState.keyword)
-            }
-        )
+        searchBar()
 
         Box(
             modifier = Modifier.weight(1f)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(Dimens.dp16)
-                    .fillMaxSize()
-                    .align(Alignment.TopStart)
-            ) {
-                Text(text = "Searching keyword: ${inputState.keyword}")
+
+            when {
+                inputFocused -> {
+                    KeywordHistoryList(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.TopStart)
+                            .background(OColor.white)
+                            .padding(Dimens.dp16),
+                        keywords = history,
+                        onClear = onClearHistory,
+                        onClick = {
+                            onClickHistory(it)
+                        }
+                    )
+                }
+                noResult -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.TopStart)
+                            .padding(Dimens.dp16),
+                    ) {
+                        SubHeading2(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = "未找到搜索结果"
+                        )
+                    }
+                }
+                else -> {
+                    // This if-else could ensure search is executed each time.
+                    // If you put web view content outside of any if-else, which means
+                    // you always make it visible, then the web view client's
+                    // methods won't be triggered because compose thinks you are not
+                    // changing any data thus no view re-render would happen; consequently
+                    // neither onPageStarted nor onPageFinished will be executed.
+                    content()
+                }
             }
 
-            if (inputState.isFocused) {
-                KeywordHistoryList(
-                    modifier = Modifier.align(Alignment.TopStart),
-                    keywords = keywords,
-                    onClear = onClearKeywords,
-                    onClick = {
-                        inputState.onValueChange(it)
-                        inputState.clearFocus()
-                        onSearch(it)
-                    }
+            if (loading) {
+                LinearProgressIndicator(
+                    color = OColor.claret,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopStart)
                 )
             }
         }
