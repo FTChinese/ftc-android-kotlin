@@ -3,12 +3,9 @@ package com.ft.ftchinese.ui.validator
 import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.store.AccountCache
-import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.ui.validator.LiveDataValidator
-import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
-import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,8 +13,9 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "MobileViewModel"
 
-class MobileViewModel : BaseViewModel() {
+class MobileViewModel : ViewModel() {
 
+    val progressLiveData = MutableLiveData<Boolean>()
     val mobileLiveData = MutableLiveData("")
     val mobileValidator = LiveDataValidator(mobileLiveData).apply {
         addRule("请输入正确的手机号码", Validator::isMainlandPhone)

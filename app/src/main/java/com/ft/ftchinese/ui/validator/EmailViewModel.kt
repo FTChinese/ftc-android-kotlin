@@ -2,11 +2,12 @@ package com.ft.ftchinese.ui.validator
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.store.AccountCache
-import com.ft.ftchinese.ui.base.BaseViewModel
 
-class EmailViewModel : BaseViewModel() {
+class EmailViewModel : ViewModel() {
 
+    val progressLiveData = MutableLiveData<Boolean>()
     val emailLiveData = MutableLiveData("")
     val emailValidator = LiveDataValidator(emailLiveData).apply {
         addRule("请输入完整的邮箱", Validator::isEmail)
