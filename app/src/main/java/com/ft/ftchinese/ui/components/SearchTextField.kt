@@ -133,7 +133,10 @@ fun SearchTextField(
 
                 if (state.keyword.isNotEmpty()) {
                     IconButton(
-                        onClick = state::onClearValue
+                        onClick = {
+                            state.onClearValue()
+                            state.requestFocus()
+                        }
                     ) {
                         Icon(
                             painterResource(id = R.drawable.ic_baseline_cancel_24),
