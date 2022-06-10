@@ -112,12 +112,13 @@ fun AuthApp(
                                 navController,
                             )
                         },
+                        onFinish = onExit,
+                        // Login success. Destroy the activity.
+                        onSuccess = {
+                            userViewModel.saveAccount(it)
+                            onExit()
+                        }
                     )
-                    // Login success. Destroy the activity.
-                    {
-                        userViewModel.saveAccount(it)
-                        onExit()
-                    }
                 }
 
                 composable(
