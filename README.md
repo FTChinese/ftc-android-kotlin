@@ -84,6 +84,12 @@ Access token, refresh token should not be saved by client.
 
 ## Payment
 
+### Test
+
+* To test Alipay/Wechat in production, use a test account on any of the release bundle;
+* To test Wechat OAuth in development, use releaseWechat.
+* In development environment on debugXXXX bundle, user any account you have on your local server. Wechat SDK could not be tested in such environment. It only works on a release bundle.
+
 ### Barrier
 
 If a non-logged-in, or non-subscribed user clicked a article behind paywall, a bottom sheet dialog is shown blocking the content. This dialog provides links to login or payment.
