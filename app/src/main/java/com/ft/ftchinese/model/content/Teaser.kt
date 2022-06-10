@@ -6,6 +6,8 @@ import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.forbiddenKeywords
+import com.ft.ftchinese.repository.isHuawei
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -107,6 +109,16 @@ data class Teaser(
     @Transient
     val channelMeta: ChannelMeta? = null,
 ) : Parcelable {
+
+    fun containForbiddenWords(): Boolean {
+        if (!isHuawei()) {
+            return false
+        }
+
+        return forbiddenKeywords.keys.any {
+            title.contains(it)
+        }
+    }
 
     fun withLangVariant(lang: Language): Teaser {
         return Teaser(

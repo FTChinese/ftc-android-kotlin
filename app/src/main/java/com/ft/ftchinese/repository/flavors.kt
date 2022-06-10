@@ -30,3 +30,7 @@ fun isKeywordForbidden(kw: String): Boolean {
 
     return forbiddenKeywords.containsKey(kw)
 }
+
+fun isHuawei(): Boolean {
+    return BuildConfig.FLAVOR == flavorHuawei
+}
