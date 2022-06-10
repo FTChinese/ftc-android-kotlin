@@ -2,6 +2,9 @@ package com.ft.ftchinese.ui.web
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.Teaser
@@ -20,6 +23,7 @@ interface JsEventListener {
     fun onFollowTopic(following: Following)
 }
 
+@Deprecated("")
 class DumbJsEventListener : JsEventListener {
     override fun onClosePage() {
     }
@@ -86,4 +90,15 @@ open class BaseJsEventListener(
                 }
         }
     }
+}
+
+@Composable
+fun rememberJsEventListener(
+    context: Context = LocalContext.current,
+    channelSource: ChannelSource? = null
+) = remember(channelSource) {
+    BaseJsEventListener(
+        context = context,
+        channelSource = channelSource
+    )
 }
