@@ -22,10 +22,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.share.ShareUtils
-import com.ft.ftchinese.ui.web.ArticleKind
-import com.ft.ftchinese.ui.web.JsSnippets
-import com.ft.ftchinese.ui.web.UrlHandler
-import com.ft.ftchinese.ui.web.WebViewListener
+import com.ft.ftchinese.ui.web.*
 import kotlinx.serialization.decodeFromString
 
 private const val TAG = "WebClient"
@@ -42,6 +39,10 @@ open class WVClient(
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         Log.i(TAG, "Start loading $url")
+    }
+
+    override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {

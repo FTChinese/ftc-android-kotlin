@@ -18,8 +18,8 @@ import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.web.JsInterface
-import com.ft.ftchinese.ui.web.SimpleWebView
+import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.rememberWebViewClient
 import com.google.accompanist.web.rememberWebViewState
 
 class WebpageActivity : ComponentActivity() {
@@ -90,9 +90,9 @@ fun WebpageActivityScreen(
                 loading = webViewState.isLoading,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                SimpleWebView(
-                    state = webViewState,
-                    jsInterface = JsInterface()
+                ComposeWebView(
+                    wvState = webViewState,
+                    webClient = rememberWebViewClient()
                 )
             }
         }
