@@ -11,13 +11,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.model.reader.WxOAuth
+import com.ft.ftchinese.model.reader.WxOAuthKind
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.wxinfo.AlertWxLoginExpired
-import com.ft.ftchinese.ui.wxinfo.launchWxOAuth
 import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.tencent.mm.opensdk.modelmsg.SendAuth
+import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
@@ -77,7 +79,7 @@ fun WxInfoActivityScreen(
                 setReAuth(false)
             },
             onConfirm = {
-                launchWxOAuth(wxApi)
+                launchWxOAuthLink(wxApi, WxOAuthKind.LOGIN)
                 setReAuth(false)
             }
         )
@@ -86,7 +88,7 @@ fun WxInfoActivityScreen(
     if (account.isEmailOnly) {
         EmailLinkWxScreen(
             onLinkWx = {
-                launchWxOAuth(wxApi)
+                launchWxOAuthLink(wxApi, WxOAuthKind.LINK)
             }
         )
     } else {
@@ -118,3 +120,16 @@ fun WxInfoActivityScreen(
     }
 }
 
+
+private fun launchWxOAuthLink(
+    wxApi: IWXAPI,
+    kind: WxOAuthKind,
+) {
+    val stateCode = WxOAuth.generateStateCode(kind)
+
+    val req = SendAuth.Req()
+    req.scope = WxOAuth.SCOPE
+    req.state = stateCode
+
+    wxApi.sendReq(req)
+}
