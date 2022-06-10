@@ -1,31 +1,114 @@
 package com.ft.ftchinese.ui.search
 
+import android.util.Log
+import android.webkit.WebView
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.ui.components.rememberSearchInputState
+import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.JsSnippets
+import com.ft.ftchinese.ui.web.WebViewCallback
+import com.ft.ftchinese.ui.web.rememberWebViewClient
+import com.ft.ftchinese.viewmodel.UserViewModel
+import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
+private const val TAG = "SearchActivity"
+
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchActivityScreen(
+    userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
     onBack: () -> Unit,
 ) {
+
+    val context = LocalContext.current
+
+    val accountState = userViewModel.accountLiveData.observeAsState()
+
+    val baseUrl = remember(accountState.value) {
+        Config.discoverServer(accountState.value)
+    }
+
     val searchState = rememberSearchState(
         scaffoldState = scaffoldState
     )
 
+    val barState = rememberSearchInputState()
+
+    val wvState = rememberWebViewStateWithHTMLData(
+        data = searchState.htmlLoaded,
+        baseUrl = baseUrl
+    )
+
     LaunchedEffect(key1 = Unit) {
+        barState.requestFocus()
         searchState.loadKeywordHistory()
     }
 
+    val wvClientCallback = remember {
+        object : WebViewCallback(context) {
+
+            override fun onPageStarted(view: WebView?, url: String?) {
+                Log.i(TAG, "Page started")
+                if (barState.keyword.isNotBlank()) {
+                    view?.evaluateJavascript(JsSnippets.search(barState.keyword)) {
+                        Log.i("Search", "search() called upon page loading")
+                    }
+                }
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) { }
+        }
+    }
+
+    /**
+     * Here you can call webClient.navigator.reload() to force
+     * Compose reloading HTML and thus trigger onPageStarted().
+     */
+    val webClient = rememberWebViewClient(
+        callback = wvClientCallback
+    )
+
     SearchScreen(
-        keywords = searchState.keywordSet.toList(),
-        onClearKeywords = {
+        loading = searchState.progress.value,
+        noResult = searchState.noResult,
+        inputFocused = barState.isFocused,
+        history = searchState.keywordSet.toList(),
+        onClearHistory = {
             searchState.truncateHistory()
         },
-        onSearch = {
+        onClickHistory = {
+            barState.onValueChange(it)
+            barState.clearFocus()
             searchState.onSearch(it)
-            searchState.saveKeyword(it)
         },
-        onBack = onBack
-    )
+        searchBar = {
+            SearchBar(
+                state = barState,
+                onBack = {
+                    barState.clearFocus()
+                    onBack()
+                },
+                onSubmit = {
+                    barState.clearFocus()
+                    searchState.onSearch(barState.keyword)
+                }
+            )
+        }
+    ) {
+        ComposeWebView(
+            wvState = wvState,
+            webClient = webClient
+        ) {
+            searchState.onWebViewCreated(it)
+        }
+    }
 }
