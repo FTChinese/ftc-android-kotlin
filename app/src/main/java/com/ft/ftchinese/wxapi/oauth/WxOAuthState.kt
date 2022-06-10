@@ -10,7 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.WxOAuth
-import com.ft.ftchinese.model.reader.WxOAuthIntent
+import com.ft.ftchinese.model.reader.WxOAuthKind
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.request.WxAuthParams
 import com.ft.ftchinese.repository.AccountRepo
@@ -136,7 +136,7 @@ class WxOAuthState(
             }
             is FetchResult.Success -> {
                 when (WxOAuth.getLastIntent()) {
-                    WxOAuthIntent.LINK -> {
+                    WxOAuthKind.LINK -> {
                         authStatus = AuthStatus.LinkLoaded(result.data)
                     }
                     else -> {
