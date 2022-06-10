@@ -19,7 +19,7 @@ import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.Paging
+import com.ft.ftchinese.ui.web.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.share.ScreenshotMeta

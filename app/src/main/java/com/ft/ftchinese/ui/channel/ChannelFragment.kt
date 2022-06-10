@@ -23,7 +23,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.Paging
+import com.ft.ftchinese.ui.web.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.ToastMessage
 import com.ft.ftchinese.ui.base.toast
