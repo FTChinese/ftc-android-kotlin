@@ -9,7 +9,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuth
-import com.ft.ftchinese.model.reader.WxOAuthIntent
+import com.ft.ftchinese.model.reader.WxOAuthKind
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -58,7 +58,7 @@ class WxExpireDialogFragment : DialogFragment() {
     }
 
     private fun authorize() {
-        val nonce = WxOAuth.generateStateCode(WxOAuthIntent.LOGIN)
+        val nonce = WxOAuth.generateStateCode(WxOAuthKind.LOGIN)
         Log.i(TAG, "Wechat oauth state: $nonce")
 
         val req = SendAuth.Req()
