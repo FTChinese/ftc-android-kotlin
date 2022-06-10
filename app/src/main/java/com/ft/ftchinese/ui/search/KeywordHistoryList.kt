@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.search
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
@@ -14,7 +13,6 @@ import com.ft.ftchinese.ui.components.IconDelete
 import com.ft.ftchinese.ui.components.SlimIconButton
 import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
 import com.google.accompanist.flowlayout.FlowRow
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -27,11 +25,7 @@ fun KeywordHistoryList(
 ) {
 
     Column(
-        modifier = Modifier
-            .background(OColor.white)
-            .padding(Dimens.dp16)
-            .fillMaxSize()
-            .then(modifier)
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
