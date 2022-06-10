@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.wxinfo
+package com.ft.ftchinese.ui.account.wechat
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
