@@ -7,20 +7,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.WxOAuth
+import com.ft.ftchinese.model.reader.WxOAuthKind
 import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberTimerState
-import com.ft.ftchinese.ui.wxinfo.launchWxOAuth
+import com.tencent.mm.opensdk.modelmsg.SendAuth
+import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
 fun MobileAuthActivityScreen(
     scaffoldState: ScaffoldState,
-    onLinkEmail: (String) -> Unit,
-    onEmailLogin: () -> Unit, // Pass mobile number to next screen.
+    onLinkEmail: (String) -> Unit, // Pass mobile number to next screen.
+    onEmailLogin: () -> Unit,
+    onFinish: () -> Unit,
     onSuccess: (Account) -> Unit,
 ) {
     val context = LocalContext.current
@@ -92,14 +96,28 @@ fun MobileAuthActivityScreen(
                         deviceToken = tokenStore.getToken()
                     )
                 )
+            },
+            alternative = {
+                LoginAlternatives(
+                    onClickEmail = onEmailLogin,
+                    onClickWechat = {
+                        launchWxOAuth(wxApi)
+                        onFinish()
+                    }
+                )
             }
-        ) {
-            LoginAlternatives(
-                onClickEmail = onEmailLogin,
-                onClickWechat = {
-                    launchWxOAuth(wxApi)
-                }
-            )
-        }
+        )
     }
+}
+
+private fun launchWxOAuth(
+    wxApi: IWXAPI
+) {
+    val stateCode = WxOAuth.generateStateCode(WxOAuthKind.LOGIN)
+
+    val req = SendAuth.Req()
+    req.scope = WxOAuth.SCOPE
+    req.state = stateCode
+
+    wxApi.sendReq(req)
 }
