@@ -61,4 +61,19 @@ object JsSnippets {
         return graph;
     })();
     """.trimIndent()
+
+    // Call JS function in a very short timeout
+    // (you can actually set the timeout to zero, but let's be safe here)
+    // so you don't have to wait for page loaded
+    // and search result comes out almost instantly.
+    // Loaded content is a list of links.
+    // Navigation is handled by analyzing the
+    // content of each url.
+    fun search(keyword: String): String {
+        return """
+            setTimeout(function(){
+                search('$keyword');
+            }, 80);
+        """.trimIndent()
+    }
 }
