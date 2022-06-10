@@ -12,8 +12,8 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
-import com.ft.ftchinese.ui.web.SimpleWebView
-import com.ft.ftchinese.ui.web.rememberJsInterface
+import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.rememberWebViewClient
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
@@ -60,10 +60,6 @@ fun BuyerInfoActivityScreen(
         )
     }
 
-    if (infoState.exit) {
-        onExit()
-    }
-
     if (infoState.alert.isNotBlank()) {
         SimpleDialog(
             title = "",
@@ -74,18 +70,16 @@ fun BuyerInfoActivityScreen(
         )
     }
 
-    val jsInterface = rememberJsInterface(callback = infoState)
-
     ProgressLayout(
         loading = infoState.progress.value,
     ) {
         if (infoState.htmlLoaded.isNotBlank()) {
-            SimpleWebView(
-                state = rememberWebViewStateWithHTMLData(
+            ComposeWebView(
+                wvState = rememberWebViewStateWithHTMLData(
                     data = infoState.htmlLoaded,
                     baseUrl = baseUrl,
                 ),
-                jsInterface = jsInterface
+                webClient = rememberWebViewClient()
             )
         }
     }
