@@ -3,8 +3,6 @@ package com.ft.ftchinese.ui.main
 import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.SearchManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -18,7 +16,6 @@ import android.view.View
 import android.webkit.WebView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
@@ -26,7 +23,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.test.TestActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.model.enums.LoginMethod
@@ -39,8 +35,6 @@ import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.about.AboutListActivity
-import com.ft.ftchinese.ui.subs.MemberActivity
-import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages
@@ -51,6 +45,9 @@ import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.myft.MyftPagerAdapter
 import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
+import com.ft.ftchinese.ui.subs.MemberActivity
+import com.ft.ftchinese.ui.subs.SubsActivity
+import com.ft.ftchinese.ui.test.TestActivity
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.android.material.tabs.TabLayout
@@ -493,27 +490,27 @@ class MainActivity : ScopedAppActivity(),
         menuInflater.inflate(R.menu.activity_main_search, menu)
 
 
-        // Get the SearchView and set the searchable configuration
-        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-
-        val searchView = (menu.findItem(R.id.action_search).actionView as SearchView)
-
-        // NOTE: If you followed example verbatim from
-        // https://developer.android.com/guide/topics/search/search-dialog.html#UsingSearchWidget,
-        // it won't work!
-        // The `componentName` passed to getSearchableInfo
-        // should be the target activity used to display
-        // search result.
-        // If you simply use `componentName`, it refers
-        // the the MainActivity here, which is not used
-        // to display search result.
-        val compoName = ComponentName(this, SearchableActivity::class.java)
-
-        searchView.apply {
-            // Assumes current activity is the searchable activity
-            setSearchableInfo(searchManager.getSearchableInfo(compoName))
-            setIconifiedByDefault(false)
-        }
+//        // Get the SearchView and set the searchable configuration
+//        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+//
+//        val searchView = (menu.findItem(R.id.action_search).actionView as SearchView)
+//
+//        // NOTE: If you followed example verbatim from
+//        // https://developer.android.com/guide/topics/search/search-dialog.html#UsingSearchWidget,
+//        // it won't work!
+//        // The `componentName` passed to getSearchableInfo
+//        // should be the target activity used to display
+//        // search result.
+//        // If you simply use `componentName`, it refers
+//        // the the MainActivity here, which is not used
+//        // to display search result.
+//        val compoName = ComponentName(this, SearchableActivity::class.java)
+//
+//        searchView.apply {
+//            // Assumes current activity is the searchable activity
+//            setSearchableInfo(searchManager.getSearchableInfo(compoName))
+//            setIconifiedByDefault(false)
+//        }
 
         return true
     }
@@ -523,7 +520,8 @@ class MainActivity : ScopedAppActivity(),
      */
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
             R.id.action_search -> {
-                super.onOptionsItemSelected(item)
+                SearchableActivity.start(this)
+                true
             }
             else -> {
                 super.onOptionsItemSelected(item)
