@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.search
 
 import android.content.Context
+import android.webkit.WebView
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -8,6 +9,9 @@ import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.database.KeywordEntry
 import com.ft.ftchinese.database.SearchDb
 import com.ft.ftchinese.database.sqlQueryVacuum
+import com.ft.ftchinese.model.content.TemplateBuilder
+import com.ft.ftchinese.repository.isKeywordForbidden
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -22,10 +26,25 @@ class SearchState(
     connState: State<ConnectionState>,
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
+
+    private val cache = FileCache(context)
     private val keywordHistoryDao = SearchDb.getInstance(context).keywordHistoryDao()
 
     var keywordSet by mutableStateOf<LinkedHashSet<String>>(linkedSetOf())
         private set
+
+    var webView: WebView? = null
+        private set
+
+    var htmlLoaded by mutableStateOf("")
+        private set
+
+    var noResult by mutableStateOf(false)
+        private set
+
+    fun onWebViewCreated(wv: WebView) {
+        webView = wv
+    }
 
     fun loadKeywordHistory() {
        scope.launch {
@@ -37,7 +56,7 @@ class SearchState(
        }
     }
 
-    fun saveKeyword(keyword: String) {
+    private fun saveKeyword(keyword: String) {
         keywordSet = linkedSetOf(keyword).apply {
             addAll(keywordSet)
         }
@@ -60,8 +79,52 @@ class SearchState(
         }
     }
 
+    /**
+     * onSearch method actually relies on reloading a complete
+     * HTML data file to trigger WebViewClient's onPageStarted
+     * method to evaluated JavaScript. This works for procedural
+     * programing but not Compose.
+     * In compose the first time the component is rendered, no
+     * re-render will happen if we do not change the HTML data.
+     * Here we are always loading the same HTML string and delegate
+     * search to JS, thus not page reload occurs, and consequently
+     * no reloading and onPageStarted will never be fired again.
+     * There are two approaches to solve it:
+     * - Keep a reference to WebView and call WebView.evaluatedJavascript() directly:
+     *
+     * if (htmlLoaded.isNotBlank() && webView != null) {
+     *    webView?.evaluateJavascript(JsSnippets.search(kw)) {
+     *        // Here we are actually calling JS from Android.
+     *    }
+     * }
+     *
+     * - Call AccompanistWebViewClient.navigator.reload()
+     * will reload the html and thus trigger onPageStarted.
+     *
+     * - Or hide web view when user is entering keyword, then
+     * show it after user clicked search. The show/hide will also
+     * trick Compose to reload page. See SearchScreen.kt documentation.
+     */
     fun onSearch(kw: String) {
+        noResult = false
+        if (isKeywordForbidden(kw)) {
+            noResult = true
+            return
+        }
 
+        progress.value = true
+
+        scope.launch {
+            val template = cache.readSearchTemplate()
+
+            htmlLoaded = TemplateBuilder(template)
+                .withSearch()
+                .render()
+
+            progress.value = false
+        }
+
+        saveKeyword(kw)
     }
 }
 
