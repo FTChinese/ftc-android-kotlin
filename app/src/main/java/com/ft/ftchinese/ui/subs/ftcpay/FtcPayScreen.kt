@@ -1,12 +1,10 @@
 package com.ft.ftchinese.ui.subs.ftcpay
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -68,7 +66,7 @@ fun FtcPayScreen(
             Spacer(modifier = Modifier.height(Dimens.dp16))
 
             radioOptions.forEach { payMethod ->
-                PayMethodOption(
+                PayMethodItem(
                     method = payMethod,
                     selected = (payMethod == selectOption),
                     enabled = !forbidden,
@@ -89,31 +87,35 @@ fun FtcPayScreen(
     }
 }
 
-@Composable
-private fun PayMethodOption(
-    method: PayMethod,
-    selected: Boolean,
-    enabled: Boolean,
-    onSelect: (PayMethod) -> Unit,
+data class PaymentBrandRes(
+    val drawableId: Int,
+    val stringId: Int,
 ) {
-    Box(
-        modifier = Modifier
-            .clickable(
-                onClick = {
-                    onSelect(method)
-                },
-                enabled = enabled
-            )
-            .padding(Dimens.dp8)
-            .fillMaxWidth(),
-    ) {
-
-        PaymentBrandItem(payMethod = method)
-
-        RadioIcon(
-            selected = selected,
-            modifier = Modifier.align(Alignment.CenterEnd)
+    companion object {
+        val aliPay = PaymentBrandRes(
+            drawableId = R.drawable.alipay,
+            stringId = R.string.pay_brand_ali
         )
+
+        val wxPay = PaymentBrandRes(
+            drawableId = R.drawable.wechat_pay,
+            stringId = R.string.pay_brand_wechat
+        )
+
+        val stripe = PaymentBrandRes(
+            drawableId = R.drawable.stripe,
+            stringId = R.string.pay_brand_stripe
+        )
+
+        @JvmStatic
+        fun of(pm: PayMethod): PaymentBrandRes? {
+            return when (pm) {
+                PayMethod.ALIPAY -> aliPay
+                PayMethod.WXPAY -> wxPay
+                PayMethod.STRIPE -> stripe
+                else -> null
+            }
+        }
     }
 }
 
