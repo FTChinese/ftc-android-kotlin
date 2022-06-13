@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.subs.stripepay
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,10 +23,7 @@ import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.model.stripesubs.StripeSubs
 import com.ft.ftchinese.repository.ApiMode
-import com.ft.ftchinese.ui.components.CheckoutHeader
-import com.ft.ftchinese.ui.components.CheckoutMessage
-import com.ft.ftchinese.ui.components.Mode
-import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.form.AutoRenewAgreement
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.subs.product.PriceCard
@@ -93,28 +89,19 @@ fun StripePayScreen(
         if (subs == null) {
             AutoRenewAgreement()
 
-            PrimaryButton(
+            PrimaryBlockButton(
                 onClick = onSubscribe,
                 enabled = (!loading && paymentMethod != null && !forbidden),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = FormatHelper.stripeIntentText(
-                        context,
-                        cartItem.intent.kind
-                    ),
-                )
-            }
+                text = FormatHelper.stripeIntentText(
+                    context,
+                    cartItem.intent.kind
+                ),
+            )
         } else {
-            PrimaryButton(
+            PrimaryBlockButton(
                 onClick = onDone,
-                modifier = Modifier
-                    .padding(Dimens.dp16)
-                    .fillMaxWidth(),
-            ) {
-                Text(text = stringResource(id = R.string.btn_done))
-            }
+                text = stringResource(id = R.string.btn_done)
+            )
         }
     }
 }
