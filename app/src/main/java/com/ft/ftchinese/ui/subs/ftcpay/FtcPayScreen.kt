@@ -30,7 +30,6 @@ fun FtcPayScreen(
 ) {
     val context = LocalContext.current
 
-    val radioOptions = listOf(PayMethod.ALIPAY, PayMethod.WXPAY)
     val (selectOption, onOptionSelected) = remember {
         mutableStateOf<PayMethod?>(null)
     }
@@ -65,57 +64,22 @@ fun FtcPayScreen(
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
 
-            radioOptions.forEach { payMethod ->
-                PayMethodItem(
-                    method = payMethod,
-                    selected = (payMethod == selectOption),
-                    enabled = !forbidden,
-                    onSelect = onOptionSelected,
-                )
-            }
+            PaymentMethodsGroup(
+                selected = selectOption,
+                forbidden = forbidden,
+                onSelect = onOptionSelected,
+            )
         }
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 selectOption?.let{
                     onClickPay(it)
                 }
             },
             enabled = (!loading && selectOption != null && !forbidden),
-            text = stringResource(id = R.string.check_out)
+            text = stringResource(id = R.string.check_out),
         )
-    }
-}
-
-data class PaymentBrandRes(
-    val drawableId: Int,
-    val stringId: Int,
-) {
-    companion object {
-        val aliPay = PaymentBrandRes(
-            drawableId = R.drawable.alipay,
-            stringId = R.string.pay_brand_ali
-        )
-
-        val wxPay = PaymentBrandRes(
-            drawableId = R.drawable.wechat_pay,
-            stringId = R.string.pay_brand_wechat
-        )
-
-        val stripe = PaymentBrandRes(
-            drawableId = R.drawable.stripe,
-            stringId = R.string.pay_brand_stripe
-        )
-
-        @JvmStatic
-        fun of(pm: PayMethod): PaymentBrandRes? {
-            return when (pm) {
-                PayMethod.ALIPAY -> aliPay
-                PayMethod.WXPAY -> wxPay
-                PayMethod.STRIPE -> stripe
-                else -> null
-            }
-        }
     }
 }
 
