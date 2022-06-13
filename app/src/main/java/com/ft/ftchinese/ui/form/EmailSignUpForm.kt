@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.EmailAuthFormVal
 import com.ft.ftchinese.ui.base.toast
@@ -80,16 +81,16 @@ fun EmailSignUpForm(
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
         ConsentTerms(
-            selected = agreed,
-            onSelect = { setAgreed(!agreed) }
+            checked = agreed,
+            onCheckedChange = { setAgreed(it) }
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             enabled = formValid && !loading,
             onClick = {
                 if (!agreed) {
                     context.toast("您需要同意用户协议和隐私政策")
-                    return@BlockButton
+                    return@PrimaryBlockButton
                 }
                 onSubmit(EmailAuthFormVal(
                     email = emailState.field.value,
@@ -99,4 +100,14 @@ fun EmailSignUpForm(
             text = stringResource(id = R.string.btn_sign_up)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewEmailSignUpForm() {
+    EmailSignUpForm(
+        initialEmail = "abc@example.org",
+        loading = false,
+        onSubmit = {}
+    )
 }

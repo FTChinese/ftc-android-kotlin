@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.BlockButton
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
@@ -27,10 +27,10 @@ fun LinkSuccessScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        BlockButton(
+        PrimaryBlockButton(
             enabled = true,
             onClick = onFinish,
-            text = stringResource(id = R.string.btn_ok)
+            text = stringResource(id = R.string.btn_ok),
         )
     }
 }

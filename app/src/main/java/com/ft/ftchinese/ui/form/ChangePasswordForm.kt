@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.PasswordUpdateParams
-import com.ft.ftchinese.ui.components.BlockButton
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
 import com.ft.ftchinese.ui.components.PasswordInput
 import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.theme.Dimens
@@ -68,7 +68,7 @@ fun ChangePasswordForm(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        BlockButton(
+        PrimaryBlockButton(
             enabled = formValid && !loading,
             onClick = {
                 onSubmit(

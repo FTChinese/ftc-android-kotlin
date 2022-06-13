@@ -75,9 +75,8 @@ fun FcmScreen(
                 .fillMaxWidth()
                 .padding(Dimens.dp16),
             enabled = !loading,
-        ) {
-            Text(text = stringResource(id = R.string.fcm_start_checking))
-        }
+            text = stringResource(id = R.string.fcm_start_checking)
+        )
     }
 }
 

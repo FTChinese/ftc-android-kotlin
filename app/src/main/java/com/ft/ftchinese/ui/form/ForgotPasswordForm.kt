@@ -55,7 +55,7 @@ fun ForgotPasswordForm(
             state = codeState,
             keyboardType = KeyboardType.Number,
             trailingIcon = {
-                OTextButton(
+                PlainTextButton(
                     onClick = { onRequestCode(emailState.field.value) },
                     enabled = emailState.valid.value && !timerState.isRunning && !loading,
                     text = timerState.text.value
@@ -64,7 +64,7 @@ fun ForgotPasswordForm(
         )
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
-        BlockButton(
+        PrimaryBlockButton(
             enabled = formValid && !loading,
             onClick = {
                 onSubmit(

@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -15,7 +13,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.MobileFormValue
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OButton
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.ruleMobileValid
 import com.ft.ftchinese.ui.validator.verifierRule
@@ -69,20 +66,18 @@ fun MobileForm(
             state = codeState,
             keyboardType = KeyboardType.Number,
             trailingIcon = {
-                TextButton(
+                PlainTextButton(
                     onClick = {
                         onRequestCode(mobileState.field.value)
                     },
-                    colors = OButton.textColors(),
                     enabled = mobileState.valid.value && !timerState.isRunning && !loading,
-                ) {
-                    Text(text = timerState.text.value)
-                }
+                    text = timerState.text.value
+                )
             }
         )
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
-        BlockButton(
+        PrimaryBlockButton(
             enabled = formValid && !loading,
             onClick = {
                 onSave(

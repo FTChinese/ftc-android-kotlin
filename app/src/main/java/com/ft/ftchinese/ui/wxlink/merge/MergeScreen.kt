@@ -21,7 +21,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.ui.components.ListItemTwoCol
-import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
 import com.ft.ftchinese.ui.components.WeightedColumn
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
 import com.ft.ftchinese.ui.theme.Dimens
@@ -38,17 +38,13 @@ fun LinkScreen(
 
     WeightedColumn(
         bottom = {
-            PrimaryButton(
+            PrimaryBlockButton(
                 onClick = {
                     linkMock.linked?.let(onLink)
                 },
                 enabled = !loading && (linkMock.linked != null),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.btn_start)
-                )
-            }
+                text = stringResource(id = R.string.btn_start)
+            )
         }
     ) {
         Text(

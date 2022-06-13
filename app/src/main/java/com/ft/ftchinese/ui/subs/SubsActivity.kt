@@ -24,7 +24,7 @@ import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
-import com.ft.ftchinese.ui.components.OTextButton
+import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.contact.BuyerInfoActivityScreen
 import com.ft.ftchinese.ui.subs.ftcpay.AliPayResult
@@ -146,7 +146,7 @@ fun SubsApp(
                     },
                     actions = {
                         if (currentScreen == SubsAppScreen.BuyerInfo) {
-                            OTextButton(
+                            PlainTextButton(
                                 onClick = onExit,
                                 text = "跳过"
                             )

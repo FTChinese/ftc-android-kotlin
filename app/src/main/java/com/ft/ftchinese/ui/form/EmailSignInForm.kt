@@ -1,20 +1,14 @@
 package com.ft.ftchinese.ui.form
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.EmailAuthFormVal
-import com.ft.ftchinese.ui.components.BlockButton
-import com.ft.ftchinese.ui.components.PasswordInput
-import com.ft.ftchinese.ui.components.TextInput
-import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OButton
 import com.ft.ftchinese.ui.validator.requiredRule
 import com.ft.ftchinese.ui.validator.ruleEmailValid
 
@@ -57,7 +51,7 @@ fun EmailSignInForm(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        BlockButton(
+        PrimaryBlockButton(
             enabled = formValid && !loading,
             onClick = {
                 onSubmit(EmailAuthFormVal(
@@ -74,23 +68,17 @@ fun EmailSignInForm(
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            TextButton(
+            PlainTextButton(
                 onClick = {
                     onForgotPassword(emailState.field.value)
                 },
-                colors = OButton.textColors()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.link_forgot_password)
-                )
-            }
+                text = stringResource(id = R.string.link_forgot_password)
+            )
 
-            TextButton(
+            PlainTextButton(
                 onClick = onSignUp,
-                colors = OButton.textColors()
-            ) {
-                Text(text = stringResource(id = R.string.link_to_signup))
-            }
+                text = stringResource(id = R.string.link_to_signup)
+            )
         }
     }
 }

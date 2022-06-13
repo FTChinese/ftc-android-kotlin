@@ -381,7 +381,7 @@ private fun TestActivityScreen(
     ) {
         NetworkStatus()
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = { onNavigate(TestAppScreen.ModalBottomSheet) },
             text = "Show Bottom Sheet"
         )
@@ -394,7 +394,7 @@ private fun TestActivityScreen(
 
         TestWxPay()
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = { onNavigate(TestAppScreen.Search) },
             text = "Test Search Bar"
         )
@@ -417,7 +417,7 @@ fun NetworkStatus() {
 
 @Composable
 fun ServiceAcceptance(fragmentManager: FragmentManager) {
-    BlockButton(
+    PrimaryBlockButton(
         onClick = {
             fragmentManager.commit {
                 add(android.R.id.content, AcceptServiceDialogFragment())
@@ -432,7 +432,7 @@ fun ServiceAcceptance(fragmentManager: FragmentManager) {
 fun TestWxPay() {
     val context = LocalContext.current
 
-    BlockButton(
+    PrimaryBlockButton(
         onClick = {
             PayIntentStore.getInstance(context)
                 .save(FtcPayIntent(
@@ -496,7 +496,7 @@ fun TestTimer() {
         initialText = "Start Timer"
     )
 
-    BlockButton(
+    PrimaryBlockButton(
         onClick = timerState::start,
         text = timerState.text.value
     )
@@ -505,7 +505,7 @@ fun TestTimer() {
 @Composable
 fun WxMiniButton() {
     val context = LocalContext.current
-    BlockButton(
+    PrimaryBlockButton(
         text = "Test Wechat Mini Program",
         onClick = {
             WebpageActivity.start(context, WebpageMeta(
@@ -532,7 +532,7 @@ private fun ModalBottomSheetScreen() {
             }
         }
     ) {
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 scope.launch { state.show() }
             },
@@ -549,7 +549,7 @@ private fun MockUserScreen() {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -560,7 +560,7 @@ private fun MockUserScreen() {
             text = "Free User"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -572,7 +572,7 @@ private fun MockUserScreen() {
             text = "Wx-only Free User"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -585,7 +585,7 @@ private fun MockUserScreen() {
             text = "Linked Account with Stripe"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -597,7 +597,7 @@ private fun MockUserScreen() {
             text = "Linked Account with One Off"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -607,7 +607,7 @@ private fun MockUserScreen() {
             text = "Standard User"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -620,7 +620,7 @@ private fun MockUserScreen() {
         )
 
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -632,7 +632,7 @@ private fun MockUserScreen() {
             text = "VIP User"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -645,7 +645,7 @@ private fun MockUserScreen() {
             text = "Stripe Standard Year"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -659,7 +659,7 @@ private fun MockUserScreen() {
             text = "Stripe Standard Month"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -673,7 +673,7 @@ private fun MockUserScreen() {
             text = "Stripe Premium"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -686,7 +686,7 @@ private fun MockUserScreen() {
             text = "Stripe Auto Renew Off"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -701,7 +701,7 @@ private fun MockUserScreen() {
             text = "Stripe Auto Renew Off with Add-on"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -714,7 +714,7 @@ private fun MockUserScreen() {
             text = "IAP Premium"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -727,7 +727,7 @@ private fun MockUserScreen() {
             text = "IAP Standard"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -740,7 +740,7 @@ private fun MockUserScreen() {
             text = "IAP Auto Renew Off"
         )
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(
@@ -756,7 +756,7 @@ private fun MockUserScreen() {
         )
 
 
-        BlockButton(
+        PrimaryBlockButton(
             onClick = {
                 session.logout()
                 session.saveAccount(

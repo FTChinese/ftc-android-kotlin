@@ -15,8 +15,9 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.ui.components.BlockButton
 import com.ft.ftchinese.ui.components.BodyText1
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
+import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.components.WeightedColumn
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
@@ -35,9 +36,9 @@ fun LatestInvoiceScreen(
 
     WeightedColumn(
         bottom = {
-            BlockButton(
+            PrimaryBlockButton(
                 onClick = onClickNext,
-                text = "下一步，确认或完善个人信息"
+                text = "下一步，确认或完善个人信息",
             )
         }
     ) {

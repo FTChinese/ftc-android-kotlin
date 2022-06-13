@@ -9,8 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.BlockButton
 import com.ft.ftchinese.ui.components.PasswordInput
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
+import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
@@ -53,7 +54,7 @@ fun ResetPasswordForm(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        BlockButton(
+        PrimaryBlockButton(
             enabled = formValid && !loading,
             onClick = {
                 onSubmit(pwState.field.value)

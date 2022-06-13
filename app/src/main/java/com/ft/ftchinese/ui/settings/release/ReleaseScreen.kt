@@ -9,8 +9,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.ui.components.BlockButton
 import com.ft.ftchinese.ui.components.Heading3
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
@@ -72,7 +72,7 @@ fun ReleaseScreen(
                 if (release.isNew) {
                     Spacer(modifier = Modifier.height(Dimens.dp16))
 
-                    BlockButton(
+                    PrimaryBlockButton(
                         onClick = {
                             onClick(newRelease)
                         },
@@ -88,7 +88,7 @@ fun ReleaseScreen(
                             is DownloadStage.Completed -> {
                                 stringResource(id = R.string.btn_download_complete)
                             }
-                        }
+                        },
                     )
                 }
             }
