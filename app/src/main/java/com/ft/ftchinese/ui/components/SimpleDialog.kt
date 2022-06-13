@@ -27,7 +27,7 @@ fun SimpleDialog(
         },
         dismissButton = {
             dismissText?.let {
-                OTextButton(
+                PlainTextButton(
                     onClick = onDismiss,
                     text = it
                 )
