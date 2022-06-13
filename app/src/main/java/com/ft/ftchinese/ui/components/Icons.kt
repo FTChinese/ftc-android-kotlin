@@ -28,6 +28,17 @@ fun RightArrow() {
 }
 
 @Composable
+fun IconArrowForward(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_arrow_forward_white_24),
+        contentDescription = null,
+        tint = tint,
+    )
+}
+
+@Composable
 fun IconCancel(
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
 ) {
