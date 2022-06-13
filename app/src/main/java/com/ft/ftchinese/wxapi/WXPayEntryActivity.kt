@@ -28,7 +28,7 @@ import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.components.OTextButton
+import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.subs.contact.BuyerInfoActivityScreen
@@ -250,7 +250,7 @@ fun WxPayApp(
                     },
                     actions = {
                         if (currentScreen == PayAppScreen.BuyerInfo) {
-                            OTextButton(
+                            PlainTextButton(
                                 onClick = onExit,
                                 text = "跳过"
                             )

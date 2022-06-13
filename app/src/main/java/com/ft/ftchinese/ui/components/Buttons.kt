@@ -88,64 +88,40 @@ enum class ButtonVariant {
 }
 
 @Composable
-fun BlockButton(
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-    text: String = stringResource(id = R.string.btn_save),
-    variant: ButtonVariant = ButtonVariant.Primary,
-) {
-    val modifier = Modifier.fillMaxWidth()
-
-    when (variant) {
-        ButtonVariant.Primary -> {
-            PrimaryButton(
-                onClick = onClick,
-                enabled = enabled,
-                modifier = modifier
-            ) {
-                Text(text = text)
-            }
-        }
-        ButtonVariant.Outline -> {
-            OutlinedButton(
-                onClick = onClick,
-                enabled = enabled,
-                modifier = modifier,
-            ) {
-                Text(text = text)
-            }
-        }
-    }
-}
-
-/**
- * IconButton without minimumTouchTargetSize.
- * The default IconButton has a min size limit which
- * is not fit with inline content.
- */
-@Composable
-fun SlimIconButton(
-    onClick: () -> Unit,
+fun PlainTextButton(
     modifier: Modifier = Modifier,
+    onClick: () -> Unit,
     enabled: Boolean = true,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    content: @Composable () -> Unit
+    colors: ButtonColors = OButtonDefaults.textButtonColors(),
+    content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier = modifier
-            .clickable(
-                onClick = onClick,
-                enabled = enabled,
-                role = Role.Button,
-                interactionSource = interactionSource,
-                indication = rememberRipple()
-            ),
-        contentAlignment = Alignment.Center
+    TextButton(
+        modifier = modifier,
+        onClick = onClick,
+        enabled = enabled,
+        colors = colors,
     ) {
-        val contentAlpha = if (enabled) LocalContentAlpha.current else ContentAlpha.disabled
-        CompositionLocalProvider(LocalContentAlpha provides contentAlpha, content = content)
+        content()
     }
 }
+
+@Composable
+fun PlainTextButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    text: String,
+) {
+    TextButton(
+        modifier = modifier,
+        onClick = onClick,
+        enabled = enabled,
+        colors = OButtonDefaults.textButtonColors(),
+    ) {
+        Text(text = text)
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
