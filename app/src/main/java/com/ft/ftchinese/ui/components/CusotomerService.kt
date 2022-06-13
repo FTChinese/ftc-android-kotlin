@@ -25,7 +25,7 @@ fun CustomerService() {
                 style = MaterialTheme.typography.h6,
             )
             Divider(color = OColor.teal)
-            OTextButton(
+            PlainTextButton(
                 onClick = {
                     val intent = IntentsUtil.emailCustomerService("FT中文网会员订阅")
                     if (intent.resolveActivity(context.packageManager) != null) {
