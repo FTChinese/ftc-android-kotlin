@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.form
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,14 +13,15 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.legal.legalPages
-import com.ft.ftchinese.ui.components.CheckButton
+import com.ft.ftchinese.ui.components.OCheckbox
+import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 
 @Composable
 fun ConsentTerms(
-    selected: Boolean,
-    onSelect: () -> Unit,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -54,9 +56,15 @@ fun ConsentTerms(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        CheckButton(
-            selected = selected,
-            onClick = onSelect
+
+        OCheckbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.padding(
+                top = Dimens.dp4,
+                bottom = Dimens.dp4,
+                end = Dimens.dp4
+            )
         )
 
         ClickableText(
@@ -90,9 +98,18 @@ fun ConsentTerms(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewConsentTerms() {
+fun PreviewConsentTermsChecked() {
     ConsentTerms(
-        selected = true,
-        onSelect = { },
+        checked = true,
+        onCheckedChange = { },
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewConsentTermsUnchecked() {
+    ConsentTerms(
+        checked = false,
+        onCheckedChange = { },
     )
 }
