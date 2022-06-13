@@ -2,10 +2,7 @@ package com.ft.ftchinese.ui.account.unlinkwx
 
 import android.content.Context
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,17 +45,13 @@ fun UnlinkScreen(
 
     WeightedColumn(
         bottom = {
-            PrimaryButton(
+            PrimaryBlockButton(
                 onClick = {
                     selectOption?.let(onUnlink)
                 },
                 enabled = !loading && (selectOption != null),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(id = R.string.title_unlink)
-                )
-            }
+                text = stringResource(id = R.string.title_unlink)
+            )
         }
     ) {
         Text(
@@ -150,43 +143,19 @@ fun UnlinkOptions(
             style = MaterialTheme.typography.subtitle1
         )
 
-        Spacer(modifier = Modifier.height(Dimens.dp16))
-
         radioOptions.forEach { anchor ->
             val enabled = !(anchor == UnlinkAnchor.WECHAT && ftcSideOnly)
-            ClickableRow(
-                onClick = { onSelect(anchor) },
-                endIcon = {
-                    IconCheck(
-                        checked = (selected == anchor),
-                        tint = if (enabled) {
-                            OColor.teal
-                        } else {
-                            OColor.black.copy(alpha = 0.4f)
-                        }
-                    )
-                },
+            RadioInput(
+                selected = (selected == anchor),
                 enabled = enabled,
-                modifier = Modifier.padding(Dimens.dp8)
-            ) {
-                Text(
-                    text = getAnchorName(
-                        context = context,
-                        anchor = anchor,
-                    ),
-                    color = if (enabled) {
-                        OColor.black
-                    } else {
-                        OColor.black.copy(alpha = 0.4f)
-                    },
-                    style = MaterialTheme.typography.body1
-                )
-            }
-
-            Divider()
+                onClick = { onSelect(anchor) },
+                label = getAnchorName(
+                    context = context,
+                    anchor = anchor,
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-
-        Spacer(modifier = Modifier.height(Dimens.dp16))
 
         Text(
             text = stringResource(id = R.string.unlink_footnote),

@@ -5,10 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.BlockButton
-import com.ft.ftchinese.ui.components.PasswordInput
-import com.ft.ftchinese.ui.components.SimpleDialog
-import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.Validator
@@ -41,7 +38,7 @@ fun DeleteAccountScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        BlockButton(
+        PrimaryBlockButton(
             enabled = currentPwState.valid.value && !loading,
             onClick = {
                 onVerify(currentPwState.field.value)

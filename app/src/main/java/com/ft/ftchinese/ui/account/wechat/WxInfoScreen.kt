@@ -63,12 +63,8 @@ fun WxInfoScreen(
             PrimaryButton(
                 onClick = onLinkEmail,
                 modifier = Modifier.align(Alignment.End),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.btn_link),
-                    style = MaterialTheme.typography.body1,
-                )
-            }
+                text = stringResource(id = R.string.btn_link)
+            )
         } else {
 
             // Wechat is linked to email, show a button to
@@ -76,11 +72,8 @@ fun WxInfoScreen(
             PrimaryButton(
                 onClick = onUnlinkEmail,
                 modifier = Modifier.align(Alignment.End),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.btn_unlink)
-                )
-            }
+                text = stringResource(id = R.string.btn_unlink)
+            )
         }
     }
 }

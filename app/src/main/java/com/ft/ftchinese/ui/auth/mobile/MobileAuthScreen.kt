@@ -60,17 +60,15 @@ fun AlertMobileNotSet(
         onDismissRequest = {},
         confirmButton = {
             PrimaryButton(
-                onClick = onLinkEmail
-            ) {
-                Text(text = stringResource(id = R.string.mobile_login_dialog_positive_buton))
-            }
+                onClick = onLinkEmail,
+                text = stringResource(id = R.string.mobile_login_dialog_positive_buton)
+            )
         },
         dismissButton = {
-            SecondaryButton(
-                onClick = onSignUp
-            ) {
-                Text(text = stringResource(id = R.string.mobile_login_dialog_negative_button))
-            }
+            PlainTextButton(
+                onClick = onSignUp,
+                text = stringResource(id = R.string.mobile_login_dialog_negative_button)
+            )
         },
         title = {
             Text(text = stringResource(id = R.string.mobile_login_dialog_title))

@@ -5,7 +5,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
 import com.ft.ftchinese.ui.theme.Dimens
 
 /**
@@ -25,12 +25,10 @@ fun EmailLinkWxScreen(
         )
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
-        PrimaryButton(
+        PrimaryBlockButton(
             onClick = onLinkWx,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "微信授权")
-        }
+            text = "微信授权"
+        )
     }
 }
 

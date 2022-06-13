@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.stripesubs.StripePaymentCard
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.ui.components.AddBankCard
 import com.ft.ftchinese.ui.components.BankCard
-import com.ft.ftchinese.ui.components.OTextButton
+import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.SimpleDialog
 import com.ft.ftchinese.ui.theme.Dimens
 import java.util.*
@@ -51,7 +51,7 @@ fun StripeWalletScreen(
                 )
 
                 if (!isDefault) {
-                    OTextButton(
+                    PlainTextButton(
                         onClick = { onSetDefault(pm) },
                         text = "设为默认",
                         modifier = Modifier.align(Alignment.TopEnd),

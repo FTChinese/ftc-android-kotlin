@@ -1,13 +1,12 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.account.address
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.reader.Address
-import com.ft.ftchinese.ui.components.BlockButton
-import com.ft.ftchinese.ui.components.TextInput
-import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.Validator
@@ -78,7 +77,7 @@ fun AddressScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        BlockButton(
+        PrimaryBlockButton(
             enabled = formValid && !loading,
             onClick = {
                 onSave(
@@ -104,5 +103,15 @@ private fun buildRules(max: Int): List<ValidationRule> {
             predicate = Validator.maxLength(max),
             message = "输入内容过长",
         ),
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewAddressScreen() {
+    AddressScreen(
+        address = Address(),
+        loading = false,
+        onSave = {}
     )
 }

@@ -62,12 +62,9 @@ fun RequestVerificationLetter(
         SecondaryButton(
             onClick = onClick,
             modifier = Modifier.align(Alignment.End),
-            enabled = !loading
-        ) {
-            Text(
-                text = stringResource(id = R.string.btn_request_verify)
-            )
-        }
+            enabled = !loading,
+            text = stringResource(id = R.string.btn_request_verify)
+        )
     }
 }
 

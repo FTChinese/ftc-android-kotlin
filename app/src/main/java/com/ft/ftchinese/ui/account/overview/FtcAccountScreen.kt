@@ -21,7 +21,6 @@ import com.ft.ftchinese.ui.account.AccountRowId
 import com.ft.ftchinese.ui.account.buildAccountRows
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun FtcAccountScreen(
@@ -50,7 +49,7 @@ fun FtcAccountScreen(
             modifier = Modifier
                 .padding(Dimens.dp16)
                 .fillMaxWidth(),
-            color = OColor.claret,
+            colors = OButtonDefaults.outlineButtonDanger(),
         ) {
             Text(
                 text = stringResource(id = R.string.title_delete_account)
@@ -88,10 +87,9 @@ fun MobileOnlyNotUpdatable(
         onDismissRequest = onDismiss,
         confirmButton = {
             PrimaryButton(
-                onClick = onDismiss
-            ) {
-                Text(text = stringResource(id = R.string.btn_ok))
-            }
+                onClick = onDismiss,
+                text = stringResource(id = R.string.btn_ok),
+            )
         },
         text = {
             Text(text = "手机号创建的账号不允许更改")
