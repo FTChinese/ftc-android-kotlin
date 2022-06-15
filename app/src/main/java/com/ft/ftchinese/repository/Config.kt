@@ -53,25 +53,6 @@ object Config {
             .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
     }
 
-    // Build the url to fetch the content of a channel based on ChannelSource.
-    fun buildChannelSourceUrl(account: Account?, source: ChannelSource): Uri? {
-        return try {
-            val builder = Uri.parse(discoverServer(account))
-                .buildUpon()
-                .path(source.path)
-                .encodedQuery(source.query)
-                .appendQueryParameter("webview", "ftcapp")
-
-            if (source.htmlType == HTML_TYPE_FRAGMENT) {
-                builder.appendQueryParameter("bodyonly", "yes")
-            }
-
-            appendUtm(builder).build()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     // membership: premium|standard|standardmonthly
     // action: buy|renew|winback
     fun buildSubsConfirmUrl(account: Account, action: PurchaseAction): Uri? {
