@@ -14,6 +14,7 @@ import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun ButtonGroupLayout(
+    modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
@@ -21,6 +22,7 @@ fun ButtonGroupLayout(
             .selectableGroup()
             .border(1.dp, OColor.teal, MaterialTheme.shapes.small)
             .padding(2.dp)
+            .then(modifier)
     ) {
         content()
     }
