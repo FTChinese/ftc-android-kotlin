@@ -2,15 +2,11 @@ package com.ft.ftchinese.ui.web
 
 import android.annotation.SuppressLint
 import android.webkit.WebView
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
-import com.ft.ftchinese.ui.theme.OColor
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 
@@ -19,36 +15,28 @@ import com.google.accompanist.web.WebViewState
 fun ComposeWebView(
     wvState: WebViewState,
     webClient: ComposeWebViewClient,
-    showProgress: Boolean = false,
+    modifier: Modifier = Modifier,
     jsInterface: JsInterface = rememberJsInterface(),
     onCreated: (WebView) -> Unit = {}
 ) {
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        WebView(
-            state = wvState,
-            modifier = Modifier.fillMaxSize(),
-            captureBackPresses = false,
-            onCreated = { webView ->
-                webView.settings.javaScriptEnabled = true
-                webView.settings.loadsImagesAutomatically = true
-                webView.settings.domStorageEnabled = true
-                webView.settings.databaseEnabled = true
-                webView.addJavascriptInterface(jsInterface, JS_INTERFACE_NAME)
-                onCreated(webView)
-            },
-            client = webClient,
-        )
-
-        if (showProgress && wvState.isLoading) {
-            LinearProgressIndicator(
-                color = OColor.claret,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopStart)
-            )
-        }
+    val chromeClient = remember {
+        ComposeChromeClient()
     }
+    WebView(
+        state = wvState,
+        modifier = modifier
+            .fillMaxWidth(),
+        captureBackPresses = false,
+        onCreated = { webView ->
+            webView.settings.javaScriptEnabled = true
+            webView.settings.loadsImagesAutomatically = true
+            webView.settings.domStorageEnabled = true
+            webView.settings.databaseEnabled = true
+            webView.addJavascriptInterface(jsInterface, JS_INTERFACE_NAME)
+            onCreated(webView)
+        },
+        client = webClient,
+        chromeClient = chromeClient,
+    )
 }
