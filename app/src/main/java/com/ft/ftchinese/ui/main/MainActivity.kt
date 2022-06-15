@@ -48,7 +48,6 @@ import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.test.TestActivity
-import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
@@ -81,7 +80,6 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var tokenManager: TokenManager
     private lateinit var wxApi: IWXAPI
     private lateinit var workManager: WorkManager
-    private lateinit var wvViewModel: WVViewModel
 
     private lateinit var statsTracker: StatsTracker
 
@@ -122,8 +120,6 @@ class MainActivity : ScopedAppActivity(),
         workManager = WorkManager.getInstance(this)
 
         logoutViewModel = ViewModelProvider(this)[LogoutViewModel::class.java]
-
-        wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
 
         wxInfoViewModel = ViewModelProvider(this)[WxInfoViewModel::class.java]
 
