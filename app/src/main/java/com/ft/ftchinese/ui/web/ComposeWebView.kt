@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 
