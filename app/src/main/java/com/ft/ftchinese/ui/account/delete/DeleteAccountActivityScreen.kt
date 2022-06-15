@@ -10,7 +10,7 @@ import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.AccountDropped
 import com.ft.ftchinese.model.request.EmailPasswordParams
-import com.ft.ftchinese.ui.base.IntentsUtil
+import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.viewmodel.UserViewModel
