@@ -19,7 +19,8 @@ data class Access(
     val loggedIn: Boolean
         get() = status != MemberStatus.NotLoggedIn
 
-    val cancellable: Boolean
+    // For language switcher, user can cancel the barrier and content will not be switched.
+    val isSwitchLanguage: Boolean
         get() = lang != Language.CHINESE
 
     val isBilingual: Boolean
