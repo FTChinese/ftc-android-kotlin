@@ -53,8 +53,7 @@ class SplashActivity : ScopedAppActivity() {
 
         workManager = WorkManager.getInstance(this)
 
-        splashViewModel = ViewModelProvider(this)
-            .get(SplashViewModel::class.java)
+        splashViewModel = ViewModelProvider(this)[SplashViewModel::class.java]
 
         connectionLiveData.observe(this) {
             splashViewModel.isNetworkAvailable.value = it
