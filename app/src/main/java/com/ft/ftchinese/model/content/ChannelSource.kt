@@ -1,8 +1,9 @@
 package com.ft.ftchinese.model.content
 
+import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
-import kotlinx.parcelize.IgnoredOnParcel
+import com.ft.ftchinese.repository.Config
 import kotlinx.parcelize.Parcelize
 
 const val HTML_TYPE_FRAGMENT = 1
@@ -43,13 +44,26 @@ data class ChannelSource (
         )
     }
 
-    @IgnoredOnParcel
-    var shouldReload = false // Used on pagination. If user clicked the same pagination number, just refersh the content.
+    fun htmlUrl(baseUrl: String): String? {
+        return try {
+            val builder = Uri.parse(baseUrl)
+                .buildUpon()
+                .path(path)
+                .encodedQuery(query)
+                .appendQueryParameter("webview", "ftcapp")
+
+            if (isFragment) {
+                builder.appendQueryParameter("bodyonly", "yes")
+            }
+
+            Config.appendUtm(builder).build().toString()
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     val fileName: String?
         get() = if (name.isBlank()) null else "$name.html"
-
-
 
     /**
      * Returns a new instance for a pagination link.
