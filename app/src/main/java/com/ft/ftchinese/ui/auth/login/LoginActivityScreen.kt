@@ -11,18 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
 fun LoginActivityScreen(
+    userViewModel: UserViewModel,
     scaffoldState: ScaffoldState,
     email: String?,
-    onSuccess: (Account) -> Unit,
+    onSuccess: () -> Unit,
     onForgotPassword: (String) -> Unit,
     onSignUp: () -> Unit,
 ) {
@@ -39,7 +40,8 @@ fun LoginActivityScreen(
 
     LaunchedEffect(key1 = loginState.emailAccount) {
         loginState.emailAccount?.let {
-            onSuccess(it)
+            userViewModel.saveAccount(it)
+            onSuccess()
         }
     }
 

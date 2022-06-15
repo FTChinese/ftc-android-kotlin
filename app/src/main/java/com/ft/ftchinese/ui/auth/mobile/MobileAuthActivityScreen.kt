@@ -6,26 +6,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.WxOAuth
-import com.ft.ftchinese.model.reader.WxOAuthKind
 import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.launchWxLogin
 import com.ft.ftchinese.ui.components.rememberTimerState
-import com.tencent.mm.opensdk.modelmsg.SendAuth
-import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
 fun MobileAuthActivityScreen(
+    userViewModel: UserViewModel,
     scaffoldState: ScaffoldState,
     onLinkEmail: (String) -> Unit, // Pass mobile number to next screen.
     onEmailLogin: () -> Unit,
     onFinish: () -> Unit,
-    onSuccess: (Account) -> Unit,
+    onSuccess: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -54,7 +52,8 @@ fun MobileAuthActivityScreen(
 
     LaunchedEffect(key1 = authState.accountLoaded) {
         authState.accountLoaded?.let {
-            onSuccess(it)
+            userViewModel.saveAccount(it)
+            onSuccess()
         }
     }
 
@@ -101,7 +100,7 @@ fun MobileAuthActivityScreen(
                 LoginAlternatives(
                     onClickEmail = onEmailLogin,
                     onClickWechat = {
-                        launchWxOAuth(wxApi)
+                        launchWxLogin(wxApi)
                         onFinish()
                     }
                 )
@@ -110,14 +109,3 @@ fun MobileAuthActivityScreen(
     }
 }
 
-private fun launchWxOAuth(
-    wxApi: IWXAPI
-) {
-    val stateCode = WxOAuth.generateStateCode(WxOAuthKind.LOGIN)
-
-    val req = SendAuth.Req()
-    req.scope = WxOAuth.SCOPE
-    req.state = stateCode
-
-    wxApi.sendReq(req)
-}

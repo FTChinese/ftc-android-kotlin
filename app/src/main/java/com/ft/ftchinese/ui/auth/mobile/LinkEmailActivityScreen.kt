@@ -5,16 +5,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.MobileLinkParams
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
 fun LinkEmailActivityScreen(
+    userViewModel: UserViewModel,
     scaffoldState: ScaffoldState,
     mobile: String?,
-    onSuccess: (Account) -> Unit,
+    onSuccess: () -> Unit,
     onForgotPassword: (String) -> Unit,
     onSignUp: () -> Unit,
 ) {
@@ -35,7 +36,8 @@ fun LinkEmailActivityScreen(
 
     LaunchedEffect(key1 = authState.accountLoaded) {
         authState.accountLoaded?.let {
-            onSuccess(it)
+            userViewModel.saveAccount(it)
+            onSuccess()
         }
     }
 
