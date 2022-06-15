@@ -44,6 +44,8 @@ class DumbJsEventListener : JsEventListener {
     }
 }
 
+private const val TAG = "JsInterface"
+
 open class BaseJsEventListener(
     private val context: Context,
     private val channelSource: ChannelSource? = null
@@ -80,13 +82,13 @@ open class BaseJsEventListener(
             FirebaseMessaging.getInstance()
                 .subscribeToTopic(following.topic)
                 .addOnCompleteListener { task ->
-                    Log.i(ArticleActivity.TAG, "Subscribing to topic ${following.topic} success: ${task.isSuccessful}")
+                    Log.i(TAG, "Subscribing to topic ${following.topic} success: ${task.isSuccessful}")
                 }
         } else {
             FirebaseMessaging.getInstance()
                 .unsubscribeFromTopic(following.topic)
                 .addOnCompleteListener { task ->
-                    Log.i(ArticleActivity.TAG, "Unsubscribing from topic ${following.topic} success: ${task.isSuccessful}")
+                    Log.i(TAG, "Unsubscribing from topic ${following.topic} success: ${task.isSuccessful}")
                 }
         }
     }
