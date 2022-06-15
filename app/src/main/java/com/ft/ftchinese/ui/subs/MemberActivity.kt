@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -70,8 +72,14 @@ class MemberActivity : ComponentActivity() {
             )
         }
 
-        // Intent in place of old startActivityForResult.
         @JvmStatic
-        fun startIntent(context: Context) = Intent(context, MemberActivity::class.java)
+        fun launch(
+            launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+            context: Context,
+        ) {
+            launcher.launch(
+                Intent(context, MemberActivity::class.java)
+            )
+        }
     }
 }
