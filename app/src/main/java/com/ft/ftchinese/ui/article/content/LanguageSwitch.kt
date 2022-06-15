@@ -1,6 +1,7 @@
-package com.ft.ftchinese.ui.article
+package com.ft.ftchinese.ui.article.content
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.content.Language
@@ -11,10 +12,13 @@ import com.ft.ftchinese.ui.components.SubHeading2
 
 @Composable
 fun LanguageSwitch(
+    modifier: Modifier = Modifier,
     currentLang: Language,
     onSelect: (Language) -> Unit
 ) {
-    ButtonGroupLayout {
+    ButtonGroupLayout(
+        modifier = modifier
+    ) {
         listOf(
             Language.CHINESE,
             Language.ENGLISH,
