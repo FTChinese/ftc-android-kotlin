@@ -21,7 +21,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.ChannelActivity
-import com.ft.ftchinese.ui.share.ShareUtils
+import com.ft.ftchinese.ui.util.ShareUtils
 import com.ft.ftchinese.ui.web.UrlHandler
 
 private const val EXTRA_MESSAGE_TYPE = "content_type"
