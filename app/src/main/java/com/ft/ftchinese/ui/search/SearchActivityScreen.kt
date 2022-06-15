@@ -64,8 +64,6 @@ fun SearchActivityScreen(
                     }
                 }
             }
-
-            override fun onPageFinished(view: WebView?, url: String?) { }
         }
     }
 
