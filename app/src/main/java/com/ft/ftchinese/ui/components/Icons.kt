@@ -50,6 +50,17 @@ fun IconCancel(
 }
 
 @Composable
+fun IconClose(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_close_24),
+        contentDescription = "Close",
+        tint = tint
+    )
+}
+
+@Composable
 fun IconRedo(
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
 ) {
