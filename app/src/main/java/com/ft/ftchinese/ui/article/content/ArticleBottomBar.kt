@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.article
+package com.ft.ftchinese.ui.article.content
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +17,7 @@ import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
-fun BottomTool(
+fun ArticleBottomBar(
     bookmarked: Boolean,
     onBookmark: (Boolean) -> Unit,
     onShare: () -> Unit,
@@ -62,7 +62,7 @@ fun BottomTool(
 @Preview(showBackground = true)
 @Composable
 fun PreviewBottomTool() {
-    BottomTool(
+    ArticleBottomBar(
         bookmarked = true,
         onBookmark = {}
     ) {
