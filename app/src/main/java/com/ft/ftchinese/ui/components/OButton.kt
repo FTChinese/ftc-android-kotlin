@@ -4,10 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -121,7 +118,7 @@ fun OButton(
     border: BorderStroke? = null,
     colors: ButtonColors = OButtonDefaults.buttonColors(),
     contentPadding: PaddingValues = OButtonDefaults.ContentPadding,
-    content: @Composable () -> Unit,
+    content: @Composable RowScope.() -> Unit,
 ) {
 
     val contentColor by colors.contentColor(enabled)
