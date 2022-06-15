@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.share
+package com.ft.ftchinese.ui.util
 
 import android.content.ContentValues
 import android.content.Context
@@ -11,7 +11,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.request.WxMiniParams
-import com.ft.ftchinese.ui.util.ImageUtil
+import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
+import com.ft.ftchinese.ui.article.share.ShareApp
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXImageObject
@@ -54,7 +55,7 @@ object ShareUtils {
 
     fun wxShareArticleReq(
         res: Resources,
-        appId: SocialAppId,
+        app: ShareApp,
         article: ReadArticle,
     ): SendMessageToWX.Req {
         val webpageObj = WXWebpageObject().apply {
@@ -73,13 +74,13 @@ object ShareUtils {
         return SendMessageToWX.Req().apply {
             transaction = System.currentTimeMillis().toString()
             message = mediaMsg
-            scene = wxScene(appId)
+            scene = wxScene(app)
         }
     }
 
     fun wxShareScreenshotReq(
         stream: InputStream,
-        appId: SocialAppId,
+        appId: ShareApp,
         screenshot: ScreenshotMeta
     ): SendMessageToWX.Req {
         val bmp = BitmapFactory.decodeStream(stream)
@@ -112,10 +113,10 @@ object ShareUtils {
         }
     }
 
-    private fun wxScene(appId: SocialAppId): Int {
+    private fun wxScene(appId: ShareApp): Int {
         return when (appId) {
-            SocialAppId.WECHAT_FRIEND -> SendMessageToWX.Req.WXSceneSession
-            SocialAppId.WECHAT_MOMENTS -> SendMessageToWX.Req.WXSceneTimeline
+            ShareApp.WxFriend -> SendMessageToWX.Req.WXSceneSession
+            ShareApp.WxMoments -> SendMessageToWX.Req.WXSceneTimeline
             else -> 0
         }
     }
