@@ -5,7 +5,6 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.SENDTO" />
-
             <data android:mimeType="text/plain" />
         </intent>
 
@@ -19,7 +18,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower. -->
+    <!-- If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" /> <!-- Required by Google advertising -->
@@ -44,9 +44,6 @@
             android:name=".ui.auth.PasswordActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.share.ScreenshotActivity"
-            android:exported="false" />
         <activity
             android:name=".ui.subs.SubsActivity"
             android:exported="false" />
