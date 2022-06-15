@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -111,7 +113,17 @@ class SubsActivity : ScopedComponentActivity() {
         }
 
         @JvmStatic
-        fun intent(context: Context) = Intent(context, SubsActivity::class.java)
+        fun launch(
+            launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+            context: Context,
+            premiumFirst: Boolean = false
+        ) {
+            launcher.launch(
+                Intent(context, SubsActivity::class.java).apply {
+                    putExtra(EXTRA_PREMIUM_FIRST, premiumFirst)
+                }
+            )
+        }
     }
 }
 
