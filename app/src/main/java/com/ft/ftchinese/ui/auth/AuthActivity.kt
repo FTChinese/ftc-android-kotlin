@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -56,6 +58,16 @@ class AuthActivity : AppCompatActivity() {
 
         @JvmStatic
         fun newIntent(context: Context) = Intent(context, AuthActivity::class.java)
+
+        @JvmStatic
+        fun launch(
+            launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+            context: Context,
+        ) {
+            launcher.launch(
+                Intent(context, AuthActivity::class.java)
+            )
+        }
     }
 }
 
@@ -98,6 +110,7 @@ fun AuthApp(
                     route = AuthScreen.MobileLogin.name
                 ) {
                     MobileAuthActivityScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffold,
                         onLinkEmail = {
                             // Go to collect email + password to link it with the mobile number user provided.
@@ -115,7 +128,6 @@ fun AuthApp(
                         onFinish = onExit,
                         // Login success. Destroy the activity.
                         onSuccess = {
-                            userViewModel.saveAccount(it)
                             onExit()
                         }
                     )
@@ -131,10 +143,10 @@ fun AuthApp(
                 ) { entry ->
                     val mobile = entry.arguments?.getString("mobile")
                     LinkEmailActivityScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffold,
                         mobile = mobile,
                         onSuccess = {
-                            userViewModel.saveAccount(it)
                             onExit()
                         },
                         onForgotPassword = { email ->
@@ -182,10 +194,10 @@ fun AuthApp(
                 ) { entry ->
                     val email = entry.arguments?.getString("email")
                     LoginActivityScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffold,
                         email = email,
                         onSuccess = {
-                            userViewModel.saveAccount(it)
                             onExit()
                         },
                         onForgotPassword = { email1 ->
@@ -213,10 +225,10 @@ fun AuthApp(
                 ) { entry ->
                     val email = entry.arguments?.getString("email")
                     SignUpActivityScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffold,
                         email = email
                     ) {
-                        userViewModel.saveAccount(it)
                         onExit()
                     }
                 }
