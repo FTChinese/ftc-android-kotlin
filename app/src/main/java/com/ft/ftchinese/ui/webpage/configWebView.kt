@@ -7,8 +7,7 @@ import android.webkit.WebViewClient
 import com.ft.ftchinese.ui.web.ChromeClient
 import com.ft.ftchinese.ui.web.JsInterface
 
-const val JS_INTERFACE_NAME = "Android"
-
+@Deprecated("")
 @SuppressLint("SetJavaScriptEnabled")
 fun configWebView(webView: WebView, jsInterface: JsInterface, client: WebViewClient) {
     webView.settings.apply {
@@ -22,7 +21,7 @@ fun configWebView(webView: WebView, jsInterface: JsInterface, client: WebViewCli
         apply {
             addJavascriptInterface(
                 jsInterface,
-                JS_INTERFACE_NAME
+                "Android"
             )
 
             webViewClient = client
