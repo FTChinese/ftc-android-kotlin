@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
@@ -46,6 +47,7 @@ import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
@@ -70,7 +72,8 @@ private enum class TestAppScreen(
     Home("Test"),
     ModalBottomSheet("ModalBottomSheet"),
     MockUser("MockUser"),
-    Search("Search");
+    Search("Search"),
+    Article("Article");
 
     companion object {
         @JvmStatic
@@ -80,6 +83,7 @@ private enum class TestAppScreen(
                 ModalBottomSheet.name -> ModalBottomSheet
                 MockUser.name -> MockUser
                 Search.name -> Search
+                Article.name -> Article
                 null -> Home
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
@@ -178,6 +182,27 @@ class TestActivity : ScopedAppActivity() {
                             }
                         )
                     }
+
+                    composable(
+                        route = TestAppScreen.Article.name
+                    ) {
+                        ArticleActivityScreen(
+                            scaffoldState = scaffoldState,
+                            teaser = Teaser(
+                                id = "001096336",
+                                type = ArticleType.Premium,
+                                title = "我们为何工作得如此辛苦？",
+                                tag = "工作生活平衡,职场,劳工权益,四天工作制,生产率,management,career",
+                                isCreatedFromUrl = false,
+                                hideAd = false,
+                                langVariant = Language.CHINESE,
+                            ),
+                            onScreenshot = { },
+                            onAudio = {}
+                        ) {
+
+                        }
+                    }
                 }
             }
         }
@@ -186,7 +211,6 @@ class TestActivity : ScopedAppActivity() {
     private fun navigateToScreen(navController: NavController, screen: TestAppScreen) {
         navController.navigate(screen.name)
     }
-
 
     @Composable
     fun FCMSubscribeTopic() {
@@ -397,6 +421,13 @@ private fun TestActivityScreen(
         PrimaryBlockButton(
             onClick = { onNavigate(TestAppScreen.Search) },
             text = "Test Search Bar"
+        )
+
+        PrimaryBlockButton(
+            onClick = {
+                onNavigate(TestAppScreen.Article)
+            },
+            text = "Example Article"
         )
     }
 }
