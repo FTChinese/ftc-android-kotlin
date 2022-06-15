@@ -117,10 +117,6 @@ class Story (
     val whitelist: Int = 0,
 ) {
 
-    fun isFrom(t: Teaser): Boolean {
-        return id == t.id &&  teaser?.type == t.type
-    }
-
     fun requireMemberTier(): Tier? {
         return when (accessibleBy) {
             "0" -> null
@@ -166,15 +162,6 @@ class Story (
             Language.ENGLISH, Language.BILINGUAL -> {
                 aiAudios.english.isNotEmpty()
             }
-        }
-    }
-
-    fun audioUrl(lang: Language): String? {
-        aiAudios ?: return null
-
-        return when (lang) {
-            Language.CHINESE -> aiAudios.chinese
-            Language.ENGLISH, Language.BILINGUAL -> aiAudios.english
         }
     }
 
