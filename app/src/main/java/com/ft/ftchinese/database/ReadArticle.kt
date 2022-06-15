@@ -17,7 +17,7 @@ import java.util.*
 @Entity(
     tableName = "reading_history",
     indices = [
-            Index(value = ["id", "type"], unique = true)
+        Index(value = ["id", "type"], unique = true)
     ]
 )
 data class ReadArticle(
@@ -200,11 +200,14 @@ data class ReadArticle(
 
 @Dao
 interface ReadingHistoryDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertOne(article: ReadArticle)
 
     @Query("SELECT * FROM reading_history ORDER BY _id DESC")
     fun getAll(): LiveData<List<ReadArticle>>
+
+    @Query("SELECT * FROM reading_history WHERE id = :id AND type = :type")
+    fun getOne(id: String, type: String): ReadArticle?
 
     @Query("SELECT COUNT(id) FROM reading_history")
     fun count(): Int
