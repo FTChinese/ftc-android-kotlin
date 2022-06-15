@@ -18,8 +18,9 @@ interface JsEventListener {
     fun onClosePage()
     fun onProgress(loading: Boolean)
     fun onAlert(message: String)
-    fun onTeaserClicked(teaser: Teaser)
-    fun onChannelClicked(source: ChannelSource)
+    fun onTeasers(teasers: List<Teaser>)
+    fun onClickTeaser(teaser: Teaser)
+    fun onClickChannel(source: ChannelSource)
     fun onFollowTopic(following: Following)
 }
 
@@ -34,13 +35,17 @@ class DumbJsEventListener : JsEventListener {
     override fun onAlert(message: String) {
     }
 
-    override fun onTeaserClicked(teaser: Teaser) {
+    override fun onClickTeaser(teaser: Teaser) {
     }
 
-    override fun onChannelClicked(source: ChannelSource) {
+    override fun onClickChannel(source: ChannelSource) {
     }
 
     override fun onFollowTopic(following: Following) {
+    }
+
+    override fun onTeasers(teasers: List<Teaser>) {
+        TODO("Not yet implemented")
     }
 }
 
@@ -64,14 +69,18 @@ open class BaseJsEventListener(
         context.toast(message)
     }
 
-    override fun onTeaserClicked(teaser: Teaser) {
+    override fun onTeasers(teasers: List<Teaser>) {
+
+    }
+
+    override fun onClickTeaser(teaser: Teaser) {
         ArticleActivity.start(
             context,
             teaser.withParentPerm(channelSource?.permission)
         )
     }
 
-    override fun onChannelClicked(source: ChannelSource) {
+    override fun onClickChannel(source: ChannelSource) {
         ChannelActivity.start(context, source)
     }
 

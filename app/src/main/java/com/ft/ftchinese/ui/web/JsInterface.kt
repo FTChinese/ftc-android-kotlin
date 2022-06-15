@@ -2,8 +2,6 @@ package com.ft.ftchinese.ui.web
 
 import android.util.Log
 import android.webkit.JavascriptInterface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import com.ft.ftchinese.model.content.ChannelContent
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
@@ -58,6 +56,8 @@ class JsInterface(
             .map {
                 it.withMeta(channelMeta)
             }
+
+        listener.onTeasers(teasers)
     }
 
     /**
@@ -93,7 +93,7 @@ class JsInterface(
                  * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
                  */
                 if (it.type == ArticleType.Column) {
-                    listener.onChannelClicked(
+                    listener.onClickChannel(
                         ChannelSource.fromTeaser(it)
                     )
                 } else {
@@ -109,7 +109,7 @@ class JsInterface(
                      * publishedAt=null,
                      * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
                      */
-                    listener.onTeaserClicked(it)
+                    listener.onClickTeaser(it)
                 }
             }
     }
@@ -134,9 +134,3 @@ class JsInterface(
     }
 }
 
-@Composable
-fun rememberJsInterface(
-    callback: JsEventListener = rememberJsEventListener()
-) = remember(callback) {
-    JsInterface(callback)
-}
