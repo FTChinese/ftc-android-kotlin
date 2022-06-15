@@ -2,8 +2,6 @@ package com.ft.ftchinese.repository
 
 import android.net.Uri
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Account
