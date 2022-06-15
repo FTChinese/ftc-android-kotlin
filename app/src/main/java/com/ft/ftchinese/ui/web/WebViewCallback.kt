@@ -10,9 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.WxMiniParams
@@ -26,11 +24,11 @@ import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.channelFromUri
 import com.ft.ftchinese.ui.base.marketingChannelFromUri
 import com.ft.ftchinese.ui.base.tagOrArchiveChannel
+import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.serialization.decodeFromString
 
 private const val TAG = "WebClient"
 private const val keyWxMiniId = "wxminiprogramid"
@@ -38,8 +36,6 @@ private const val keyWxMiniPath = "wxminiprogrampath"
 
 @Deprecated("")
 interface WebViewListener {
-    // After article page executed js to collect open graph meta data
-    fun onOpenGraph(openGraph: OpenGraphMeta)
     // When a link in web view point to a channel
     fun onChannelSelected(source: ChannelSource)
     // When pagination link in a channel page is clicked
@@ -275,26 +271,13 @@ open class WebViewCallback(
 
     open fun onPageFinished(view: WebView?, url: String?) {
         Log.i(TAG, "Finished loading $url")
-
-        view?.evaluateJavascript(
-            JsSnippets.lockerIcon(account?.membership?.tier)
-        ) {
-            Log.i(TAG, "Privilege result: $it")
-        }
-
-        view?.evaluateJavascript(
-            JsSnippets.openGraph
-        ) {
-            Log.i(TAG, "JS evaluation result: $it")
-            openGraphEvaluated(marshaller.decodeFromString(it))
-        }
     }
 
     /**
      * Used when we are loading an html without knowing enough
      * metadata to determine the article's permission.
      */
-    open fun openGraphEvaluated(openGraph: OpenGraphMeta) {}
+//    open fun openGraphEvaluated(openGraph: OpenGraphMeta) {}
 
     fun onOverrideUrlLoading(event: WvUrlEvent) {
         when (event) {
@@ -356,7 +339,7 @@ open class WebViewCallback(
     // enough information about permissions.
     // Alas they didn't.
     open fun onChannelSelected(source: ChannelSource) {
-
+        ChannelActivity.start(context, source)
     }
 }
 
