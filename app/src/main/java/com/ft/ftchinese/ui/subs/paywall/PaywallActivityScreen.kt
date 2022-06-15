@@ -1,11 +1,7 @@
 package com.ft.ftchinese.ui.subs.paywall
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
@@ -25,15 +21,6 @@ import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-
-private fun launchLoginActivity(
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context,
-) {
-    launcher.launch(
-        AuthActivity.newIntent(context)
-    )
-}
 
 @Composable
 fun PaywallActivityScreen(
@@ -114,7 +101,10 @@ fun PaywallActivityScreen(
             account = account,
             onFtcPay = {
                 if (!userViewModel.isLoggedIn) {
-                    launchLoginActivity(launcher, context)
+                    AuthActivity.launch(
+                        launcher,
+                        context,
+                    )
                     return@PaywallScreen
                 }
 
@@ -123,7 +113,7 @@ fun PaywallActivityScreen(
             },
             onStripePay = {
                 if (!userViewModel.isLoggedIn) {
-                    launchLoginActivity(launcher, context)
+                    AuthActivity.launch(launcher, context)
                     return@PaywallScreen
                 }
                 if (userViewModel.isWxOnly) {
@@ -134,7 +124,7 @@ fun PaywallActivityScreen(
                 onStripePay(it)
             },
         ) {
-            launchLoginActivity(launcher, context)
+            AuthActivity.launch(launcher, context)
         }
     }
 }

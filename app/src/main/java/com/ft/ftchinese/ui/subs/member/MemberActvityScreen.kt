@@ -1,15 +1,14 @@
 package com.ft.ftchinese.ui.subs.member
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.ScaffoldState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -98,7 +97,7 @@ fun MemberActivityScreen(
         ) {
             when (it) {
                 SubsOptionRow.GoToPaywall -> {
-                    launchPaywallActivity(
+                    SubsActivity.launch(
                         launcher = launcher,
                         context = context
                     )
@@ -114,11 +113,3 @@ fun MemberActivityScreen(
     }
 }
 
-private fun launchPaywallActivity(
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context
-) {
-    launcher.launch(
-        SubsActivity.intent(context)
-    )
-}
