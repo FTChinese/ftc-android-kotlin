@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.share
+package com.ft.ftchinese.ui.article.share
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -49,8 +49,8 @@ fun ShareIcon(
 
 @Composable
 fun SocialShareList(
-    apps: List<SocialApp>,
-    onShareTo: (SocialApp) -> Unit
+    apps: List<ShareApp>,
+    onShareTo: (ShareApp) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -59,8 +59,8 @@ fun SocialShareList(
     ) {
         apps.forEach { app ->
             ShareIcon(
-                image = painterResource(id = app.icon),
-                text = "${app.name}"
+                image = painterResource(id = app.iconId),
+                text = app.title
             ) {
                 onShareTo(app)
             }
@@ -77,4 +77,13 @@ fun PreviewShareIcon() {
     ) {
         
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewShareList() {
+    SocialShareList(
+        apps = ShareApp.all,
+        onShareTo = {}
+    )
 }
