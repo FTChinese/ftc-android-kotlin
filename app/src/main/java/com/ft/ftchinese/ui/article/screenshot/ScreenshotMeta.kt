@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.share
+package com.ft.ftchinese.ui.article.screenshot
 
 import android.net.Uri
 import android.os.Parcelable
@@ -10,3 +10,9 @@ data class ScreenshotMeta(
     val title: String,
     val description: String,
 ) : Parcelable
+
+data class ScreenshotParams(
+    val imageUrl: String,
+    val articleId: String,
+    val articleType: String,
+)
