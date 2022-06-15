@@ -39,6 +39,12 @@ class FileCache (private val context: Context) {
         }
     }
 
+    suspend fun asyncSaveText(name: String, text: String) {
+        withContext(Dispatchers.IO) {
+            saveText(name, text)
+        }
+    }
+
     fun loadText(name: String?): String? {
         if (name.isNullOrBlank()) {
             return null
@@ -51,6 +57,12 @@ class FileCache (private val context: Context) {
         } catch (e: Exception) {
             Log.i(TAG, "Cannot open file $name due to: ${e.message}")
             null
+        }
+    }
+
+    suspend fun asyncLoadText(name: String): String? {
+        return withContext(Dispatchers.IO) {
+            loadText(name)
         }
     }
 
