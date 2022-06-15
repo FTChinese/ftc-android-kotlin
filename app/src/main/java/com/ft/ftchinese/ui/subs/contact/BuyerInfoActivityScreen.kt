@@ -13,7 +13,6 @@ import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
 import com.ft.ftchinese.ui.web.ComposeWebView
-import com.ft.ftchinese.ui.web.rememberWebViewClient
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
@@ -79,7 +78,6 @@ fun BuyerInfoActivityScreen(
                     data = infoState.htmlLoaded,
                     baseUrl = baseUrl,
                 ),
-                webClient = rememberWebViewClient()
             )
         }
     }

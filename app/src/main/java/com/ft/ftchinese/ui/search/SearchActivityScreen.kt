@@ -104,7 +104,6 @@ fun SearchActivityScreen(
     ) {
         ComposeWebView(
             wvState = wvState,
-            webClient = webClient
         ) {
             searchState.onWebViewCreated(it)
         }

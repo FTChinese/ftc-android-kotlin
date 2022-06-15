@@ -138,9 +138,13 @@ class BuyerInfoState(
         alert = message
     }
 
-    override fun onTeaserClicked(teaser: Teaser) {}
+    override fun onTeasers(teasers: List<Teaser>) {
 
-    override fun onChannelClicked(source: ChannelSource) {}
+    }
+
+    override fun onClickTeaser(teaser: Teaser) {}
+
+    override fun onClickChannel(source: ChannelSource) {}
 
     override fun onFollowTopic(following: Following) {}
 }

@@ -13,15 +13,26 @@ import com.google.accompanist.web.WebViewState
 @Composable
 fun ComposeWebView(
     wvState: WebViewState,
-    webClient: ComposeWebViewClient,
     modifier: Modifier = Modifier,
-    jsInterface: JsInterface = rememberJsInterface(),
+    webClientCallback: WebViewCallback = rememberWebViewCallback(),
+    jsListener: JsEventListener = rememberJsEventListener(),
     onCreated: (WebView) -> Unit = {}
 ) {
 
     val chromeClient = remember {
         ComposeChromeClient()
     }
+
+    val jsInterface = remember(jsListener) {
+        JsInterface(jsListener)
+    }
+
+    val webClient = remember(webClientCallback) {
+        ComposeWebViewClient(
+            callback = webClientCallback
+        )
+    }
+
     WebView(
         state = wvState,
         modifier = modifier

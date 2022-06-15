@@ -7,7 +7,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.web.ComposeWebView
-import com.ft.ftchinese.ui.web.rememberWebViewClient
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewState
 
@@ -35,7 +34,6 @@ fun AiAudioActivityScreen(
     ) {
         ComposeWebView(
             wvState = webViewState,
-            webClient = rememberWebViewClient()
         )
     }
 

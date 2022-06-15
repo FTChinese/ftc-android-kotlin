@@ -35,7 +35,7 @@ import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.util.ShareUtils
 import com.ft.ftchinese.ui.web.ComposeWebView
-import com.ft.ftchinese.ui.web.rememberWebViewClient
+import com.ft.ftchinese.ui.web.rememberWebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -78,7 +78,9 @@ fun ArticleActivityScreen(
         baseUrl = baseUrl
     )
 
-    val webClient = rememberWebViewClient()
+    val wbCb = rememberWebViewCallback(
+        account = userViewModel.account
+    )
 
     LaunchedEffect(key1 = Unit) {
         articleState.initLoading(
@@ -246,7 +248,7 @@ fun ArticleActivityScreen(
 
                         ComposeWebView(
                             wvState = wvState,
-                            webClient = webClient
+                            webClientCallback = wbCb
                         ) {
                             articleState.onWebViewCreated(it)
                         }

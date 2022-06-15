@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberStartTime
@@ -48,6 +49,18 @@ fun ChannelActivityScreen(
         data = channelState.htmlLoaded,
         baseUrl = baseUrl
     )
+
+    val jsCallback = remember(channelSource) {
+        object : BaseJsEventListener(context, channelSource) {
+            override fun onTeasers(teasers: List<Teaser>) {
+                super.onTeasers(teasers)
+            }
+
+            override fun onClickTeaser(teaser: Teaser) {
+                super.onClickTeaser(teaser)
+            }
+        }
+    }
 
     val wvCallback = remember(userViewModel.account) {
         object : WebViewCallback(context, userViewModel.account) {
@@ -82,9 +95,6 @@ fun ChannelActivityScreen(
             }
         }
     }
-    val webClient = rememberWebViewClient(
-        callback = wvCallback
-    )
 
     LaunchedEffect(key1 = baseUrl) {
         channelState.initLoading(
@@ -130,7 +140,8 @@ fun ChannelActivityScreen(
             ) {
                 ComposeWebView(
                     wvState = wvState,
-                    webClient = webClient
+                    webClientCallback = wvCallback,
+                    jsListener = jsCallback,
                 )
             }
         }

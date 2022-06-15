@@ -12,7 +12,6 @@ import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.web.ComposeWebView
-import com.ft.ftchinese.ui.web.rememberWebViewClient
 import com.google.accompanist.web.rememberWebViewState
 
 @Composable
@@ -52,7 +51,6 @@ fun WebpageActivityScreen(
             ) {
                 ComposeWebView(
                     wvState = webViewState,
-                    webClient = rememberWebViewClient()
                 )
             }
         }
