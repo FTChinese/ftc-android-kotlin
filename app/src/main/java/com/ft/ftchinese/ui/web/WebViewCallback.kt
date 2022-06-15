@@ -34,14 +34,6 @@ private const val TAG = "WebClient"
 private const val keyWxMiniId = "wxminiprogramid"
 private const val keyWxMiniPath = "wxminiprogrampath"
 
-@Deprecated("")
-interface WebViewListener {
-    // When a link in web view point to a channel
-    fun onChannelSelected(source: ChannelSource)
-    // When pagination link in a channel page is clicked
-    fun onPagination(paging: Paging)
-}
-
 fun containWxMiniProgram(url: Uri): Boolean {
     return !url.getQueryParameter(keyWxMiniId).isNullOrBlank()
 }
