@@ -16,11 +16,10 @@ class WebpageActivity : ComponentActivity() {
             ?.let {
                 setContent {
                     WebpageScreen(
-                        pageMeta = it,
-                        onExit = {
-                            finish()
-                        }
-                    )
+                        pageMeta = it
+                    ) {
+                        finish()
+                    }
                 }
             }
     }
