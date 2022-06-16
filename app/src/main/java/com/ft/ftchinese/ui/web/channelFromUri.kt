@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.base
+package com.ft.ftchinese.ui.web
 
 import android.net.Uri
 import com.ft.ftchinese.model.content.ChannelSource

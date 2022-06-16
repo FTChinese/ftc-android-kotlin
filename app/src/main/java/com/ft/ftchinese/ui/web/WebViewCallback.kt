@@ -21,9 +21,6 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
-import com.ft.ftchinese.ui.base.channelFromUri
-import com.ft.ftchinese.ui.base.marketingChannelFromUri
-import com.ft.ftchinese.ui.base.tagOrArchiveChannel
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
