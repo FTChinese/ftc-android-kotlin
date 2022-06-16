@@ -22,7 +22,6 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.article.audio.AiAudioActivityScreen
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotActivityScreen
-import com.ft.ftchinese.ui.article.screenshot.ScreenshotParams
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 
@@ -42,7 +41,7 @@ class ArticleActivity : AppCompatActivity() {
         setContent {
             ArticleApp(
                 onExit = { finish() },
-                teaser = teaser
+                initialId = NavStore.saveTeaser(teaser),
             )
         }
     }
@@ -64,9 +63,9 @@ class ArticleActivity : AppCompatActivity() {
          * Load content with standard JSON API.
          */
         @JvmStatic
-        fun start(context: Context?, channelItem: Teaser) {
+        fun start(context: Context?, teaser: Teaser) {
             val intent = Intent(context, ArticleActivity::class.java).apply {
-                putExtra(EXTRA_ARTICLE_TEASER, channelItem)
+                putExtra(EXTRA_ARTICLE_TEASER, teaser)
             }
 
             context?.startActivity(intent)
@@ -91,7 +90,7 @@ class ArticleActivity : AppCompatActivity() {
 @Composable
 private fun ArticleApp(
     onExit: () -> Unit,
-    teaser: Teaser,
+    initialId: String,
 ) {
 
     val scaffoldState = rememberScaffoldState()
@@ -120,24 +119,48 @@ private fun ArticleApp(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = ArticleAppScreen.Story.name,
+                startDestination = "${ArticleAppScreen.Story.name}/{id}",
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(
-                    route = ArticleAppScreen.Story.name
-                ) {
+                    route = "${ArticleAppScreen.Story.name}/{id}",
+                    arguments = listOf(
+                        navArgument("id") {
+                            type = NavType.StringType
+                            defaultValue = initialId
+                        }
+                    )
+                ) { entry ->
+                    val id = entry.arguments?.getString("id")
                     ArticleActivityScreen(
                         scaffoldState = scaffoldState,
-                        teaser = teaser,
+                        id = id,
                         onScreenshot = {
-                            navigateToScreenshot(
-                                navController,
-                                it,
+                            navigate(
+                                navController = navController,
+                                screen = ArticleAppScreen.Screenshot,
+                                id = it,
                             )
                         },
                         onAudio = {
-                            navigateToAiAudio(
-                                navController,
+                            navigate(
+                                navController = navController,
+                                screen = ArticleAppScreen.Audio,
+                                id = it,
+                            )
+                        },
+                        onArticle = {
+                            navigate(
+                                navController = navController,
+                                screen = ArticleAppScreen.Story,
+                                id = it
+                            )
+                        },
+                        onChannel = {
+                            navigate(
+                                navController = navController,
+                                screen = ArticleAppScreen.Channel,
+                                id = it,
                             )
                         }
                     ) {
@@ -149,48 +172,41 @@ private fun ArticleApp(
                 }
 
                 composable(
-                    route = "${ArticleAppScreen.Screenshot.name}/{type}/{id}?imageUrl={imageUrl}",
+                    route = "${ArticleAppScreen.Screenshot.name}/{id}",
                     arguments = listOf(
                         navArgument("id") {
-                            type = NavType.StringType
-                        },
-                        navArgument("type") {
-                            type = NavType.StringType
-                        },
-                        navArgument("imageUrl") {
                             type = NavType.StringType
                         },
                     )
                 ) { entry ->
                     val id = entry.arguments?.getString("id")
-                    val type = entry.arguments?.getString("type")
-                    val imageUrl = entry.arguments?.getString("imageUrl")
                     ScreenshotActivityScreen(
-                        type = type,
                         id = id,
-                        imageUrl = imageUrl,
                     )
                 }
 
                 composable(
-                    route = ArticleAppScreen.Audio.name,
-                ) {
-                    AiAudioActivityScreen()
+                    route = "${ArticleAppScreen.Audio.name}/{id}",
+                    arguments = listOf(
+                        navArgument("id") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val id = entry.arguments?.getString("id")
+                    AiAudioActivityScreen(
+                        id = id
+                    )
                 }
             }
         }
     }
 }
 
-private fun navigateToScreenshot(
+private fun navigate(
     navController: NavController,
-    params: ScreenshotParams,
+    screen: ArticleAppScreen,
+    id: String
 ) {
-    navController.navigate("${ArticleAppScreen.Screenshot.name}/${params.articleType}/${params.articleId}?imageUrl=${params.imageUrl}")
-}
-
-private fun navigateToAiAudio(
-    navController: NavController
-) {
-    navController.navigate(ArticleAppScreen.Audio.name)
+    navController.navigate("${screen.name}/${id}")
 }

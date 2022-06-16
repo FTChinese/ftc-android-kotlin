@@ -26,14 +26,12 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 
 @Composable
 fun ScreenshotActivityScreen(
-    type: String?,
     id: String?,
-    imageUrl: String?,
 ) {
 
     val context = LocalContext.current
 
-    if (type.isNullOrBlank() || id.isNullOrBlank() || imageUrl.isNullOrBlank()) {
+    if (id.isNullOrBlank()) {
         context.toast("Missing type, id or imageUrl")
         return
     }
@@ -43,13 +41,7 @@ fun ScreenshotActivityScreen(
     val screenshotState = rememberScreenshotState()
 
     LaunchedEffect(key1 = Unit) {
-        screenshotState.loadImage(
-            ScreenshotParams(
-            imageUrl = imageUrl,
-            articleId = id,
-            articleType = type
-        )
-        )
+        screenshotState.loadImage(id)
     }
 
     Column(

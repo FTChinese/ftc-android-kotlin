@@ -25,6 +25,8 @@ import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.article.NavStore
+import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -75,16 +77,32 @@ class ArticlesState(
         private set
 
     var isBilingual by mutableStateOf(false)
+        private set
 
-    var screenshotUri by mutableStateOf<Uri?>(null)
+    var screenshotMeta by mutableStateOf<ScreenshotMeta?>(null)
+        private set
 
     private var currentStory: Story? = null
-    private var currentTeaser: Teaser? = null
+
+    var currentTeaser by mutableStateOf<Teaser?>(null)
+        private set
 
     val aiAudioTeaser: Teaser?
         get() = currentStory?.aiAudioTeaser(language)
 
     private var webView: WebView? = null
+
+    fun findTeaser(id: String) {
+        val t = NavStore.getTeaser(id)
+        if (t == null) {
+            showSnackBar("Missing required parameters")
+            return
+        }
+
+        currentTeaser = t
+
+        trackClickTeaser(t)
+    }
 
     fun onWebViewCreated(wv: WebView) {
         webView = wv
@@ -92,9 +110,10 @@ class ArticlesState(
 
     fun switchLang(
         lang: Language,
-        teaser: Teaser,
         account: Account?
     ) {
+
+        val t = currentTeaser ?: return
 
         if (lang == language) {
             return
@@ -112,22 +131,22 @@ class ArticlesState(
             }
         }
 
-       language = lang
+        language = lang
         initLoading(
-            teaser = teaser,
             account = account,
         )
     }
 
     fun initLoading(
-        teaser: Teaser,
         account: Account?
     ) {
+
+        val t = currentTeaser ?: return
 
         progress.value = true
         scope.launch {
             val result = loadArticle(
-                teaser = teaser,
+                teaser = t,
                 account = account,
                 refresh = false,
             )
@@ -141,7 +160,7 @@ class ArticlesState(
                 }
                 is FetchResult.Success -> {
                     onArticleLoaded(
-                        teaser = teaser,
+                        teaser = t,
                         content = result.data,
                         account = account
                     )
@@ -152,14 +171,13 @@ class ArticlesState(
         }
     }
 
-    fun refresh(
-        teaser: Teaser,
-        account: Account?
-    ) {
+    fun refresh(account: Account?) {
+        val t = currentTeaser ?: return
+
         refreshing = true
         scope.launch {
             val result = loadArticle(
-                teaser = teaser,
+                teaser = t,
                 account = account,
                 refresh = true,
             )
@@ -173,7 +191,7 @@ class ArticlesState(
                 }
                 is FetchResult.Success -> {
                     onArticleLoaded(
-                        teaser = teaser,
+                        teaser = t,
                         content = result.data,
                         account = account
                     )
@@ -437,8 +455,6 @@ class ArticlesState(
 
         showSnackBar("生成截图...")
 
-        screenshotUri = null
-
         progress.value = true
         scope.launch {
             val imageUri = withContext(Dispatchers.IO) {
@@ -463,7 +479,11 @@ class ArticlesState(
                 )
 
                 if (ok) {
-                    screenshotUri = imageUri
+                    screenshotMeta = ScreenshotMeta(
+                        imageUri = imageUri,
+                        title = articleRead?.title ?: "",
+                        description = articleRead?.standfirst ?: ""
+                    )
                 }
             } catch (e: Exception) {
                 e.message?.let { showSnackBar(it) }
