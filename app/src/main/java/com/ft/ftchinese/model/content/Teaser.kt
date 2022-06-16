@@ -108,6 +108,9 @@ data class Teaser(
     val channelMeta: ChannelMeta? = null,
 ) : Parcelable {
 
+    val isColumn: Boolean
+        get() = type == ArticleType.Column
+
     fun withLangVariant(lang: Language): Teaser {
         return Teaser(
             id = id,
