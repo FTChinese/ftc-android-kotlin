@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
@@ -44,6 +46,14 @@ object OButtonDefaults {
         backgroundColor = backgroundColor,
         contentColor = contentColor,
         disabledContentColor = contentColor.copy(alpha = ContentAlpha.disabled)
+    )
+
+    @Composable
+    fun outlineBorder(
+        color: Color = OColor.teal
+    ): BorderStroke = BorderStroke(
+        width = ButtonDefaults.OutlinedBorderSize,
+        color = color
     )
 
     @Composable
@@ -109,6 +119,19 @@ fun SelectButton(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewSelectButton() {
+    SelectButton(
+        selected = true,
+        onSelect = {  },
+        modifier = Modifier
+            .padding(Dimens.dp8)
+    ) {
+        SubHeading2(text = "English")
+    }
+}
+
 @Composable
 fun OButton(
     onClick: () -> Unit,
@@ -117,6 +140,7 @@ fun OButton(
     shape: Shape = MaterialTheme.shapes.small,
     border: BorderStroke? = null,
     colors: ButtonColors = OButtonDefaults.buttonColors(),
+    margin: PaddingValues = PaddingValues(0.dp),
     contentPadding: PaddingValues = OButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit,
 ) {
@@ -131,7 +155,8 @@ fun OButton(
             value = MaterialTheme.typography.button
         ) {
             Row(
-                modifier = modifier
+                modifier = Modifier
+                    .padding(margin)
                     .clickable(
                         enabled = enabled,
                         onClick = onClick
@@ -139,7 +164,8 @@ fun OButton(
                     .then(if (border != null) Modifier.border(border, shape) else Modifier)
                     .clip(shape = shape)
                     .background(colors.backgroundColor(enabled).value)
-                    .padding(contentPadding),
+                    .padding(contentPadding)
+                    .then(modifier),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -151,13 +177,17 @@ fun OButton(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewSelectButton() {
-    SelectButton(
-        selected = true,
-        onSelect = {  },
-        modifier = Modifier
-            .padding(Dimens.dp8)
+fun PreviewOButton() {
+    OButton(
+        onClick = {  },
+        colors = OButtonDefaults.outlineButtonColors(),
+        border = BorderStroke(1.dp, OColor.teal),
+        shape = CircleShape,
+        margin = PaddingValues(Dimens.dp16),
+        modifier = Modifier.size(50.dp)
     ) {
-        SubHeading2(text = "English")
+        Text(text = "Hello, Word")
     }
 }
+
+
