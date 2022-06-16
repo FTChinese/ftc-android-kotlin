@@ -21,7 +21,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.commit
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -54,7 +53,6 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.*
-import com.ft.ftchinese.ui.main.AcceptServiceDialogFragment
 import com.ft.ftchinese.ui.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
@@ -415,8 +413,6 @@ private fun TestActivityScreen(
             text = "Show Bottom Sheet"
         )
 
-        ServiceAcceptance(fragmentManager)
-
         TestCountDown()
 
         TestTimer()
@@ -449,19 +445,6 @@ fun NetworkStatus() {
     ) {
         Text(text = "Network $onOff")
     }
-}
-
-@Composable
-fun ServiceAcceptance(fragmentManager: FragmentManager) {
-    PrimaryBlockButton(
-        onClick = {
-            fragmentManager.commit {
-                add(android.R.id.content, AcceptServiceDialogFragment())
-                addToBackStack(null)
-            }
-        },
-        text = "Service Acceptance"
-    )
 }
 
 @Composable
