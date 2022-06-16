@@ -12,7 +12,6 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.WxMiniParams
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.tracking.GAAction
@@ -20,11 +19,11 @@ import com.ft.ftchinese.tracking.GACategory
 import com.ft.ftchinese.tracking.PaywallSource
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.channelFromUri
 import com.ft.ftchinese.ui.base.marketingChannelFromUri
 import com.ft.ftchinese.ui.base.tagOrArchiveChannel
-import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
@@ -254,7 +253,7 @@ sealed class WvUrlEvent {
 
 open class WebViewCallback(
     private val context: Context,
-    private val account: Account? = null,
+    private val channelSource: ChannelSource? = null
 ) {
 
     open fun onPageStarted(view: WebView?, url: String?) {
@@ -274,12 +273,10 @@ open class WebViewCallback(
     fun onOverrideUrlLoading(event: WvUrlEvent) {
         when (event) {
             is WvUrlEvent.MailTo -> {
-
+                // TODO:
             }
             is WvUrlEvent.Login -> {
-                if (account == null) {
-                    context.startActivity(AuthActivity.newIntent(context))
-                }
+                onLogin()
             }
             is WvUrlEvent.WxMiniProgram -> {
                 launchWxMiniProgram(
@@ -288,10 +285,10 @@ open class WebViewCallback(
                 )
             }
             is WvUrlEvent.Article -> {
-                ArticleActivity.start(context, event.teaser)
+                onClickStory(event.teaser)
             }
             is WvUrlEvent.Channel -> {
-                onChannelSelected(event.source)
+                onClickChannel(event.source)
             }
             is WvUrlEvent.Pagination -> {
                 onPagination(event.paging)
@@ -319,7 +316,17 @@ open class WebViewCallback(
 
     // When pagination link in a channel page is clicked
     open fun onPagination(paging: Paging) {
+        Log.i(TAG, "Pagination: $paging")
+        val pagedSource = channelSource?.withPagination(
+            pageKey = paging.key,
+            pageNumber = paging.page
+        ) ?: return
 
+        if (channelSource.isSamePage(pagedSource)) {
+            return
+        }
+
+        onClickChannel(pagedSource)
     }
 
     // When a link in web view point to a channel
@@ -330,19 +337,33 @@ open class WebViewCallback(
     // This is not a correct approach since server should provide
     // enough information about permissions.
     // Alas they didn't.
-    open fun onChannelSelected(source: ChannelSource) {
-        ChannelActivity.start(context, source)
+    open fun onClickChannel(source: ChannelSource) {
+        ChannelActivity.start(
+            context,
+            source.withParentPerm(channelSource?.permission)
+        )
+    }
+
+    open fun onClickStory(teaser: Teaser) {
+        ArticleActivity.start(
+            context,
+            teaser.withParentPerm(channelSource?.permission)
+        )
+    }
+
+    open fun onLogin() {
+        context.startActivity(AuthActivity.newIntent(context))
     }
 }
 
 @Composable
 fun rememberWebViewCallback(
     context: Context = LocalContext.current,
-    account: Account? = null
-) = remember(account) {
+    channelSource: ChannelSource? = null
+) = remember(channelSource) {
     WebViewCallback(
         context = context,
-        account = account
+        channelSource = channelSource,
     )
 }
 
