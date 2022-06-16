@@ -12,10 +12,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.components.rememberSearchInputState
-import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.ui.web.JsSnippets
 import com.ft.ftchinese.ui.web.WebViewCallback
-import com.ft.ftchinese.ui.web.rememberWebViewClient
+import com.ft.ftchinese.ui.web.rememberFtcWebViewClient
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
@@ -71,7 +71,7 @@ fun SearchActivityScreen(
      * Here you can call webClient.navigator.reload() to force
      * Compose reloading HTML and thus trigger onPageStarted().
      */
-    val webClient = rememberWebViewClient(
+    val webClient = rememberFtcWebViewClient(
         callback = wvClientCallback
     )
 
@@ -102,7 +102,7 @@ fun SearchActivityScreen(
             )
         }
     ) {
-        ComposeWebView(
+        FtcWebView(
             wvState = wvState,
         ) {
             searchState.onWebViewCreated(it)

@@ -19,10 +19,10 @@ import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.ui.article.chl.rememberChannelState
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberBaseUrl
-import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.ui.web.JsSnippets
 import com.ft.ftchinese.ui.web.WebViewCallback
-import com.ft.ftchinese.ui.web.rememberJsEventListener
+import com.ft.ftchinese.ui.web.rememberFtcJsEventListener
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -53,7 +53,7 @@ fun ChannelTabScreen(
         baseUrl = baseUrl
     )
 
-    val jsCallback = rememberJsEventListener(
+    val jsCallback = rememberFtcJsEventListener(
         channelSource = channelSource
     )
 
@@ -109,7 +109,7 @@ fun ChannelTabScreen(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                ComposeWebView(
+                FtcWebView(
                     wvState = wvState,
                     webClientCallback = wvCallback,
                     jsListener = jsCallback,

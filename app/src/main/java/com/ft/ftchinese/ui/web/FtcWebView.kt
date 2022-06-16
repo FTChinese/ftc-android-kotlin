@@ -11,11 +11,11 @@ import com.google.accompanist.web.WebViewState
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun ComposeWebView(
+fun FtcWebView(
     wvState: WebViewState,
     modifier: Modifier = Modifier,
     webClientCallback: WebViewCallback = rememberWebViewCallback(),
-    jsListener: JsEventListener = rememberJsEventListener(),
+    jsListener: JsEventListener = rememberFtcJsEventListener(),
     onCreated: (WebView) -> Unit = {}
 ) {
 
@@ -28,7 +28,7 @@ fun ComposeWebView(
     }
 
     val webClient = remember(webClientCallback) {
-        ComposeWebViewClient(
+        FtcWebViewClient(
             callback = webClientCallback
         )
     }

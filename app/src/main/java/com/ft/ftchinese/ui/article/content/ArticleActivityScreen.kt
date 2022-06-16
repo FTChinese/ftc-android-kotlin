@@ -34,8 +34,8 @@ import com.ft.ftchinese.ui.components.sendArticleReadLen
 import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.util.ShareUtils
-import com.ft.ftchinese.ui.web.BaseJsEventListener
-import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.FtcJsEventListener
+import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -103,7 +103,7 @@ fun ArticleActivityScreen(
     )
 
     val jsCallback = remember {
-        object : BaseJsEventListener(context) {
+        object : FtcJsEventListener(context) {
             override fun onClickTeaser(teaser: Teaser) {
                 scope.launch(Dispatchers.Main) {
                     onArticle(NavStore.saveTeaser(teaser))
@@ -287,7 +287,7 @@ fun ArticleActivityScreen(
                             .verticalScroll(rememberScrollState())
                     ) {
 
-                        ComposeWebView(
+                        FtcWebView(
                             wvState = wvState,
                             webClientCallback = wvCallback,
                             jsListener = jsCallback,

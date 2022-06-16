@@ -10,7 +10,7 @@ import com.google.accompanist.web.AccompanistWebViewClient
 
 private const val TAG = "WebClient"
 
-class ComposeWebViewClient(
+class FtcWebViewClient(
     private val callback: WebViewCallback,
 ) : AccompanistWebViewClient() {
 
@@ -50,10 +50,10 @@ class ComposeWebViewClient(
 }
 
 @Composable
-fun rememberWebViewClient(
+fun rememberFtcWebViewClient(
     callback: WebViewCallback = rememberWebViewCallback()
 ) = remember(callback) {
-    ComposeWebViewClient(
+    FtcWebViewClient(
         callback
     )
 }

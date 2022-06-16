@@ -53,7 +53,7 @@ fun ChannelActivityScreen(
     )
 
     val jsCallback = remember(channelState.channelSource) {
-        object : BaseJsEventListener(context, channelState.channelSource) {
+        object : FtcJsEventListener(context, channelState.channelSource) {
             override fun onClickTeaser(teaser: Teaser) {
                 Log.i(TAG, "Clicked a teaser item $teaser")
                 val t = teaser.withParentPerm(channelState.channelSource?.permission)
@@ -141,7 +141,7 @@ fun ChannelActivityScreen(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                ComposeWebView(
+                FtcWebView(
                     wvState = wvState,
                     webClientCallback = wvCallback,
                     jsListener = jsCallback,

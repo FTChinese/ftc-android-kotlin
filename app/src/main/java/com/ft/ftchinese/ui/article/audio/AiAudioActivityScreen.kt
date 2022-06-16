@@ -7,7 +7,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewState
 
@@ -40,7 +40,7 @@ fun AiAudioActivityScreen(
     ProgressLayout(
         loading = webViewState.isLoading
     ) {
-        ComposeWebView(
+        FtcWebView(
             wvState = webViewState,
         )
     }
