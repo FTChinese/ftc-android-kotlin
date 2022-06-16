@@ -13,7 +13,7 @@ class ServiceAcceptance private constructor(context: Context) {
         return sharedPreferences.getBoolean(PREF_IS_ACCEPTED, false)
     }
 
-    fun accepted() {
+    fun accept() {
         sharedPreferences.edit {
             putBoolean(PREF_IS_ACCEPTED, true)
         }
