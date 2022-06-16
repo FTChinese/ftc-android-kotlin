@@ -19,7 +19,7 @@ import kotlinx.serialization.decodeFromString
 private const val TAG = "SplashWorker"
 class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
 
-    private val cache = FileStore(appContext)
+    private val fileStore = FileStore(appContext)
     private val userSession = SessionManager.getInstance(appContext)
     private val store = SplashStore.getInstance(appContext)
 
@@ -38,7 +38,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
 
     private fun cachedSchedule(): Schedule? {
         Log.i(TAG, "Cache splash schedule")
-        return cache.loadText(CacheFileNames.splashSchedule)?.let {
+        return fileStore.loadText(CacheFileNames.splashSchedule)?.let {
             try {
                 marshaller.decodeFromString<Schedule>(it)
             } catch (e: Exception) {
@@ -48,25 +48,30 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
     }
 
     private fun prepareNextRound(schedule: Schedule): Result {
-        Log.i(TAG, "Prepare next round fof splash")
+        Log.i(TAG, "Prepare next round of splash")
         val ad = schedule
             .findToday(userSession.loadAccount()?.membership?.tier)
             .pickRandom() ?: return Result.failure()
 
         Log.i(TAG, "Selected splash for next round: $ad")
-        return ad.imageName?.let {
-            val done = downloadImage(
-                url = ad.imageUrl,
-                fileName = it
-            )
 
-            if (done) {
-                store.save(ad)
-                Result.success()
-            } else {
-                Result.retry()
-            }
-        } ?: Result.failure()
+        val imageName = ad.imageName ?: return Result.failure()
+
+        if (fileStore.exists(imageName)) {
+            return Result.success()
+        }
+
+        val done = downloadImage(
+            url = ad.imageUrl,
+            fileName = imageName
+        )
+
+        return if (done) {
+            store.save(ad)
+            Result.success()
+        } else {
+            Result.retry()
+        }
     }
 
     private fun downloadSchedule(): Schedule? {
@@ -78,7 +83,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
 
             Log.i(TAG, "Splash schedule downloaded. Cache it.")
             if (resp.raw.isNotEmpty()) {
-                cache.saveText(
+                fileStore.saveText(
                     CacheFileNames.splashSchedule,
                     resp.raw,
                 )
@@ -98,7 +103,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
                 .get(url)
                 .download()
                 ?.let {
-                    cache.writeBinaryFile(fileName, it)
+                    fileStore.writeBinaryFile(fileName, it)
                 }
 
             true
