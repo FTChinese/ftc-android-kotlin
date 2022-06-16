@@ -32,11 +32,7 @@ object Config {
     }
 
     fun discoverServer(account: Account?): String {
-        if (account == null) {
-            return BuildConfig.BASE_URL_FALLBACK
-        }
-
-        return when (account.membership.tier) {
+        return when (account?.membership?.tier) {
             Tier.STANDARD -> BuildConfig.BASE_URL_STANDARD
             Tier.PREMIUM -> BuildConfig.BASE_URL_PREMIUM
             else -> BuildConfig.BASE_URL_FALLBACK
