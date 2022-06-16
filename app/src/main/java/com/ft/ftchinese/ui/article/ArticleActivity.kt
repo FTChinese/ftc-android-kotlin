@@ -3,8 +3,8 @@ package com.ft.ftchinese.ui.article
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -29,7 +29,7 @@ import com.ft.ftchinese.ui.theme.OTheme
  * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
  * properly generated for CoordinatorLayout.
  */
-class ArticleActivity : AppCompatActivity() {
+class ArticleActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

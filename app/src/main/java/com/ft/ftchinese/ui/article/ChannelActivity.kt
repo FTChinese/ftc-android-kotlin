@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -37,10 +37,10 @@ private const val TAG = "ChannelActivity"
 
 /**
  * This is used to show a channel page, which consists of a list of article teaser.
- * It is similar to [MainActivity] except that it does not wrap a TabLayout.
+ * It is similar to MainActivity except that it does not wrap a TabLayout.
  * Use cases: column channel, editor's choice, archive list.
  */
-class ChannelActivity : AppCompatActivity() {
+class ChannelActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
