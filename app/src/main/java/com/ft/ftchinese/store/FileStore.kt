@@ -29,7 +29,10 @@ val templateCache: MutableMap<String, String> = HashMap()
 
 private const val TAG = "FileCache"
 
-class FileCache (private val context: Context) {
+/**
+ * FileStore handles app-specific storage.
+ */
+class FileStore (private val context: Context) {
 
     fun saveText(name: String, text: String) {
         try {
@@ -89,6 +92,7 @@ class FileCache (private val context: Context) {
 
     fun writeBinaryFile(name: String, array: ByteArray) {
         try {
+            // Equivalent to context.openFileOutput().write(array, Context.MODE_PRIVATE)
             File(context.filesDir, name).writeBytes(array)
         } catch (e: Exception) {
             Log.i(TAG, "Failed to save binary file $name due to ${e.message}")
@@ -109,6 +113,10 @@ class FileCache (private val context: Context) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    fun newfile(name: String): File {
+        return File(context.filesDir, name)
     }
 
     fun space(): String {
