@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.main
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -20,7 +21,6 @@ import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.service.SplashWorker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.ChannelActivity
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.main.splash.SplashActivityScreen
 import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
@@ -29,7 +29,7 @@ private const val EXTRA_MESSAGE_TYPE = "content_type"
 private const val EXTRA_CONTENT_ID = "content_id"
 private const val TAG = "SplashActivity"
 
-class SplashActivity : ScopedAppActivity() {
+class SplashActivity : AppCompatActivity() {
 
     private lateinit var workManager: WorkManager
 
