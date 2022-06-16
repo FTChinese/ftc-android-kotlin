@@ -19,11 +19,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
+import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.tracking.PaywallTracker
-import com.ft.ftchinese.ui.article.audio.AudioTeaserStore
-import com.ft.ftchinese.ui.article.screenshot.ScreenshotParams
+import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.share.ShareApp
 import com.ft.ftchinese.ui.article.share.SocialShareList
 import com.ft.ftchinese.ui.auth.AuthActivity
@@ -34,12 +34,14 @@ import com.ft.ftchinese.ui.components.sendArticleReadLen
 import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.util.ShareUtils
+import com.ft.ftchinese.ui.web.BaseJsEventListener
 import com.ft.ftchinese.ui.web.ComposeWebView
-import com.ft.ftchinese.ui.web.rememberWebViewCallback
+import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -47,70 +49,34 @@ import kotlinx.coroutines.launch
 fun ArticleActivityScreen(
     userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
-    teaser: Teaser,
-    onScreenshot: (ScreenshotParams) -> Unit,
-    onAudio: () -> Unit,
+    id: String?,
+    onScreenshot: (id: String) -> Unit,
+    onAudio: (id: String) -> Unit,
+    onArticle: (id: String) -> Unit,
+    onChannel: (id: String) -> Unit,
     onBack: () -> Unit,
 ) {
 
+    val startTime = rememberStartTime()
+
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val articleState = rememberArticleState(
+        scaffoldState = scaffoldState,
+        scope = scope
+    )
+
+    LaunchedEffect(key1 = Unit) {
+        id?.let {
+            articleState.findTeaser(it)
+        }
+    }
 
     val baseUrl = remember(userViewModel.account) {
         Config.discoverServer(userViewModel.account)
     }
-
-    val startTime = rememberStartTime()
-
     val wxApi = rememberWxApi()
-
-    val articleState = rememberArticleState(
-        scaffoldState = scaffoldState
-    )
-
-    val bottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = false,
-    )
-    val scope = rememberCoroutineScope()
-
-    val wvState = rememberWebViewStateWithHTMLData(
-        data = articleState.htmlLoaded,
-        baseUrl = baseUrl
-    )
-
-    val wbCb = rememberWebViewCallback(
-        account = userViewModel.account
-    )
-
-    LaunchedEffect(key1 = Unit) {
-        articleState.initLoading(
-            teaser = teaser,
-            account = userViewModel.account,
-        )
-        articleState.trackClickTeaser(teaser)
-    }
-
-    LaunchedEffect(key1 = articleState.articleRead) {
-        articleState.articleRead?.let {
-            articleState.trackViewed(it)
-        }
-    }
-
-    LaunchedEffect(key1 = articleState.screenshotUri) {
-        articleState.screenshotUri?.let {
-            onScreenshot(ScreenshotParams(
-                imageUrl = it.toString(),
-                articleId = teaser.id,
-                articleType = teaser.type.toString()
-            ))
-        }
-    }
-
-    LaunchedEffect(key1 = articleState.access) {
-        articleState.access?.let {
-            PaywallTracker.fromArticle(teaser.withLangVariant(it.lang))
-        }
-    }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -126,16 +92,94 @@ fun ArticleActivityScreen(
         }
     }
 
+    val bottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = false,
+    )
+
+    val wvState = rememberWebViewStateWithHTMLData(
+        data = articleState.htmlLoaded,
+        baseUrl = baseUrl
+    )
+
+    val jsCallback = remember {
+        object : BaseJsEventListener(context) {
+            override fun onClickTeaser(teaser: Teaser) {
+                scope.launch(Dispatchers.Main) {
+                    onArticle(NavStore.saveTeaser(teaser))
+                }
+            }
+
+            override fun onClickChannel(source: ChannelSource) {
+                scope.launch(Dispatchers.Main) {
+                    onChannel(NavStore.saveChannel(source))
+                }
+            }
+        }
+    }
+
+    val wvCallback = remember(userViewModel.account) {
+        object : WebViewCallback(context) {
+            override fun onClickChannel(source: ChannelSource) {
+                onChannel(NavStore.saveChannel(source))
+            }
+
+            override fun onClickStory(teaser: Teaser) {
+                onArticle(NavStore.saveTeaser(teaser))
+            }
+
+            override fun onLogin() {
+                if (userViewModel.account == null) {
+                    AuthActivity.launch(
+                        launcher = launcher,
+                        context = context,
+                    )
+                } else {
+                    context.toast("Already logged in")
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = articleState.currentTeaser) {
+        if (articleState.currentTeaser != null) {
+            articleState.initLoading(
+                account = userViewModel.account,
+            )
+        }
+    }
+
+    LaunchedEffect(key1 = articleState.articleRead) {
+        articleState.articleRead?.let {
+            articleState.trackViewed(it)
+        }
+    }
+
+    LaunchedEffect(key1 = articleState.screenshotMeta) {
+        articleState.screenshotMeta?.let {
+            onScreenshot(NavStore.saveScreenshot(it))
+        }
+    }
+
+    LaunchedEffect(key1 = articleState.access) {
+        articleState.access?.let { access ->
+            articleState.currentTeaser?.let {
+                PaywallTracker.fromArticle(it.withLangVariant(access.lang))
+            }
+        }
+    }
+
     DisposableEffect(key1 = Unit) {
         onDispose {
             val account = userViewModel.account ?: return@onDispose
-
-            sendArticleReadLen(
-                context = context,
-                account = account,
-                teaser = teaser,
-                startAt = startTime
-            )
+            articleState.currentTeaser?.let {
+                sendArticleReadLen(
+                    context = context,
+                    account = account,
+                    teaser = it,
+                    startAt = startTime
+                )
+            }
         }
     }
 
@@ -200,15 +244,13 @@ fun ArticleActivityScreen(
                         onSelectLang = {
                             articleState.switchLang(
                                 lang = it,
-                                teaser = teaser,
                                 account = userViewModel.account
                             )
                         },
                         audioFound = articleState.audioFound,
                         onClickAudio = {
                             articleState.aiAudioTeaser?.let {
-                                AudioTeaserStore.save(it)
-                                onAudio()
+                                onAudio(NavStore.saveTeaser(it))
                             }
                         },
                         onBack = onBack,
@@ -234,7 +276,6 @@ fun ArticleActivityScreen(
                     ),
                     onRefresh = {
                         articleState.refresh(
-                            teaser = teaser,
                             account = userViewModel.account
                         )
                     },
@@ -248,7 +289,8 @@ fun ArticleActivityScreen(
 
                         ComposeWebView(
                             wvState = wvState,
-                            webClientCallback = wbCb
+                            webClientCallback = wvCallback,
+                            jsListener = jsCallback,
                         ) {
                             articleState.onWebViewCreated(it)
                         }
