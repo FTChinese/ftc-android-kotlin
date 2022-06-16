@@ -15,7 +15,7 @@ class WebpageActivity : ComponentActivity() {
         intent.getParcelableExtra<WebpageMeta>(EXTRA_WEB_META)
             ?.let {
                 setContent {
-                    WebpageActivityScreen(
+                    WebpageScreen(
                         pageMeta = it,
                         onExit = {
                             finish()
