@@ -4,10 +4,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 @Composable
 fun Timer(
@@ -44,13 +41,16 @@ fun Timer(
 
 class TimerState(
     private val totalTime: Long,
-    private val initialText: String,
     private val scope: CoroutineScope,
+    private val initialText: String = "",
 ) {
     var currentTime by mutableStateOf(totalTime)
         private set
 
     var isRunning by mutableStateOf(false)
+        private set
+
+    private var job: Job? = null
 
     val text = derivedStateOf {
         if (!isRunning) {
@@ -63,7 +63,7 @@ class TimerState(
     fun start() {
         isRunning = true
         currentTime = totalTime
-        scope.launch(Dispatchers.Main) {
+        job = scope.launch(Dispatchers.Main) {
             for (i in totalTime downTo 0) {
                 currentTime = i
                 delay(1000)
@@ -71,6 +71,10 @@ class TimerState(
             isRunning = false
             currentTime = totalTime
         }
+    }
+
+    fun stop() {
+        job?.cancel()
     }
 }
 
@@ -81,8 +85,8 @@ fun rememberTimerState(
     scope: CoroutineScope = rememberCoroutineScope()
 ) = remember(totalTime, initialText, scope) {
     TimerState(
-        totalTime,
-        initialText,
-        scope,
+        totalTime = totalTime,
+        initialText = initialText,
+        scope = scope,
     )
 }
