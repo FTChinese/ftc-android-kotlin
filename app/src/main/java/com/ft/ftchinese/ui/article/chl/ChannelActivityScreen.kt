@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.ui.article.chl
 
 import android.util.Log
 import android.webkit.WebView
@@ -8,24 +8,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.components.rememberStartTime
-import com.ft.ftchinese.ui.components.sendChannelReadLen
+import com.ft.ftchinese.ui.components.rememberBaseUrl
 import com.ft.ftchinese.ui.web.*
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val TAG = "ChannelActivity"
 
@@ -33,37 +31,53 @@ private const val TAG = "ChannelActivity"
 fun ChannelActivityScreen(
     userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
-    channelSource: ChannelSource,
+    id: String?,
+    onArticle: (id: String) -> Unit,
+    onChannel: (id: String) -> Unit,
 ) {
     val context = LocalContext.current
-    val baseUrl = remember(userViewModel.account) {
-        Config.discoverServer(userViewModel.account)
-    }
-    val startTime = rememberStartTime()
+    val baseUrl = rememberBaseUrl(userViewModel.account)
+    val scope = rememberCoroutineScope()
 
     val channelState = rememberChannelState(
         scaffoldState = scaffoldState,
     )
+
+    LaunchedEffect(key1 = Unit) {
+        channelState.findChannelSource(id)
+    }
 
     val wvState = rememberWebViewStateWithHTMLData(
         data = channelState.htmlLoaded,
         baseUrl = baseUrl
     )
 
-    val jsCallback = remember(channelSource) {
-        object : BaseJsEventListener(context, channelSource) {
-            override fun onTeasers(teasers: List<Teaser>) {
-                super.onTeasers(teasers)
+    val jsCallback = remember(channelState.channelSource) {
+        object : BaseJsEventListener(context, channelState.channelSource) {
+            override fun onClickTeaser(teaser: Teaser) {
+                Log.i(TAG, "Clicked a teaser item $teaser")
+                val t = teaser.withParentPerm(channelState.channelSource?.permission)
+                scope.launch(Dispatchers.Main) {
+                    onArticle(NavStore.saveTeaser(t))
+                }
             }
 
-            override fun onClickTeaser(teaser: Teaser) {
-                super.onClickTeaser(teaser)
+            override fun onClickChannel(source: ChannelSource) {
+                Log.i(TAG, "Clicked a channel item $source")
+                scope.launch(Dispatchers.Main) {
+                    onChannel(NavStore.saveChannel(source))
+                }
             }
         }
     }
 
-    val wvCallback = remember(userViewModel.account) {
-        object : WebViewCallback(context, userViewModel.account) {
+    val wvCallback = remember(
+        channelState.channelSource,
+    ) {
+        object : WebViewCallback(
+            context,
+            channelSource = channelState.channelSource
+        ) {
             override fun onPageFinished(view: WebView?, url: String?) {
                 view?.evaluateJavascript(
                     JsSnippets.lockerIcon(userViewModel.account?.membership?.tier)
@@ -73,32 +87,24 @@ fun ChannelActivityScreen(
                 super.onPageFinished(view, url)
             }
 
-            override fun onPagination(paging: Paging) {
-                val pagedSource = channelSource.withPagination(
-                    paging.key, paging.page
-                )
-
-                if (channelSource.isSamePage(pagedSource)) {
-                    return
-                }
-
-                ChannelActivity.start(context, pagedSource)
+            override fun onClickChannel(source: ChannelSource) {
+                Log.i(TAG, "Clicked a channel link $source")
+                onChannel(NavStore.saveChannel(
+                    source.withParentPerm(
+                        channelState.channelSource?.permission
+                    )
+                ))
             }
 
-            override fun onChannelSelected(source: ChannelSource) {
-                ChannelActivity.start(
-                    context,
-                    source.withParentPerm(
-                        channelSource.permission
-                    )
-                )
+            override fun onClickStory(teaser: Teaser) {
+                Log.i(TAG, "Clicked a story link $teaser")
+                onArticle(NavStore.saveTeaser(teaser))
             }
         }
     }
 
-    LaunchedEffect(key1 = baseUrl) {
+    LaunchedEffect(key1 = baseUrl, channelState.channelSource) {
         channelState.initLoading(
-            source = channelSource,
             baseUrl = baseUrl,
             account = userViewModel.account
         )
@@ -106,14 +112,12 @@ fun ChannelActivityScreen(
 
     DisposableEffect(key1 = Unit) {
         onDispose {
-            val account = userViewModel.account ?: return@onDispose
-
-            sendChannelReadLen(
-                context = context,
-                userId = account.id,
-                startTime = startTime,
-                source = channelSource
-            )
+            userViewModel.account?.id?.let {
+                channelState.sendReadDur(
+                    context = context,
+                    userId = it
+                )
+            }
         }
     }
 
@@ -126,7 +130,6 @@ fun ChannelActivityScreen(
             ),
             onRefresh = {
                 channelState.refresh(
-                    source = channelSource,
                     baseUrl = baseUrl,
                     account = userViewModel.account
                 )
