@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.store.CacheFileNames
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +26,7 @@ class WxInfoViewModel : BaseViewModel() {
     }
 
     // Load avatar, upon initial start, from cache, and fallback to network.
-    fun loadAvatar(wechat: Wechat, cache: FileCache) {
+    fun loadAvatar(wechat: Wechat, cache: FileStore) {
         wechat.avatarUrl ?: return
 
         Log.i(TAG, "Start loading wechat avatar: ${wechat.avatarUrl}")
