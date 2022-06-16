@@ -8,8 +8,10 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
@@ -50,4 +52,25 @@ fun PreviewToolbar() {
     )
 }
 
-
+@Composable
+fun CloseBar(
+    title: String = "",
+    onClose: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {}
+) {
+    TopAppBar(
+        title = {
+            Text(text = title)
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onClose
+            ) {
+                IconClose()
+            }
+        },
+        actions = actions,
+        backgroundColor = Color.Transparent,
+        elevation = 0.dp
+    )
+}
