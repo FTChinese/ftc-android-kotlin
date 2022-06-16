@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.components.CloseBar
+import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.web.UrlHandler
 import com.google.accompanist.web.AccompanistWebViewClient
@@ -42,10 +43,12 @@ fun WebTabScreen(
             title = title,
             actions = {
                 if (openInBrowser) {
-                    UrlHandler.openInCustomTabs(
-                        ctx = context,
-                        url = Uri.parse(url)
-                    )
+                    MenuOpenInBrowser {
+                        UrlHandler.openInCustomTabs(
+                            ctx = context,
+                            url = Uri.parse(url)
+                        )
+                    }
                 }
             }
         )

@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.components.CloseBar
+import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.ui.web.UrlHandler
@@ -29,10 +30,12 @@ fun WebpageScreen(
             title = pageMeta.title,
             actions = {
                 if (pageMeta.showMenu) {
-                    UrlHandler.openInCustomTabs(
-                        ctx = context,
-                        url = Uri.parse(pageMeta.url)
-                    )
+                    MenuOpenInBrowser {
+                        UrlHandler.openInCustomTabs(
+                            ctx = context,
+                            url = Uri.parse(pageMeta.url)
+                        )
+                    }
                 }
             }
         )
