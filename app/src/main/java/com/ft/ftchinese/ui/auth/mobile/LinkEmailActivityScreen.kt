@@ -1,9 +1,11 @@
 package com.ft.ftchinese.ui.auth.mobile
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.request.MobileLinkParams
 import com.ft.ftchinese.store.TokenManager
@@ -42,7 +44,8 @@ fun LinkEmailActivityScreen(
     }
 
     ProgressLayout(
-        loading = authState.progress.value
+        loading = authState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         LinkEmailScreen(
             mobile = mobile ?: "",

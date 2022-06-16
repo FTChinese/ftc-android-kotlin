@@ -1,7 +1,9 @@
 package com.ft.ftchinese.ui.main.terms
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.store.ServiceAcceptance
@@ -25,7 +27,8 @@ fun TermsActivityScreen(
     )
 
     ProgressLayout(
-        loading = wvState.isLoading
+        loading = wvState.isLoading,
+        modifier = Modifier.fillMaxSize()
     ) {
         TermsScreen(
             onAgree = {

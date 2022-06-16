@@ -1,10 +1,12 @@
 package com.ft.ftchinese.ui.account.mobile
 
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberTimerState
@@ -43,7 +45,8 @@ fun MobileActivityScreen(
     }
 
     ProgressLayout(
-        loading = uiState.progress.value
+        loading = uiState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         MobileScreen(
             currentMobile = account.mobile ?: "",

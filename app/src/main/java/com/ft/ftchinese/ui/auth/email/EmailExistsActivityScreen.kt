@@ -1,9 +1,11 @@
 package com.ft.ftchinese.ui.auth.email
 
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import com.ft.ftchinese.ui.components.ProgressLayout
 
 private const val TAG = "EmailExists"
@@ -25,7 +27,8 @@ fun EmailExistsActivityScreen(
     }
 
     ProgressLayout(
-        loading = emailState.progress.value
+        loading = emailState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         EmailExistsScreen(
             loading = emailState.progress.value,

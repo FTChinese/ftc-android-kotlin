@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
@@ -84,7 +86,8 @@ fun ReleaseActivityScreen(
     }
 
     ProgressLayout(
-        loading = releaseState.progress.value
+        loading = releaseState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         ReleaseScreen(
             loading = releaseState.progress.value,

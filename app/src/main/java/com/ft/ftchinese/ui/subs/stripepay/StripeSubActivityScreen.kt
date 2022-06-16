@@ -3,11 +3,13 @@ package com.ft.ftchinese.ui.subs.stripepay
 import android.app.Activity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
@@ -142,7 +144,8 @@ fun StripeSubActivityScreen(
     }
 
     ProgressLayout(
-        loading = paymentState.progress.value
+        loading = paymentState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         paymentState.cartItem?.let {
             StripePayScreen(

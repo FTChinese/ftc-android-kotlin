@@ -1,8 +1,10 @@
 package com.ft.ftchinese.wxapi.wxpay
 
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.LiveData
 import com.ft.ftchinese.ui.components.ProgressLayout
 
@@ -19,6 +21,7 @@ fun WxPayActivityScreen(
 
     ProgressLayout(
         loading = status.value is WxPayStatus.Loading,
+        modifier = Modifier.fillMaxSize()
     ) {
         WxPayScreen(
             status = status.value,

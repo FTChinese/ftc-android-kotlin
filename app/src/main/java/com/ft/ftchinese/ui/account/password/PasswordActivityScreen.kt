@@ -1,8 +1,10 @@
 package com.ft.ftchinese.ui.account.password
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.auth.PasswordActivity
 import com.ft.ftchinese.ui.components.ProgressLayout
@@ -38,7 +40,8 @@ fun PasswordActivityScreen(
     }
 
     ProgressLayout(
-        loading = uiState.progress.value
+        loading = uiState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         PasswordScreen(
             loading = uiState.progress.value,

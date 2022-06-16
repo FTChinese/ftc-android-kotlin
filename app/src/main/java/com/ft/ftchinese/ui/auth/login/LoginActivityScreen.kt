@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.auth.login
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ScaffoldState
@@ -46,7 +47,8 @@ fun LoginActivityScreen(
     }
 
     ProgressLayout(
-        loading = loginState.progress.value
+        loading = loginState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         LoginScreen(
             email = email,

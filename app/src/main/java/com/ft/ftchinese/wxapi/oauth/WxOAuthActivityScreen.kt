@@ -1,9 +1,11 @@
 package com.ft.ftchinese.wxapi.oauth
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import com.ft.ftchinese.model.enums.LoginMethod
@@ -70,6 +72,7 @@ fun WxOAuthActivityScreen(
 
     ProgressLayout(
         loading = oauthState.authStatus is AuthStatus.Loading,
+        modifier = Modifier.fillMaxSize()
     ) {
         WxOAuthAScreen(
             status = oauthState.authStatus,

@@ -1,7 +1,9 @@
 package com.ft.ftchinese.ui.auth.password
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.ft.ftchinese.model.request.PasswordResetParams
 import com.ft.ftchinese.ui.components.ProgressLayout
 
@@ -28,7 +30,8 @@ fun ResetActivityScreen(
     }
 
     ProgressLayout(
-        loading = resetState.progress.value
+        loading = resetState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         ResetScreen(
             email = email,

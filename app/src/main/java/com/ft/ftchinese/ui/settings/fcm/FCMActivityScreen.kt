@@ -3,7 +3,9 @@ package com.ft.ftchinese.ui.settings.fcm
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
@@ -15,7 +17,8 @@ fun FcmActivityScreen() {
     val fcmState = rememberFcmState()
 
     ProgressLayout(
-        loading = fcmState.progress
+        loading = fcmState.progress,
+        modifier = Modifier.fillMaxSize()
     ) {
         FcmScreen(
             loading = fcmState.progress,

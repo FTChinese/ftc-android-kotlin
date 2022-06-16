@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.auth.signup
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ScaffoldState
@@ -43,7 +44,8 @@ fun SignUpActivityScreen(
     }
 
     ProgressLayout(
-        loading = signUpState.progress.value
+        loading = signUpState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         SignUpScreen(
             email = email ?: "",

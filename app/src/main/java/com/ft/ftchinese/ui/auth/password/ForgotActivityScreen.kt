@@ -1,10 +1,12 @@
 package com.ft.ftchinese.ui.auth.password
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.request.PasswordResetLetterParams
 import com.ft.ftchinese.ui.components.ProgressLayout
@@ -42,7 +44,8 @@ fun ForgotActivityScreen(
     }
 
     ProgressLayout(
-        loading = forgotState.progress.value
+        loading = forgotState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         ForgotScreen(
             email = email,

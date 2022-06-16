@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.LinearProgressIndicator
@@ -13,11 +14,11 @@ import com.ft.ftchinese.ui.theme.OColor
 fun ProgressLayout(
     modifier: Modifier = Modifier,
     loading: Boolean = false,
-    content: @Composable () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize().then(modifier)
+        modifier = modifier,
     ) {
         content()
 

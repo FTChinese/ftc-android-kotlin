@@ -1,7 +1,9 @@
 package com.ft.ftchinese.ui.article.audio
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.article.NavStore
@@ -38,7 +40,8 @@ fun AiAudioActivityScreen(
     val webViewState = rememberWebViewState(url = url)
 
     ProgressLayout(
-        loading = webViewState.isLoading
+        loading = webViewState.isLoading,
+        modifier = Modifier.fillMaxSize()
     ) {
         FtcWebView(
             wvState = webViewState,

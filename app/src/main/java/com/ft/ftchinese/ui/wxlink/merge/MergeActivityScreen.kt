@@ -1,8 +1,10 @@
 package com.ft.ftchinese.ui.wxlink.merge
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.base.toast
@@ -41,6 +43,7 @@ fun MergeActivityScreen(
     } else {
         ProgressLayout(
             loading = linkState.progress.value,
+            modifier = Modifier.fillMaxSize()
         ) {
             LinkScreen(
                 loading = linkState.progress.value,

@@ -1,9 +1,11 @@
 package com.ft.ftchinese.ui.account.unlinkwx
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.toast
@@ -35,6 +37,7 @@ fun UnlinkActivityScreen(
 
     ProgressLayout(
         loading = unlinkState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         UnlinkScreen(
             account = account,

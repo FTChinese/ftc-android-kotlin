@@ -1,8 +1,10 @@
 package com.ft.ftchinese.ui.account.email
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 
@@ -27,7 +29,8 @@ fun UpdateEmailActivityScreen(
     }
 
     ProgressLayout(
-        loading = emailState.progress.value
+        loading = emailState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         UpdateEmailScreen(
             email = account.email,

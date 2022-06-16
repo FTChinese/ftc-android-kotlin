@@ -1,9 +1,11 @@
 package com.ft.ftchinese.ui.account.address
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 
@@ -28,7 +30,8 @@ fun AddressActivityScreen(
     }
 
     ProgressLayout(
-        loading = uiState.progress.value
+        loading = uiState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         AddressScreen(
             address = uiState.currentAddress.value,

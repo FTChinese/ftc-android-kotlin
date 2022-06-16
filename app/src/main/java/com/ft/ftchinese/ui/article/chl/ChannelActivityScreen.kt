@@ -122,7 +122,8 @@ fun ChannelActivityScreen(
     }
 
     ProgressLayout(
-        loading = channelState.progress.value
+        loading = channelState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         SwipeRefresh(
             state = rememberSwipeRefreshState(

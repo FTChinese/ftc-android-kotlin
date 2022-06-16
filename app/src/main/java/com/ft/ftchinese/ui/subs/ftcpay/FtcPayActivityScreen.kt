@@ -1,10 +1,12 @@
 package com.ft.ftchinese.ui.subs.ftcpay
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.BuildConfig
@@ -106,7 +108,8 @@ fun FtcPayActivityScreen(
     }
 
     ProgressLayout(
-        loading = ftcPayState.progress.value
+        loading = ftcPayState.progress.value,
+        modifier = Modifier.fillMaxSize()
     ) {
         ftcPayState.cartItem?.let { item ->
             FtcPayScreen(
