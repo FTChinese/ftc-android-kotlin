@@ -10,7 +10,7 @@ import com.ft.ftchinese.R.string.news_notification_channel_id
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.channel.ChannelActivity
+import com.ft.ftchinese.ui.article.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 

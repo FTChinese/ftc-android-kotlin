@@ -85,7 +85,7 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".ui.channel.ChannelActivity"
+            android:name=".ui.article.ChannelActivity"
             android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.article.ArticleActivity"

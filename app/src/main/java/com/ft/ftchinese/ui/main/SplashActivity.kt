@@ -18,9 +18,9 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.SplashStore
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.util.ShareUtils
 import com.ft.ftchinese.ui.web.UrlHandler
 
