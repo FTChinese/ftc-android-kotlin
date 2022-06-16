@@ -56,6 +56,7 @@ fun PreviewToolbar() {
 fun CloseBar(
     title: String = "",
     onClose: () -> Unit,
+    backgroundColor: Color = OColor.paper,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
@@ -70,7 +71,7 @@ fun CloseBar(
             }
         },
         actions = actions,
-        backgroundColor = Color.Transparent,
+        backgroundColor = backgroundColor,
         elevation = 0.dp
     )
 }
