@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.web
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.MainThread
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -10,8 +11,8 @@ import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.base.toast
-import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessaging
 
 interface JsEventListener {
@@ -24,33 +25,12 @@ interface JsEventListener {
     fun onFollowTopic(following: Following)
 }
 
-@Deprecated("")
-class DumbJsEventListener : JsEventListener {
-    override fun onClosePage() {
-    }
-
-    override fun onProgress(loading: Boolean) {
-    }
-
-    override fun onAlert(message: String) {
-    }
-
-    override fun onClickTeaser(teaser: Teaser) {
-    }
-
-    override fun onClickChannel(source: ChannelSource) {
-    }
-
-    override fun onFollowTopic(following: Following) {
-    }
-
-    override fun onTeasers(teasers: List<Teaser>) {
-        TODO("Not yet implemented")
-    }
-}
-
 private const val TAG = "JsInterface"
 
+/**
+ * When you need to handle ui in the sub-class, switch
+ * to UI thread as JS might be running on a non-UI thread.
+ */
 open class BaseJsEventListener(
     private val context: Context,
     private val channelSource: ChannelSource? = null
@@ -73,18 +53,30 @@ open class BaseJsEventListener(
 
     }
 
+    // Pass on permission in case parent channel page
+    // has access control.
+    @MainThread
     override fun onClickTeaser(teaser: Teaser) {
+        Log.i(TAG, "onClickTeaser: $teaser")
         ArticleActivity.start(
             context,
             teaser.withParentPerm(channelSource?.permission)
         )
     }
 
+    // Pass on parent's permission when a new channel page
+    // is started from an existing channel page.
+    @MainThread
     override fun onClickChannel(source: ChannelSource) {
-        ChannelActivity.start(context, source)
+        Log.i(TAG, "onClickChannel: $source")
+        ChannelActivity.start(
+            context,
+            source.withParentPerm(channelSource?.permission)
+        )
     }
 
     override fun onFollowTopic(following: Following) {
+        Log.i(TAG, "onFollowTopic: $following")
         val isSubscribed = topicStore.save(following)
 
         if (isSubscribed) {
