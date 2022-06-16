@@ -3,7 +3,6 @@ package com.ft.ftchinese.ui.components
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -13,15 +12,7 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
-import com.ft.ftchinese.tracking.StatsTracker
 import java.util.*
-
-@Composable
-fun rememberTracker(
-    context: Context = LocalContext.current
-) = remember {
-    StatsTracker.getInstance(context)
-}
 
 @Composable
 fun rememberStartTime() = remember {
