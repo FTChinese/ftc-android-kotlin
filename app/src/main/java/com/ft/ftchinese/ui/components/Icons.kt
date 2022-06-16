@@ -61,6 +61,17 @@ fun IconClose(
 }
 
 @Composable
+fun IconOpenInBrowser(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_open_in_browser_24),
+        contentDescription = "Open in browser",
+        tint = tint,
+    )
+}
+
+@Composable
 fun IconRedo(
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
 ) {
