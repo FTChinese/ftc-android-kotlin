@@ -1,12 +1,10 @@
 package com.ft.ftchinese.ui.about
 
-import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.web.ChromeClient
-import com.google.accompanist.web.WebView
+import com.ft.ftchinese.ui.web.FtcWebView
 import com.google.accompanist.web.rememberWebViewState
 
 @Composable
@@ -16,20 +14,9 @@ fun AboutDetailsActivityScreen(
     val wvState = rememberWebViewState(url = url)
 
     ProgressLayout(
-        loading = false
+        loading = false,
+        modifier = Modifier.fillMaxSize()
     ) {
-        WebView(
-            state = wvState,
-            modifier = Modifier.fillMaxSize(),
-            captureBackPresses = false,
-            onCreated = {
-                it.settings.javaScriptEnabled = true
-                it.settings.loadsImagesAutomatically = true
-                it.settings.domStorageEnabled = true
-                it.settings.databaseEnabled = true
-                it.webChromeClient = ChromeClient()
-                it.webViewClient = WebViewClient()
-            }
-        )
+        FtcWebView(wvState = wvState)
     }
 }
