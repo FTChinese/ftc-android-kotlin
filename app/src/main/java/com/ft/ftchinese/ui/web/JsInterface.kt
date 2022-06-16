@@ -14,7 +14,7 @@ import kotlinx.serialization.decodeFromString
 private const val TAG = "JsInterface"
 
 class JsInterface(
-    private val listener: JsEventListener = DumbJsEventListener()
+    private val listener: JsEventListener
 ) {
 
     private var teasers: List<Teaser> = listOf()
@@ -41,7 +41,6 @@ class JsInterface(
      */
     @JavascriptInterface
     fun onPageLoaded(message: String) {
-
         Log.i(TAG, "JS onPageLoaded")
 
         val channelContent = marshaller.decodeFromString<ChannelContent>(message)
@@ -78,40 +77,39 @@ class JsInterface(
     }
 
     private fun articleListItemSelected(index: Int) {
-        Log.i(TAG, "JS interface responding to click on an item")
+        val teaser = teasers.getOrNull(index)
+        Log.i(TAG, "Selected teaser $teaser")
 
         // Find which item user is clicked.
-        teasers
-            .getOrNull(index)
-            ?.let {
+        teaser?.let {
+            /**
+             * {
+             * "id": "007000049",
+             * "type": "column",
+             * "headline": "徐瑾经济人" }
+             * Canonical URL: http://www.ftchinese.com/channel/column.html
+             * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
+             */
+            if (it.isColumn) {
+                listener.onClickChannel(
+                    ChannelSource.fromTeaser(it)
+                )
+            } else {
                 /**
-                 * {
-                 * "id": "007000049",
-                 * "type": "column",
-                 * "headline": "徐瑾经济人" }
-                 * Canonical URL: http://www.ftchinese.com/channel/column.html
-                 * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
+                 * For this type of data, load url directly.
+                 * Teaser(
+                 * id=44330,
+                 * type=interactive,
+                 * subType=mbagym,
+                 * title=一周新闻小测：2021年07月17日,
+                 * audioUrl=null,
+                 * radioUrl=null,
+                 * publishedAt=null,
+                 * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
                  */
-                if (it.type == ArticleType.Column) {
-                    listener.onClickChannel(
-                        ChannelSource.fromTeaser(it)
-                    )
-                } else {
-                    /**
-                     * For this type of data, load url directly.
-                     * Teaser(
-                     * id=44330,
-                     * type=interactive,
-                     * subType=mbagym,
-                     * title=一周新闻小测：2021年07月17日,
-                     * audioUrl=null,
-                     * radioUrl=null,
-                     * publishedAt=null,
-                     * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
-                     */
-                    listener.onClickTeaser(it)
-                }
+                listener.onClickTeaser(it)
             }
+        }
     }
 
     @JavascriptInterface
