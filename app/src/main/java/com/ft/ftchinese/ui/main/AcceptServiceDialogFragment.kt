@@ -7,13 +7,14 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebViewClient
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentAcceptServiceDialogBinding
 import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.store.ServiceAcceptance
-import com.ft.ftchinese.ui.web.DumbWebViewClient
+import com.ft.ftchinese.ui.web.BaseJsEventListener
 import com.ft.ftchinese.ui.web.JsInterface
 import com.ft.ftchinese.ui.webpage.configWebView
 
@@ -60,8 +61,8 @@ class AcceptServiceDialogFragment : DialogFragment() {
 
         configWebView(
             webView = binding.termsHolder,
-            jsInterface = JsInterface(),
-            client = DumbWebViewClient()
+            jsInterface = JsInterface(BaseJsEventListener(requireContext())),
+            client = WebViewClient()
         )
 
         binding.declineBtn.setOnClickListener {
