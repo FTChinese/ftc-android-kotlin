@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
@@ -31,7 +30,10 @@ import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
-import com.ft.ftchinese.store.*
+import com.ft.ftchinese.store.CacheFileNames
+import com.ft.ftchinese.store.FileStore
+import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.about.AboutListActivity
@@ -73,10 +75,9 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var binding: ActivityMainBinding
     private lateinit var navHeaderBinding: DrawerNavHeaderBinding
 
-    private lateinit var cache: FileCache
+    private lateinit var cache: FileStore
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var acceptance: ServiceAcceptance
     private lateinit var tokenManager: TokenManager
     private lateinit var wxApi: IWXAPI
     private lateinit var workManager: WorkManager
@@ -107,7 +108,7 @@ class MainActivity : ScopedAppActivity(),
 
         createNotificationChannel()
 
-        cache = FileCache(this)
+        cache = FileStore(this)
         statsTracker = StatsTracker.getInstance(this)
 
         // Register Wechat id
@@ -115,7 +116,6 @@ class MainActivity : ScopedAppActivity(),
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
         sessionManager = SessionManager.getInstance(this)
-        acceptance = ServiceAcceptance.getInstance(this)
         tokenManager = TokenManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
@@ -149,7 +149,6 @@ class MainActivity : ScopedAppActivity(),
 
         checkWxSession()
 
-        showTermsAndConditions()
         setupWorker()
     }
 
@@ -188,17 +187,6 @@ class MainActivity : ScopedAppActivity(),
         }
 
         conversionViewModel.launchTask(3, 30, 7)
-    }
-
-    private fun showTermsAndConditions() {
-        Log.i(TAG, "Service accepted ${acceptance.isAccepted()}")
-        if (acceptance.isAccepted()) {
-            return
-        }
-        supportFragmentManager.commit {
-            add(android.R.id.content, AcceptServiceDialogFragment())
-            addToBackStack(null)
-        }
     }
 
     private fun createNotificationChannel() {
