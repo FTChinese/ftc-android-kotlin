@@ -1,28 +1,29 @@
 package com.ft.ftchinese.ui.main
 
-import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.work.*
-import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.ActivitySplashBinding
-import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
+import com.ft.ftchinese.model.content.RemoteMessageType
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.service.SplashWorker
-import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.store.SplashStore
-import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.util.ShareUtils
-import com.ft.ftchinese.ui.web.UrlHandler
+import com.ft.ftchinese.ui.main.splash.SplashActivityScreen
+import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
+import com.ft.ftchinese.ui.theme.OTheme
 
 private const val EXTRA_MESSAGE_TYPE = "content_type"
 private const val EXTRA_CONTENT_ID = "content_id"
@@ -30,43 +31,21 @@ private const val TAG = "SplashActivity"
 
 class SplashActivity : ScopedAppActivity() {
 
-    private lateinit var cache: FileCache
-    private lateinit var sessionManager: SessionManager
-    private lateinit var statsTracker: StatsTracker
-    private lateinit var splashManager: SplashStore
-    private lateinit var splashViewModel: SplashViewModel
-    // Why this?
-    private var customTabsOpened: Boolean = false
-    private lateinit var binding: ActivitySplashBinding
     private lateinit var workManager: WorkManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(
-            this,
-            R.layout.activity_splash)
 
-        cache = FileCache(this)
-        sessionManager = SessionManager.getInstance(this)
-        splashManager = SplashStore.getInstance(this)
-        statsTracker = StatsTracker.getInstance(this)
+        setContent {
+            SplashApp(
+                onNext = this::exit,
+                onDeclined = {
+                    finish()
+                }
+            )
+        }
 
         workManager = WorkManager.getInstance(this)
-
-        splashViewModel = ViewModelProvider(this)[SplashViewModel::class.java]
-
-        connectionLiveData.observe(this) {
-            splashViewModel.isNetworkAvailable.value = it
-        }
-
-        isConnected.let {
-            splashViewModel.isNetworkAvailable.value = it
-        }
-
-        binding.handler = this
-
-        setupViewModel()
-        splashViewModel.loadAd(splashManager, cache)
         handleMessaging()
     }
 
@@ -134,60 +113,6 @@ class SplashActivity : ScopedAppActivity() {
         }
     }
 
-    private fun setupViewModel() {
-        splashViewModel.shouldExit.observe(this) {
-            if (it) {
-                Log.i(TAG, "shouldExit is $it")
-                exit()
-            }
-        }
-
-        splashViewModel.adLoaded.observe(this) {
-            Log.i(TAG, "Splash loaded $it")
-            // Tracking event ad viewed.
-            statsTracker.adViewed(it)
-            // Send a request to the tracking url defined in the ad
-            // data.
-            it.impressionDest().forEach { url ->
-                statsTracker.launchAdSent(url)
-                splashViewModel.sendImpression(url)
-            }
-        }
-
-        // Show the image.
-        splashViewModel.imageLoaded.observe(this) {
-            Log.i(TAG, "Splash image loaded. Creating drawable")
-            val drawable = Drawable.createFromStream(
-                it.first,
-                it.second,
-            )
-
-            if (drawable == null) {
-                Log.i(TAG, "Create drawable failed.")
-                exit()
-                return@observe
-            }
-
-            hideSystemUI()
-            binding.adImage.setImageDrawable(drawable)
-            splashViewModel.startCounting()
-        }
-
-        // Tracking if impression is successfully sent.
-        splashViewModel.impressionResult.observe(this) {
-            if (it.first) {
-                statsTracker.launchAdSuccess(it.second)
-            } else {
-                statsTracker.launchAdFail(it.second)
-            }
-        }
-
-        // Timer text.
-        splashViewModel.counterLiveData.observe(this) {
-            binding.timerText = getString(R.string.prompt_ad_timer, it)
-        }
-    }
-
     private fun setupWorker() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.UNMETERED)
@@ -210,72 +135,60 @@ class SplashActivity : ScopedAppActivity() {
         }
     }
 
-    // When clicking counter, skip the ad.
-    fun onClickCounter(view: View) {
-        splashViewModel.adLoaded.value?.let {
-            statsTracker.adSkipped(it)
-        }
-        splashViewModel.stopCounting()
-        exit()
-    }
-
-    fun onClickImage(view: View) {
-        // Stop counting and exit
-        splashViewModel.stopCounting()
-        splashViewModel.adLoaded.value?.let {
-
-            val url = Uri.parse(it.linkUrl)
-
-            if (ShareUtils.containWxMiniProgram(url)) {
-                val params = ShareUtils.wxMiniProgramParams(url)
-                if (params != null) {
-                    ShareUtils.createWxApi(this)
-                        .sendReq(
-                            ShareUtils.wxMiniProgramReq(params)
-                        )
-                    StatsTracker.getInstance(this).openedInWxMini(params)
-                    return@let
-                }
-            }
-
-            // Chrome web opened on top of this activity to show ad.
-            // After user exited from ad, the onResume method is called and if customTabsOpened is true, it will
-            // call exit().
-            customTabsOpened = true
-            statsTracker.adClicked(it)
-
-            UrlHandler.openInCustomTabs(this, url)
-        }
-    }
 
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
     private fun exit() {
         Log.i(TAG, "Exiting Splash Activity")
-//        showSystemUI()
         MainActivity.start(this)
         setupWorker()
         finish()
     }
+}
 
-    private fun hideSystemUI() {
-        binding.adContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-    }
+@Composable
+fun SplashApp(
+    onNext: () -> Unit,
+    onDeclined: () -> Unit
+) {
+    val scaffoldState = rememberScaffoldState()
+    val navController = rememberNavController()
 
-//    private fun showSystemUI() {
-//        binding.adContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//    }
+    OTheme {
+        Scaffold(
+            scaffoldState = scaffoldState
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = Screens.Splash.name,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(
+                    route = Screens.Splash.name
+                ) {
+                    SplashActivityScreen(
+                        onAgreement = {
+                            navController
+                                .navigate(Screens.Terms.name)
+                        },
+                        onNext = onNext
+                    )
+                }
 
-    override fun onResume() {
-        super.onResume()
-
-        if (customTabsOpened) {
-            exit()
+                composable(
+                    route = Screens.Terms.name
+                ) {
+                    TermsActivityScreen(
+                        onAgreed = onNext,
+                        onDeclined = onDeclined
+                    )
+                }
+            }
         }
     }
+}
+
+private enum class Screens {
+    Splash,
+    Terms;
 }
