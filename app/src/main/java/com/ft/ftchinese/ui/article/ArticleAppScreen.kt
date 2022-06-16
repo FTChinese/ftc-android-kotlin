@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.article
 enum class ArticleAppScreen(
     val title: String,
 ) {
+    Channel(""),
     Story(""),
     Screenshot("分享截图"),
     Audio("");
@@ -11,6 +12,7 @@ enum class ArticleAppScreen(
         @JvmStatic
         fun fromRoute(route: String?): ArticleAppScreen =
             when (route?.substringBefore("/")) {
+                Channel.name -> Channel
                 Story.name -> Story
                 Screenshot.name -> Screenshot
                 Audio.name -> Audio
