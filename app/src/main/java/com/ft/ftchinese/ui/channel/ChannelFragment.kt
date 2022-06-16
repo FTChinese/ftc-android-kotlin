@@ -13,10 +13,6 @@ import androidx.fragment.app.Fragment
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.ui.theme.OTheme
 
-/**
- * Hosted inside [TabPagerAdapter] or [ChannelActivity]
- * when used to handle pagination.
- */
 class ChannelFragment : Fragment() {
 
     override fun onCreateView(
@@ -25,7 +21,8 @@ class ChannelFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-        val channelSource = arguments?.getParcelable<ChannelSource>(ARG_CHANNEL_SOURCE)
+        val channelSource = arguments
+            ?.getParcelable<ChannelSource>(ARG_CHANNEL_SOURCE)
 
         return ComposeView(requireContext()).apply {
 
@@ -35,7 +32,6 @@ class ChannelFragment : Fragment() {
                         source = it
                     )
                 }
-
             }
         }
     }
@@ -69,7 +65,7 @@ private fun ChannelFragScreen(
         Scaffold(
             scaffoldState = scaffoldState
         ) {
-            ChannelActivityScreen(
+            ChannelTabScreen(
                 scaffoldState = scaffoldState,
                 channelSource = source
             )
