@@ -249,9 +249,11 @@ fun ArticleActivityScreen(
                         },
                         audioFound = articleState.audioFound,
                         onClickAudio = {
-                            articleState.aiAudioTeaser?.let {
-                                onAudio(NavStore.saveTeaser(it))
-                            }
+                            articleState
+                                .aiAudioTeaser
+                                ?.let {
+                                    onAudio(NavStore.saveTeaser(it))
+                                }
                         },
                         onBack = onBack,
                     )
@@ -281,6 +283,7 @@ fun ArticleActivityScreen(
                     },
                     modifier = Modifier.fillMaxSize(),
                 ) {
+                    // SwipeRefresh must have a vertical scrollable children.
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -340,7 +343,6 @@ fun ArticleActivityScreen(
                 )
             }
         }
-
     }
 }
 
