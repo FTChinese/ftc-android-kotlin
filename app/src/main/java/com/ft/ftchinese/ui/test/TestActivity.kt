@@ -47,6 +47,7 @@ import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -186,9 +187,8 @@ class TestActivity : ScopedAppActivity() {
                     composable(
                         route = TestAppScreen.Article.name
                     ) {
-                        ArticleActivityScreen(
-                            scaffoldState = scaffoldState,
-                            teaser = Teaser(
+                        val id = NavStore.saveTeaser(
+                            Teaser(
                                 id = "001096336",
                                 type = ArticleType.Premium,
                                 title = "我们为何工作得如此辛苦？",
@@ -196,12 +196,17 @@ class TestActivity : ScopedAppActivity() {
                                 isCreatedFromUrl = false,
                                 hideAd = false,
                                 langVariant = Language.CHINESE,
-                            ),
+                            )
+                        )
+                        ArticleActivityScreen(
+                            scaffoldState = scaffoldState,
+                            id = id,
                             onScreenshot = { },
-                            onAudio = {}
-                        ) {
-
-                        }
+                            onAudio = {},
+                            onArticle = {},
+                            onChannel = {},
+                            onBack = {}
+                        )
                     }
                 }
             }

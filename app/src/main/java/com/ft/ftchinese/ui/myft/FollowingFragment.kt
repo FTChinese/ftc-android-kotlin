@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.ui.channel.ChannelActivity
+import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.theme.Dimens
 
 class FollowingFragment : Fragment() {
