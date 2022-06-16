@@ -1,18 +1,10 @@
 package com.ft.ftchinese.ui.webpage
 
-import android.net.Uri
 import android.webkit.WebView
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.ui.components.CloseBar
-import com.ft.ftchinese.ui.components.MenuOpenInBrowser
-import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.web.UrlHandler
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
@@ -25,7 +17,6 @@ fun WebTabScreen(
     onClose: () -> Unit,
 ) {
 
-    val context = LocalContext.current
     val wvState = rememberWebViewState(url = url)
 
     val webClient = remember {
@@ -35,40 +26,26 @@ fun WebTabScreen(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
+    WebContentLayout(
+        url = if (openInBrowser) {
+            url
+         } else { null },
+        title = title,
+        loading = wvState.isLoading,
+        onClose = onClose
     ) {
-        CloseBar(
-            onClose = onClose,
-            title = title,
-            actions = {
-                if (openInBrowser) {
-                    MenuOpenInBrowser {
-                        UrlHandler.openInCustomTabs(
-                            ctx = context,
-                            url = Uri.parse(url)
-                        )
-                    }
-                }
-            }
+        WebView(
+            state = wvState,
+            modifier = Modifier
+                .fillMaxWidth(),
+            captureBackPresses = true,
+            onCreated = { webView ->
+                webView.settings.javaScriptEnabled = true
+                webView.settings.loadsImagesAutomatically = true
+                webView.settings.domStorageEnabled = true
+                webView.settings.databaseEnabled = true
+            },
+            client = webClient,
         )
-
-        ProgressLayout(
-            loading = wvState.isLoading
-        ) {
-            WebView(
-                state = wvState,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                captureBackPresses = true,
-                onCreated = { webView ->
-                    webView.settings.javaScriptEnabled = true
-                    webView.settings.loadsImagesAutomatically = true
-                    webView.settings.domStorageEnabled = true
-                    webView.settings.databaseEnabled = true
-                },
-                client = webClient,
-            )
-        }
     }
 }
