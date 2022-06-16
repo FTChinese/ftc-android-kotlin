@@ -8,11 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
-import com.ft.ftchinese.ui.web.ComposeWebView
+import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
@@ -33,8 +33,8 @@ fun BuyerInfoActivityScreen(
     val invoiceStore = remember {
         InvoiceStore.getInstance(context)
     }
-    val fileCache = remember {
-        FileCache(context)
+    val fileStore = remember {
+        FileStore(context)
     }
 
     val baseUrl = remember(account) {
@@ -55,7 +55,7 @@ fun BuyerInfoActivityScreen(
         infoState.loadPage(
             account = account,
             action = action,
-            cache = fileCache
+            cache = fileStore
         )
     }
 
@@ -73,7 +73,7 @@ fun BuyerInfoActivityScreen(
         loading = infoState.progress.value,
     ) {
         if (infoState.htmlLoaded.isNotBlank()) {
-            ComposeWebView(
+            FtcWebView(
                 wvState = rememberWebViewStateWithHTMLData(
                     data = infoState.htmlLoaded,
                     baseUrl = baseUrl,
