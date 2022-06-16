@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -48,7 +48,7 @@ class BuyerInfoState(
     fun loadPage(
         account: Account,
         action: PurchaseAction,
-        cache: FileCache,
+        cache: FileStore,
     ) {
 
         if (!ensureConnected()) {
@@ -111,7 +111,7 @@ class BuyerInfoState(
         account: Account,
         content: String,
         address: Address,
-        cache: FileCache,
+        cache: FileStore,
     ): String {
         val template = withContext(Dispatchers.IO) {
             cache.readChannelTemplate()

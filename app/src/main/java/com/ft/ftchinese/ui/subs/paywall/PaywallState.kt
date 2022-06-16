@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.paywall.defaultPaywall
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -33,7 +33,7 @@ class PaywallState(
 
     fun loadPaywall(
         isTest: Boolean,
-        cache: FileCache
+        cache: FileStore
     ) {
         progress.value = true
         scope.launch {
@@ -83,7 +83,7 @@ class PaywallState(
 
     fun refreshPaywall(
         isTest: Boolean,
-        cache: FileCache,
+        cache: FileStore,
     ) {
         if (!ensureConnected()) {
             return

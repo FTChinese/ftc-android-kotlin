@@ -13,7 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.AuthActivity
@@ -33,7 +33,7 @@ fun PaywallActivityScreen(
 
     val context = LocalContext.current
     val cache = remember {
-        FileCache(context)
+        FileStore(context)
     }
     val tracker = remember {
         StatsTracker.getInstance(context)

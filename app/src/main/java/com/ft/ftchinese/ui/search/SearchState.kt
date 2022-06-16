@@ -11,7 +11,7 @@ import com.ft.ftchinese.database.SearchDb
 import com.ft.ftchinese.database.sqlQueryVacuum
 import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.repository.isKeywordForbidden
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -27,7 +27,7 @@ class SearchState(
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
-    private val cache = FileCache(context)
+    private val cache = FileStore(context)
     private val keywordHistoryDao = SearchDb.getInstance(context).keywordHistoryDao()
 
     var keywordSet by mutableStateOf<LinkedHashSet<String>>(linkedSetOf())

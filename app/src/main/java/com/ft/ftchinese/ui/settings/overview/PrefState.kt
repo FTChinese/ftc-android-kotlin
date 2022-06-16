@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -23,7 +23,7 @@ class PrefState(
     connState: State<ConnectionState>,
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
-    private val cache = FileCache(context)
+    private val cache = FileStore(context)
     private val readingHistoryDao = ArticleDb.getInstance(context).readDao()
 
     var cacheSize by mutableStateOf("")

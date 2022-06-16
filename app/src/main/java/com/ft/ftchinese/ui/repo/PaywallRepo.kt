@@ -4,7 +4,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.paywall.*
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.PaywallClient
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,7 +46,7 @@ object PaywallRepo {
             }
     }
 
-    suspend fun fromFileCache(isTest: Boolean, cache: FileCache): Paywall? {
+    suspend fun fromFileCache(isTest: Boolean, cache: FileStore): Paywall? {
         val pw = cache.asyncLoadPaywall(isTest)
         if (pw != null) {
             updateCache(pw)
@@ -55,7 +55,7 @@ object PaywallRepo {
         return pw
     }
 
-    suspend fun fromServer(isTest: Boolean, scope: CoroutineScope, cache: FileCache): FetchResult<Paywall> {
+    suspend fun fromServer(isTest: Boolean, scope: CoroutineScope, cache: FileStore): FetchResult<Paywall> {
         return when (val result = PaywallClient.asyncRetrieve(isTest)) {
             is FetchResult.LocalizedError -> result
             is FetchResult.TextError -> result

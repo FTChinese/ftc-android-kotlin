@@ -22,7 +22,7 @@ import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.ArticleClient
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.NavStore
@@ -48,7 +48,7 @@ class ArticlesState(
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
-    private val cache = FileCache(context)
+    private val cache = FileStore(context)
     private val db = ArticleDb.getInstance(context)
     // TODO: follow/unfollow topics in state rather in JS interface
     private val topicStore = FollowedTopics.getInstance(context)

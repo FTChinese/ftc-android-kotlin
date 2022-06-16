@@ -11,7 +11,7 @@ import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.ArticleClient
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
@@ -36,7 +36,7 @@ class ChannelState(
     connState: State<ConnectionState>,
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
-    private val cache = FileCache(context)
+    private val cache = FileStore(context)
     private val startTime = Date().time / 1000
 
     var refreshing by mutableStateOf(false)
