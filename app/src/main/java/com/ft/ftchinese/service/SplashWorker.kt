@@ -11,7 +11,7 @@ import com.ft.ftchinese.repository.AdClient
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.repository.Endpoint
 import com.ft.ftchinese.store.CacheFileNames
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.SplashStore
 import kotlinx.serialization.decodeFromString
@@ -19,7 +19,7 @@ import kotlinx.serialization.decodeFromString
 private const val TAG = "SplashWorker"
 class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
 
-    private val cache = FileCache(appContext)
+    private val cache = FileStore(appContext)
     private val userSession = SessionManager.getInstance(appContext)
     private val store = SplashStore.getInstance(appContext)
 
