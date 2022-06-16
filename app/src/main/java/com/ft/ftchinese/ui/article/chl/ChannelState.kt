@@ -1,8 +1,7 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.ui.article.chl
 
 import android.content.Context
 import android.util.Log
-import android.webkit.WebView
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -13,15 +12,16 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
-import com.ft.ftchinese.ui.web.JsSnippets
+import com.ft.ftchinese.ui.components.sendChannelReadLen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 
 private const val TAG = "ChannelState"
 
@@ -37,7 +37,7 @@ class ChannelState(
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
     private val cache = FileCache(context)
-    private val tracker = StatsTracker.getInstance(context)
+    private val startTime = Date().time / 1000
 
     var refreshing by mutableStateOf(false)
         private set
@@ -45,11 +45,27 @@ class ChannelState(
     var htmlLoaded by mutableStateOf("")
         private set
 
+    var channelSource by mutableStateOf<ChannelSource?>(null)
+            private set
+
+    fun findChannelSource(id: String?) {
+        if (id == null) {
+            showSnackBar("Missing id")
+            return
+        }
+
+        channelSource = NavStore.getChannel(id)
+    }
+
+    fun setTabbedChannelSource(source: ChannelSource) {
+        channelSource = source
+    }
+
     fun initLoading(
-        source: ChannelSource,
         baseUrl: String,
         account: Account?
     ) {
+        val source = channelSource ?: return
         progress.value = true
         scope.launch {
             val result = retrieveHtml(
@@ -113,10 +129,10 @@ class ChannelState(
     }
 
     fun refresh(
-        source: ChannelSource,
         baseUrl: String,
         account: Account?
     ) {
+        val source = channelSource ?: return
         refreshing = true
         scope.launch {
             val result = retrieveHtml(
@@ -170,10 +186,12 @@ class ChannelState(
             Log.i(TAG, "Load channel ${source.path} from cache")
             val html = cache.asyncLoadText(cacheName)
             if (html != null) {
-                return FetchResult.Success(Loaded(
+                return FetchResult.Success(
+                    Loaded(
                     html = html,
                     isRemote = false
-                ))
+                )
+                )
             }
         }
 
@@ -204,10 +222,12 @@ class ChannelState(
 
                 }
 
-                return FetchResult.Success(Loaded(
+                return FetchResult.Success(
+                    Loaded(
                     html = result.data,
                     isRemote = true
-                ))
+                )
+                )
             }
         }
     }
@@ -225,6 +245,20 @@ class ChannelState(
                 .withChannel(content)
                 .withUserInfo(account)
                 .render()
+        }
+    }
+
+    fun sendReadDur(
+        context: Context,
+        userId: String
+    ) {
+        channelSource?.let {
+            sendChannelReadLen(
+                context = context,
+                userId = userId,
+                startTime = startTime,
+                source = it
+            )
         }
     }
 }
