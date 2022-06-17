@@ -36,7 +36,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.about.AboutListActivity
+import com.ft.ftchinese.ui.settings.about.AboutListActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
