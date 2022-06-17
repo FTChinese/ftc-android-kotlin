@@ -31,6 +31,7 @@ enum class SettingScreen(@StringRes val titleId: Int?) {
                 CheckVersion.name -> CheckVersion
                 Feedback.name -> Feedback
                 AboutUs.name -> AboutUs
+                Legal.name -> Legal
                 null -> Overview
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
