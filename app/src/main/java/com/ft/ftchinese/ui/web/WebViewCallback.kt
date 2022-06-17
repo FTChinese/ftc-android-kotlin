@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.legal.WebpageMeta
@@ -21,7 +22,9 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
+import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.subs.SubsActivity
+import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -270,7 +273,13 @@ open class WebViewCallback(
     fun onOverrideUrlLoading(event: WvUrlEvent) {
         when (event) {
             is WvUrlEvent.MailTo -> {
-                // TODO:
+                val ok = IntentsUtil.sendEmail(
+                    context = context,
+                    uri = event.uri
+                )
+                if (!ok) {
+                    context.toast(R.string.prompt_no_email_app)
+                }
             }
             is WvUrlEvent.Login -> {
                 onLogin()
