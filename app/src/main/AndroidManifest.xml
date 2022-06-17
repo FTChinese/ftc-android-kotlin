@@ -48,8 +48,6 @@
             android:name=".ui.subs.SubsActivity"
             android:exported="false" />
         <activity
-            android:name="com.ft.ftchinese.ui.settings.about.AboutListActivity" />
-        <activity
             android:name=".ui.webpage.WebpageActivity" />
         <activity
             android:name=".ui.test.TestActivity"
