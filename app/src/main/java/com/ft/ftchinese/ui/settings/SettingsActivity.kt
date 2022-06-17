@@ -1,15 +1,19 @@
 package com.ft.ftchinese.ui.settings
 
-import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
@@ -21,28 +25,40 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.ft.ftchinese.ui.about.AboutActivityScreen
+import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
 import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
+import com.ft.ftchinese.ui.settings.overview.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
 class SettingsActivity : ComponentActivity() {
 
-    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+    private var logout: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            SettingsApp {
-                finish()
-            }
+            SettingsApp(
+                onLoggedOut = {
+                    logout = true
+                },
+                onExit = {
+                    if (logout) {
+                        setResult(Activity.RESULT_OK)
+                    }
+                    finish()
+                }
+            )
         }
     }
 
     companion object {
 
+        // Handle release notification.
         @JvmStatic
         fun deepLinkIntent(context: Context) = Intent(
             Intent.ACTION_VIEW,
@@ -50,6 +66,17 @@ class SettingsActivity : ComponentActivity() {
             context,
             SettingsActivity::class.java
         )
+
+        // If user logged out, notify the calling activity.
+        @JvmStatic
+        fun launch(
+            launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+            context: Context,
+        ) {
+            launcher.launch(
+                Intent(context, SettingsActivity::class.java)
+            )
+        }
 
         @JvmStatic
         fun start(context: Context) {
@@ -60,6 +87,7 @@ class SettingsActivity : ComponentActivity() {
 
 @Composable
 fun SettingsApp(
+    onLoggedOut: () -> Unit,
     onExit: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -70,15 +98,22 @@ fun SettingsApp(
         backstackEntry.value?.destination?.route
     )
 
+    val (legalTitle, setLegalTitle) = remember {
+        mutableStateOf("")
+    }
     OTheme {
         Scaffold(
             topBar = {
                 Toolbar(
-                    heading = stringResource(id = currentScreen.titleId),
+                    heading = if (currentScreen.titleId != null) {
+                        stringResource(id = currentScreen.titleId)
+                    } else { legalTitle },
                     onBack = {
                         val ok = navController.popBackStack()
                         if (!ok) {
                             onExit()
+                        } else if (currentScreen != SettingScreen.Legal) {
+                            setLegalTitle("")
                         }
                     }
                 )
@@ -100,7 +135,8 @@ fun SettingsApp(
                                 navController,
                                 screen,
                             )
-                        }
+                        },
+                        onLoggedOut = onLoggedOut
                     )
                 }
 
@@ -130,6 +166,34 @@ fun SettingsApp(
                         cached = cached
                     )
                 }
+
+                composable(
+                    route = SettingScreen.AboutUs.name
+                ) {
+                    AboutActivityScreen(
+                        onNavigate = {
+                            setLegalTitle(it.title)
+                            navigateToLegal(
+                                navController = navController,
+                                url = it.url
+                            )
+                        }
+                    )
+                }
+
+                composable(
+                    route = "${SettingScreen.Legal.name}/?url={url",
+                    arguments = listOf(
+                        navArgument("url") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val url = entry.arguments?.getString("url")!!
+                    AboutDetailsActivityScreen(
+                        url = url
+                    )
+                }
             }
         }
     }
@@ -147,4 +211,11 @@ private fun navigateToScreen(
             navController.navigate(screen.name)
         }
     }
+}
+
+private fun navigateToLegal(
+    navController: NavController,
+    url: String,
+) {
+    navController.navigate("${SettingScreen.Legal.name}/?url=${url}")
 }
