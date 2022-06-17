@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.about
+package com.ft.ftchinese.ui.settings.about
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable

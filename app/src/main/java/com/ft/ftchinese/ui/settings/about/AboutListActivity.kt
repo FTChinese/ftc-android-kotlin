@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.about
+package com.ft.ftchinese.ui.settings.about
 
 import android.content.Context
 import android.content.Intent

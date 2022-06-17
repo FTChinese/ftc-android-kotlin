@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.about
+package com.ft.ftchinese.ui.settings.about
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,7 +24,7 @@ fun AboutActivityScreen(
                 onClick = {
                   onNavigate(pageMeta)
                 },
-                contentPadding = PaddingValues(Dimens.dp8)
+                contentPadding = PaddingValues(Dimens.dp16)
             ) {
                 Text(
                     text = pageMeta.title,
