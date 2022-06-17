@@ -4,7 +4,10 @@ import androidx.annotation.StringRes
 import com.ft.ftchinese.R
 import com.ft.ftchinese.repository.Config
 
-enum class SettingScreen(@StringRes val titleId: Int?) {
+enum class SettingScreen(
+    @StringRes val titleId: Int,
+    val showToolBar: Boolean = true,
+) {
     Overview(titleId = R.string.action_settings),
     ClearCache(titleId = R.string.pref_clear_cache),
     ClearHistory(titleId = R.string.pref_clear_history),
@@ -12,7 +15,7 @@ enum class SettingScreen(@StringRes val titleId: Int?) {
     CheckVersion(titleId = R.string.pref_check_new_version),
     Feedback(titleId = R.string.action_feedback),
     AboutUs(titleId = R.string.title_about_us),
-    Legal(titleId = null);
+    Legal(titleId = R.string.title_about_us, showToolBar = false);
 
     companion object {
 
