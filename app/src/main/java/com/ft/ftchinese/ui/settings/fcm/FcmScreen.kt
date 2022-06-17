@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.settings.fcm
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,7 +13,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.components.ClickableRow
+import com.ft.ftchinese.ui.components.ListItemIconText
+import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.ui.components.IconRightArrow
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
@@ -41,11 +43,10 @@ fun FcmScreen(
             )
 
             ClickableRow(
-                modifier = Modifier
-                    .background(OColor.black5)
-                    .padding(Dimens.dp16),
-                endIcon = { RightArrow() },
-                onClick = onSetting
+                endIcon = { IconRightArrow() },
+                onClick = onSetting,
+                contentPadding = PaddingValues(Dimens.dp16),
+                background = OColor.black5
             ) {
                 Text(
                     text = stringResource(id = R.string.channel_setting_news),
