@@ -1,16 +1,14 @@
 package com.ft.ftchinese.ui.about
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.components.ClickableRow
-import com.ft.ftchinese.ui.components.RightArrow
+import com.ft.ftchinese.ui.components.IconRightArrow
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
@@ -20,14 +18,13 @@ fun AboutActivityScreen(
     Column {
         legalPages.forEach { pageMeta ->
             ClickableRow(
-                modifier = Modifier
-                    .padding(Dimens.dp16),
                 endIcon = {
-                    RightArrow()
+                    IconRightArrow()
                 },
                 onClick = {
                   onNavigate(pageMeta)
-                }
+                },
+                contentPadding = PaddingValues(Dimens.dp8)
             ) {
                 Text(
                     text = pageMeta.title,
