@@ -1,21 +1,24 @@
-package com.ft.ftchinese.ui.settings
+package com.ft.ftchinese.ui.settings.overview
 
 import androidx.annotation.StringRes
 import com.ft.ftchinese.R
 import com.ft.ftchinese.repository.Config
 
-enum class SettingScreen(@StringRes val titleId: Int) {
+enum class SettingScreen(@StringRes val titleId: Int?) {
     Overview(titleId = R.string.action_settings),
     ClearCache(titleId = R.string.pref_clear_cache),
     ClearHistory(titleId = R.string.pref_clear_history),
     Notification(titleId = R.string.fcm_pref),
-    CheckVersion(titleId = R.string.pref_check_new_version);
+    CheckVersion(titleId = R.string.pref_check_new_version),
+    Feedback(titleId = R.string.action_feedback),
+    AboutUs(titleId = R.string.title_about_us),
+    Legal(titleId = null);
 
     companion object {
 
         val releaseRoutePattern = "${CheckVersion.name}/?cached={cached}"
-        val newReleaseRoute = "${CheckVersion}/?cached=false"
-        val releaseDeepLinkPattern = "${Config.canonicalUrl}/${releaseRoutePattern}"
+        val newReleaseRoute = "$CheckVersion/?cached=false"
+        val releaseDeepLinkPattern = "${Config.canonicalUrl}/$releaseRoutePattern"
         val newReleaseDeepLink = "${Config.canonicalUrl}/${CheckVersion.name}/?cached=true"
 
         @JvmStatic
@@ -26,6 +29,8 @@ enum class SettingScreen(@StringRes val titleId: Int) {
                 ClearHistory.name -> ClearHistory
                 Notification.name -> Notification
                 CheckVersion.name -> CheckVersion
+                Feedback.name -> Feedback
+                AboutUs.name -> AboutUs
                 null -> Overview
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
