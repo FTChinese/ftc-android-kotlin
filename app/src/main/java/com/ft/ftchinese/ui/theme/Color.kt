@@ -26,7 +26,35 @@ object OColor {
     val candy = Color(0xFFff7faa)
 
     // Tint claret
+    val claret30 = Color(0xFF4d081f)
+    val claret40 = Color(0xFF660a29)
+    val claret50 = Color(0xFF800d33)
+    val claret60 = Color(0xFF990f3d)
+    val claret70 = Color(0xFFb31247)
     val claret80 = Color(0xFFcc1452)
+    val claret90 = Color(0xFFe6175c)
+    val claret100 = Color(0xFFff1a66)
+
+    // Tint Oxford
+    val oxford30 = Color(0xFF082a4d)
+    val oxford40 = Color(0xFF0a3866)
+    val oxford50 = Color(0xFF0d4680)
+    val oxford60 = Color(0xFF0f5499)
+    val oxford70 = Color(0xFF1262b3)
+    val oxford80 = Color(0xFF1470cc)
+    val oxford90 = Color(0xFF177ee6)
+    val oxford100 = Color(0xFF1a8cff)
+
+    // Tint Teal
+    val teal20 = Color(0xFF052f33)
+    val teal30 = Color(0xFF08474d)
+    val teal40 = Color(0xFF0a5e66)
+    val teal50 = Color(0xFF0d7680)
+    val teal60 = Color(0xFF0f8e99)
+    val teal70 = Color(0xFF12a5b3)
+    val teal80 = Color(0xFF14bdcc)
+    val teal90 = Color(0xFF17d4e6)
+    val teal100 = Color(0xFF1aecff)
 
     // Tint black
     val black5 = Color(0xFFf2e5da)
@@ -39,6 +67,7 @@ object OColor {
     val black70 = Color(0xFF4d4845)
     val black80 = Color(0xFF33302e)
     val black90 = Color(0xFF1a1817)
+    val blackOverlay = Color(0x66000000)
 
     // Tint White
     val white10 = Color(0xFFfff2e8)
