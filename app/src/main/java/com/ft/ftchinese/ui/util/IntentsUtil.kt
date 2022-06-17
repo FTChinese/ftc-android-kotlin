@@ -4,9 +4,38 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import com.ft.ftchinese.R
+import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.ui.formatter.FormatHelper
+
+fun composeDeletionEmail(
+    context: Context,
+    a: Account
+): String? {
+    val emailOrMobile = if (a.isMobileEmail) {
+        a.mobile
+    } else {
+        a.email
+    }
+
+    if (a.membership.tier == null || a.membership.cycle == null) {
+        return null
+    }
+
+    val edition = FormatHelper.formatEdition(
+        context,
+        Edition(
+            tier = a.membership.tier,
+            cycle = a.membership.cycle,
+        )
+    )
+
+    return "FT中文网，\n请删除我的账号 $emailOrMobile。\n我的账号已经购买了FT中文网付费订阅服务 $edition，到期时间 ${a.membership.localizeExpireDate()}。我已知悉删除账号的同时将删除我的订阅信息。"
+}
 
 object IntentsUtil {
-    fun emailCustomerService(
+    private fun emailIntentCustomerService(
         title: String,
         body: String? = null
     ): Intent {
@@ -21,6 +50,58 @@ object IntentsUtil {
                 putExtra(Intent.EXTRA_TEXT, body)
             }
         }
+    }
+
+    fun sendCustomerServiceEmail(context: Context): Boolean {
+        return sendEmail(
+            context,
+            emailIntentCustomerService(
+                title = "FT中文网会员订阅"
+            )
+        )
+    }
+
+    fun sendDeleteAccountEmail(
+        context: Context,
+        account: Account,
+    ): Boolean {
+        return sendEmail(
+            context = context,
+            emailIntentCustomerService(
+                title = context.getString(R.string.subject_delete_account_valid_subs),
+                body = composeDeletionEmail(context, account)
+            )
+        )
+    }
+
+    private fun emailIntentFeedback(): Intent {
+        return Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:ftchinese.feedback@gmail.com")
+            putExtra(Intent.EXTRA_SUBJECT, "Feedback from FTC Android App")
+        }
+    }
+
+    fun sendFeedbackEmail(context: Context): Boolean {
+        return sendEmail(context, emailIntentFeedback())
+    }
+
+    private fun emailIntent(uri: Uri): Intent {
+        return Intent(Intent.ACTION_SENDTO).apply {
+            data = uri
+        }
+    }
+
+    private fun sendEmail(context: Context, intent: Intent): Boolean {
+        return if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+            true
+        } else {
+            false
+        }
+    }
+
+    fun sendEmail(context: Context, uri: Uri): Boolean {
+        return sendEmail(context, emailIntent(uri))
     }
 
     fun openSetting(context: Context) {
