@@ -1,8 +1,8 @@
 package com.ft.ftchinese.ui.subs.member
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
@@ -14,7 +14,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.IconCancel
 import com.ft.ftchinese.ui.components.IconRedo
-import com.ft.ftchinese.ui.components.RightArrow
+import com.ft.ftchinese.ui.components.IconRightArrow
 import com.ft.ftchinese.ui.theme.Dimens
 
 enum class SubsOptionRow {
@@ -41,9 +41,9 @@ fun SubsOptions(
                     onClickRow(SubsOptionRow.GoToPaywall)
                 },
                 endIcon = {
-                    RightArrow()
+                    IconRightArrow()
                 },
-                modifier = Modifier.padding(Dimens.dp8)
+                contentPadding = PaddingValues(Dimens.dp8)
             ) {
                 Text(text = "购买订阅或更改自动续订")
             }
@@ -56,7 +56,7 @@ fun SubsOptions(
                     onClick = {
                         onClickRow(SubsOptionRow.ReactivateStripe)
                     },
-                    modifier = Modifier.padding(Dimens.dp8),
+                    contentPadding = PaddingValues(Dimens.dp8),
                     endIcon = {
                         IconRedo()
                     }
@@ -71,7 +71,7 @@ fun SubsOptions(
                     onClick = {
                         onClickRow(SubsOptionRow.CancelStripe)
                     },
-                    modifier = Modifier.padding(Dimens.dp8),
+                    contentPadding = PaddingValues(Dimens.dp8),
                     endIcon = {
                         IconCancel()
                     }
