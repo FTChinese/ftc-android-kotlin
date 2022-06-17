@@ -1,32 +1,25 @@
 package com.ft.ftchinese.ui.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.IconSearch
 import com.ft.ftchinese.ui.main.home.MainBottomBar
 import com.ft.ftchinese.ui.main.home.MainNavScreen
-import com.ft.ftchinese.ui.search.SearchableActivity
-import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.ui.main.home.MainToolBar
+import com.ft.ftchinese.ui.search.SearchActivityScreen
 
 @Composable
 fun MainApp() {
 
-    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
     val backstackEntry = navController.currentBackStackEntryAsState()
@@ -38,33 +31,10 @@ fun MainApp() {
     Scaffold(
         topBar = {
             if (currentScreen.showTopBar) {
-                TopAppBar(
-                    title = {
-                        if (currentScreen.showTopBar) {
-                            when (currentScreen) {
-                                MainNavScreen.News -> {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.ic_menu_masthead),
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit
-                                    )
-                                }
-                                else -> {
-                                    Text(text = stringResource(id = currentScreen.titleId))
-                                }
-                            }
-                        }
-                    },
-                    elevation = Dimens.dp4,
-                    backgroundColor = OColor.wheat,
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                SearchableActivity.start(context)
-                            }
-                        ) {
-                            IconSearch()
-                        }
+                MainToolBar(
+                    screen = currentScreen,
+                    onSearch = {
+                        navigateToSearch(navController)
                     }
                 )
             }
@@ -72,18 +42,20 @@ fun MainApp() {
         },
         // See https://developer.android.com/jetpack/compose/navigation#bottom-nav
         bottomBar = {
-            MainBottomBar(
-                onClick = { screen ->
-                    navController.navigate(screen.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+            if (currentScreen.showBottomBar) {
+                MainBottomBar(
+                    onClick = { screen ->
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                selected = currentScreen
-            )
+                    },
+                    selected = currentScreen
+                )
+            }
         },
         scaffoldState = scaffoldState
     ) { innerPadding ->
@@ -121,26 +93,23 @@ fun MainApp() {
             ) {
                 Text(text = "My Ft")
             }
+
+            composable(
+                route = MainNavScreen.Search.route
+            ) {
+                SearchActivityScreen(
+                    scaffoldState = scaffoldState,
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
     }
 }
 
-@Composable
-private fun SearchIcon(
-    onClick: () -> Unit
+private fun navigateToSearch(
+    navController: NavController
 ) {
-    IconButton(
-        onClick = onClick
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_search_black_24dp),
-            contentDescription = "Search"
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen() {
-    MainApp()
+    navController.navigate(MainNavScreen.Search.route)
 }
