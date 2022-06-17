@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.IconRightArrow
@@ -13,21 +12,21 @@ import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
 fun AboutActivityScreen(
-    onNavigate: (WebpageMeta) -> Unit
+    onNavigate: (index: Int) -> Unit
 ) {
     Column {
-        legalPages.forEach { pageMeta ->
+        legalPages.forEachIndexed { index, webpageMeta ->
             ClickableRow(
                 endIcon = {
                     IconRightArrow()
                 },
                 onClick = {
-                  onNavigate(pageMeta)
+                  onNavigate(index)
                 },
                 contentPadding = PaddingValues(Dimens.dp16)
             ) {
                 Text(
-                    text = pageMeta.title,
+                    text = webpageMeta.title,
                 )
             }
         }
