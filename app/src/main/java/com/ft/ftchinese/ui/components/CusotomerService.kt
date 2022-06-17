@@ -27,10 +27,8 @@ fun CustomerService() {
             Divider(color = OColor.teal)
             PlainTextButton(
                 onClick = {
-                    val intent = IntentsUtil.emailCustomerService("FT中文网会员订阅")
-                    if (intent.resolveActivity(context.packageManager) != null) {
-                        context.startActivity(intent)
-                    } else {
+                    val ok = IntentsUtil.sendCustomerServiceEmail(context)
+                    if (!ok) {
                         context.longToast(R.string.prompt_no_email_app)
                     }
                 },
