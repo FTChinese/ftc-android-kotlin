@@ -20,7 +20,7 @@ fun IconAddCircle(
 }
 
 @Composable
-fun RightArrow() {
+fun IconRightArrow() {
     Icon(
         painter = painterResource(id = R.drawable.ic_keyboard_arrow_right_gray_24dp),
         contentDescription = "Details"
@@ -67,6 +67,72 @@ fun IconOpenInBrowser(
     Icon(
         painter = painterResource(id = R.drawable.ic_baseline_open_in_browser_24),
         contentDescription = "Open in browser",
+        tint = tint,
+    )
+}
+
+@Composable
+fun IconExit(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_exit_to_app_black_24dp),
+        contentDescription = "Exit",
+        tint = tint,
+    )
+}
+
+@Composable
+fun IconAccountBox(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_account_box_black_24dp),
+        contentDescription = "Exit",
+        tint = tint,
+    )
+}
+
+@Composable
+fun IconMember(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_card_membership_black_24dp),
+        contentDescription = "Membership",
+        tint = tint,
+    )
+}
+
+@Composable
+fun IconFeedback(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_feedback_black_24dp),
+        contentDescription = "Feedback",
+        tint = tint,
+    )
+}
+
+@Composable
+fun IconSettings(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_settings_black_24dp),
+        contentDescription = "Settings",
+        tint = tint,
+    )
+}
+
+@Composable
+fun IconInfo(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_info_black_24dp),
+        contentDescription = "Info",
         tint = tint,
     )
 }
