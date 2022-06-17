@@ -1,11 +1,14 @@
 package com.ft.ftchinese.ui.account
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -59,6 +62,8 @@ class AccountActivity : ComponentActivity() {
                     R.string.message_account_deleted,
                     Toast.LENGTH_SHORT
                 ).show()
+                // TODO: notify caller the deletion event.
+                setResult(Activity.RESULT_OK)
                 finish()
             }
         }
@@ -75,6 +80,16 @@ class AccountActivity : ComponentActivity() {
         fun start(context: Context) {
             val intent = Intent(context, AccountActivity::class.java)
             context.startActivity(intent)
+        }
+
+        @JvmStatic
+        fun launch(
+            launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+            context: Context,
+        ) {
+            launcher.launch(
+                Intent(context, AccountActivity::class.java)
+            )
         }
     }
 }
