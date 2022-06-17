@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
@@ -25,9 +23,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.ft.ftchinese.ui.settings.about.AboutActivityScreen
-import com.ft.ftchinese.ui.settings.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.settings.about.AboutActivityScreen
+import com.ft.ftchinese.ui.settings.about.LegalDocActivityScreen
 import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
 import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.settings.overview.SettingScreen
@@ -98,25 +96,21 @@ fun SettingsApp(
         backstackEntry.value?.destination?.route
     )
 
-    val (legalTitle, setLegalTitle) = remember {
-        mutableStateOf("")
-    }
     OTheme {
         Scaffold(
             topBar = {
-                Toolbar(
-                    heading = if (currentScreen.titleId != null) {
-                        stringResource(id = currentScreen.titleId)
-                    } else { legalTitle },
-                    onBack = {
-                        val ok = navController.popBackStack()
-                        if (!ok) {
-                            onExit()
-                        } else if (currentScreen != SettingScreen.Legal) {
-                            setLegalTitle("")
-                        }
-                    }
-                )
+                if (currentScreen.showToolBar) {
+                    Toolbar(
+                        heading = stringResource(id = currentScreen.titleId),
+                        onBack = {
+                            val ok = navController.popBackStack()
+                            if (!ok) {
+                                onExit()
+                            }
+                        },
+                    )
+                }
+
             },
             scaffoldState = scaffoldState,
         ) { innerPadding ->
@@ -172,26 +166,28 @@ fun SettingsApp(
                 ) {
                     AboutActivityScreen(
                         onNavigate = {
-                            setLegalTitle(it.title)
                             navigateToLegal(
                                 navController = navController,
-                                url = it.url
+                                index = it,
                             )
                         }
                     )
                 }
 
                 composable(
-                    route = "${SettingScreen.Legal.name}/?url={url}",
+                    route = "${SettingScreen.Legal.name}/{index}",
                     arguments = listOf(
-                        navArgument("url") {
-                            type = NavType.StringType
+                        navArgument("index") {
+                            type = NavType.IntType
                         }
                     )
                 ) { entry ->
-                    val url = entry.arguments?.getString("url")!!
-                    AboutDetailsActivityScreen(
-                        url = url
+                    val index = entry.arguments?.getInt("index") ?: 0
+                    LegalDocActivityScreen(
+                        index = index,
+                        onClose = {
+                            navController.popBackStack()
+                        }
                     )
                 }
             }
@@ -215,7 +211,7 @@ private fun navigateToScreen(
 
 private fun navigateToLegal(
     navController: NavController,
-    url: String,
+    index: Int,
 ) {
-    navController.navigate("${SettingScreen.Legal.name}/?url=${url}")
+    navController.navigate("${SettingScreen.Legal.name}/${index}")
 }
