@@ -25,8 +25,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import com.ft.ftchinese.ui.about.AboutActivityScreen
-import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
+import com.ft.ftchinese.ui.settings.about.AboutActivityScreen
+import com.ft.ftchinese.ui.settings.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
 import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
@@ -182,7 +182,7 @@ fun SettingsApp(
                 }
 
                 composable(
-                    route = "${SettingScreen.Legal.name}/?url={url",
+                    route = "${SettingScreen.Legal.name}/?url={url}",
                     arguments = listOf(
                         navArgument("url") {
                             type = NavType.StringType
