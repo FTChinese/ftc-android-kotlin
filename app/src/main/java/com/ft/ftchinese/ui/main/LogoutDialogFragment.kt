@@ -10,6 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentLogoutBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
+@Deprecated("")
 class LogoutDialogFragment : BottomSheetDialogFragment() {
     private lateinit var viewModel: LogoutViewModel
     private lateinit var binding: FragmentLogoutBinding
@@ -32,8 +33,7 @@ class LogoutDialogFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(LogoutViewModel::class.java)
+            ViewModelProvider(this)[LogoutViewModel::class.java]
         } ?: throw Exception("Invalid exception")
 
         binding.handler = this
