@@ -32,9 +32,11 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
     val isWxOnly: Boolean
         get() = accountLiveData.value?.isWxOnly == true
 
-    fun reloadAccount() {
-        accountLiveData.value = session.loadAccount(raw = true)?.copy()
+    fun reloadAccount(): Account? {
+        val a = session.loadAccount(raw = true)?.copy()
+        accountLiveData.value = a
         Log.i(TAG, "Account reloaded $account")
+        return a
     }
 
     fun saveAccount(a: Account) {
