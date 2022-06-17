@@ -38,6 +38,7 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.about.AboutListActivity
 import com.ft.ftchinese.ui.account.AccountActivity
+import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.ui.base.isConnected
@@ -300,8 +301,7 @@ class MainActivity : ScopedAppActivity(),
         // Set listener on the title text inside drawer's header view
         navHeaderBinding.navHeaderTitle.setOnClickListener {
             if (!sessionManager.isLoggedIn()) {
-//                AuthActivity.startForResult(this)
-                startForResult.launch(com.ft.ftchinese.ui.auth.AuthActivity.newIntent(this))
+                startForResult.launch(AuthActivity.newIntent(this))
                 return@setOnClickListener
             }
 
