@@ -1,8 +1,8 @@
 package com.ft.ftchinese.ui.settings.release
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,7 +27,7 @@ fun ReleaseMenu(
             startIcon = {
                 IconDelete()
             },
-            modifier = Modifier.padding(Dimens.dp16)
+            contentPadding = PaddingValues(Dimens.dp16)
         ) {
             Text(
                 text = "删除下载的文件",
@@ -40,7 +40,7 @@ fun ReleaseMenu(
             startIcon = {
                 IconFolderOpen()
             },
-            modifier = Modifier.padding(Dimens.dp16)
+            contentPadding = PaddingValues(Dimens.dp16)
         ) {
             Text(
                 text = "打开下载文件夹",
