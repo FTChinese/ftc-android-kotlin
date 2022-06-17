@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
@@ -22,7 +24,8 @@ fun ListItemTwoCol(
             .fillMaxWidth()
             .padding(bottom = Dimens.dp8)
             .then(modifier),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = lead,
@@ -34,4 +37,13 @@ fun ListItemTwoCol(
             color = OColor.black80
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewListItemTwoCol() {
+    ListItemTwoCol(
+        lead = "Hello",
+        tail = "World"
+    )
 }
