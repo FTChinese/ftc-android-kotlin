@@ -2,21 +2,17 @@ package com.ft.ftchinese.ui.account.wechat
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Wechat
+import com.ft.ftchinese.ui.components.Figure
 import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.theme.Dimens
 
@@ -42,9 +38,9 @@ fun WxInfoScreen(
             )
     ) {
 
-        NamedAvatar(
+        Figure(
             imageUrl = wechat.avatarUrl,
-            name = wechat.nickname ?: "",
+            caption = wechat.nickname ?: ""
         )
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
@@ -75,32 +71,6 @@ fun WxInfoScreen(
                 text = stringResource(id = R.string.btn_unlink)
             )
         }
-    }
-}
-
-@Composable
-private fun NamedAvatar(
-    imageUrl: String?,
-    name: String,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        AsyncImage(
-            model = imageUrl, 
-            contentDescription = "",
-            placeholder = painterResource(id = R.drawable.ic_account_circle_black_24dp),
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .height(128.dp)
-                .width(128.dp)
-                .clip(RoundedCornerShape(10.dp))
-        )
-        Text(
-            text = name,
-            style = MaterialTheme.typography.subtitle2,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
     }
 }
 
