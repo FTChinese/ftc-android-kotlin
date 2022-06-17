@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.myft
+package com.ft.ftchinese.ui.main.myft
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
