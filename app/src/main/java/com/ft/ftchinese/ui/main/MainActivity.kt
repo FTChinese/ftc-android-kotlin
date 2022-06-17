@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -36,7 +35,6 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.settings.about.AboutListActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -331,9 +329,7 @@ class MainActivity : ScopedAppActivity(),
                     SubsActivity.start(this)
                 }
                 R.id.action_my_subs -> MemberActivity.start(this)
-                R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
-                R.id.action_about -> AboutListActivity.start(this)
                 R.id.action_test -> TestActivity.start(this)
             }
 
@@ -540,19 +536,6 @@ class MainActivity : ScopedAppActivity(),
     override fun onTabUnselected(tab: TabLayout.Tab?) {
         if (BuildConfig.DEBUG) {
             Log.i(TAG, "Tab unselected: ${tab?.position}")
-        }
-    }
-
-    private fun feedbackEmail() {
-        val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:ftchinese.feedback@gmail.com")
-            putExtra(Intent.EXTRA_SUBJECT, "Feedback on FTC Android App")
-        }
-
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
-        } else {
-            toast(R.string.prompt_no_email_app)
         }
     }
 
