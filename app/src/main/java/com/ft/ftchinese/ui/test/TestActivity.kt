@@ -20,7 +20,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
-import androidx.fragment.app.FragmentManager
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -53,6 +52,8 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.main.MainApp
+import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
 import com.ft.ftchinese.ui.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
@@ -72,7 +73,9 @@ private enum class TestAppScreen(
     ModalBottomSheet("ModalBottomSheet"),
     MockUser("MockUser"),
     Search("Search"),
-    Article("Article");
+    Article("Article"),
+    Agreement("Agreement"),
+    Main("Main");
 
     companion object {
         @JvmStatic
@@ -83,6 +86,8 @@ private enum class TestAppScreen(
                 MockUser.name -> MockUser
                 Search.name -> Search
                 Article.name -> Article
+                Agreement.name -> Agreement
+                Main.name -> Main
                 null -> Home
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
@@ -103,7 +108,9 @@ class TestActivity : ScopedAppActivity() {
         workManager = WorkManager.getInstance(this)
 
         setContent {
-            TestApp()
+            TestApp(
+                onFinish = { finish() }
+            )
 //            MainApp()
         }
 
@@ -115,105 +122,7 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
-    @Composable
-    private fun TestApp() {
-        val scaffoldState = rememberScaffoldState()
 
-        OTheme {
-            val navController = rememberNavController()
-            val backstackEntry = navController.currentBackStackEntryAsState()
-            val currentScreen = TestAppScreen.fromRoute(
-                backstackEntry.value?.destination?.route
-            )
-
-            Scaffold(
-                topBar = {
-                    Toolbar(
-                        heading = currentScreen.title,
-                        onBack = {
-                            val ok = navController.popBackStack()
-                            if (!ok) {
-                                finish()
-                            }
-                        },
-                    )
-                },
-                scaffoldState = scaffoldState
-            ) { innerPadding ->
-                NavHost(
-                    navController = navController,
-                    startDestination = TestAppScreen.Home.name,
-                    modifier = Modifier.padding(innerPadding)
-                ) {
-                    composable(
-                        route = TestAppScreen.Home.name
-                    ) {
-                        TestActivityScreen(
-                            fragmentManager = supportFragmentManager,
-                            onNavigate = {
-                                navigateToScreen(
-                                    navController,
-                                    screen = it
-                                )
-                            }
-                        )
-                    }
-
-                    composable(
-                        route = TestAppScreen.ModalBottomSheet.name
-                    ) {
-                        ModalBottomSheetScreen()
-                    }
-
-                    composable(
-                        route = TestAppScreen.MockUser.name
-                    ) {
-                        MockUserScreen()
-                    }
-
-                    composable(
-                        route = TestAppScreen.Search.name
-                    ) {
-                        SearchActivityScreen(
-                            scaffoldState = scaffoldState,
-                            onBack = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
-
-                    composable(
-                        route = TestAppScreen.Article.name
-                    ) {
-                        val id = NavStore.saveTeaser(
-                            Teaser(
-                                id = "001096336",
-                                type = ArticleType.Premium,
-                                title = "我们为何工作得如此辛苦？",
-                                tag = "工作生活平衡,职场,劳工权益,四天工作制,生产率,management,career",
-                                isCreatedFromUrl = false,
-                                hideAd = false,
-                                langVariant = Language.CHINESE,
-                            )
-                        )
-                        ArticleActivityScreen(
-                            scaffoldState = scaffoldState,
-                            id = id,
-                            onScreenshot = { },
-                            onAudio = {},
-                            onArticle = {},
-                            onChannel = {},
-                            onBack = {}
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    private fun navigateToScreen(navController: NavController, screen: TestAppScreen) {
-        navController.navigate(screen.name)
-    }
 
     @Composable
     fun FCMSubscribeTopic() {
@@ -232,19 +141,6 @@ class TestActivity : ScopedAppActivity() {
                 }
         }) {
             Text(text = "FCM Subscribe a Topic")
-        }
-    }
-
-
-
-    @Composable
-    fun ClearServiceAcceptance() {
-        Button(onClick = {
-            ServiceAcceptance
-                .getInstance(this@TestActivity)
-                .clear()
-        }) {
-            Text(text = "Clear Service Acceptance")
         }
     }
 
@@ -397,8 +293,121 @@ class TestActivity : ScopedAppActivity() {
 }
 
 @Composable
+private fun TestApp(
+    onFinish: () -> Unit
+) {
+    val scaffoldState = rememberScaffoldState()
+
+    OTheme {
+        val navController = rememberNavController()
+        val backstackEntry = navController.currentBackStackEntryAsState()
+        val currentScreen = TestAppScreen.fromRoute(
+            backstackEntry.value?.destination?.route
+        )
+
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    heading = currentScreen.title,
+                    onBack = {
+                        val ok = navController.popBackStack()
+                        if (!ok) {
+                            onFinish()
+                        }
+                    },
+                )
+            },
+            scaffoldState = scaffoldState
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = TestAppScreen.Home.name,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(
+                    route = TestAppScreen.Home.name
+                ) {
+                    TestActivityScreen {
+                        navigateToScreen(
+                            navController,
+                            screen = it
+                        )
+                    }
+                }
+
+                composable(
+                    route = TestAppScreen.ModalBottomSheet.name
+                ) {
+                    ModalBottomSheetScreen()
+                }
+
+                composable(
+                    route = TestAppScreen.MockUser.name
+                ) {
+                    MockUserScreen()
+                }
+
+                composable(
+                    route = TestAppScreen.Search.name
+                ) {
+                    SearchActivityScreen(
+                        scaffoldState = scaffoldState,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(
+                    route = TestAppScreen.Article.name
+                ) {
+                    val id = NavStore.saveTeaser(
+                        Teaser(
+                            id = "001096336",
+                            type = ArticleType.Premium,
+                            title = "我们为何工作得如此辛苦？",
+                            tag = "工作生活平衡,职场,劳工权益,四天工作制,生产率,management,career",
+                            isCreatedFromUrl = false,
+                            hideAd = false,
+                            langVariant = Language.CHINESE,
+                        )
+                    )
+                    ArticleActivityScreen(
+                        scaffoldState = scaffoldState,
+                        id = id,
+                        onScreenshot = { },
+                        onAudio = {},
+                        onArticle = {},
+                        onChannel = {},
+                        onBack = {}
+                    )
+                }
+
+                composable(
+                    route =  TestAppScreen.Agreement.name
+                ) {
+                    TermsActivityScreen(
+                        onAgreed = { navController.popBackStack() },
+                        onDeclined = { navController.popBackStack() }
+                    )
+                }
+
+                composable(
+                    route = TestAppScreen.Main.name
+                ) {
+                    MainApp()
+                }
+            }
+        }
+    }
+}
+
+private fun navigateToScreen(navController: NavController, screen: TestAppScreen) {
+    navController.navigate(screen.name)
+}
+
+@Composable
 private fun TestActivityScreen(
-    fragmentManager: FragmentManager,
     onNavigate: (TestAppScreen) -> Unit
 ) {
     Column(
@@ -408,17 +417,33 @@ private fun TestActivityScreen(
     ) {
         NetworkStatus()
 
+        Divider()
+        
+        Heading3(text = "Entry Point")
+        PrimaryBlockButton(
+            onClick = { /*TODO*/ },
+            text = "Show Agreement"
+        )
+
+        ClearServiceAcceptance()
+
+        PrimaryBlockButton(
+            onClick = {
+                onNavigate(TestAppScreen.Main)
+            },
+            text = "Sow Main Activity"
+        )
+
+        Divider()
+
         PrimaryBlockButton(
             onClick = { onNavigate(TestAppScreen.ModalBottomSheet) },
             text = "Show Bottom Sheet"
         )
 
-        TestCountDown()
+        Divider()
 
-        TestTimer()
-
-        TestWxPay()
-
+        Heading3(text = "Content")
         PrimaryBlockButton(
             onClick = { onNavigate(TestAppScreen.Search) },
             text = "Test Search Bar"
@@ -430,6 +455,15 @@ private fun TestActivityScreen(
             },
             text = "Example Article"
         )
+
+
+        Divider()
+
+        TestWxPay()
+        
+        TestCountDown()
+
+        TestTimer()
     }
 }
 
@@ -518,6 +552,19 @@ fun TestTimer() {
     PrimaryBlockButton(
         onClick = timerState::start,
         text = timerState.text.value
+    )
+}
+
+@Composable
+fun ClearServiceAcceptance() {
+    val context = LocalContext.current
+    PrimaryBlockButton(
+        onClick = {
+            ServiceAcceptance
+                .getInstance(context)
+                .clear()
+        },
+        text = "Clear Service Acceptance"
     )
 }
 
