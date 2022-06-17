@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.account.overview
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -67,10 +68,9 @@ private fun AccountRow(
     ClickableRow(
         onClick = onClick,
         endIcon = {
-            RightArrow()
+            IconRightArrow()
         },
-        modifier = Modifier
-            .padding(Dimens.dp16)
+        contentPadding = PaddingValues(Dimens.dp8)
     ) {
         ListItemTwoLine(
             primary = primary,
