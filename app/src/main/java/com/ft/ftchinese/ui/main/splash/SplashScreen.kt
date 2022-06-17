@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -58,13 +56,16 @@ fun SplashScreen(
             OButton(
                 onClick = onClickCounter,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .size(24.dp),
-                border = BorderStroke(1.dp, OColor.teal),
-                colors = OButtonDefaults.outlineButtonColors(),
-                shape = CircleShape,
-                contentPadding = PaddingValues(0.dp),
-                margin = PaddingValues(Dimens.dp16)
+                    .align(Alignment.TopEnd),
+                border = BorderStroke(1.dp, OColor.black60),
+                colors = OButtonDefaults.outlineButtonColors(
+                    contentColor = OColor.black60
+                ),
+                contentPadding = PaddingValues(
+                    horizontal = Dimens.dp16,
+                    vertical = Dimens.dp4
+                ),
+                margin = PaddingValues(Dimens.dp24),
             ) {
                 Text(
                     text = "$counter",
