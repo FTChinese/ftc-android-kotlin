@@ -28,6 +28,7 @@ import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.theme.OTheme
 
+@Deprecated("")
 class AboutListActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
