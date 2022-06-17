@@ -26,8 +26,11 @@ class PrefState(
     private val cache = FileStore(context)
     private val readingHistoryDao = ArticleDb.getInstance(context).readDao()
 
-    var cacheSize by mutableStateOf("")
-    var readCount by mutableStateOf(0)
+    var cacheSize by mutableStateOf("0 KiB")
+        private set
+
+    var readEntries by mutableStateOf("")
+        private set
 
     fun calculateCacheSize() {
         scope.launch {
@@ -53,7 +56,7 @@ class PrefState(
             withContext(Dispatchers.IO) {
                 readingHistoryDao.count()
             }.let {
-                readCount = it
+                readEntries = humanizeReadCount(it)
             }
         }
     }
@@ -65,10 +68,14 @@ class PrefState(
                 readingHistoryDao.vacuumDb(SimpleSQLiteQuery("VACUUM"))
             }
 
-            readCount = 0
+            readEntries = humanizeReadCount(0)
 
             showSnackBar(R.string.prompt_reading_history)
         }
+    }
+
+    private fun humanizeReadCount(count: Int): String {
+        return resources.getString(R.string.summary_articles_read, count)
     }
 }
 
