@@ -53,6 +53,7 @@ fun PreferenceActivityScreen(
     )
 
     ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
         sheetContent = {
             LogoutSheet {
                 userViewModel.logout()
@@ -61,7 +62,8 @@ fun PreferenceActivityScreen(
                 }
                 onLoggedOut()
             }
-        }
+        },
+
     ) {
         PreferenceScreen(
             rows = rows,
