@@ -11,8 +11,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.ui.main.home.ChannelTabScreen
 import com.ft.ftchinese.ui.theme.OTheme
 
+@Deprecated("")
 class ChannelFragment : Fragment() {
 
     override fun onCreateView(
