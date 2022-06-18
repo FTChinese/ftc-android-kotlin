@@ -70,7 +70,6 @@ private fun AccountRow(
         endIcon = {
             IconRightArrow()
         },
-        contentPadding = PaddingValues(Dimens.dp8)
     ) {
         ListItemTwoLine(
             primary = primary,
