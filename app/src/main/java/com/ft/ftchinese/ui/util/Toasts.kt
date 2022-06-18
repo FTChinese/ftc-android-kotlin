@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.base
+package com.ft.ftchinese.ui.util
 
 import android.content.Context
 import android.widget.Toast

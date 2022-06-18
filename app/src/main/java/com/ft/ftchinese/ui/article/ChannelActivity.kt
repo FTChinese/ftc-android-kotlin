@@ -27,7 +27,7 @@ import com.ft.ftchinese.ui.article.audio.AiAudioActivityScreen
 import com.ft.ftchinese.ui.article.chl.ChannelActivityScreen
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotActivityScreen
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.google.firebase.analytics.FirebaseAnalytics

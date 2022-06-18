@@ -27,7 +27,7 @@ import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.share.ShareApp
 import com.ft.ftchinese.ui.article.share.SocialShareList
 import com.ft.ftchinese.ui.auth.AuthActivity
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.rememberStartTime
 import com.ft.ftchinese.ui.components.rememberWxApi
 import com.ft.ftchinese.ui.components.sendArticleReadLen

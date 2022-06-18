@@ -13,10 +13,9 @@ import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
-import com.ft.ftchinese.viewmodel.PaymentMethodInUse
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.Stripe
 import com.stripe.android.model.SetupIntent
