@@ -87,7 +87,7 @@ class SplashState(
 
             Log.i(TAG, "Splash found $splashAd")
 
-            if (!splashAd.isToday()) {
+            if (!splashAd.isToday() || splashAd.isVideo) {
                 Log.i(TAG, "Splash is not targeting today. Exit")
                 shouldExit = true
                 return@launch

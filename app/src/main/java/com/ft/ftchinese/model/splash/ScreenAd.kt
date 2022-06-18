@@ -45,6 +45,10 @@ data class ScreenAd(
     @Transient
     var date: LocalDate? = null
 
+    // I don't know how to play a video in an Image element.
+    val isVideo: Boolean
+        get() = imageUrl.endsWith(".mp4")
+
     fun isToday(): Boolean {
         if (date?.isEqual(LocalDate.now()) == true) {
             return true

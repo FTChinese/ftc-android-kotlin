@@ -55,6 +55,10 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
 
         Log.i(TAG, "Selected splash for next round: $ad")
 
+        if (ad.isVideo) {
+            return Result.success()
+        }
+
         val imageName = ad.imageName ?: return Result.failure()
 
         if (fileStore.exists(imageName)) {
