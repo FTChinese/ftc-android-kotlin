@@ -122,8 +122,6 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
-
-
     @Composable
     fun FCMSubscribeTopic() {
         Button(onClick = {
@@ -307,15 +305,17 @@ private fun TestApp(
 
         Scaffold(
             topBar = {
-                Toolbar(
-                    heading = currentScreen.title,
-                    onBack = {
-                        val ok = navController.popBackStack()
-                        if (!ok) {
-                            onFinish()
-                        }
-                    },
-                )
+                if (currentScreen != TestAppScreen.Main) {
+                    Toolbar(
+                        heading = currentScreen.title,
+                        onBack = {
+                            val ok = navController.popBackStack()
+                            if (!ok) {
+                                onFinish()
+                            }
+                        },
+                    )
+                }
             },
             scaffoldState = scaffoldState
         ) { innerPadding ->
