@@ -1,9 +1,8 @@
 package com.ft.ftchinese.ui.subs.product
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +25,7 @@ import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
 
-@OptIn(ExperimentalFoundationApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
+@OptIn(androidx.compose.material.ExperimentalMaterialApi::class)
 @Composable
 fun ProductCard(
     item: ProductItem,
@@ -101,10 +100,12 @@ fun ProductCard(
 @Composable
 private fun ProductDescRow(text: String) {
     Row {
-       Image(
-           painter = painterResource(id = R.drawable.ic_done_gray_24dp),
-           contentDescription = null,
-       )
+
+        Icon(
+            painter = painterResource(id = R.drawable.ic_baseline_done_24),
+            contentDescription = null,
+            tint = OColor.black60
+        )
 
         Spacer(modifier = Modifier.width(Dimens.dp4))
 

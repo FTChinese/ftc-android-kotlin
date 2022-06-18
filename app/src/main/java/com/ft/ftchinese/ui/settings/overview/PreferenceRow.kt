@@ -35,7 +35,7 @@ data class SettingRow(
                 SettingRow(
                     id = SettingScreen.ClearCache,
                     summary = cacheSize,
-                    iconId = R.drawable.ic_clear_24dp,
+                    iconId = R.drawable.ic_baseline_clear_all_24,
                     disclosure = false,
                 ),
                 SettingRow(

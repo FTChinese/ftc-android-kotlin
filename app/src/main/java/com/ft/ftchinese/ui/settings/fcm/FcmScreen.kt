@@ -92,7 +92,7 @@ class FcmMessageBuilder {
     fun addPlayService(available: Boolean): FcmMessageBuilder {
         val item = if (available) {
             IconTextRow(
-                icon = R.drawable.ic_done_claret_24dp,
+                icon = R.drawable.ic_baseline_done_24,
                 text = R.string.play_service_available,
             )
         } else {
@@ -109,7 +109,7 @@ class FcmMessageBuilder {
     fun addTokenRetrievable(available: Boolean): FcmMessageBuilder {
         val item = if (available) {
             IconTextRow(
-                icon = R.drawable.ic_done_claret_24dp,
+                icon = R.drawable.ic_baseline_done_24,
                 text = R.string.fcm_accessible
             )
         } else {
