@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.Language
+import com.ft.ftchinese.ui.components.IconArrowBackIOS
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
@@ -30,15 +29,9 @@ fun ArticleToolBar(
         backgroundColor = OColor.wheat
     ) {
         IconButton(
-            onClick = {
-                onBack()
-            }
+            onClick = onBack
         ) {
-            Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = OColor.black90
-            )
+            IconArrowBackIOS()
         }
 
         Box(
