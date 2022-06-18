@@ -14,7 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.EmailAuthFormVal
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
