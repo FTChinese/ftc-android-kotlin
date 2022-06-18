@@ -28,6 +28,7 @@ import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.theme.Dimens
 
+@Deprecated("")
 class FollowingFragment : Fragment() {
 
     private lateinit var followViewModel: FollowingViewModel

@@ -23,6 +23,7 @@ import com.ft.ftchinese.ui.components.ArticleItem
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 
+@Deprecated("")
 class ReadArticleFragment : Fragment() {
 
     private lateinit var model: ReadArticleViewModel

@@ -22,6 +22,7 @@ import com.ft.ftchinese.ui.components.ArticleItem
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 
+@Deprecated("")
 class StarredArticleFragment : Fragment() {
 
     private lateinit var starViewModel: StarArticleViewModel
