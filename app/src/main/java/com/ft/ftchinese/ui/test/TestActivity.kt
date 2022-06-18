@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,16 +49,15 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.connectivityState
-import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.main.MainApp
 import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
 import com.ft.ftchinese.ui.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -94,7 +95,7 @@ private enum class TestAppScreen(
     }
 }
 
-class TestActivity : ScopedAppActivity() {
+class TestActivity : AppCompatActivity() {
 
     private lateinit var payIntentStore: PayIntentStore
     private lateinit var sessionManager: SessionManager
@@ -395,7 +396,9 @@ private fun TestApp(
                 composable(
                     route = TestAppScreen.Main.name
                 ) {
-                    MainApp()
+                    MainApp(
+                        userViewModel = viewModel()
+                    )
                 }
             }
         }
