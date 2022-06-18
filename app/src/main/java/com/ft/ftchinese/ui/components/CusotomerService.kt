@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.util.IntentsUtil
-import com.ft.ftchinese.ui.base.longToast
+import com.ft.ftchinese.ui.util.longToast
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
