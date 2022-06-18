@@ -43,6 +43,27 @@ sealed class MainNavScreen(
         showBottomBar = false,
         showTopBar = false,
     )
+    object ReadArticles: MainNavScreen(
+        route = "read_articles",
+        titleId = R.string.myft_reading_history,
+        iconId = R.drawable.ic_baseline_article_24,
+        showBottomBar = false,
+        showTopBar = true,
+    )
+    object StarredArticles : MainNavScreen(
+        route = "starred_articles",
+        titleId = R.string.myft_starred_articles,
+        iconId = R.drawable.ic_baseline_article_24,
+        showBottomBar = false,
+        showTopBar = true,
+    )
+    object FollowedTopics : MainNavScreen(
+        route = "followed_topics",
+        titleId = R.string.myft_following,
+        iconId = R.drawable.ic_baseline_topic_24,
+        showBottomBar = false,
+        showTopBar = true
+    )
 
     companion object {
         @JvmStatic
@@ -54,6 +75,9 @@ sealed class MainNavScreen(
                 Video.route -> Video
                 MyFt.route -> MyFt
                 Search.route -> Search
+                ReadArticles.route -> ReadArticles
+                StarredArticles.route -> StarredArticles
+                FollowedTopics.route -> FollowedTopics
                 null -> News
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
