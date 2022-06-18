@@ -67,7 +67,6 @@ class MainActivity : ScopedAppActivity(),
     private var mBackKeyPressed = false
     private var pagerAdapter: TabPagerAdapter? = null
 
-    private lateinit var logoutViewModel: LogoutViewModel
     private lateinit var wxInfoViewModel: WxInfoViewModel
     private lateinit var conversionViewModel: ConversionViewModel
 
@@ -118,8 +117,6 @@ class MainActivity : ScopedAppActivity(),
         tokenManager = TokenManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
-        logoutViewModel = ViewModelProvider(this)[LogoutViewModel::class.java]
-
         wxInfoViewModel = ViewModelProvider(this)[WxInfoViewModel::class.java]
 
         conversionViewModel = ViewModelProvider(this)[ConversionViewModel::class.java]
@@ -169,9 +166,9 @@ class MainActivity : ScopedAppActivity(),
             }
         }
 
-        logoutViewModel.loggedOutLiveData.observe(this) {
-            logout()
-        }
+//        logoutViewModel.loggedOutLiveData.observe(this) {
+//            logout()
+//        }
 
         // Open conversion tracking page.
         conversionViewModel.campaignLiveData.observe(this) {
@@ -295,17 +292,6 @@ class MainActivity : ScopedAppActivity(),
             R.layout.drawer_nav_header,
             binding.drawerNav,
             false)
-
-        // Set listener on the title text inside drawer's header view
-        navHeaderBinding.navHeaderTitle.setOnClickListener {
-            if (!sessionManager.isLoggedIn()) {
-                startForResult.launch(AuthActivity.newIntent(this))
-                return@setOnClickListener
-            }
-
-            LogoutDialogFragment()
-                .show(supportFragmentManager, "LogoutDialog")
-        }
 
         binding.drawerNav.apply {
             addHeaderView(navHeaderBinding.root)
