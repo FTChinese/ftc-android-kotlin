@@ -51,23 +51,23 @@ object PaywallTracker {
     // From MemberActivity's upgrade button.
     fun fromUpgrade() {
         from = PaywallSource(
-                id = "upgrade_btn",
-                type = "MemberActivity",
-                title = "User initiated",
-                category = GACategory.SUBSCRIPTION,
-                action = GAAction.DISPLAY,
-                label = "MemberActivity/upgrade_btn"
+            id = "upgrade_btn",
+            type = "MemberActivity",
+            title = "User initiated",
+            category = GACategory.SUBSCRIPTION,
+            action = GAAction.DISPLAY,
+            label = "MemberActivity/upgrade_btn"
         )
     }
 
     fun fromRenew() {
         from = PaywallSource(
-                id = "renew_btn",
-                type = "MemberActivity",
-                title = "User initiated",
-                category = GACategory.SUBSCRIPTION,
-                action = GAAction.DISPLAY,
-                label = "MemberActivity/renew_btn"
+            id = "renew_btn",
+            type = "MemberActivity",
+            title = "User initiated",
+            category = GACategory.SUBSCRIPTION,
+            action = GAAction.DISPLAY,
+            label = "MemberActivity/renew_btn"
         )
     }
 }
