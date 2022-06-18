@@ -27,8 +27,8 @@ import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.util.ImageUtil
 import com.ft.ftchinese.ui.util.ShareUtils

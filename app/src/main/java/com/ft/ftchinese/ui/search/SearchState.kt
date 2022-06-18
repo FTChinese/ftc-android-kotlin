@@ -12,8 +12,8 @@ import com.ft.ftchinese.database.sqlQueryVacuum
 import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.repository.isKeywordForbidden
 import com.ft.ftchinese.store.FileStore
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

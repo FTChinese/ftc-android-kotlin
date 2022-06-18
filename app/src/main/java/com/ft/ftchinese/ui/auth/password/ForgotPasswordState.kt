@@ -10,8 +10,8 @@ import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.request.PasswordResetLetterParams
 import com.ft.ftchinese.model.request.PasswordResetVerifier
 import com.ft.ftchinese.repository.AuthClient
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

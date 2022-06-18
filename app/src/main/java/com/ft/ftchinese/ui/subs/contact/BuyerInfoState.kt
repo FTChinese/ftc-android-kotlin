@@ -18,8 +18,8 @@ import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileStore
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.web.JsEventListener
 import kotlinx.coroutines.*

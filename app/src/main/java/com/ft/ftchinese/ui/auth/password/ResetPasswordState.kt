@@ -9,8 +9,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.request.PasswordResetParams
 import com.ft.ftchinese.repository.AuthClient
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

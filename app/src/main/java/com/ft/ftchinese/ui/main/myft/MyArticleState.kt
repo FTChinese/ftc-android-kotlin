@@ -10,8 +10,8 @@ import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.store.FollowedTopics
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

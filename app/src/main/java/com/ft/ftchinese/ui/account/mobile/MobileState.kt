@@ -10,8 +10,8 @@ import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.model.request.MobileFormValue
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

@@ -6,7 +6,7 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.base.ConnectionState
+import com.ft.ftchinese.ui.util.ConnectionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

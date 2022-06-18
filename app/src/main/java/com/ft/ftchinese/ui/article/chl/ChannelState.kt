@@ -13,8 +13,8 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.article.NavStore
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.components.sendChannelReadLen
 import kotlinx.coroutines.CoroutineScope

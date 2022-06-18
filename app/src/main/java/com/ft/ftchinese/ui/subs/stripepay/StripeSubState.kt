@@ -19,8 +19,8 @@ import com.ft.ftchinese.tracking.BeginCheckoutParams
 import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.account.stripewallet.StripeWalletState
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.repo.PaywallRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
