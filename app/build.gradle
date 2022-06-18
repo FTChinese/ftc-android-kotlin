@@ -42,11 +42,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        kotlinOptions.useIR = true
+//        kotlinOptions.useIR = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
-        useIR = true
+//        useIR = true
     }
     buildFeatures {
         dataBinding true
@@ -54,7 +54,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0-beta02'
+        kotlinCompilerExtensionVersion '1.2.0-rc01'
     }
     defaultConfig {
         applicationId "com.ft.ftchinese"
@@ -189,7 +189,7 @@ dependencies {
     def room_version = '2.4.2'
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
-    def compose_ui = "1.2.0-beta03"
+    def compose_ui = "1.2.0-rc01"
     def accompanist = "0.24.10-beta"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
