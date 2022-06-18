@@ -1,81 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/root_container"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.drawerlayout.widget.DrawerLayout
-            android:id="@+id/drawer_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            tools:openDrawer="start">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <!--<include-->
-            <!--layout="@layout/app_bar_main"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent" />-->
-            <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_constraintBottom_toTopOf="@id/bottom_nav"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+            <!--  See https://developer.android.com/reference/com/google/android/material/tabs/TabLayout -->
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:elevation="5dp"
+                android:background="@color/colorWheat"
+                app:tabMode="scrollable"
+                app:tabIndicatorColor="@color/colorClaret"
+                app:tabSelectedTextColor="@color/colorClaret" />
 
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="0dp"
-                    android:layout_height="?attr/actionBarSize"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+        </androidx.viewpager.widget.ViewPager>
 
-                <androidx.viewpager.widget.ViewPager
-                    android:id="@+id/view_pager"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                    app:layout_constraintBottom_toTopOf="@id/bottom_nav"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/toolbar">
+        <!--DO NOT put a progress bar here since ViewPager might prepopuldate a the next tab and progress bar will be visible always.-->
 
-<!--  See https://developer.android.com/reference/com/google/android/material/tabs/TabLayout -->
-                    <com.google.android.material.tabs.TabLayout
-                        android:id="@+id/tab_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:elevation="5dp"
-                        android:background="@color/colorWheat"
-                        app:tabMode="scrollable"
-                        app:tabIndicatorColor="@color/colorClaret"
-                        app:tabSelectedTextColor="@color/colorClaret" />
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:menu="@menu/activity_main_bottom"/>
 
-                </androidx.viewpager.widget.ViewPager>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+<!--    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--        xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--        xmlns:tools="http://schemas.android.com/tools"-->
+<!--        android:id="@+id/root_container"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
 
-                <!--DO NOT put a progress bar here since ViewPager might prepopuldate a the next tab and progress bar will be visible always.-->
+<!--        <androidx.drawerlayout.widget.DrawerLayout-->
+<!--            android:id="@+id/drawer_layout"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:fitsSystemWindows="true"-->
+<!--            tools:openDrawer="start">-->
+<!--            -->
+<!--            -->
 
-                <com.google.android.material.bottomnavigation.BottomNavigationView
-                    android:id="@+id/bottom_nav"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:menu="@menu/activity_main_bottom"/>
+<!--            <com.google.android.material.navigation.NavigationView-->
+<!--                android:id="@+id/drawer_nav"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_gravity="start"-->
+<!--                android:fitsSystemWindows="false"-->
+<!--                app:menu="@menu/activity_main_drawer" />-->
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <com.google.android.material.navigation.NavigationView
-                android:id="@+id/drawer_nav"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="start"
-                android:fitsSystemWindows="false"
-                app:menu="@menu/activity_main_drawer" />
-
-        </androidx.drawerlayout.widget.DrawerLayout>
-    </FrameLayout>
+<!--        </androidx.drawerlayout.widget.DrawerLayout>-->
+<!--    </FrameLayout>-->
 </layout>
 
 

@@ -5,54 +5,35 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.webkit.WebView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMainBinding
-import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.model.enums.LoginMethod
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
-import com.ft.ftchinese.store.CacheFileNames
-import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.store.TokenManager
-import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.account.AccountActivity
-import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages
-import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.base.toast
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.myft.MyftPagerAdapter
 import com.ft.ftchinese.ui.search.SearchableActivity
-import com.ft.ftchinese.ui.settings.SettingsActivity
-import com.ft.ftchinese.ui.subs.MemberActivity
-import com.ft.ftchinese.ui.subs.SubsActivity
-import com.ft.ftchinese.ui.test.TestActivity
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
-import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -67,17 +48,12 @@ class MainActivity : ScopedAppActivity(),
     private var mBackKeyPressed = false
     private var pagerAdapter: TabPagerAdapter? = null
 
-    private lateinit var wxInfoViewModel: WxInfoViewModel
     private lateinit var conversionViewModel: ConversionViewModel
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var navHeaderBinding: DrawerNavHeaderBinding
-
-    private lateinit var cache: FileStore
+//    private lateinit var navHeaderBinding: DrawerNavHeaderBinding
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var tokenManager: TokenManager
-    private lateinit var wxApi: IWXAPI
     private lateinit var workManager: WorkManager
 
     private lateinit var statsTracker: StatsTracker
@@ -106,29 +82,21 @@ class MainActivity : ScopedAppActivity(),
 
         createNotificationChannel()
 
-        cache = FileStore(this)
         statsTracker = StatsTracker.getInstance(this)
 
         // Register Wechat id
-        wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
-        wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
+        WXAPIFactory.createWXAPI(
+            this,
+            BuildConfig.WX_SUBS_APPID, false
+        ).apply {
+            registerApp(BuildConfig.WX_SUBS_APPID)
+        }
 
         sessionManager = SessionManager.getInstance(this)
-        tokenManager = TokenManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
-
-        wxInfoViewModel = ViewModelProvider(this)[WxInfoViewModel::class.java]
 
         conversionViewModel = ViewModelProvider(this)[ConversionViewModel::class.java]
 
-        connectionLiveData.observe(this) {
-            wxInfoViewModel.isNetworkAvailable.value = it
-        }
-        isConnected.let {
-            wxInfoViewModel.isNetworkAvailable.value = it
-        }
-
-        showSystemUI()
         setupViewModel()
 
         // Set ViewPager adapter
@@ -139,7 +107,7 @@ class MainActivity : ScopedAppActivity(),
         binding.tabLayout.addOnTabSelectedListener(this)
 
         setupBottomNav()
-        setupDrawer()
+//        setupDrawer()
 
         statsTracker.appOpened()
 
@@ -148,27 +116,7 @@ class MainActivity : ScopedAppActivity(),
         setupWorker()
     }
 
-    private fun showSystemUI() {
-        binding.rootContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-    }
-
     private fun setupViewModel() {
-        wxInfoViewModel.avatarLoaded.observe(this) {
-            when (it) {
-                is FetchResult.LocalizedError -> Log.i(TAG, getString(it.msgId))
-                is FetchResult.TextError -> toast(it.text)
-                is FetchResult.Success -> {
-                    navHeaderBinding.avatar = Drawable.createFromStream(
-                        it.data,
-                        CacheFileNames.wxAvatar
-                    )
-                }
-            }
-        }
-
-//        logoutViewModel.loggedOutLiveData.observe(this) {
-//            logout()
-//        }
 
         // Open conversion tracking page.
         conversionViewModel.campaignLiveData.observe(this) {
@@ -257,7 +205,6 @@ class MainActivity : ScopedAppActivity(),
                 }
 
                 R.id.nav_myft -> {
-
                     binding.viewPager.adapter = MyftPagerAdapter(supportFragmentManager)
                     pagerAdapter = null
 
@@ -282,61 +229,68 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
+    private fun displayTitle(title: Int) {
+        supportActionBar?.apply {
+            setDisplayUseLogoEnabled(false)
+            setDisplayShowTitleEnabled(true)
+            setTitle(title)
+        }
+    }
+
     /**
      * Add event listener to drawer menu.
      */
-    private fun setupDrawer() {
-
-        navHeaderBinding = DataBindingUtil.inflate(
-            layoutInflater,
-            R.layout.drawer_nav_header,
-            binding.drawerNav,
-            false)
-
-        binding.drawerNav.apply {
-            addHeaderView(navHeaderBinding.root)
-            // Hide test section
-            menu.setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
-        }
-
-        // Set a listener that will be notified when a menu item is selected.
-        binding.drawerNav.setNavigationItemSelectedListener {
-            when (it.itemId) {
-                R.id.action_login -> {
-//                    AuthActivity.startForResult(this)
-                    startForResult.launch(
-                        com.ft.ftchinese.ui.auth.AuthActivity.newIntent(this)
-                    )
-                }
-                R.id.action_account -> AccountActivity.start(this)
-                R.id.action_paywall -> {
-                    // Tracking
-                    PaywallTracker.fromDrawer()
-                    SubsActivity.start(this)
-                }
-                R.id.action_my_subs -> MemberActivity.start(this)
-                R.id.action_settings -> SettingsActivity.start(this)
-                R.id.action_test -> TestActivity.start(this)
-            }
-
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
-
-            true
-        }
-
-        ActionBarDrawerToggle(
-            this,
-            binding.drawerLayout,
-            binding.toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        ).apply {
-            binding.drawerLayout.addDrawerListener(this)
-            syncState()
-        }
-
-        updateSessionUI()
-    }
+//    private fun setupDrawer() {
+//
+//        navHeaderBinding = DataBindingUtil.inflate(
+//            layoutInflater,
+//            R.layout.drawer_nav_header,
+//            binding.drawerNav,
+//            false)
+//
+//        binding.drawerNav.apply {
+//            addHeaderView(navHeaderBinding.root)
+//            // Hide test section
+//            menu.setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
+//        }
+//
+//        // Set a listener that will be notified when a menu item is selected.
+//        binding.drawerNav.setNavigationItemSelectedListener {
+//            when (it.itemId) {
+//                R.id.action_login -> {
+//                    startForResult.launch(
+//                        AuthActivity.newIntent(this)
+//                    )
+//                }
+//                R.id.action_account -> AccountActivity.start(this)
+//                R.id.action_paywall -> {
+//                    // Tracking
+//                    PaywallTracker.fromDrawer()
+//                    SubsActivity.start(this)
+//                }
+//                R.id.action_my_subs -> MemberActivity.start(this)
+//                R.id.action_settings -> SettingsActivity.start(this)
+//                R.id.action_test -> TestActivity.start(this)
+//            }
+//
+//            binding.drawerLayout.closeDrawer(GravityCompat.START)
+//
+//            true
+//        }
+//
+//        ActionBarDrawerToggle(
+//            this,
+//            binding.drawerLayout,
+//            binding.toolbar,
+//            R.string.navigation_drawer_open,
+//            R.string.navigation_drawer_close
+//        ).apply {
+//            binding.drawerLayout.addDrawerListener(this)
+//            syncState()
+//        }
+//
+//        updateSessionUI()
+//    }
 
     /**
      * Update UI depending on user's login/logout state
@@ -345,42 +299,27 @@ class MainActivity : ScopedAppActivity(),
 
         val account = sessionManager.loadAccount()
 
-        account?.let {
-            wxInfoViewModel.loadAvatar(
-                it.wechat,
-                cache
-            )
-        }
+//        navHeaderBinding.account = account
 
-        navHeaderBinding.account = account
-
-        binding.drawerNav.menu.apply {
-            // show signin/signup if account is null.
-            setGroupVisible(R.id.drawer_group_sign_in_up, account == null)
-            // Show account.
-            findItem(R.id.action_account)?.isVisible = account != null
-            // Only show when user is a member.
-            findItem(R.id.action_my_subs)?.isVisible = account?.isMember ?: false
-            findItem(R.id.action_paywall)?.isVisible = !(account?.isMember ?: false)
-        }
+//        binding.drawerNav.menu.apply {
+//            // show signin/signup if account is null.
+//            setGroupVisible(R.id.drawer_group_sign_in_up, account == null)
+//            // Show account.
+//            findItem(R.id.action_account)?.isVisible = account != null
+//            // Only show when user is a member.
+//            findItem(R.id.action_my_subs)?.isVisible = account?.isMember ?: false
+//            findItem(R.id.action_paywall)?.isVisible = !(account?.isMember ?: false)
+//        }
     }
 
     private fun logout() {
         sessionManager.logout()
-        navHeaderBinding.avatar = null
-        cache.deleteFile(WX_AVATAR_NAME)
         CustomerSession.endCustomerSession()
         updateSessionUI()
         toast("账号已登出")
     }
 
-    private fun displayTitle(title: Int) {
-        supportActionBar?.apply {
-            setDisplayUseLogoEnabled(false)
-            setDisplayShowTitleEnabled(true)
-            setTitle(title)
-        }
-    }
+
 
     /**
      * Check whether wechat session has expired.
@@ -401,9 +340,6 @@ class MainActivity : ScopedAppActivity(),
 
         val wxSession = sessionManager.loadWxSession() ?: return
 
-        // For testing only. To test wechat you must use a release version.
-//        WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
-
         if (wxSession.isExpired) {
             logout()
             WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
@@ -420,11 +356,13 @@ class MainActivity : ScopedAppActivity(),
     }
 
     override fun onBackPressed() {
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
-            doubleClickToExit()
-        }
+//        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+//            binding.drawerLayout.closeDrawer(GravityCompat.START)
+//        } else {
+//            doubleClickToExit()
+//        }
+
+        doubleClickToExit()
     }
 
     private fun doubleClickToExit() {
@@ -451,33 +389,7 @@ class MainActivity : ScopedAppActivity(),
      * Create menus on toolbar
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds mFollows to the action bar if it is present.
-
         menuInflater.inflate(R.menu.activity_main_search, menu)
-
-
-//        // Get the SearchView and set the searchable configuration
-//        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-//
-//        val searchView = (menu.findItem(R.id.action_search).actionView as SearchView)
-//
-//        // NOTE: If you followed example verbatim from
-//        // https://developer.android.com/guide/topics/search/search-dialog.html#UsingSearchWidget,
-//        // it won't work!
-//        // The `componentName` passed to getSearchableInfo
-//        // should be the target activity used to display
-//        // search result.
-//        // If you simply use `componentName`, it refers
-//        // the the MainActivity here, which is not used
-//        // to display search result.
-//        val compoName = ComponentName(this, SearchableActivity::class.java)
-//
-//        searchView.apply {
-//            // Assumes current activity is the searchable activity
-//            setSearchableInfo(searchManager.getSearchableInfo(compoName))
-//            setIconifiedByDefault(false)
-//        }
-
         return true
     }
 
