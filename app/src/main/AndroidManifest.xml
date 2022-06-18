@@ -72,7 +72,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.search.SearchableActivity"
+            android:name="com.ft.ftchinese.ui.main.search.SearchableActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:parentActivityName=".ui.main.MainActivity">
