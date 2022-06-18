@@ -81,6 +81,9 @@ interface StarredArticleDao {
     @Query("SELECT * FROM starred_article ORDER BY _id DESC")
     fun getAll(): LiveData<List<StarredArticle>>
 
+    @Query("SELECT * FROM starred_article ORDER BY _id DESC")
+    fun loadAll(): List<StarredArticle>
+
     @Query("SELECT EXISTS(SELECT * FROM starred_article WHERE id = :id AND type = :type) AS found")
     fun exists(id: String, type: String): Boolean
 }

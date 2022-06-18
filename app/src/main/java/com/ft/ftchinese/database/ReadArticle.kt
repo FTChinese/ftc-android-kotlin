@@ -206,6 +206,9 @@ interface ReadingHistoryDao {
     @Query("SELECT * FROM reading_history ORDER BY _id DESC")
     fun getAll(): LiveData<List<ReadArticle>>
 
+    @Query("SELECT * FROM reading_history ORDER BY _id DESC")
+    fun loadAll(): List<ReadArticle>
+
     @Query("SELECT * FROM reading_history WHERE id = :id AND type = :type")
     fun getOne(id: String, type: String): ReadArticle?
 
