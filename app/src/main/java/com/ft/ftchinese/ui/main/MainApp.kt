@@ -21,6 +21,7 @@ import com.ft.ftchinese.ui.main.myft.ReadArticleActivityScreen
 import com.ft.ftchinese.ui.main.myft.StarredArticleActivityScreen
 import com.ft.ftchinese.ui.main.myft.TopicsActivityScreen
 import com.ft.ftchinese.ui.search.SearchActivityScreen
+import com.ft.ftchinese.ui.theme.OTheme
 
 @Composable
 fun MainApp() {
@@ -33,129 +34,132 @@ fun MainApp() {
         backstackEntry.value?.destination?.route
     )
 
-    Scaffold(
-        topBar = {
-            if (currentScreen.showTopBar) {
-                MainToolBar(
-                    screen = currentScreen,
-                    onSearch = {
-                        navigateToSearch(navController)
-                    },
-                    onBack = {
-                        navController.popBackStack()
-                    }
-                )
-            }
-        },
-        // See https://developer.android.com/jetpack/compose/navigation#bottom-nav
-        bottomBar = {
-            if (currentScreen.showBottomBar) {
-                MainBottomBar(
-                    onClick = { screen ->
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
+    OTheme {
+        Scaffold(
+            topBar = {
+                if (currentScreen.showTopBar) {
+                    MainToolBar(
+                        screen = currentScreen,
+                        onSearch = {
+                            navigateToSearch(navController)
+                        },
+                        onBack = {
+                            navController.popBackStack()
                         }
-                    },
-                    selected = currentScreen
-                )
-            }
-        },
-        scaffoldState = scaffoldState
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = MainNavScreen.News.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(
-                route = MainNavScreen.News.route
+                    )
+                }
+            },
+            // See https://developer.android.com/jetpack/compose/navigation#bottom-nav
+            bottomBar = {
+                if (currentScreen.showBottomBar) {
+                    MainBottomBar(
+                        onClick = { screen ->
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        selected = currentScreen
+                    )
+                }
+            },
+            scaffoldState = scaffoldState
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = MainNavScreen.News.route,
+                modifier = Modifier.padding(innerPadding)
             ) {
-                ChannelPagerScreen(
-                    scaffoldState = scaffoldState,
-                    channelSource = TabPages.newsPages
-                )
-            }
-            
-            composable(
-                route = MainNavScreen.English.route
-            ) {
-                ChannelPagerScreen(
-                    scaffoldState = scaffoldState,
-                    channelSource = TabPages.englishPages
-                )
-            }
-            
-            composable(
-                route = MainNavScreen.FtAcademy.route
-            ) {
-                ChannelPagerScreen(
-                    scaffoldState = scaffoldState,
-                    channelSource = TabPages.ftaPages
-                )
-            }
-            
-            composable(
-                route = MainNavScreen.Video.route
-            ) {
-                ChannelPagerScreen(
-                    scaffoldState = scaffoldState,
-                    channelSource = TabPages.videoPages
-                )
-            }
-            
-            composable(
-                route = MainNavScreen.MyFt.route
-            ) {
-                MyFtActivityScreen(
-                    onNavigate = {
-                        navigate(
-                            navController = navController,
-                            screen = it
-                        )
-                    }
-                )
-            }
+                composable(
+                    route = MainNavScreen.News.route
+                ) {
+                    ChannelPagerScreen(
+                        scaffoldState = scaffoldState,
+                        channelSource = TabPages.newsPages
+                    )
+                }
 
-            composable(
-                route = MainNavScreen.Search.route
-            ) {
-                SearchActivityScreen(
-                    scaffoldState = scaffoldState,
-                    onBack = {
-                        navController.popBackStack()
-                    }
-                )
-            }
+                composable(
+                    route = MainNavScreen.English.route
+                ) {
+                    ChannelPagerScreen(
+                        scaffoldState = scaffoldState,
+                        channelSource = TabPages.englishPages
+                    )
+                }
 
-            composable(
-                route = MainNavScreen.ReadArticles.route
-            ) {
-                ReadArticleActivityScreen(
-                    scaffoldState = scaffoldState
-                )
-            }
+                composable(
+                    route = MainNavScreen.FtAcademy.route
+                ) {
+                    ChannelPagerScreen(
+                        scaffoldState = scaffoldState,
+                        channelSource = TabPages.ftaPages
+                    )
+                }
 
-            composable(
-                route = MainNavScreen.StarredArticles.route
-            ) {
-                StarredArticleActivityScreen(
-                    scaffoldState = scaffoldState
-                )
-            }
+                composable(
+                    route = MainNavScreen.Video.route
+                ) {
+                    ChannelPagerScreen(
+                        scaffoldState = scaffoldState,
+                        channelSource = TabPages.videoPages
+                    )
+                }
 
-            composable(
-                route = MainNavScreen.FollowedTopics.route
-            ) {
-                TopicsActivityScreen(
-                    scaffoldState = scaffoldState
-                )
+                composable(
+                    route = MainNavScreen.MyFt.route
+                ) {
+                    MyFtActivityScreen(
+                        onNavigate = {
+                            navigate(
+                                navController = navController,
+                                screen = it
+                            )
+                        }
+                    )
+                }
+
+                composable(
+                    route = MainNavScreen.Search.route
+                ) {
+                    SearchActivityScreen(
+                        scaffoldState = scaffoldState,
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                composable(
+                    route = MainNavScreen.ReadArticles.route
+                ) {
+                    ReadArticleActivityScreen(
+                        scaffoldState = scaffoldState
+                    )
+                }
+
+                composable(
+                    route = MainNavScreen.StarredArticles.route
+                ) {
+                    StarredArticleActivityScreen(
+                        scaffoldState = scaffoldState
+                    )
+                }
+
+                composable(
+                    route = MainNavScreen.FollowedTopics.route
+                ) {
+                    TopicsActivityScreen(
+                        scaffoldState = scaffoldState
+                    )
+                }
             }
         }
     }
+
 }
 
 private fun navigateToSearch(
@@ -170,3 +174,4 @@ private fun navigate(
 ) {
     navController.navigate(screen.route)
 }
+
