@@ -7,15 +7,19 @@ import com.ft.ftchinese.model.content.ChannelSource
 @Composable
 fun ChannelPagerScreen(
     scaffoldState: ScaffoldState,
-    channelSource: List<ChannelSource>
+    channelSources: List<ChannelSource>,
+    onTabSelected: (ChannelSource) -> Unit
 ) {
+
     ChannelPagerLayout(
-        pages = channelSource
+        pages = channelSources,
+        onTabSelected = {
+            channelSources.getOrNull(it)?.let(onTabSelected)
+        }
     ) {
         ChannelTabScreen(
             scaffoldState = scaffoldState,
             channelSource = it,
-
         )
     }
 }

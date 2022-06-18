@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChannelPagerLayout(
     pages: List<ChannelSource>,
-    onTabChange: (Int) -> Unit = {},
+    onTabSelected: (Int) -> Unit = {},
     content: @Composable (ChannelSource) -> Unit,
 ) {
 
@@ -31,7 +31,7 @@ fun ChannelPagerLayout(
 
     LaunchedEffect(key1 = pagerState.currentPage) {
         Log.i("Channel", "Current tab changed ${pagerState.currentPage}")
-        onTabChange(pagerState.currentPage)
+        onTabSelected(pagerState.currentPage)
     }
 
     Column(
