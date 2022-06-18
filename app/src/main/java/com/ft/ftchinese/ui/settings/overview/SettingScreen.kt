@@ -8,7 +8,7 @@ enum class SettingScreen(
     @StringRes val titleId: Int,
     val showToolBar: Boolean = true,
 ) {
-    Overview(titleId = R.string.action_settings),
+    Overview(titleId = R.string.title_settings),
     ClearCache(titleId = R.string.pref_clear_cache),
     ClearHistory(titleId = R.string.pref_clear_history),
     Notification(titleId = R.string.fcm_pref),
