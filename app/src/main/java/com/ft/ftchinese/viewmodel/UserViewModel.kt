@@ -2,6 +2,7 @@ package com.ft.ftchinese.viewmodel
 
 import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
@@ -9,11 +10,12 @@ import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.store.SessionManager
+import com.stripe.android.CustomerSession
 
 private const val TAG = "UserViewModel"
 
-open class UserViewModel(application: Application) : BaseAppViewModel(application) {
-    protected val session = SessionManager.getInstance(application)
+open class UserViewModel(application: Application) : AndroidViewModel(application) {
+    private val session = SessionManager.getInstance(application)
 
     val accountLiveData: MutableLiveData<Account> by lazy {
         MutableLiveData<Account>()
@@ -63,8 +65,29 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
         session.saveWxSession(wxSession)
     }
 
+    /**
+     * Check whether wechat session has expired.
+     * Wechat refresh token expires after 30 days.
+     */
+    fun isWxSessionExpired(): Boolean {
+        val a = account ?: return false
+
+        if (!a.isWxOnly) {
+            return false
+        }
+
+        val wxSess = session.loadWxSession() ?: return false
+        return if (wxSess.isExpired) {
+            logout()
+            true
+        } else {
+            false
+        }
+    }
+
     fun logout() {
         accountLiveData.value = null
+        CustomerSession.endCustomerSession()
         session.logout()
     }
 }
