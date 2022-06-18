@@ -6,15 +6,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
+import com.ft.ftchinese.ui.main.home.MainNavScreen
 import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
 fun MyFtActivityScreen(
-    userViewModel: UserViewModel,
+    userViewModel: UserViewModel = viewModel(),
+    onNavigate: (MainNavScreen) -> Unit
 ) {
     val context = LocalContext.current
     val accountState = userViewModel.accountLiveData.observeAsState()
@@ -65,13 +68,13 @@ fun MyFtActivityScreen(
                     )
                 }
                 MyFtRow.ReadHistory -> {
-
+                    onNavigate(MainNavScreen.ReadArticles)
                 }
                 MyFtRow.Bookmarked -> {
-
+                    onNavigate(MainNavScreen.StarredArticles)
                 }
                 MyFtRow.Topics -> {
-
+                    onNavigate(MainNavScreen.FollowedTopics)
                 }
             }
         }
