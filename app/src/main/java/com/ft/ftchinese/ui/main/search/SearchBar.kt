@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.search
+package com.ft.ftchinese.ui.main.search
 
 import androidx.compose.material.IconButton
 import androidx.compose.material.TopAppBar

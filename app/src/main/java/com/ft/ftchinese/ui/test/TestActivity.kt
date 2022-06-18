@@ -52,7 +52,7 @@ import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.main.MainApp
 import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
-import com.ft.ftchinese.ui.search.SearchActivityScreen
+import com.ft.ftchinese.ui.main.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.ConnectionState

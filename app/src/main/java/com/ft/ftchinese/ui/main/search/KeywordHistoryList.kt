@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.search
+package com.ft.ftchinese.ui.main.search
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Chip

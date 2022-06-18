@@ -28,7 +28,7 @@ import com.ft.ftchinese.model.content.TabPages
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.myft.MyftPagerAdapter
-import com.ft.ftchinese.ui.search.SearchableActivity
+import com.ft.ftchinese.ui.main.search.SearchableActivity
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.android.material.tabs.TabLayout
@@ -40,11 +40,8 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 class MainActivity : AppCompatActivity(),
         TabLayout.OnTabSelectedListener {
 
-    private var mBackKeyPressed = false
     @Deprecated("")
     private var pagerAdapter: TabPagerAdapter? = null
-
-
 
     @Deprecated("")
     private lateinit var binding: ActivityMainBinding

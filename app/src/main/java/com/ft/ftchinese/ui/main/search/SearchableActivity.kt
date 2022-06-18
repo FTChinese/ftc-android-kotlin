@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.search
+package com.ft.ftchinese.ui.main.search
 
 import android.annotation.SuppressLint
 import android.content.Context

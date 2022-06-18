@@ -2,7 +2,7 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
 
-private const val devIP = "http://192.168.0.3"
+private const val devIP = "http://192.168.0.4"
 private const val devPort = "8206"
 
 enum class ApiMode {

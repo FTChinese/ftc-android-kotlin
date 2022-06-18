@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.search
+package com.ft.ftchinese.ui.main.search
 
 import android.util.Log
 import android.webkit.WebView

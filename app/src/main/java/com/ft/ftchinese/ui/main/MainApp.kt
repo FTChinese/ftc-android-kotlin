@@ -28,7 +28,7 @@ import com.ft.ftchinese.ui.main.myft.MyFtActivityScreen
 import com.ft.ftchinese.ui.main.myft.ReadArticleActivityScreen
 import com.ft.ftchinese.ui.main.myft.StarredArticleActivityScreen
 import com.ft.ftchinese.ui.main.myft.TopicsActivityScreen
-import com.ft.ftchinese.ui.search.SearchActivityScreen
+import com.ft.ftchinese.ui.main.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.ShareUtils
 import com.ft.ftchinese.viewmodel.UserViewModel
