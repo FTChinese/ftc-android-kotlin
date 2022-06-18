@@ -14,7 +14,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 @Composable
 fun rememberWxApi(
     context: Context = LocalContext.current
-) = remember {
+): IWXAPI = remember {
     WXAPIFactory.createWXAPI(
         context,
         BuildConfig.WX_SUBS_APPID,
