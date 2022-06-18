@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.base
+package com.ft.ftchinese.ui.util
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -12,19 +12,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
-
-/**
- * https://developer.android.com/training/basics/network-ops/reading-network-state
- * getSystemService(ConnectivityManager::class.java)
- */
-val Context.isConnected: Boolean
-    get() {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-
-        return connectivityManager?.let {
-            isConnected(connectivityManager)
-        } ?: false
-    }
 
 val Context.currentConnectivityState: ConnectionState
     get() {
