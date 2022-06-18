@@ -15,8 +15,8 @@ import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.request.WxAuthParams
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.AuthClient
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
