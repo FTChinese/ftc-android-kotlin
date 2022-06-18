@@ -5,6 +5,7 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.SENDTO" />
+
             <data android:mimeType="text/plain" />
         </intent>
 
@@ -17,8 +18,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <!-- If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /> <!-- If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower. -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -37,9 +37,12 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".ui.main.MyFtActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.auth.AuthActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.auth.PasswordActivity"
             android:exported="false"
@@ -47,8 +50,7 @@
         <activity
             android:name=".ui.subs.SubsActivity"
             android:exported="false" />
-        <activity
-            android:name=".ui.webpage.WebpageActivity" />
+        <activity android:name=".ui.webpage.WebpageActivity" />
         <activity
             android:name=".ui.test.TestActivity"
             android:label="Test" />
@@ -89,7 +91,7 @@
             android:name=".ui.article.ArticleActivity"
             android:parentActivityName=".ui.main.MainActivity" />
         <activity android:name=".ui.account.AccountActivity" />
-        <activity android:name=".ui.wxlink.WxLinkEmailActivity"/>
+        <activity android:name=".ui.wxlink.WxLinkEmailActivity" />
         <activity android:name=".ui.subs.MemberActivity" />
         <activity
             android:name=".wxapi.WXPayEntryActivity"
@@ -117,10 +119,12 @@
         </activity>
         <activity
             android:name=".ui.settings.SettingsActivity"
-            android:parentActivityName=".ui.main.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:parentActivityName=".ui.main.MainActivity">
             <intent-filter>
-                <data android:scheme="https" android:host="www.ftchinese.com"/>
+                <data
+                    android:host="www.ftchinese.com"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
 
