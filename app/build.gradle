@@ -252,9 +252,6 @@ dependencies {
     implementation "androidx.compose.foundation:foundation:$compose_ui"
     // Material Design
     implementation "androidx.compose.material:material:$compose_ui"
-    // Material design icons
-    implementation "androidx.compose.material:material-icons-core:$compose_ui"
-    // implementation "androidx.compose.material:material-icons-extended:$compose_ui"
     // Integration with activities
     implementation 'androidx.activity:activity-compose:1.4.0'
     // Integration with ViewModels
@@ -264,6 +261,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist"
     implementation "com.google.accompanist:accompanist-webview:$accompanist"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanist"
+    implementation "com.google.accompanist:accompanist-pager:$accompanist"
+    implementation "com.google.accompanist:accompanist-pager-indicators:$accompanist"
 
     // UI Tests
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui"
