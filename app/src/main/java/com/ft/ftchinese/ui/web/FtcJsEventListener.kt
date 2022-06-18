@@ -12,7 +12,7 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.ChannelActivity
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.google.firebase.messaging.FirebaseMessaging
 
 private const val TAG = "JsInterface"

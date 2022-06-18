@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.legal.legalPages
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.webpage.WebpageScreen
 
 @Composable

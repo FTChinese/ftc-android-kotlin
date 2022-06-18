@@ -12,7 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.auth.signup.SignUpScreen
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.ScreenHeader
 import com.ft.ftchinese.ui.wxlink.merge.LinkSuccessScreen

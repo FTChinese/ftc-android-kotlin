@@ -22,7 +22,7 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.webpage.WebpageActivity

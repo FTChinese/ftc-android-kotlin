@@ -14,7 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.FileProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
 import java.io.File

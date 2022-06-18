@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.wxlink.merge.MergerStore
 import com.ft.ftchinese.ui.wxlink.merge.WxEmailMerger

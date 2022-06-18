@@ -10,7 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.work.*
 import com.ft.ftchinese.service.VerifyOneOffPurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable

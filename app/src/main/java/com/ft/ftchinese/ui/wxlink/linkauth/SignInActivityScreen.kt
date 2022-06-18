@@ -14,7 +14,7 @@ import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.auth.login.LoginScreen
 import com.ft.ftchinese.ui.auth.login.rememberLoginState
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.ScreenHeader
 import com.ft.ftchinese.ui.wxlink.merge.MergerStore
