@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.main.home.MainNavScreen
+import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -57,6 +58,12 @@ fun MyFtActivityScreen(
                 }
                 MyFtRow.Paywall -> {
                     SubsActivity.launch(
+                        launcher = launcher,
+                        context = context
+                    )
+                }
+                MyFtRow.Settings -> {
+                    SettingsActivity.launch(
                         launcher = launcher,
                         context = context
                     )

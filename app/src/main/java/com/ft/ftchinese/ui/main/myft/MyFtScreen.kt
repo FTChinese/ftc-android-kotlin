@@ -24,6 +24,7 @@ enum class MyFtRow(
     Account(R.string.title_account),
     Paywall(R.string.title_subscription),
     MySubs(R.string.title_my_subs),
+    Settings(R.string.title_settings),
     ReadHistory(R.string.myft_reading_history),
     Bookmarked(R.string.myft_starred_articles),
     Topics(R.string.myft_following);
@@ -31,8 +32,12 @@ enum class MyFtRow(
 
 val loggedInRows: List<MyFtRow> = listOf(
     MyFtRow.Account,
-    MyFtRow.Paywall,
     MyFtRow.MySubs,
+)
+
+val toolsRows: List<MyFtRow> = listOf(
+    MyFtRow.MySubs,
+    MyFtRow.Settings,
 )
 
 val articleRows: List<MyFtRow> = listOf(
@@ -41,24 +46,26 @@ val articleRows: List<MyFtRow> = listOf(
     MyFtRow.Topics
 )
 
+
+
 fun buildMyFtRows(loggedIn: Boolean): List<TableGroup<MyFtRow>> {
-    if (loggedIn) {
-        return listOf(
+    return if (loggedIn) {
+        listOf(
             TableGroup(
                 header = "",
                 rows = loggedInRows
-            ),
-            TableGroup(
-                header = "",
-                rows = articleRows
             )
         )
-    }
-
-    return listOf(
+    } else {
+        listOf()
+    } + listOf(
         TableGroup(
             header = "",
-            rows = articleRows,
+            rows = toolsRows
+        ),
+        TableGroup(
+            header = "",
+            rows = articleRows
         )
     )
 }
@@ -87,10 +94,16 @@ fun MyFtScreen(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Bottom
         ) {
-            Figure(
-                imageUrl = avatarUrl,
-                caption = displayName ?: ""
-            )
+            if (avatarUrl.isNullOrBlank()) {
+                Figure(
+                    caption = displayName ?: ""
+                )
+            } else {
+                Figure(
+                    imageUrl = avatarUrl,
+                    caption = displayName ?: ""
+                )
+            }
         }
 
         if (!loggedIn) {
@@ -116,7 +129,6 @@ fun MyFtScreen(
                     endIcon = {
                         IconRightArrow()
                     },
-                    contentPadding = PaddingValues(Dimens.dp8)
                 ) {
                     SubHeading2(text = stringResource(id = row.textId))
                 }
@@ -128,7 +140,6 @@ fun MyFtScreen(
             
             ClickableRow(
                 onClick = { TestActivity.start(context) },
-                contentPadding = PaddingValues(Dimens.dp8),
                 endIcon = {
                     IconRightArrow()
                 }
