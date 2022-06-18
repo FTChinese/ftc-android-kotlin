@@ -14,7 +14,8 @@ fun ChannelPagerScreen(
     ) {
         ChannelTabScreen(
             scaffoldState = scaffoldState,
-            channelSource = it
+            channelSource = it,
+
         )
     }
 }
