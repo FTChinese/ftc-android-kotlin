@@ -155,16 +155,15 @@ fun SubsApp(
                         if (!ok) {
                             onExit()
                         }
-                    },
-                    actions = {
-                        if (currentScreen == SubsAppScreen.BuyerInfo) {
-                            PlainTextButton(
-                                onClick = onExit,
-                                text = "跳过"
-                            )
-                        }
                     }
-                )
+                ) {
+                    if (currentScreen == SubsAppScreen.BuyerInfo) {
+                        PlainTextButton(
+                            onClick = onExit,
+                            text = "跳过"
+                        )
+                    }
+                }
             },
             scaffoldState = scaffoldState
         ) { innerPadding ->

@@ -247,16 +247,15 @@ fun WxPayApp(
                         if (!ok) {
                             onExit()
                         }
-                    },
-                    actions = {
-                        if (currentScreen == PayAppScreen.BuyerInfo) {
-                            PlainTextButton(
-                                onClick = onExit,
-                                text = "跳过"
-                            )
-                        }
                     }
-                )
+                ) {
+                    if (currentScreen == PayAppScreen.BuyerInfo) {
+                        PlainTextButton(
+                            onClick = onExit,
+                            text = "跳过"
+                        )
+                    }
+                }
             },
             scaffoldState = scaffold,
         ) { innerPadding ->
