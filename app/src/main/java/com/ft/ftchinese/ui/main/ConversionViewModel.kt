@@ -15,12 +15,14 @@ import kotlinx.coroutines.withContext
 
 class ConversionViewModel(app: Application): AndroidViewModel(app) {
 
+    private val store = ConversionStore.getInstance(app)
+
     val campaignLiveData: MutableLiveData<FtcCampaignItem> by lazy {
         MutableLiveData<FtcCampaignItem>()
     }
 
     fun launchTask(retries: Int, timeout: Int, lookBackWindow: Long) {
-        if (ConversionStore.exists(getApplication())) {
+        if (store.exists()) {
             return
         }
 
@@ -53,7 +55,7 @@ class ConversionViewModel(app: Application): AndroidViewModel(app) {
 
             campaignLiveData.value = campaign
 
-            ConversionStore.save(getApplication(), adEvent.campaignId)
+            store.save(adEvent.campaignId)
         }
     }
 
