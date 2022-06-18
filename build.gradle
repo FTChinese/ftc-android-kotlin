@@ -15,7 +15,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.2.0'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.0'
         // https://developers.google.com/android/guides/google-services-plugin
         // As part of enabling Google APIs or Firebase services
         // Process the google-services.json file and produce Android resources that can be used in your application's code
