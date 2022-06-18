@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -27,7 +28,6 @@ import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.SubsActivity
@@ -53,7 +53,7 @@ private const val TAG = "WxPayEntryActivity"
  * to wechat sdk, which will call Wechat. After you paid inside wechat app, you will be redirected
  * to this page.
  */
-class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
+class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
 
     private var payIntentStore: PayIntentStore? = null
     private var tracker: StatsTracker? = null

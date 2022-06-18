@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -21,7 +22,6 @@ import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.auth.AuthActivity
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.wxlink.merge.MergeActivityScreen
@@ -33,7 +33,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
-class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler {
+class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler {
     private var api: IWXAPI? = null
     private lateinit var sessionManager: SessionManager
     private val wxRespLiveData = MutableLiveData<BaseResp?>()

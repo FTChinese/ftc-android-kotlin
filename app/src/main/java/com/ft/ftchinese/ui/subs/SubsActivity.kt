@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -25,7 +26,6 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.contact.BuyerInfoActivityScreen
@@ -37,11 +37,9 @@ import com.ft.ftchinese.ui.subs.paywall.PaywallActivityScreen
 import com.ft.ftchinese.ui.subs.stripepay.StripeSubActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
-class SubsActivity : ScopedComponentActivity() {
+class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
     private lateinit var userViewModel: UserViewModel
     private lateinit var ftcPayViewModel: FtcPayViewModel
