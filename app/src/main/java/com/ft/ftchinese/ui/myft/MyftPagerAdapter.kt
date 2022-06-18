@@ -9,28 +9,15 @@ class MyftPagerAdapter(
         fm: FragmentManager
 ) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
-    private val tabs = listOf(
-            MyftTab(id = MyftTabId.READ, title = "阅读历史"),
-            MyftTab(id = MyftTabId.STARRED, title = "收藏文章"),
-            MyftTab(id = MyftTabId.FOLLOWING, title = "关注")
-    )
-
     override fun getItem(position: Int): Fragment {
-
-        val tab = tabs[position]
-
-        return when (tab.id) {
-            MyftTabId.READ -> ReadArticleFragment.newInstance()
-            MyftTabId.STARRED -> StarredArticleFragment.newInstance()
-            MyftTabId.FOLLOWING -> FollowingFragment.newInstance()
-        }
+        return ReadArticleFragment.newInstance()
     }
 
     override fun getCount(): Int {
-        return tabs.size
+        return 1
     }
 
-    override fun getPageTitle(position: Int): CharSequence? {
-        return tabs[position].title
+    override fun getPageTitle(position: Int): CharSequence {
+        return "My FT"
     }
 }
