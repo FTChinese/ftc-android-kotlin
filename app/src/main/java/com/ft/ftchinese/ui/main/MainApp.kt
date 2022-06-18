@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,9 +11,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.ft.ftchinese.ui.base.TabPages
+import com.ft.ftchinese.ui.main.home.ChannelPagerScreen
 import com.ft.ftchinese.ui.main.home.MainBottomBar
 import com.ft.ftchinese.ui.main.home.MainNavScreen
 import com.ft.ftchinese.ui.main.home.MainToolBar
+import com.ft.ftchinese.ui.main.myft.MyFtActivityScreen
+import com.ft.ftchinese.ui.main.myft.ReadArticleActivityScreen
+import com.ft.ftchinese.ui.main.myft.StarredArticleActivityScreen
+import com.ft.ftchinese.ui.main.myft.TopicsActivityScreen
 import com.ft.ftchinese.ui.search.SearchActivityScreen
 
 @Composable
@@ -35,10 +40,12 @@ fun MainApp() {
                     screen = currentScreen,
                     onSearch = {
                         navigateToSearch(navController)
+                    },
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
-
         },
         // See https://developer.android.com/jetpack/compose/navigation#bottom-nav
         bottomBar = {
@@ -67,31 +74,50 @@ fun MainApp() {
             composable(
                 route = MainNavScreen.News.route
             ) {
-                Text(text = "News")
+                ChannelPagerScreen(
+                    scaffoldState = scaffoldState,
+                    channelSource = TabPages.newsPages
+                )
             }
             
             composable(
                 route = MainNavScreen.English.route
             ) {
-                Text(text = "English")
+                ChannelPagerScreen(
+                    scaffoldState = scaffoldState,
+                    channelSource = TabPages.englishPages
+                )
             }
             
             composable(
                 route = MainNavScreen.FtAcademy.route
             ) {
-                Text(text = "FT Academy")
+                ChannelPagerScreen(
+                    scaffoldState = scaffoldState,
+                    channelSource = TabPages.ftaPages
+                )
             }
             
             composable(
                 route = MainNavScreen.Video.route
             ) {
-                Text(text = "Video")
+                ChannelPagerScreen(
+                    scaffoldState = scaffoldState,
+                    channelSource = TabPages.videoPages
+                )
             }
             
             composable(
                 route = MainNavScreen.MyFt.route
             ) {
-                Text(text = "My Ft")
+                MyFtActivityScreen(
+                    onNavigate = {
+                        navigate(
+                            navController = navController,
+                            screen = it
+                        )
+                    }
+                )
             }
 
             composable(
@@ -104,6 +130,30 @@ fun MainApp() {
                     }
                 )
             }
+
+            composable(
+                route = MainNavScreen.ReadArticles.route
+            ) {
+                ReadArticleActivityScreen(
+                    scaffoldState = scaffoldState
+                )
+            }
+
+            composable(
+                route = MainNavScreen.StarredArticles.route
+            ) {
+                StarredArticleActivityScreen(
+                    scaffoldState = scaffoldState
+                )
+            }
+
+            composable(
+                route = MainNavScreen.FollowedTopics.route
+            ) {
+                TopicsActivityScreen(
+                    scaffoldState = scaffoldState
+                )
+            }
         }
     }
 }
@@ -112,4 +162,11 @@ private fun navigateToSearch(
     navController: NavController
 ) {
     navController.navigate(MainNavScreen.Search.route)
+}
+
+private fun navigate(
+    navController: NavController,
+    screen: MainNavScreen
+) {
+    navController.navigate(screen.route)
 }
