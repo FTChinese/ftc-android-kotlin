@@ -23,7 +23,7 @@ fun ClickableRow(
     enabled: Boolean = true,
     onClick: () -> Unit,
     margin: PaddingValues = PaddingValues(0.dp),
-    contentPadding: PaddingValues = PaddingValues(Dimens.dp8),
+    contentPadding: PaddingValues = PaddingValues(Dimens.dp16),
     background: Color = Color.Transparent,
     startIcon: @Composable RowScope.() -> Unit = {},
     endIcon: @Composable RowScope.() -> Unit = {},
