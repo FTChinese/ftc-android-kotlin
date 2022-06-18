@@ -48,7 +48,12 @@ private fun ReadArticleList(
     LazyColumn(
         modifier = Modifier.padding(Dimens.dp8),
     ) {
-        items(readArticles) { teaser ->
+        items(
+            items = readArticles,
+            key = {
+                it.id
+            }
+        ) { teaser ->
             ArticleItem(
                 heading = teaser.title,
                 subHeading = teaser.standfirst,

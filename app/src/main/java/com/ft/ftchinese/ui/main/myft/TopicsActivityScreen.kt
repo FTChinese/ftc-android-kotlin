@@ -35,7 +35,12 @@ fun TopicsActivityScreen(
         verticalArrangement = Arrangement.spacedBy(Dimens.dp8),
         horizontalArrangement = Arrangement.spacedBy(Dimens.dp8),
     ) {
-        items(articleState.topicsFollowed) {
+        items(
+            items = articleState.topicsFollowed,
+            key = {
+                it.topic
+            }
+        ) {
             FollowedTopicsCard(
                 text = it.tag,
                 onClick = {

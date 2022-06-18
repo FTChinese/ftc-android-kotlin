@@ -48,7 +48,12 @@ fun StarredArticleList(
     LazyColumn(
         modifier = Modifier.padding(Dimens.dp8),
     ) {
-        items(starredArticles) { teaser ->
+        items(
+            items = starredArticles,
+            key = {
+                it.id
+            }
+        ) { teaser ->
             ArticleItem(
                 heading = teaser.title,
                 subHeading = teaser.standfirst,
