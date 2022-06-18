@@ -9,13 +9,46 @@ import androidx.compose.ui.res.painterResource
 import com.ft.ftchinese.R
 
 @Composable
-fun IconAddCircle(
+fun IconArrowBackIOS(
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
 ) {
     Icon(
-        painter = painterResource(id = R.drawable.ic_baseline_add_circle_outline_24),
-        contentDescription = "Add",
+        painter = painterResource(id = R.drawable.ic_baseline_arrow_back_ios_24),
+        contentDescription = "Back",
         tint = tint
+    )
+}
+
+@Composable
+fun IconArrowForwardIOS(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_arrow_forward_ios_24),
+        contentDescription = "Forward",
+        tint = tint
+    )
+}
+
+@Composable
+fun IconArrowBack(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_arrow_back_24),
+        contentDescription = "Back",
+        tint = tint,
+    )
+}
+
+@Composable
+fun IconArrowForward(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_baseline_arrow_forward_24),
+        contentDescription = "Forward",
+        tint = tint,
     )
 }
 
@@ -28,13 +61,13 @@ fun IconRightArrow() {
 }
 
 @Composable
-fun IconArrowForward(
+fun IconAddCircle(
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
 ) {
     Icon(
-        painter = painterResource(id = R.drawable.ic_baseline_arrow_forward_white_24),
-        contentDescription = null,
-        tint = tint,
+        painter = painterResource(id = R.drawable.ic_baseline_add_circle_outline_24),
+        contentDescription = "Add",
+        tint = tint
     )
 }
 
@@ -88,7 +121,7 @@ fun IconAccountBox(
 ) {
     Icon(
         painter = painterResource(id = R.drawable.ic_account_box_black_24dp),
-        contentDescription = "Exit",
+        contentDescription = "Account",
         tint = tint,
     )
 }
