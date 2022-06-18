@@ -1,13 +1,11 @@
 package com.ft.ftchinese.ui.search
 
-import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.tooling.preview.Preview
+import com.ft.ftchinese.ui.components.IconArrowBackIOS
 import com.ft.ftchinese.ui.components.SearchInputState
 import com.ft.ftchinese.ui.components.SearchTextField
 import com.ft.ftchinese.ui.components.rememberSearchInputState
@@ -28,11 +26,7 @@ fun SearchBar(
                onBack()
            }
        ) {
-           Icon(
-               imageVector = Icons.Filled.ArrowBack,
-               contentDescription = "Back",
-               tint = OColor.black90
-           )
+           IconArrowBackIOS()
        }
 
         SearchTextField(
