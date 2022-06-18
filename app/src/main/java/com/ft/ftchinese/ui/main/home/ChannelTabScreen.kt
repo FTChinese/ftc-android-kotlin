@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.ui.main.home
 
 import android.util.Log
 import android.webkit.WebView
