@@ -44,7 +44,7 @@
     <string name="action_help">幫助</string>
     <string name="action_feedback">意見回應</string>
     <string name="action_logout">退出登入</string>
-    <string name="action_settings">設置</string>
+    <string name="title_settings">設置</string>
 
     <!--  Account  -->
     <string name="title_login">登入FT中文網</string>

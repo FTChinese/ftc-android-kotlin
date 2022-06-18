@@ -102,7 +102,7 @@
     <string name="action_help">帮助</string>
     <string name="action_feedback">反馈</string>
     <string name="action_logout">退出登录</string>
-    <string name="action_settings">设置</string>
+    <string name="title_settings">设置</string>
 
     <!--  Generic message  -->
     <string name="prompt_saved">保存成功!</string>
