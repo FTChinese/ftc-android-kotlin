@@ -128,7 +128,8 @@
     <string name="oauth_denied">授权被拒绝！</string>
     <string name="oauth_state_missing">授权码缺失！</string>
     <string name="oauth_state_mismatch">授权状态码错误！</string>
-    <string name="wx_session_expired">微信登录已过期，请重新登录。微信登录会定期失效，如果您以后不希望看到本提示，可以在侧边栏的\"账号与安全\"下绑定FT中文网账号。</string>
+    <string name="login_expired">登录过期</string>
+    <string name="wx_session_expired">微信登录已过期，请重新登录。微信登录会定期失效，如果您以后不希望看到本提示，可以重新登录后在\"我的FT - 账号与安全\"下绑定FT中文网账号。</string>
     <string name="wx_refresh_token_expired">微信授权已过期，请重新授权后刷新账号数据。</string>
     <string name="wx_relogin">重新授权</string>
     <string name="action_wx_login">微信登录</string>
