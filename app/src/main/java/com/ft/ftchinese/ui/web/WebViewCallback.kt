@@ -12,7 +12,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.model.request.WxMiniParams
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.tracking.GAAction

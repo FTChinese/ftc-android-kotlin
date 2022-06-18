@@ -19,7 +19,7 @@ import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMainBinding
-import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.SessionManager

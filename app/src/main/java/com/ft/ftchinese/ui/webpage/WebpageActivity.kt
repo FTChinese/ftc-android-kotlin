@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.content.WebpageMeta
 
 class WebpageActivity : ComponentActivity() {
 

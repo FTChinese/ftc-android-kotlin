@@ -12,7 +12,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import com.ft.ftchinese.model.legal.legalPages
+import com.ft.ftchinese.model.content.legalPages
 import com.ft.ftchinese.ui.components.OCheckbox
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor

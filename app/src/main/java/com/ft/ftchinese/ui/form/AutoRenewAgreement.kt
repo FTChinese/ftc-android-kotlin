@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import com.ft.ftchinese.model.legal.legalPages
+import com.ft.ftchinese.model.content.legalPages
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 

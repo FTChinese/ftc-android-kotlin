@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.ft.ftchinese.model.legal.legalPages
+import com.ft.ftchinese.model.content.legalPages
 import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.IconRightArrow
 import com.ft.ftchinese.ui.theme.Dimens

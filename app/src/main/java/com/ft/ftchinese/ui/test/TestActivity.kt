@@ -36,7 +36,7 @@ import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
@@ -580,7 +580,8 @@ fun WxMiniButton() {
             WebpageActivity.start(context, WebpageMeta(
                 title = "Test",
                 url = "http://192.168.1.42:8080"
-            ))
+            )
+            )
         },
     )
 }

@@ -1,7 +1,7 @@
 package com.ft.ftchinese.ui.webpage
 
 import androidx.compose.runtime.Composable
-import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.google.accompanist.web.rememberWebViewState
 
