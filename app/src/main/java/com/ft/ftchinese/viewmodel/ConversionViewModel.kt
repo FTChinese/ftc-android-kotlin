@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.main
+package com.ft.ftchinese.viewmodel
 
 import android.app.Application
 import android.util.Log
