@@ -8,9 +8,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.ui.base.ConnectionState
-import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.components.BaseState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import kotlinx.coroutines.CoroutineScope
 
 class MainAppState(
@@ -19,6 +20,15 @@ class MainAppState(
     connState: State<ConnectionState>,
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState)  {
+    val tracker = StatsTracker.getInstance(context)
+
+    fun trackAppOpened() {
+        tracker.appOpened()
+    }
+
+    fun trackChannelSelected(title: String) {
+        tracker.tabSelected(title)
+    }
 }
 
 @Composable

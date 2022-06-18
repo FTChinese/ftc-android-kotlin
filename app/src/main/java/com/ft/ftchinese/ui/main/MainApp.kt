@@ -4,14 +4,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.ft.ftchinese.ui.base.TabPages
+import com.ft.ftchinese.R
+import com.ft.ftchinese.model.content.TabPages
+import com.ft.ftchinese.ui.components.SimpleDialog
+import com.ft.ftchinese.ui.components.launchWxLogin
 import com.ft.ftchinese.ui.main.home.ChannelPagerScreen
 import com.ft.ftchinese.ui.main.home.MainBottomBar
 import com.ft.ftchinese.ui.main.home.MainNavScreen
@@ -22,10 +30,15 @@ import com.ft.ftchinese.ui.main.myft.StarredArticleActivityScreen
 import com.ft.ftchinese.ui.main.myft.TopicsActivityScreen
 import com.ft.ftchinese.ui.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.ShareUtils
+import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
-fun MainApp() {
+fun MainApp(
+    userViewModel: UserViewModel,
+) {
 
+    val context = LocalContext.current
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
     val backstackEntry = navController.currentBackStackEntryAsState()
@@ -33,6 +46,35 @@ fun MainApp() {
     val currentScreen = MainNavScreen.fromRoute(
         backstackEntry.value?.destination?.route
     )
+
+    val appState = rememberMainAppState(
+        scaffoldState = scaffoldState
+    )
+
+    val (wxReAuth, setWxReAuth) = remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        appState.trackAppOpened()
+        val wxExpired = userViewModel.isWxSessionExpired()
+
+        if (wxExpired) {
+            setWxReAuth(true)
+        }
+    }
+
+    if (wxReAuth) {
+        SimpleDialog(
+            title = stringResource(id = R.string.login_expired),
+            body = stringResource(id = R.string.wx_session_expired),
+            onDismiss = { setWxReAuth(false) },
+            onConfirm = {
+                launchWxLogin(ShareUtils.createWxApi(context))
+                setWxReAuth(false)
+            }
+        )
+    }
 
     OTheme {
         Scaffold(
@@ -78,7 +120,10 @@ fun MainApp() {
                 ) {
                     ChannelPagerScreen(
                         scaffoldState = scaffoldState,
-                        channelSource = TabPages.newsPages
+                        channelSources = TabPages.newsPages,
+                        onTabSelected = {
+                            appState.trackChannelSelected(it.title)
+                        }
                     )
                 }
 
@@ -87,7 +132,10 @@ fun MainApp() {
                 ) {
                     ChannelPagerScreen(
                         scaffoldState = scaffoldState,
-                        channelSource = TabPages.englishPages
+                        channelSources = TabPages.englishPages,
+                        onTabSelected = {
+                            appState.trackChannelSelected(it.title)
+                        }
                     )
                 }
 
@@ -96,7 +144,10 @@ fun MainApp() {
                 ) {
                     ChannelPagerScreen(
                         scaffoldState = scaffoldState,
-                        channelSource = TabPages.ftaPages
+                        channelSources = TabPages.ftaPages,
+                        onTabSelected = {
+                            appState.trackChannelSelected(it.title)
+                        }
                     )
                 }
 
@@ -105,7 +156,10 @@ fun MainApp() {
                 ) {
                     ChannelPagerScreen(
                         scaffoldState = scaffoldState,
-                        channelSource = TabPages.videoPages
+                        channelSources = TabPages.videoPages,
+                        onTabSelected = {
+                            appState.trackChannelSelected(it.title)
+                        }
                     )
                 }
 
@@ -174,4 +228,6 @@ private fun navigate(
 ) {
     navController.navigate(screen.route)
 }
+
+
 

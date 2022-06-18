@@ -12,92 +12,88 @@ import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMainBinding
-import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.TabPages
-import com.ft.ftchinese.ui.base.toast
+import com.ft.ftchinese.model.content.TabPages
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
-import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.myft.MyftPagerAdapter
 import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.webpage.WebpageActivity
+import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.android.material.tabs.TabLayout
-import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
  */
-class MainActivity : ScopedAppActivity(),
+class MainActivity : AppCompatActivity(),
         TabLayout.OnTabSelectedListener {
 
     private var mBackKeyPressed = false
+    @Deprecated("")
     private var pagerAdapter: TabPagerAdapter? = null
 
-    private lateinit var conversionViewModel: ConversionViewModel
 
+
+    @Deprecated("")
     private lateinit var binding: ActivityMainBinding
-//    private lateinit var navHeaderBinding: DrawerNavHeaderBinding
 
+    @Deprecated("")
     private lateinit var sessionManager: SessionManager
-    private lateinit var workManager: WorkManager
 
+    @Deprecated("")
     private lateinit var statsTracker: StatsTracker
+
+    private lateinit var conversionViewModel: ConversionViewModel
+    private lateinit var userViewModel: UserViewModel
 
     private val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             toast(R.string.login_success)
-            updateSessionUI()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // TODO: remove
         binding = DataBindingUtil.setContentView(
             this,
             R.layout.activity_main,
         )
+        // TODO: remove
         setSupportActionBar(binding.toolbar)
 
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
 
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+        registerWx()
+
+        // TODO: set compose ui.
+
+
         createNotificationChannel()
 
+        setupWorker()
+        setupConversion()
+
         statsTracker = StatsTracker.getInstance(this)
-
-        // Register Wechat id
-        WXAPIFactory.createWXAPI(
-            this,
-            BuildConfig.WX_SUBS_APPID, false
-        ).apply {
-            registerApp(BuildConfig.WX_SUBS_APPID)
-        }
-
         sessionManager = SessionManager.getInstance(this)
-        workManager = WorkManager.getInstance(this)
-
-        conversionViewModel = ViewModelProvider(this)[ConversionViewModel::class.java]
-
-        setupViewModel()
 
         // Set ViewPager adapter
         setupHome()
@@ -107,30 +103,8 @@ class MainActivity : ScopedAppActivity(),
         binding.tabLayout.addOnTabSelectedListener(this)
 
         setupBottomNav()
-//        setupDrawer()
 
         statsTracker.appOpened()
-
-        checkWxSession()
-
-        setupWorker()
-    }
-
-    private fun setupViewModel() {
-
-        // Open conversion tracking page.
-        conversionViewModel.campaignLiveData.observe(this) {
-            WebpageActivity.start(
-                context = this,
-                meta = WebpageMeta(
-                    title = "",
-                    url = it.url,
-                    showMenu = false,
-                )
-            )
-        }
-
-        conversionViewModel.launchTask(3, 30, 7)
     }
 
     private fun createNotificationChannel() {
@@ -152,6 +126,7 @@ class MainActivity : ScopedAppActivity(),
     }
 
     private fun setupWorker() {
+        val workManager = WorkManager.getInstance(this)
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.UNMETERED)
             .setRequiresBatteryNotLow(true)
@@ -174,6 +149,33 @@ class MainActivity : ScopedAppActivity(),
         workManager.enqueueUniqueWork("latestRelease", ExistingWorkPolicy.REPLACE, upgradeWork)
     }
 
+    // Register Wechat id
+    private fun registerWx() {
+        WXAPIFactory.createWXAPI(
+            this,
+            BuildConfig.WX_SUBS_APPID, false
+        ).apply {
+            registerApp(BuildConfig.WX_SUBS_APPID)
+        }
+    }
+
+    private fun setupConversion() {
+        conversionViewModel = ViewModelProvider(this)[ConversionViewModel::class.java]
+        // Open conversion tracking page.
+        conversionViewModel.campaignLiveData.observe(this) {
+            WebpageActivity.start(
+                context = this,
+                meta = WebpageMeta(
+                    title = "",
+                    url = it.url,
+                    showMenu = false,
+                )
+            )
+        }
+        conversionViewModel.launchTask(3, 30, 7)
+    }
+
+    @Deprecated("")
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener {
             Log.i(TAG, "Selected bottom nav item ${it.title}")
@@ -218,6 +220,7 @@ class MainActivity : ScopedAppActivity(),
     /**
      * Set up home page upon launching, or clicking the Home button in BottomNavigationView.
      */
+    @Deprecated("")
     private fun setupHome() {
         pagerAdapter = TabPagerAdapter(TabPages.newsPages, supportFragmentManager)
         binding.viewPager.adapter = pagerAdapter
@@ -229,159 +232,12 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
+    @Deprecated("")
     private fun displayTitle(title: Int) {
         supportActionBar?.apply {
             setDisplayUseLogoEnabled(false)
             setDisplayShowTitleEnabled(true)
             setTitle(title)
-        }
-    }
-
-    /**
-     * Add event listener to drawer menu.
-     */
-//    private fun setupDrawer() {
-//
-//        navHeaderBinding = DataBindingUtil.inflate(
-//            layoutInflater,
-//            R.layout.drawer_nav_header,
-//            binding.drawerNav,
-//            false)
-//
-//        binding.drawerNav.apply {
-//            addHeaderView(navHeaderBinding.root)
-//            // Hide test section
-//            menu.setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
-//        }
-//
-//        // Set a listener that will be notified when a menu item is selected.
-//        binding.drawerNav.setNavigationItemSelectedListener {
-//            when (it.itemId) {
-//                R.id.action_login -> {
-//                    startForResult.launch(
-//                        AuthActivity.newIntent(this)
-//                    )
-//                }
-//                R.id.action_account -> AccountActivity.start(this)
-//                R.id.action_paywall -> {
-//                    // Tracking
-//                    PaywallTracker.fromDrawer()
-//                    SubsActivity.start(this)
-//                }
-//                R.id.action_my_subs -> MemberActivity.start(this)
-//                R.id.action_settings -> SettingsActivity.start(this)
-//                R.id.action_test -> TestActivity.start(this)
-//            }
-//
-//            binding.drawerLayout.closeDrawer(GravityCompat.START)
-//
-//            true
-//        }
-//
-//        ActionBarDrawerToggle(
-//            this,
-//            binding.drawerLayout,
-//            binding.toolbar,
-//            R.string.navigation_drawer_open,
-//            R.string.navigation_drawer_close
-//        ).apply {
-//            binding.drawerLayout.addDrawerListener(this)
-//            syncState()
-//        }
-//
-//        updateSessionUI()
-//    }
-
-    /**
-     * Update UI depending on user's login/logout state
-     */
-    private fun updateSessionUI() {
-
-        val account = sessionManager.loadAccount()
-
-//        navHeaderBinding.account = account
-
-//        binding.drawerNav.menu.apply {
-//            // show signin/signup if account is null.
-//            setGroupVisible(R.id.drawer_group_sign_in_up, account == null)
-//            // Show account.
-//            findItem(R.id.action_account)?.isVisible = account != null
-//            // Only show when user is a member.
-//            findItem(R.id.action_my_subs)?.isVisible = account?.isMember ?: false
-//            findItem(R.id.action_paywall)?.isVisible = !(account?.isMember ?: false)
-//        }
-    }
-
-    private fun logout() {
-        sessionManager.logout()
-        CustomerSession.endCustomerSession()
-        updateSessionUI()
-        toast("账号已登出")
-    }
-
-
-
-    /**
-     * Check whether wechat session has expired.
-     * Wechat refresh token expires after 30 days.
-     */
-    private fun checkWxSession() {
-        val account = sessionManager.loadAccount() ?: return
-
-        // If loginMethod is wechat, or the account is bound
-        // to ftc account, do not show the alert.
-        if (account.loginMethod != LoginMethod.WECHAT) {
-            return
-        }
-
-        if (account.isLinked) {
-            return
-        }
-
-        val wxSession = sessionManager.loadWxSession() ?: return
-
-        if (wxSession.isExpired) {
-            logout()
-            WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        if (BuildConfig.DEBUG) {
-            Log.i(TAG, "onStart finished")
-        }
-
-        updateSessionUI()
-    }
-
-    override fun onBackPressed() {
-//        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-//            binding.drawerLayout.closeDrawer(GravityCompat.START)
-//        } else {
-//            doubleClickToExit()
-//        }
-
-        doubleClickToExit()
-    }
-
-    private fun doubleClickToExit() {
-        // If this is the first time user clicked back button, the first part the will executed.
-        if (!mBackKeyPressed) {
-            toast(R.string.prompt_exit)
-            mBackKeyPressed = true
-
-            // Delay for 2 seconds.
-            // If user did not touch the back button within 2 seconds, mBackKeyPressed will be changed back gto false.
-            // If user touch the back button within 2 seconds, `if` condition will be false, this part will not be executed.
-            launch {
-                delay(2000)
-                mBackKeyPressed = false
-            }
-        } else {
-            // If user clicked back button two times within 2 seconds, this part will be executed.
-            cancel()
-            finish()
         }
     }
 
