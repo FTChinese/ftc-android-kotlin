@@ -431,7 +431,7 @@ private fun TestActivityScreen(
             onClick = {
                 onNavigate(TestAppScreen.Main)
             },
-            text = "Sow Main Activity"
+            text = "Show Main Activity"
         )
 
         Divider()
