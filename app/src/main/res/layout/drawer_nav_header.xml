@@ -41,7 +41,6 @@
             android:id="@+id/nav_header_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableEnd="@drawable/ic_arrow_drop_down_white_24dp"
             android:text="@{account == null ? @string/nav_not_logged_in : account.displayName}"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             app:layout_constraintBottom_toBottomOf="parent"
