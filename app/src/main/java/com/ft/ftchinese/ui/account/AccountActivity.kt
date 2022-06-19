@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
@@ -21,7 +20,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.account.address.AddressActivityScreen
 import com.ft.ftchinese.ui.account.delete.DeleteAccountActivityScreen
 import com.ft.ftchinese.ui.account.email.UpdateEmailActivityScreen
@@ -33,6 +31,7 @@ import com.ft.ftchinese.ui.account.unlinkwx.UnlinkActivityScreen
 import com.ft.ftchinese.ui.account.wechat.WxInfoActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 /**
@@ -54,18 +53,13 @@ class AccountActivity : ComponentActivity() {
         setContent {
             AccountApp(
                 userViewModel = userViewModel,
-                onExit = { finish() }
-            ) {
-                userViewModel.logout()
-                Toast.makeText(
-                    this,
-                    R.string.message_account_deleted,
-                    Toast.LENGTH_SHORT
-                ).show()
-                // TODO: notify caller the deletion event.
-                setResult(Activity.RESULT_OK)
-                finish()
-            }
+                onAccountDeleted = {
+                    setResult(Activity.RESULT_OK, IntentsUtil.accountDeleted)
+                    userViewModel.logout()
+                    finish()
+                },
+                onExit = { finish() },
+            )
         }
     }
 
@@ -97,8 +91,8 @@ class AccountActivity : ComponentActivity() {
 @Composable
 fun AccountApp(
     userViewModel: UserViewModel,
+    onAccountDeleted: () -> Unit,
     onExit: () -> Unit,
-    onLogout: () -> Unit,
 ) {
     val scaffold = rememberScaffoldState()
 
@@ -239,10 +233,9 @@ fun AccountApp(
                     DeleteAccountActivityScreen(
                         userViewModel = userViewModel,
                         scaffoldState = scaffold,
-                        onDeleted = onLogout,
+                        onDeleted = onAccountDeleted,
                     )
                 }
-
             }
         }
     }
