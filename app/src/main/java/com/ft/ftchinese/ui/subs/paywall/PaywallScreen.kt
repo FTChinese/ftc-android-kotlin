@@ -18,7 +18,6 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.defaultPaywall
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.CustomerService
 import com.ft.ftchinese.ui.components.PrimaryBlockButton
@@ -30,12 +29,12 @@ import com.ft.ftchinese.ui.theme.Dimens
 @Composable
 fun PaywallScreen(
     paywall: Paywall,
-    account: Account?,
+    membership: Membership,
+    isLoggedIn: Boolean,
     onFtcPay: (item: CartItemFtc) -> Unit,
     onStripePay: (item: CartItemStripe) -> Unit,
     onLoginRequest: () -> Unit,
 ) {
-    val membership = account?.membership?.normalize() ?: Membership()
 
     val productItems = paywall.buildUiProducts(membership)
 
@@ -45,7 +44,7 @@ fun PaywallScreen(
             .padding(Dimens.dp8)
     ) {
 
-        if (account == null) {
+        if (!isLoggedIn) {
             PaywallLogin(onClick = onLoginRequest)
         }
         
@@ -110,7 +109,8 @@ fun SubsStatusBox(
 fun PreviewPaywallContent() {
     PaywallScreen(
         paywall = defaultPaywall,
-        account = null,
+        membership = Membership(),
+        isLoggedIn = false,
         onFtcPay = {},
         onStripePay = {},
     ) {}

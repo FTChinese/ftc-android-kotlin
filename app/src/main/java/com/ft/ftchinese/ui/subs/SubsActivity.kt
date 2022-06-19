@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.subs
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -36,6 +37,7 @@ import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.subs.paywall.PaywallActivityScreen
 import com.ft.ftchinese.ui.subs.stripepay.StripeSubActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
 import kotlinx.coroutines.*
 
@@ -59,6 +61,10 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 premiumOnTop = premiumFirst,
                 onAliPay = this::launchAliPay,
                 onExit = {
+                    finish()
+                },
+                onPaid = {
+                    setResult(Activity.RESULT_OK, IntentsUtil.accountRefreshed)
                     finish()
                 }
             )
@@ -132,6 +138,7 @@ fun SubsApp(
     premiumOnTop: Boolean,
     onAliPay: (AliPayIntent) -> Unit,
     onExit: () -> Unit,
+    onPaid: () -> Unit,
 ) {
 
     val scaffoldState = rememberScaffoldState()
@@ -157,7 +164,7 @@ fun SubsApp(
                 ) {
                     if (currentScreen == SubsAppScreen.BuyerInfo) {
                         PlainTextButton(
-                            onClick = onExit,
+                            onClick = onPaid,
                             text = "跳过"
                         )
                     }
@@ -255,10 +262,10 @@ fun SubsApp(
                         scaffoldState = scaffoldState,
                         priceId = priceId,
                         trialId = trialId,
-                        onExit = {
-                            navController.popBackStack()
-                        }
-                    )
+                        onSuccess = onPaid
+                    ) {
+                        navController.popBackStack()
+                    }
                 }
             }
         }

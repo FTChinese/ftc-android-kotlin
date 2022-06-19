@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.subs.SubsActivity
+import com.ft.ftchinese.ui.util.AccountAction
+import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -23,6 +25,7 @@ fun MemberActivityScreen(
     userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
     showSnackBar: (String) -> Unit,
+    onRefreshed: () -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -40,18 +43,21 @@ fun MemberActivityScreen(
     LaunchedEffect(key1 = memberState.accountUpdated) {
         memberState.accountUpdated?.let {
             userViewModel.saveAccount(it)
+            onRefreshed()
         }
     }
 
     LaunchedEffect(key1 = memberState.stripeSubsUpdated) {
         memberState.stripeSubsUpdated?.let {
             userViewModel.saveStripeSubs(it)
+            onRefreshed()
         }
     }
 
     LaunchedEffect(key1 = memberState.iapSubsUpdated) {
         memberState.iapSubsUpdated?.let {
             userViewModel.saveIapSubs(it)
+            onRefreshed()
         }
     }
 
@@ -61,6 +67,14 @@ fun MemberActivityScreen(
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 userViewModel.reloadAccount()
+                result.data?.let(IntentsUtil::getAccountAction)?.let {
+                    when (it) {
+                        AccountAction.Refreshed -> {
+                            onRefreshed()
+                        }
+                        else -> {}
+                    }
+                }
             }
             Activity.RESULT_CANCELED -> {}
         }

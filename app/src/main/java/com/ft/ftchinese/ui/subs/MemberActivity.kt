@@ -14,17 +14,24 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.member.MemberActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.util.RequestCode
+import com.ft.ftchinese.ui.util.IntentsUtil
+import com.ft.ftchinese.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 class MemberActivity : ComponentActivity() {
 
+    private var refreshed: Boolean = false
+    private lateinit var userViewModel: UserViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         setContent {
             OTheme {
@@ -36,7 +43,11 @@ class MemberActivity : ComponentActivity() {
                         Toolbar(
                             heading = stringResource(id = R.string.title_my_subs),
                             onBack = {
-                                setResult(Activity.RESULT_OK)
+                                // In case the activity is called from article's barrier.
+                                if (refreshed) {
+                                    // TODO: this could only be triggered by back button, not by back press.
+                                    setResult(Activity.RESULT_OK, IntentsUtil.accountRefreshed)
+                                }
                                 finish()
                             }
                         )
@@ -44,17 +55,26 @@ class MemberActivity : ComponentActivity() {
                     scaffoldState = scaffoldState
                 ) { innerPadding ->
                     MemberActivityScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffoldState,
                         showSnackBar = { msg ->
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar(msg)
                             }
                         },
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        onRefreshed = {
+                            refreshed = true
+                        }
                     )
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        userViewModel.reloadAccount()
     }
 
     companion object {
@@ -62,14 +82,6 @@ class MemberActivity : ComponentActivity() {
         @JvmStatic
         fun start(context: Context?) {
             context?.startActivity(Intent(context, MemberActivity::class.java))
-        }
-
-        @JvmStatic
-        fun startForResult(activity: Activity?) {
-            activity?.startActivityForResult(
-                Intent(activity, MemberActivity::class.java),
-                RequestCode.MEMBER_REFRESHED
-            )
         }
 
         @JvmStatic

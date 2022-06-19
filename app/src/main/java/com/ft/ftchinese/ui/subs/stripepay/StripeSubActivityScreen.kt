@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.subs.stripepay
 
-import android.app.Activity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,11 +13,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
 import com.ft.ftchinese.repository.ApiConfig
-import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.CreateCustomerDialog
 import com.ft.ftchinese.ui.components.ErrorDialog
 import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.subs.MemberActivity
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
@@ -32,7 +30,8 @@ fun StripeSubActivityScreen(
     scaffoldState: ScaffoldState,
     priceId: String?,
     trialId: String?,
-    onExit: (Int) -> Unit,
+    onSuccess: () -> Unit,
+    onCancelled: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -100,9 +99,7 @@ fun StripeSubActivityScreen(
     if (account.stripeId.isNullOrBlank()) {
         CreateCustomerDialog(
             email = account.email,
-            onDismiss = {
-                onExit(Activity.RESULT_CANCELED)
-            },
+            onDismiss = onCancelled,
             onConfirm = {
                 paymentState.createCustomer(account)
             }
@@ -161,8 +158,7 @@ fun StripeSubActivityScreen(
                     paymentState.subscribe(account, it)
                 },
                 onDone = {
-                    MemberActivity.start(context)
-                    onExit(Activity.RESULT_OK)
+                    onSuccess()
                 }
             )
         }

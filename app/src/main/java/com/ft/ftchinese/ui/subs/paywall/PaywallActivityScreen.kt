@@ -4,19 +4,21 @@ import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.ScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.AuthActivity
+import com.ft.ftchinese.ui.util.AccountAction
+import com.ft.ftchinese.ui.util.IntentsUtil
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -41,6 +43,7 @@ fun PaywallActivityScreen(
 
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
+    val isLoggedIn by userViewModel.loggedInLiveData.observeAsState(false)
 
     val (openDialog, setOpenDialog) = remember {
         mutableStateOf(false)
@@ -56,6 +59,11 @@ fun PaywallActivityScreen(
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 userViewModel.reloadAccount()
+                result.data?.let(IntentsUtil::getAccountAction)?.let {
+                    if (it == AccountAction.SignedIn) {
+                        context.toast(R.string.login_success)
+                    }
+                }
             }
             Activity.RESULT_CANCELED -> {
 
@@ -98,7 +106,8 @@ fun PaywallActivityScreen(
         PaywallScreen(
             paywall = paywallState.paywallData
                 .reOrderProducts(premiumOnTop),
-            account = account,
+            membership = account?.membership?.normalize() ?: Membership(),
+            isLoggedIn = isLoggedIn,
             onFtcPay = {
                 if (!userViewModel.isLoggedIn) {
                     AuthActivity.launch(
