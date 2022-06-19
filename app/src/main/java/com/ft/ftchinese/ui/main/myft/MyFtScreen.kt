@@ -36,7 +36,7 @@ val loggedInRows: List<MyFtRow> = listOf(
 )
 
 val toolsRows: List<MyFtRow> = listOf(
-    MyFtRow.MySubs,
+    MyFtRow.Paywall,
     MyFtRow.Settings,
 )
 
