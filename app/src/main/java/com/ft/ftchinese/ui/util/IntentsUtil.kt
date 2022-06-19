@@ -3,11 +3,17 @@ package com.ft.ftchinese.ui.util
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Parcelable
 import android.provider.Settings
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.formatter.FormatHelper
+import kotlinx.parcelize.Parcelize
+
+fun Intent.putParcelableExtra(key: String, value: Parcelable) {
+    putExtra(key, value)
+}
 
 fun composeDeletionEmail(
     context: Context,
@@ -115,4 +121,31 @@ object IntentsUtil {
             context.startActivity(intent)
         }
     }
+
+    private const val EXTRA_ACCOUNT_ACTION = "com.ft.ftchinese.EXTRA_ACCOUNT_ACTION"
+    val signedIn = Intent().apply {
+        putParcelableExtra(EXTRA_ACCOUNT_ACTION, AccountAction.SignedIn)
+    }
+    val loggedOut = Intent().apply {
+        putParcelableExtra(EXTRA_ACCOUNT_ACTION, AccountAction.LoggedOut)
+    }
+    val accountDeleted = Intent().apply {
+        putParcelableExtra(EXTRA_ACCOUNT_ACTION, AccountAction.Deleted)
+    }
+    val accountRefreshed = Intent().apply {
+        putParcelableExtra(EXTRA_ACCOUNT_ACTION, AccountAction.Refreshed)
+    }
+
+    fun getAccountAction(intent: Intent): AccountAction? {
+        return intent.getParcelableExtra(EXTRA_ACCOUNT_ACTION)
+    }
+}
+
+
+@Parcelize
+enum class AccountAction : Parcelable {
+    SignedIn,
+    LoggedOut,
+    Deleted,
+    Refreshed;
 }
