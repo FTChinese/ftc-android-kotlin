@@ -96,7 +96,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler {
             return
         }
 
-        AuthActivity.startForResult(this)
+        startActivity(AuthActivity.newIntent(this))
         finish()
     }
 
