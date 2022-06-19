@@ -34,7 +34,6 @@ fun DeleteAccountActivityScreen(
     uiState.dropped?.let {
         when (it) {
             AccountDropped.Success -> {
-                uiState.resetDropped()
                 onDeleted()
             }
             AccountDropped.SubsExists -> {
