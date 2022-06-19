@@ -31,23 +31,25 @@ import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.settings.overview.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.IntentsUtil
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
 class SettingsActivity : ComponentActivity() {
 
-    private var logout: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             SettingsApp(
                 onLoggedOut = {
-                    logout = true
+                    // Immediately close current screen to force UI update; otherwise
+                    // the UI does not update if user exit by pressing the back key
+                    // rather than clicking the toolbar back button.
+                    // Back key press won't trigger setResult().
+                    setResult(Activity.RESULT_OK, IntentsUtil.loggedOut)
+                    finish()
                 },
                 onExit = {
-                    if (logout) {
-                        setResult(Activity.RESULT_OK)
-                    }
                     finish()
                 }
             )
