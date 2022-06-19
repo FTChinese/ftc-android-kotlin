@@ -167,6 +167,7 @@ fun MainApp(
                     route = MainNavScreen.MyFt.route
                 ) {
                     MyFtActivityScreen(
+                        userViewModel = userViewModel,
                         onNavigate = {
                             navigate(
                                 navController = navController,
