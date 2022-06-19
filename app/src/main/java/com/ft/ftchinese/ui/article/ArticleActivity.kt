@@ -47,7 +47,7 @@ class ArticleActivity : ComponentActivity() {
     }
 
     companion object {
-        const val EXTRA_ARTICLE_TEASER = "extra_article_teaser"
+        const val EXTRA_ARTICLE_TEASER = "com.ft.ftchinese.ArticleTeaser"
 
         @JvmStatic
         fun newIntent(context: Context?, teaser: Teaser?): Intent {

@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,7 +37,8 @@ fun ChannelActivityScreen(
     onChannel: (id: String) -> Unit,
 ) {
     val context = LocalContext.current
-    val baseUrl = rememberBaseUrl(userViewModel.account)
+    val account by userViewModel.accountLiveData.observeAsState()
+    val baseUrl = rememberBaseUrl(account)
     val scope = rememberCoroutineScope()
 
     val channelState = rememberChannelState(

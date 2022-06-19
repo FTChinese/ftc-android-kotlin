@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.article.audio
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -19,16 +20,17 @@ fun AiAudioActivityScreen(
     id: String?
 ) {
     val context = LocalContext.current
+    val accountState = userViewModel.accountLiveData.observeAsState()
 
     if (id == null) {
         context.toast("Missing id")
         return
     }
 
-    val url = remember(userViewModel.account) {
+    val url = remember(accountState.value) {
         NavStore
             .getTeaser(id)
-            ?.htmlUrl(userViewModel.account)
+            ?.htmlUrl(accountState.value)
 
     }
 

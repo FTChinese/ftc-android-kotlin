@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,19 +22,21 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.share.ShareApp
 import com.ft.ftchinese.ui.article.share.SocialShareList
 import com.ft.ftchinese.ui.auth.AuthActivity
-import com.ft.ftchinese.ui.util.toast
+import com.ft.ftchinese.ui.components.rememberBaseUrl
 import com.ft.ftchinese.ui.components.rememberStartTime
 import com.ft.ftchinese.ui.components.rememberWxApi
 import com.ft.ftchinese.ui.components.sendArticleReadLen
 import com.ft.ftchinese.ui.subs.MemberActivity
 import com.ft.ftchinese.ui.subs.SubsActivity
+import com.ft.ftchinese.ui.util.AccountAction
+import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.util.ShareUtils
+import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.web.FtcJsEventListener
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.ui.web.WebViewCallback
@@ -57,6 +60,7 @@ fun ArticleActivityScreen(
     onBack: () -> Unit,
 ) {
 
+    val account by userViewModel.accountLiveData.observeAsState()
     val startTime = rememberStartTime()
 
     val context = LocalContext.current
@@ -73,18 +77,32 @@ fun ArticleActivityScreen(
         }
     }
 
-    val baseUrl = remember(userViewModel.account) {
-        Config.discoverServer(userViewModel.account)
-    }
+    val baseUrl = rememberBaseUrl(account)
     val wxApi = rememberWxApi()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
+        // Handle result for login, payment, and refreshing account
         when (result.resultCode) {
             Activity.RESULT_OK -> {
-                userViewModel.reloadAccount()
-                articleState.refreshAccess(userViewModel.account)
+                val a = userViewModel.reloadAccount()
+                // DO not use the variable `account` defined at the start of this composable.
+                // The state value captured here won't be updated.
+                articleState.refreshAccess(a)
+                result.data?.let(IntentsUtil::getAccountAction)?.let {
+                    when (it) {
+                        // Result from AuthActivity.
+                        AccountAction.SignedIn -> {
+                            context.toast(R.string.login_success)
+                        }
+                        // Result from MemberActivity or SubsActivity
+                        AccountAction.Refreshed -> {
+                            context.toast(R.string.refresh_success)
+                        }
+                        else -> { }
+                    }
+                }
             }
             Activity.RESULT_CANCELED -> {
 
@@ -141,7 +159,11 @@ fun ArticleActivityScreen(
         }
     }
 
-    LaunchedEffect(key1 = articleState.currentTeaser) {
+    // Start loading data.
+    LaunchedEffect(
+        key1 = articleState.currentTeaser,
+        key2 = baseUrl
+    ) {
         if (articleState.currentTeaser != null) {
             articleState.initLoading(
                 account = userViewModel.account,
@@ -171,11 +193,11 @@ fun ArticleActivityScreen(
 
     DisposableEffect(key1 = Unit) {
         onDispose {
-            val account = userViewModel.account ?: return@onDispose
+            val a = userViewModel.account ?: return@onDispose
             articleState.currentTeaser?.let {
                 sendArticleReadLen(
                     context = context,
-                    account = account,
+                    account = a,
                     teaser = it,
                     startAt = startTime
                 )
@@ -322,6 +344,7 @@ fun ArticleActivityScreen(
                                 SubsActivity.launch(
                                     launcher = launcher,
                                     context = context,
+                                    premiumFirst = event.upgrade
                                 )
                             }
                             is BarrierEvent.MySubs -> {
