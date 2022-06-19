@@ -7,7 +7,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
@@ -15,8 +14,8 @@ import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.launchWxLogin
 import com.ft.ftchinese.ui.components.rememberTimerState
+import com.ft.ftchinese.ui.components.rememberWxApi
 import com.ft.ftchinese.viewmodel.UserViewModel
-import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
 fun MobileAuthActivityScreen(
@@ -33,12 +32,7 @@ fun MobileAuthActivityScreen(
         TokenManager.getInstance(context)
     }
 
-    val wxApi = remember {
-        WXAPIFactory.createWXAPI(
-            context,
-            BuildConfig.WX_SUBS_APPID
-        )
-    }
+    val wxApi = rememberWxApi()
 
     val authState = rememberMobileAuthState(
         scaffoldState = scaffoldState
