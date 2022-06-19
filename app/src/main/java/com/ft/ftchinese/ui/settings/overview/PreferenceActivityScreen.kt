@@ -1,10 +1,8 @@
 package com.ft.ftchinese.ui.settings.overview
 
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
@@ -22,6 +20,7 @@ fun PreferenceActivityScreen(
     onNavigateTo: (SettingScreen) -> Unit
 ) {
     val context = LocalContext.current
+    val isLoggedIn = userViewModel.loggedInLiveData.observeAsState(false)
 
     val scope = rememberCoroutineScope()
 
@@ -86,7 +85,7 @@ fun PreferenceActivityScreen(
                     }
                 }
             },
-            isLoggedIn = userViewModel.isLoggedIn,
+            isLoggedIn = isLoggedIn.value,
             onLogout = {
                 scope.launch {
                     bottomSheetState.show()
