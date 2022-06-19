@@ -11,6 +11,7 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,8 +38,9 @@ fun ChannelTabScreen(
     channelSource: ChannelSource,
 ) {
     val context = LocalContext.current
+    val accountState = userViewModel.accountLiveData.observeAsState()
 
-    val baseUrl = rememberBaseUrl(userViewModel.account)
+    val baseUrl = rememberBaseUrl(account = accountState.value)
 
     val channelState = rememberChannelState(
         scaffoldState = scaffoldState,
@@ -57,7 +59,7 @@ fun ChannelTabScreen(
         channelSource = channelSource
     )
 
-    val wvCallback = remember(userViewModel.account) {
+    val wvCallback = remember(accountState.value) {
         object : WebViewCallback(context) {
             override fun onPageFinished(view: WebView?, url: String?) {
                 view?.evaluateJavascript(
@@ -70,7 +72,6 @@ fun ChannelTabScreen(
         }
     }
 
-    // TODO: monitor account change?
     LaunchedEffect(key1 = baseUrl, channelState.channelSource) {
         channelState.initLoading(
             baseUrl = baseUrl,
