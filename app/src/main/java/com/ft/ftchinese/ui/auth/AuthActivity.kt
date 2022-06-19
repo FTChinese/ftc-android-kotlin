@@ -32,29 +32,29 @@ import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
 import com.ft.ftchinese.ui.auth.signup.SignUpActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.util.RequestCode
+import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 class AuthActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AuthApp {
-                setResult(Activity.RESULT_OK)
-                finish()
-            }
+            AuthApp(
+                onLoginSuccess = {
+                    // It seems the device's physical back key won't trigger setResult.
+                    setResult(Activity.RESULT_OK, IntentsUtil.signedIn)
+                    finish()
+                },
+                onExit = {
+                    finish()
+                }
+            )
         }
     }
 
     companion object {
-        @JvmStatic
-        fun startForResult(activity: Activity) {
-            activity.startActivityForResult(
-                Intent(activity, AuthActivity::class.java),
-                RequestCode.SIGN_IN
-            )
-        }
 
         @JvmStatic
         fun newIntent(context: Context) = Intent(context, AuthActivity::class.java)
@@ -73,6 +73,7 @@ class AuthActivity : AppCompatActivity() {
 
 @Composable
 fun AuthApp(
+    onLoginSuccess: () -> Unit,
     onExit: () -> Unit
 ) {
     val scaffold = rememberScaffoldState()
@@ -127,9 +128,7 @@ fun AuthApp(
                         },
                         onFinish = onExit,
                         // Login success. Destroy the activity.
-                        onSuccess = {
-                            onExit()
-                        }
+                        onSuccess = onLoginSuccess
                     )
                 }
 
@@ -197,9 +196,7 @@ fun AuthApp(
                         userViewModel = userViewModel,
                         scaffoldState = scaffold,
                         email = email,
-                        onSuccess = {
-                            onExit()
-                        },
+                        onSuccess = onLoginSuccess,
                         onForgotPassword = { email1 ->
                             navigateToForgotPassword(
                                 navController,
@@ -227,10 +224,9 @@ fun AuthApp(
                     SignUpActivityScreen(
                         userViewModel = userViewModel,
                         scaffoldState = scaffold,
-                        email = email
-                    ) {
-                        onExit()
-                    }
+                        email = email,
+                        onSuccess = onLoginSuccess
+                    )
                 }
 
                 composable(
