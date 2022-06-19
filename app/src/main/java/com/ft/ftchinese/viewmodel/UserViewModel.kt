@@ -3,6 +3,7 @@ package com.ft.ftchinese.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
@@ -21,6 +22,18 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         MutableLiveData<Account>()
     }
 
+    val loggedInLiveData = MediatorLiveData<Boolean>().apply {
+        addSource(accountLiveData) {
+            value = accountLiveData.value != null
+        }
+    }
+
+    /**
+     * When you changed account and wants to access its latest value in a callback,
+     * use this getter since the callback might be using the values enclosed rather than
+     * the latest data.
+     * DO not rely this for composable update!
+     */
     val account: Account?
         get() = accountLiveData.value
 
@@ -35,6 +48,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         get() = accountLiveData.value?.isWxOnly == true
 
     fun reloadAccount(): Account? {
+        // TODO: the copy might not be needed.
         val a = session.loadAccount(raw = true)?.copy()
         accountLiveData.value = a
         Log.i(TAG, "Account reloaded $account")
