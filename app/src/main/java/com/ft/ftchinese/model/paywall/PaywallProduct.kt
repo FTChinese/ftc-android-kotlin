@@ -43,6 +43,7 @@ data class PaywallProduct(
         )
     }
 
+    // Collect price items application to a membership.
     private fun collectFtcItems(m: Membership): Pair<List<CartItemFtc>, StripePriceIDs> {
         val offerKinds = m.offerKinds
 
