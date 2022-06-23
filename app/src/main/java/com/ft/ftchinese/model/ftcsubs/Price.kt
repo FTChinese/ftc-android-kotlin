@@ -168,7 +168,7 @@ data class Price(
                 it.priceOff
             }
 
-        if (filtered.isNullOrEmpty()) {
+        if (filtered.isEmpty()) {
             return null
         }
 
