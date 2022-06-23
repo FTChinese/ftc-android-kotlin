@@ -92,6 +92,11 @@ fun PaywallActivityScreen(
         )
     }
 
+    val pwData = remember(paywallState.paywallData, premiumOnTop) {
+        paywallState.paywallData
+            .reOrderProducts(premiumOnTop)
+    }
+
     SwipeRefresh(
         state = rememberSwipeRefreshState(
             isRefreshing = paywallState.refreshing,
@@ -104,8 +109,7 @@ fun PaywallActivityScreen(
         },
     ) {
         PaywallScreen(
-            paywall = paywallState.paywallData
-                .reOrderProducts(premiumOnTop),
+            paywall = pwData,
             membership = account?.membership?.normalize() ?: Membership(),
             isLoggedIn = isLoggedIn,
             onFtcPay = {
