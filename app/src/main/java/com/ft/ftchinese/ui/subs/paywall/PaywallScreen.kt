@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -36,7 +37,9 @@ fun PaywallScreen(
     onLoginRequest: () -> Unit,
 ) {
 
-    val productItems = paywall.buildUiProducts(membership)
+    val productItems = remember(paywall, membership) {
+        paywall.buildUiProducts(membership)
+    }
 
     Column(
         modifier = Modifier
