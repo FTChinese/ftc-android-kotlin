@@ -134,7 +134,12 @@ fun StripeWalletActivityScreen(
             paymentMethod = paymentMethodInUse?.current,
             isDefault = paymentMethodInUse?.isDefault ?: true,
             onSetDefault = {
-                if (account.membership.isInvalidStripe) {
+                if (account.membership.isStripe) {
+                    // Otherwise we are should obtain
+                    // user's permission since we are updating
+                    // a valid subscription.
+                    setAlertPayMethod(it)
+                } else {
                     // If not a valid stripe subscription,
                     // set this payment method as default
                     // under customer object
@@ -142,11 +147,6 @@ fun StripeWalletActivityScreen(
                         account = account,
                         paymentMethod = it,
                     )
-                } else {
-                    // Otherwise we are should obtain
-                    // user's permission since we are updating
-                    // a valid subscription.
-                    setAlertPayMethod(it)
                 }
             },
             onAddCard = {
