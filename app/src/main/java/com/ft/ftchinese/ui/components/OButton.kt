@@ -75,6 +75,19 @@ object OButtonDefaults {
         contentColor = contentColor,
         disabledContentColor = contentColor.copy(alpha = 0.4F),
     )
+
+    @Composable
+    fun selectButtonColors(
+        backgroundColor: Color = OColor.teal,
+        contentColor: Color = OColor.white,
+        unselectedBackgroundColor: Color = Color.Transparent,
+        unselectedContentColor: Color = OColor.teal,
+    ): ButtonColors = ButtonDefaults.buttonColors(
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+        disabledBackgroundColor = unselectedBackgroundColor,
+        disabledContentColor = unselectedContentColor
+    )
 }
 
 @Composable
@@ -85,12 +98,12 @@ fun SelectButton(
     enabled: Boolean = true,
     shape: Shape = MaterialTheme.shapes.small,
     border: BorderStroke? = null,
-    colors: ButtonColors = OButtonDefaults.buttonColors(),
+    colors: ButtonColors = OButtonDefaults.selectButtonColors(),
     contentPadding: PaddingValues = OButtonDefaults.ContentPadding,
     content: @Composable () -> Unit,
 ) {
 
-    val contentColor by colors.contentColor(enabled)
+    val contentColor by colors.contentColor(selected)
 
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
@@ -108,7 +121,7 @@ fun SelectButton(
                     )
                     .then(if (border != null) Modifier.border(border, shape) else Modifier)
                     .clip(shape = shape)
-                    .background(colors.backgroundColor(enabled).value)
+                    .background(colors.backgroundColor(selected).value)
                     .padding(contentPadding),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
