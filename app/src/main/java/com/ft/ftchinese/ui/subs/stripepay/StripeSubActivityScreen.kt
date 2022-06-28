@@ -112,6 +112,12 @@ fun StripeSubActivityScreen(
         }
     }
 
+    LaunchedEffect(key1 = paymentState.subsResult) {
+        paymentState.subsResult?.let {
+            userViewModel.saveMembership(it.membership)
+        }
+    }
+
     LaunchedEffect(key1 = Unit) {
         paymentState.loadDefaultPaymentMethod(account)
     }
