@@ -373,7 +373,7 @@ object StripeClient {
         }
     }
 
-    fun updateSubs(account: Account, params: SubParams): StripeSubsResult? {
+    private fun updateSubs(account: Account, params: SubParams): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
@@ -392,7 +392,7 @@ object StripeClient {
     suspend fun asyncUpdateSubs(account: Account, params: SubParams): FetchResult<StripeSubsResult> {
         return try {
             val result = withContext(Dispatchers.IO) {
-                StripeClient.updateSubs(account, params)
+                updateSubs(account, params)
             }
 
             if (result == null) {
