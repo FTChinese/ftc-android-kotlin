@@ -33,6 +33,10 @@ class SearchState(
     var keywordSet by mutableStateOf<LinkedHashSet<String>>(linkedSetOf())
         private set
 
+    /**
+     * Here you can call webClient.navigator.reload() to force
+     * Compose reloading HTML and thus trigger onPageStarted().
+     */
     var webView: WebView? = null
         private set
 

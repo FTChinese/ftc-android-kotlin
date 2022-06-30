@@ -11,12 +11,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.components.rememberSearchInputState
 import com.ft.ftchinese.ui.web.FtcWebView
-import com.ft.ftchinese.ui.web.WebViewCallback
-import com.ft.ftchinese.ui.web.rememberFtcWebViewClient
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
-
-private const val TAG = "SearchActivity"
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -25,8 +21,6 @@ fun SearchActivityScreen(
     scaffoldState: ScaffoldState,
     onBack: () -> Unit,
 ) {
-
-    val context = LocalContext.current
 
     val accountState = userViewModel.accountLiveData.observeAsState()
 
@@ -49,28 +43,6 @@ fun SearchActivityScreen(
         barState.requestFocus()
         searchState.loadKeywordHistory()
     }
-
-    val wvClientCallback = remember {
-        object : WebViewCallback(context) {
-
-//            override fun onPageStarted(view: WebView?, url: String?) {
-//                Log.i(TAG, "Page started")
-//                if (barState.keyword.isNotBlank()) {
-//                    view?.evaluateJavascript(JsSnippets.search(barState.keyword)) {
-//                        Log.i("Search", "search() called upon page loading")
-//                    }
-//                }
-//            }
-        }
-    }
-
-    /**
-     * Here you can call webClient.navigator.reload() to force
-     * Compose reloading HTML and thus trigger onPageStarted().
-     */
-    val webClient = rememberFtcWebViewClient(
-        callback = wvClientCallback
-    )
 
     SearchScreen(
         loading = searchState.progress.value,
