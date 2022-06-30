@@ -56,7 +56,6 @@ fun MainToolBar(
             null
         },
         elevation = Dimens.zero,
-        backgroundColor = OColor.wheat,
         actions = {
             IconButton(
                 onClick = onSearch

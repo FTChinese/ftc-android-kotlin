@@ -7,12 +7,12 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
 private val LightColors = lightColors(
+    primary = OColor.wheat, // Affects toolbar background
+    onPrimary = OColor.black, // Affects toolbar content.
     background = OColor.paper,
 )
 
-private val DarkColors = darkColors(
-    background = OColor.black80,
-)
+private val DarkColors = darkColors()
 
 @Composable
 fun OTheme(
@@ -20,7 +20,7 @@ fun OTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colors = LightColors,
+        colors = if (darkTheme) DarkColors else LightColors,
         content = content
     )
 }

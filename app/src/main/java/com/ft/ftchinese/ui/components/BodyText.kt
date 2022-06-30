@@ -10,7 +10,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
-import com.ft.ftchinese.ui.theme.OColor
 
 // Size 16
 @Composable
@@ -18,7 +17,7 @@ fun BodyText0(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
     text: String,
-    color: Color = OColor.black
+    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,
@@ -39,7 +38,7 @@ fun BodyText1(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
     text: String,
-    color: Color = OColor.black
+    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,
@@ -56,7 +55,7 @@ fun BodyText2(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Start,
     text: String,
-    color: Color = OColor.black60
+    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,

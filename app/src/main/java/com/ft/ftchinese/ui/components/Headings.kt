@@ -28,7 +28,7 @@ fun Heading1(
 fun Heading2(
     text: String,
     textAlign: TextAlign = TextAlign.Center,
-    color: Color = OColor.black60
+    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,
@@ -43,7 +43,7 @@ fun Heading2(
 fun Heading3(
     text: String,
     textAlign: TextAlign = TextAlign.Center,
-    color: Color = OColor.black60
+    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,
@@ -59,7 +59,7 @@ fun SubHeading1(
     text: String,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
-    color: Color = OColor.black
+    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,
@@ -75,7 +75,7 @@ fun SubHeading2(
     text: String,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
-    color: Color = OColor.black
+    color: Color = Color.Unspecified
 ) {
     Text(
         text = text,
