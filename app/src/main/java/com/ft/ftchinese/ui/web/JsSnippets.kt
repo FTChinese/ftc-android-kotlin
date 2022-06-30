@@ -71,9 +71,7 @@ object JsSnippets {
     // content of each url.
     fun search(keyword: String): String {
         return """
-            setTimeout(function(){
-                search('$keyword');
-            }, 80);
+           search('$keyword');
         """.trimIndent()
     }
 }

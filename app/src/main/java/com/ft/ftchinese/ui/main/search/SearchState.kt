@@ -116,9 +116,8 @@ class SearchState(
 
         scope.launch {
             val template = cache.readSearchTemplate()
-
-            htmlLoaded = TemplateBuilder(template)
-                .withSearch()
+                htmlLoaded = TemplateBuilder(template)
+                .withSearch(kw)
                 .render()
 
             progress.value = false

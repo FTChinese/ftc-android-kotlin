@@ -1,7 +1,5 @@
 package com.ft.ftchinese.ui.main.search
 
-import android.util.Log
-import android.webkit.WebView
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,7 +11,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.components.rememberSearchInputState
 import com.ft.ftchinese.ui.web.FtcWebView
-import com.ft.ftchinese.ui.web.JsSnippets
 import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.ui.web.rememberFtcWebViewClient
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -56,14 +53,14 @@ fun SearchActivityScreen(
     val wvClientCallback = remember {
         object : WebViewCallback(context) {
 
-            override fun onPageStarted(view: WebView?, url: String?) {
-                Log.i(TAG, "Page started")
-                if (barState.keyword.isNotBlank()) {
-                    view?.evaluateJavascript(JsSnippets.search(barState.keyword)) {
-                        Log.i("Search", "search() called upon page loading")
-                    }
-                }
-            }
+//            override fun onPageStarted(view: WebView?, url: String?) {
+//                Log.i(TAG, "Page started")
+//                if (barState.keyword.isNotBlank()) {
+//                    view?.evaluateJavascript(JsSnippets.search(barState.keyword)) {
+//                        Log.i("Search", "search() called upon page loading")
+//                    }
+//                }
+//            }
         }
     }
 

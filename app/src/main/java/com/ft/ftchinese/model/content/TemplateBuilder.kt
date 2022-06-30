@@ -6,6 +6,7 @@ import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.tracking.AdParser
 import com.ft.ftchinese.tracking.AdPosition
 import com.ft.ftchinese.tracking.JSCodes
+import com.ft.ftchinese.ui.web.JsSnippets
 
 private const val TAG = "StoryBuilder"
 
@@ -182,8 +183,9 @@ var androidUserAddress = ${addr.toJsonString()}
         return this
     }
 
-    fun withSearch(): TemplateBuilder {
+    fun withSearch(keyword: String): TemplateBuilder {
         ctx["{search-html}"] = ""
+        ctx["/*run-android-search-js*/"] = JsSnippets.search(keyword)
         return this
     }
 }
