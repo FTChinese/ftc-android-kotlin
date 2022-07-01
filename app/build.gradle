@@ -68,6 +68,11 @@ android {
         buildConfigField "String", "BASE_URL_B2B", props.getProperty("base_url.b2b")
         buildConfigField "String", "BASE_URL_FALLBACK", props.getProperty("base_url.fallback")
 
+        buildConfigField "String", "BASE_URL_STANDARD_TRADITIONAL", props.getProperty("base_url.standard_traditional")
+        buildConfigField "String", "BASE_URL_PREMIUM_TRADITIONAL", props.getProperty("base_url.premium_traditional")
+        buildConfigField "String", "BASE_URL_B2B_TRADITIONAL", props.getProperty("base_url.b2b_traditional")
+        buildConfigField "String", "BASE_URL_FALLBACK_TRADITIONAL", props.getProperty("base_url.fallback_traditional")
+
         buildConfigField "String", "API_CONTENT_LIVE", props.getProperty("api_url.content.live")
         buildConfigField "String", "API_SUBS_LIVE", props.getProperty("api_url.subs.live")
         buildConfigField "String", "API_SUBS_SANDBOX", props.getProperty("api_url.subs.sandbox")

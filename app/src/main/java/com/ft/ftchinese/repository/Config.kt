@@ -1,10 +1,14 @@
 package com.ft.ftchinese.repository
 
+import android.content.res.Resources
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Account
+import java.util.*
 
 object Config {
 
@@ -31,7 +35,24 @@ object Config {
         return HOST_FTA == host
     }
 
+    private fun getLanguageTag(): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return Resources.getSystem().getConfiguration().getLocales().get(0).toLanguageTag()
+        }
+        return Locale.getDefault().toLanguageTag()
+    }
+
     fun discoverServer(account: Account?): String {
+        val languageTag = getLanguageTag()
+        Log.i("discoverServer", "language and country: $languageTag")
+        val isTraditionalChinese = arrayOf("zh-HK", "zh-MO", "zh-TW", "zh-CHT").contains(languageTag)
+        if (isTraditionalChinese) {
+            return when (account?.membership?.tier) {
+                Tier.STANDARD -> BuildConfig.BASE_URL_STANDARD_TRADITIONAL
+                Tier.PREMIUM -> BuildConfig.BASE_URL_PREMIUM_TRADITIONAL
+                else -> BuildConfig.BASE_URL_FALLBACK_TRADITIONAL
+            }
+        }
         return when (account?.membership?.tier) {
             Tier.STANDARD -> BuildConfig.BASE_URL_STANDARD
             Tier.PREMIUM -> BuildConfig.BASE_URL_PREMIUM
