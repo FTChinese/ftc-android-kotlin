@@ -28,9 +28,7 @@ fun MainBottomBar(
     onClick: (MainNavScreen) -> Unit
 ) {
 
-    BottomNav(
-        backgroundColor = OColor.wheat,
-    ) {
+    BottomNav {
         bottomNavItems.forEach { item ->
             BottomNavItem(
                 icon = {

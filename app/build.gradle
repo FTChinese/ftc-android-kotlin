@@ -56,8 +56,8 @@ android {
         // Target sdk version 30 cannot call wechat SDK.
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 32
-        versionCode 101
-        versionName "6.5.1"
+        versionCode 102
+        versionName "6.5.2"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -188,7 +188,7 @@ dependencies {
     def room_version = '2.4.2'
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
-    def compose_ui = "1.2.0-rc01"
+    def compose_ui = "1.2.0-rc02"
     def accompanist = "0.24.10-beta"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.

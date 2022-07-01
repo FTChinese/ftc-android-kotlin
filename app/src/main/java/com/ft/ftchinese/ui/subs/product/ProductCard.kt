@@ -1,10 +1,7 @@
 package com.ft.ftchinese.ui.subs.product
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +22,7 @@ import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
 
-@OptIn(androidx.compose.material.ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProductCard(
     item: ProductItem,
@@ -43,7 +40,7 @@ fun ProductCard(
             item.ftcItems.forEach { cartItem ->
                 Card(
                     onClick = { onFtcPay(cartItem) },
-                    backgroundColor = OColor.wheat,
+                    backgroundColor = MaterialTheme.colors.primarySurface,
                     elevation = Dimens.dp4
                 ) {
                     PriceCard(

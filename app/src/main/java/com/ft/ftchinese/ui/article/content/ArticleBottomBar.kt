@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
@@ -21,10 +24,11 @@ fun ArticleBottomBar(
     bookmarked: Boolean,
     onBookmark: (Boolean) -> Unit,
     onShare: () -> Unit,
+    backgroundColor: Color = MaterialTheme.colors.primarySurface,
 ) {
     Row(
         modifier = Modifier
-            .background(OColor.wheat)
+            .background(backgroundColor)
             .padding(
                 horizontal = Dimens.dp16,
                 vertical = Dimens.dp8,
@@ -64,8 +68,7 @@ fun ArticleBottomBar(
 fun PreviewBottomTool() {
     ArticleBottomBar(
         bookmarked = true,
-        onBookmark = {}
-    ) {
-
-    }
+        onBookmark = {},
+        onShare = {}
+    )
 }

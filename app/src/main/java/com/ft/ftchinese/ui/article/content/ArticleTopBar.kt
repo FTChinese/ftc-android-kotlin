@@ -25,9 +25,7 @@ fun ArticleToolBar(
     onClickAudio: () -> Unit,
     onBack: () -> Unit,
 ) {
-    TopAppBar(
-        backgroundColor = OColor.wheat
-    ) {
+    TopAppBar {
         IconButton(
             onClick = onBack
         ) {

@@ -5,11 +5,9 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun Toolbar(
@@ -30,7 +28,6 @@ fun Toolbar(
         },
         actions = actions,
         elevation = Dimens.dp4,
-        backgroundColor = OColor.wheat
     )
 }
 
@@ -47,7 +44,6 @@ fun PreviewToolbar() {
 fun CloseBar(
     title: String = "",
     onClose: () -> Unit,
-    backgroundColor: Color = OColor.paper,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
@@ -62,7 +58,6 @@ fun CloseBar(
             }
         },
         actions = actions,
-        backgroundColor = backgroundColor,
         elevation = 0.dp
     )
 }
