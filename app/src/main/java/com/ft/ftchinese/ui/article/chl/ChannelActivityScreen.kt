@@ -105,9 +105,11 @@ fun ChannelActivityScreen(
         }
     }
 
-    LaunchedEffect(key1 = baseUrl, channelState.channelSource) {
+    LaunchedEffect(
+        key1 = account,
+        key2 = channelState.channelSource
+    ) {
         channelState.initLoading(
-            baseUrl = baseUrl,
             account = userViewModel.account
         )
     }
@@ -133,7 +135,6 @@ fun ChannelActivityScreen(
             ),
             onRefresh = {
                 channelState.refresh(
-                    baseUrl = baseUrl,
                     account = userViewModel.account
                 )
             },

@@ -17,6 +17,7 @@ import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.components.sendChannelReadLen
+import com.ft.ftchinese.ui.util.UriUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,15 +63,19 @@ class ChannelState(
     }
 
     fun initLoading(
-        baseUrl: String,
         account: Account?
     ) {
         val source = channelSource ?: return
         progress.value = true
         scope.launch {
             val result = retrieveHtml(
-                source,
-                baseUrl,
+                url = UriUtils.channelUrl(
+                    source = source,
+                    account = account,
+                ),
+                cacheName = UriUtils.channelCacheName(
+                    source = source,
+                ),
                 refresh = false
             )
 
@@ -94,7 +99,6 @@ class ChannelState(
                     if (!result.data.isRemote) {
                         silentUpdate(
                             source = source,
-                            baseUrl = baseUrl,
                             account = account,
                         )
                     }
@@ -105,12 +109,16 @@ class ChannelState(
 
     private suspend fun silentUpdate(
         source: ChannelSource,
-        baseUrl: String,
         account: Account?
     ) {
         val result = retrieveHtml(
-            source,
-            baseUrl,
+            url = UriUtils.channelUrl(
+                source = source,
+                account = account,
+            ),
+            cacheName = UriUtils.channelCacheName(
+                source = source,
+            ),
             refresh = true
         )
 
@@ -129,15 +137,19 @@ class ChannelState(
     }
 
     fun refresh(
-        baseUrl: String,
         account: Account?
     ) {
         val source = channelSource ?: return
         refreshing = true
         scope.launch {
             val result = retrieveHtml(
-                source,
-                baseUrl,
+                url = UriUtils.channelUrl(
+                    source = source,
+                    account = account,
+                ),
+                cacheName = UriUtils.channelCacheName(
+                    source = source,
+                ),
                 refresh = true
             )
 
@@ -176,27 +188,26 @@ class ChannelState(
     }
 
     private suspend fun retrieveHtml(
-        source: ChannelSource,
-        baseUrl: String,
+        url: String?,
+        cacheName: String?,
         refresh: Boolean
     ): FetchResult<Loaded> {
-        val cacheName = source.fileName
+        Log.i(TAG, "Channel url: $url")
 
         if (!refresh && !cacheName.isNullOrBlank()) {
-            Log.i(TAG, "Load channel ${source.path} from cache")
+            Log.i(TAG, "Load channel $cacheName from cache")
             val html = cache.asyncLoadText(cacheName)
             if (html != null) {
                 return FetchResult.Success(
                     Loaded(
-                    html = html,
-                    isRemote = false
-                )
+                        html = html,
+                        isRemote = false
+                    )
                 )
             }
         }
 
-        val url = source.htmlUrl(baseUrl)
-        Log.i(TAG,"Channel url for ${source.path} is empty")
+        Log.i(TAG,"Channel url for $cacheName is empty")
 
         if (url.isNullOrBlank()) {
             return FetchResult.TextError("Empty url to load")
@@ -224,9 +235,9 @@ class ChannelState(
 
                 return FetchResult.Success(
                     Loaded(
-                    html = result.data,
-                    isRemote = true
-                )
+                        html = result.data,
+                        isRemote = true
+                    )
                 )
             }
         }
