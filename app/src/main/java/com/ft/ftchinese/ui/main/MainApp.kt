@@ -119,6 +119,7 @@ fun MainApp(
                     route = MainNavScreen.News.route
                 ) {
                     ChannelPagerScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffoldState,
                         channelSources = TabPages.newsPages,
                         onTabSelected = {
@@ -131,6 +132,7 @@ fun MainApp(
                     route = MainNavScreen.English.route
                 ) {
                     ChannelPagerScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffoldState,
                         channelSources = TabPages.englishPages,
                         onTabSelected = {
@@ -143,6 +145,7 @@ fun MainApp(
                     route = MainNavScreen.FtAcademy.route
                 ) {
                     ChannelPagerScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffoldState,
                         channelSources = TabPages.ftaPages,
                         onTabSelected = {
@@ -155,6 +158,7 @@ fun MainApp(
                     route = MainNavScreen.Video.route
                 ) {
                     ChannelPagerScreen(
+                        userViewModel = userViewModel,
                         scaffoldState = scaffoldState,
                         channelSources = TabPages.videoPages,
                         onTabSelected = {

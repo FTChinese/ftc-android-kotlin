@@ -46,10 +46,6 @@ fun ChannelTabScreen(
         scaffoldState = scaffoldState,
     )
 
-    LaunchedEffect(key1 = Unit) {
-        channelState.setTabbedChannelSource(channelSource)
-    }
-
     val wvState = rememberWebViewStateWithHTMLData(
         data = channelState.htmlLoaded,
         baseUrl = baseUrl
@@ -72,9 +68,12 @@ fun ChannelTabScreen(
         }
     }
 
-    LaunchedEffect(key1 = baseUrl, channelState.channelSource) {
+    LaunchedEffect(
+        key1 = accountState.value,
+        key2 = channelState.channelSource
+    ) {
+        channelState.setTabbedChannelSource(channelSource)
         channelState.initLoading(
-            baseUrl = baseUrl,
             account = userViewModel.account
         )
     }
@@ -100,7 +99,6 @@ fun ChannelTabScreen(
             ),
             onRefresh = {
                 channelState.refresh(
-                    baseUrl = baseUrl,
                     account = userViewModel.account
                 )
             },
