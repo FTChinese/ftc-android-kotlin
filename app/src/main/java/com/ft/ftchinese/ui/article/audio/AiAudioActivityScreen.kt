@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.util.UriUtils
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewState
@@ -30,8 +31,9 @@ fun AiAudioActivityScreen(
     val url = remember(accountState.value) {
         NavStore
             .getTeaser(id)
-            ?.htmlUrl(accountState.value)
-
+            ?.let {
+                UriUtils.teaserUrl(it, accountState.value)
+            }
     }
 
     if (url.isNullOrBlank()) {

@@ -10,8 +10,8 @@ import androidx.work.workDataOf
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.service.*
+import com.ft.ftchinese.ui.util.UriUtils
 import java.util.*
 
 @Composable
@@ -48,7 +48,7 @@ fun sendArticleReadLen(
 ) {
     val data: Data = workDataOf(
         KEY_DUR_URL to "/android/${teaser.type}/${teaser.id}/${teaser.title}",
-        KEY_DUR_REFER to HostConfig.discoverServer(account),
+        KEY_DUR_REFER to UriUtils.discoverHost(account?.membership.tier),
         KEY_DUR_START to startAt,
         KEY_DUR_END to Date().time / 1000,
         KEY_DUR_USER_ID to account.id

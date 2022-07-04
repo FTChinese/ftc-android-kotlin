@@ -1,12 +1,8 @@
 package com.ft.ftchinese.model.content
 
-import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.ArticleType
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.HostConfig
-import com.ft.ftchinese.ui.util.UriUtils
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -144,77 +140,13 @@ data class Teaser(
             (type == ArticleType.Interactive && subType == "bilingual")
 
 
-    private val jsApiPath: String
+    val jsApiPath: String
         get () = when (type) {
             ArticleType.Story,
             ArticleType.Premium -> "/index.php/jsapi/get_story_more_info/${id}"
             ArticleType.Interactive -> "/index.php/jsapi/get_interactive_more_info/${id}"
             else -> ""
         }
-
-    private fun jsApiUrl(account: Account?): String {
-        return "${HostConfig.discoverServer(account)}${jsApiPath}"
-    }
-
-    fun htmlUrl(account: Account?): String? {
-        if (id.isBlank()) {
-            return null
-        }
-
-        val builder = Uri.parse(HostConfig.discoverServer(account))
-            .buildUpon()
-
-        // Otherwise use webpage.
-        builder
-            .appendPath(type.toString())
-            .appendPath(id)
-
-
-        langVariant.aiAudioPathSuffix().let {
-            builder.appendPath(it)
-        }
-
-        builder.appendQueryParameter("webview", "ftcapp")
-
-        when (type) {
-            ArticleType.Interactive -> {
-
-                builder
-                    .appendQueryParameter("001", "")
-                    .appendQueryParameter("exclusive", "")
-
-                when (subType) {
-                    SUB_TYPE_RADIO,
-                    SUB_TYPE_SPEED_READING,
-                    SUB_TYPE_MBAGYM -> {
-                    }
-
-                    else -> builder
-                        .appendQueryParameter("hideheader", "yes")
-                        .appendQueryParameter("ad", "no")
-                        .appendQueryParameter("inNavigation", "yes")
-                        .appendQueryParameter("for", "audio")
-                        .appendQueryParameter("enableScript", "yes")
-                        .appendQueryParameter("timestamp", "${Date().time}")
-                }
-            }
-
-            ArticleType.Video -> builder
-                .appendQueryParameter("004", "")
-
-            else -> {}
-        }
-
-        return UriUtils.appendUtm(builder).build().toString()
-    }
-
-    fun contentUrl(account: Account?): String? {
-        return if (hasJsAPI) {
-            jsApiUrl(account)
-        } else {
-            htmlUrl(account)
-        }
-    }
 
     fun buildGALabel(): String {
         return when (type) {

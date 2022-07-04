@@ -9,11 +9,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
+import com.ft.ftchinese.ui.components.rememberBaseUrl
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
@@ -39,9 +39,7 @@ fun BuyerInfoActivityScreen(
         FileStore(context)
     }
 
-    val baseUrl = remember(account) {
-        HostConfig.discoverServer(account)
-    }
+    val baseUrl = rememberBaseUrl(account)
 
     val infoState = rememberBuyerInfoState(
         scaffoldState = scaffoldState

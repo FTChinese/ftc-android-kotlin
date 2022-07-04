@@ -4,10 +4,9 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ft.ftchinese.repository.HostConfig
+import com.ft.ftchinese.ui.components.rememberBaseUrl
 import com.ft.ftchinese.ui.components.rememberSearchInputState
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -23,9 +22,7 @@ fun SearchActivityScreen(
 
     val accountState = userViewModel.accountLiveData.observeAsState()
 
-    val baseUrl = remember(accountState.value) {
-        HostConfig.discoverServer(accountState.value)
-    }
+    val baseUrl = rememberBaseUrl(account = accountState.value)
 
     val searchState = rememberSearchState(
         scaffoldState = scaffoldState

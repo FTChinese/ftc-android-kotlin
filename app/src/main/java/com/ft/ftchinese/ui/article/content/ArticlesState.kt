@@ -27,11 +27,8 @@ import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
-import com.ft.ftchinese.ui.util.ConnectionState
-import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
-import com.ft.ftchinese.ui.util.ImageUtil
-import com.ft.ftchinese.ui.util.ShareUtils
+import com.ft.ftchinese.ui.util.*
 import com.ft.ftchinese.ui.web.JsSnippets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -112,8 +109,6 @@ class ArticlesState(
         lang: Language,
         account: Account?
     ) {
-
-        val t = currentTeaser ?: return
 
         if (lang == language) {
             return
@@ -219,7 +214,7 @@ class ArticlesState(
             }
         }
 
-        val url = teaser.contentUrl(account)
+        val url = UriUtils.teaserUrl(teaser, account)
         Log.i(TAG, "Try to fetch data from $url")
 
         if (url.isNullOrBlank()) {

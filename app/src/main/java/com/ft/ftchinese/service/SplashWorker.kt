@@ -8,12 +8,12 @@ import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.splash.Schedule
 import com.ft.ftchinese.repository.AdClient
-import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.repository.Endpoint
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.SplashStore
+import com.ft.ftchinese.ui.util.UriUtils
 import kotlinx.serialization.decodeFromString
 
 private const val TAG = "SplashWorker"
@@ -79,7 +79,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
     }
 
     private fun downloadSchedule(): Schedule? {
-        val url = "${HostConfig.discoverServer(userSession.loadAccount())}${Endpoint.splashSchedule}"
+        val url = "${UriUtils.discoverHost(userSession.loadAccount()?.membership?.tier)}${Endpoint.splashSchedule}"
 
         Log.i(TAG,"Start download splash schedule")
         try {

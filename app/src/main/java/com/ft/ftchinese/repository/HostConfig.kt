@@ -1,11 +1,20 @@
 package com.ft.ftchinese.repository
 
-import android.content.res.Resources
-import android.os.Build
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.reader.Account
 import java.util.*
+
+data class ContentHosts(
+    val premium: String,
+    val standard: String,
+    val free: String,
+) {
+    fun pick(tier: Tier?) = when (tier) {
+        Tier.STANDARD -> standard
+        Tier.PREMIUM -> premium
+        else -> free
+    }
+}
 
 object HostConfig {
 
@@ -16,13 +25,29 @@ object HostConfig {
 
     const val canonicalUrl = "${urlScheme}${HOST_FTC}"
 
+    val simplifiedContentHosts = ContentHosts(
+        premium = BuildConfig.BASE_URL_PREMIUM,
+        standard = BuildConfig.BASE_URL_STANDARD,
+        free = BuildConfig.BASE_URL_FALLBACK
+    )
+
+    val traditionalContentHosts = ContentHosts(
+        premium = BuildConfig.BASE_URL_PREMIUM_TRADITIONAL,
+        standard = BuildConfig.BASE_URL_STANDARD_TRADITIONAL,
+        free = BuildConfig.BASE_URL_FALLBACK_TRADITIONAL
+    )
+
     private val internalHost = listOf(
         HOST_FTC,
-        BuildConfig.BASE_URL_FALLBACK.removePrefix(urlScheme),
-        BuildConfig.BASE_URL_STANDARD.removePrefix(urlScheme),
-        BuildConfig.BASE_URL_PREMIUM.removePrefix(urlScheme),
-        BuildConfig.BASE_URL_B2B.removePrefix(urlScheme),
-    )
+    ) + listOf(
+        BuildConfig.BASE_URL_PREMIUM,
+        BuildConfig.BASE_URL_STANDARD,
+        BuildConfig.BASE_URL_FALLBACK,
+        BuildConfig.BASE_URL_B2B,
+        BuildConfig.BASE_URL_PREMIUM_TRADITIONAL,
+        BuildConfig.BASE_URL_STANDARD_TRADITIONAL,
+        BuildConfig.BASE_URL_FALLBACK_TRADITIONAL
+    ).map { it.removePrefix(urlScheme) }
 
     fun isInternalLink(host: String): Boolean {
         return internalHost.contains(host)
@@ -32,28 +57,29 @@ object HostConfig {
         return HOST_FTA == host
     }
 
-    private fun getLanguageTag(): String {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            return Resources.getSystem().getConfiguration().getLocales().get(0).toLanguageTag()
-        }
-        return Locale.getDefault().toLanguageTag()
-    }
+//    private fun getLanguageTag(): String {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//            return Resources.getSystem().getConfiguration().getLocales().get(0).toLanguageTag()
+//        }
+//        return Locale.getDefault().toLanguageTag()
+//    }
 
-    fun discoverServer(account: Account?): String {
-        val languageTag = getLanguageTag()
-        val isTraditionalChinese = arrayOf("zh-HK", "zh-MO", "zh-TW", "zh-CHT").contains(languageTag)
-        if (isTraditionalChinese) {
-            return when (account?.membership?.tier) {
-                Tier.STANDARD -> BuildConfig.BASE_URL_STANDARD_TRADITIONAL
-                Tier.PREMIUM -> BuildConfig.BASE_URL_PREMIUM_TRADITIONAL
-                else -> BuildConfig.BASE_URL_FALLBACK_TRADITIONAL
-            }
-        }
-        return when (account?.membership?.tier) {
-            Tier.STANDARD -> BuildConfig.BASE_URL_STANDARD
-            Tier.PREMIUM -> BuildConfig.BASE_URL_PREMIUM
-            else -> BuildConfig.BASE_URL_FALLBACK
-        }
-    }
+//    @Deprecated("", ReplaceWith("UriUtils.discoverHost"))
+//    fun discoverServer(account: Account?): String {
+//        val languageTag = getLanguageTag()
+//        val isTraditionalChinese = arrayOf("zh-HK", "zh-MO", "zh-TW", "zh-CHT").contains(languageTag)
+//        if (isTraditionalChinese) {
+//            return when (account?.membership?.tier) {
+//                Tier.STANDARD -> BuildConfig.BASE_URL_STANDARD_TRADITIONAL
+//                Tier.PREMIUM -> BuildConfig.BASE_URL_PREMIUM_TRADITIONAL
+//                else -> BuildConfig.BASE_URL_FALLBACK_TRADITIONAL
+//            }
+//        }
+//        return when (account?.membership?.tier) {
+//            Tier.STANDARD -> BuildConfig.BASE_URL_STANDARD
+//            Tier.PREMIUM -> BuildConfig.BASE_URL_PREMIUM
+//            else -> BuildConfig.BASE_URL_FALLBACK
+//        }
+//    }
 
 }
