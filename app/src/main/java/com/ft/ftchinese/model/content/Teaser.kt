@@ -126,13 +126,6 @@ data class Teaser(
         )
     }
 
-    val cacheFileName: String
-        get() = if (hasJsAPI) {
-            "${type}_$id.json"
-        } else {
-            "${type}_$id.html"
-        }
-
     // Only stories have api.
     val hasJsAPI: Boolean
         get() = type == ArticleType.Story ||
