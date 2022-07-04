@@ -203,7 +203,7 @@ class ArticlesState(
         account: Account?,
         refresh: Boolean
     ): FetchResult<String> {
-        val cachedFileName = teaser.cacheFileName
+        val cachedFileName = UriUtils.articleCacheName(teaser)
 
         if (!refresh) {
             Log.i(TAG, "Try to find cached file $cachedFileName")
