@@ -220,6 +220,9 @@ data class Membership(
     val isZero: Boolean
         get() = tier == null
 
+    val isB2b: Boolean
+        get() = payMethod == PayMethod.B2B
+
     val unlinkToEmailOnly: Boolean
         get() = arrayOf(
             PayMethod.STRIPE,
