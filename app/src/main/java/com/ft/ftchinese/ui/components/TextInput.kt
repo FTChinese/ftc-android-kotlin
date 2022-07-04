@@ -18,6 +18,15 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.validator.ValidationRule
 
+object OTextFieldDefaults {
+    @Composable
+    fun outlineTextFieldColors() = TextFieldDefaults.outlinedTextFieldColors(
+        cursorColor = OColor.teal,
+        focusedBorderColor = OColor.teal.copy(alpha = ContentAlpha.high),
+        focusedLabelColor = OColor.teal,
+    )
+}
+
 class InputState(
     initialValue: String = "",
     private val rules: List<ValidationRule> = listOf()
@@ -126,6 +135,7 @@ fun InputField(
         readOnly = readOnly,
         enabled = enabled,
         singleLine = singleLine,
+        colors = OTextFieldDefaults.outlineTextFieldColors()
     )
 }
 
