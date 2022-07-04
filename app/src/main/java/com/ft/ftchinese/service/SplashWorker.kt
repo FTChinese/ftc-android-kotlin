@@ -79,7 +79,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
     }
 
     private fun downloadSchedule(): Schedule? {
-        val url = "${UriUtils.discoverHost(userSession.loadAccount()?.membership?.tier)}${Endpoint.splashSchedule}"
+        val url = "${UriUtils.discoverHost(userSession.loadAccount()?.membership)}${Endpoint.splashSchedule}"
 
         Log.i(TAG,"Start download splash schedule")
         try {
