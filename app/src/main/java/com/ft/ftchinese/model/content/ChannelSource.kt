@@ -1,9 +1,7 @@
 package com.ft.ftchinese.model.content
 
-import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.ui.util.UriUtils
 import kotlinx.parcelize.Parcelize
 
 const val HTML_TYPE_FRAGMENT = 1
@@ -43,27 +41,6 @@ data class ChannelSource (
             permission = p
         )
     }
-
-    fun htmlUrl(baseUrl: String): String? {
-        return try {
-            val builder = Uri.parse(baseUrl)
-                .buildUpon()
-                .path(path)
-                .encodedQuery(query)
-                .appendQueryParameter("webview", "ftcapp")
-
-            if (isFragment) {
-                builder.appendQueryParameter("bodyonly", "yes")
-            }
-
-            UriUtils.appendUtm(builder).build().toString()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    val fileName: String?
-        get() = if (name.isBlank()) null else "$name.html"
 
     /**
      * Returns a new instance for a pagination link.
@@ -178,14 +155,5 @@ val pathToTitle = mapOf(
     "ebook-english-1" to "读FT学英语",
     "2018lunchwiththeft1" to "与FT共进午餐"
 
-)
-
-val noAccess = mapOf(
-    // /channel/english.html?webview=ftcapp
-    "english.html" to "每日英语",
-    // /channel/mba.html?webview=ftcapp
-    "mba.html" to "FT商学院",
-    // /channel/weekly.html
-    "weekly.html" to "热门文章"
 )
 
