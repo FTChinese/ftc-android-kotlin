@@ -114,6 +114,7 @@ class MainActivity : ComponentActivity() {
         conversionViewModel.launchTask(3, 30, 7)
     }
 
+    // Ensure ChannelPageScreen is updated in case user' account changed.
     override fun onResume() {
         super.onResume()
 
