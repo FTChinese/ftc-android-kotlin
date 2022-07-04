@@ -14,7 +14,7 @@ import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.model.request.WxMiniParams
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.tracking.GACategory
 import com.ft.ftchinese.tracking.PaywallSource
@@ -84,8 +84,8 @@ sealed class WvUrlEvent {
                  */
                 "http", "https" -> when {
                     containWxMiniProgram(uri) -> ofWxMiniProgram(uri)
-                    Config.isInternalLink(uri.host ?: "") -> ofInSiteLink(uri)
-                    Config.isFtaLink(uri.host ?: "") -> ofFtaSubs(uri)
+                    HostConfig.isInternalLink(uri.host ?: "") -> ofInSiteLink(uri)
+                    HostConfig.isFtaLink(uri.host ?: "") -> ofFtaSubs(uri)
                     else -> External(uri)
                 }
                 // For unknown schemes, simply returns true to prevent

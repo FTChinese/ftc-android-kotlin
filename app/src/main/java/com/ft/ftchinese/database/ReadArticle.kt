@@ -10,7 +10,7 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.formatSQLDateTime
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.HostConfig
 import org.threeten.bp.LocalDateTime
 import java.util.*
 
@@ -62,7 +62,7 @@ data class ReadArticle(
 ) {
 
     val canonicalUrl: String
-        get() = "https://${Config.HOST_FTC}/$type/$id"
+        get() = "https://${HostConfig.HOST_FTC}/$type/$id"
 
     fun toTeaser(): Teaser {
         return Teaser(

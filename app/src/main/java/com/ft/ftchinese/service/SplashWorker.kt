@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.splash.Schedule
 import com.ft.ftchinese.repository.AdClient
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.repository.Endpoint
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileStore
@@ -79,7 +79,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
     }
 
     private fun downloadSchedule(): Schedule? {
-        val url = "${Config.discoverServer(userSession.loadAccount())}${Endpoint.splashSchedule}"
+        val url = "${HostConfig.discoverServer(userSession.loadAccount())}${Endpoint.splashSchedule}"
 
         Log.i(TAG,"Start download splash schedule")
         try {

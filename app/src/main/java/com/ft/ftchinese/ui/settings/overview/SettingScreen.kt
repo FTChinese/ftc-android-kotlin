@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.settings.overview
 
 import androidx.annotation.StringRes
 import com.ft.ftchinese.R
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.HostConfig
 
 enum class SettingScreen(
     @StringRes val titleId: Int,
@@ -21,8 +21,8 @@ enum class SettingScreen(
 
         val releaseRoutePattern = "${CheckVersion.name}/?cached={cached}"
         val newReleaseRoute = "$CheckVersion/?cached=false"
-        val releaseDeepLinkPattern = "${Config.canonicalUrl}/$releaseRoutePattern"
-        val newReleaseDeepLink = "${Config.canonicalUrl}/${CheckVersion.name}/?cached=true"
+        val releaseDeepLinkPattern = "${HostConfig.canonicalUrl}/$releaseRoutePattern"
+        val newReleaseDeepLink = "${HostConfig.canonicalUrl}/${CheckVersion.name}/?cached=true"
 
         @JvmStatic
         fun fromRoute(route: String?): SettingScreen =

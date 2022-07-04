@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.components.ProgressLayout
@@ -40,7 +40,7 @@ fun BuyerInfoActivityScreen(
     }
 
     val baseUrl = remember(account) {
-        Config.discoverServer(account)
+        HostConfig.discoverServer(account)
     }
 
     val infoState = rememberBuyerInfoState(

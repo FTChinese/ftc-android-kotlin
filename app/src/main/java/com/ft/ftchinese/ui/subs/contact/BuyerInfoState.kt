@@ -16,11 +16,11 @@ import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileStore
-import com.ft.ftchinese.ui.util.ConnectionState
-import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.UriUtils
+import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.web.JsEventListener
 import kotlinx.coroutines.*
 
@@ -55,7 +55,7 @@ class BuyerInfoState(
             return
         }
 
-        val uri = Config.buildSubsConfirmUrl(account, action)
+        val uri = UriUtils.buildSubsConfirmUrl(account, action)
         if (uri == null) {
             Log.i(TAG, "Address url is empty")
             exit = true
