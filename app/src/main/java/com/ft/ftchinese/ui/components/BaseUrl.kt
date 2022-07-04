@@ -9,5 +9,5 @@ import com.ft.ftchinese.ui.util.UriUtils
 fun rememberBaseUrl(
     account: Account?
 ) = remember(account) {
-    UriUtils.discoverHost(account?.membership?.tier)
+    UriUtils.discoverHost(account?.membership)
 }

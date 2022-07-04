@@ -2,17 +2,25 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.Tier
-import java.util.*
+import com.ft.ftchinese.model.reader.Membership
 
 data class ContentHosts(
     val premium: String,
     val standard: String,
+    val b2b: String,
     val free: String,
 ) {
-    fun pick(tier: Tier?) = when (tier) {
-        Tier.STANDARD -> standard
-        Tier.PREMIUM -> premium
-        else -> free
+
+    fun pick(membership: Membership?): String {
+        if (membership?.isB2b == true) {
+            return b2b
+        }
+
+        return when (membership?.tier) {
+            Tier.STANDARD -> standard
+            Tier.PREMIUM -> premium
+            else -> free
+        }
     }
 }
 
@@ -28,13 +36,15 @@ object HostConfig {
     val simplifiedContentHosts = ContentHosts(
         premium = BuildConfig.BASE_URL_PREMIUM,
         standard = BuildConfig.BASE_URL_STANDARD,
-        free = BuildConfig.BASE_URL_FALLBACK
+        b2b = BuildConfig.BASE_URL_B2B,
+        free = BuildConfig.BASE_URL_FALLBACK,
     )
 
     val traditionalContentHosts = ContentHosts(
         premium = BuildConfig.BASE_URL_PREMIUM_TRADITIONAL,
         standard = BuildConfig.BASE_URL_STANDARD_TRADITIONAL,
-        free = BuildConfig.BASE_URL_FALLBACK_TRADITIONAL
+        b2b = BuildConfig.BASE_URL_B2B_TRADITIONAL,
+        free = BuildConfig.BASE_URL_FALLBACK_TRADITIONAL,
     )
 
     private val internalHost = listOf(
@@ -46,7 +56,8 @@ object HostConfig {
         BuildConfig.BASE_URL_B2B,
         BuildConfig.BASE_URL_PREMIUM_TRADITIONAL,
         BuildConfig.BASE_URL_STANDARD_TRADITIONAL,
-        BuildConfig.BASE_URL_FALLBACK_TRADITIONAL
+        BuildConfig.BASE_URL_FALLBACK_TRADITIONAL,
+        BuildConfig.BASE_URL_B2B_TRADITIONAL,
     ).map { it.removePrefix(urlScheme) }
 
     fun isInternalLink(host: String): Boolean {

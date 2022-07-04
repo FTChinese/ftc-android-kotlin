@@ -48,7 +48,7 @@ fun sendArticleReadLen(
 ) {
     val data: Data = workDataOf(
         KEY_DUR_URL to "/android/${teaser.type}/${teaser.id}/${teaser.title}",
-        KEY_DUR_REFER to UriUtils.discoverHost(account?.membership.tier),
+        KEY_DUR_REFER to UriUtils.discoverHost(account.membership),
         KEY_DUR_START to startAt,
         KEY_DUR_END to Date().time / 1000,
         KEY_DUR_USER_ID to account.id
