@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.content
 import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.ui.util.UriUtils
 import kotlinx.parcelize.Parcelize
 
 const val HTML_TYPE_FRAGMENT = 1
@@ -56,7 +56,7 @@ data class ChannelSource (
                 builder.appendQueryParameter("bodyonly", "yes")
             }
 
-            Config.appendUtm(builder).build().toString()
+            UriUtils.appendUtm(builder).build().toString()
         } catch (e: Exception) {
             null
         }

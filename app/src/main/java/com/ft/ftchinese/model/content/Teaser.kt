@@ -5,7 +5,8 @@ import android.os.Parcelable
 import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.HostConfig
+import com.ft.ftchinese.ui.util.UriUtils
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -152,7 +153,7 @@ data class Teaser(
         }
 
     private fun jsApiUrl(account: Account?): String {
-        return "${Config.discoverServer(account)}${jsApiPath}"
+        return "${HostConfig.discoverServer(account)}${jsApiPath}"
     }
 
     fun htmlUrl(account: Account?): String? {
@@ -160,7 +161,7 @@ data class Teaser(
             return null
         }
 
-        val builder = Uri.parse(Config.discoverServer(account))
+        val builder = Uri.parse(HostConfig.discoverServer(account))
             .buildUpon()
 
         // Otherwise use webpage.
@@ -204,7 +205,7 @@ data class Teaser(
             else -> {}
         }
 
-        return Config.appendUtm(builder).build().toString()
+        return UriUtils.appendUtm(builder).build().toString()
     }
 
     fun contentUrl(account: Account?): String? {
