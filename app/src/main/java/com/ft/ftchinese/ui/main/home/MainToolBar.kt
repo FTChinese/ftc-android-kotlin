@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
@@ -16,7 +17,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.IconArrowBackIOS
 import com.ft.ftchinese.ui.components.IconSearch
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun MainToolBar(
@@ -28,16 +28,7 @@ fun MainToolBar(
         title = {
             when (screen) {
                 MainNavScreen.News -> {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_menu_masthead),
-                        contentDescription = "",
-                        contentScale = ContentScale.FillHeight,
-                        modifier = Modifier
-                            .padding(
-                                vertical = Dimens.dp16
-                            )
-                            .fillMaxHeight()
-                    )
+                    BrandMastHead()
                 }
                 else -> {
                     Text(text = stringResource(id = screen.titleId))
@@ -66,6 +57,23 @@ fun MainToolBar(
     )
 }
 
+@Composable
+fun BrandMastHead() {
+    Image(
+        painter = painterResource(id = if (MaterialTheme.colors.isLight) {
+            R.drawable.brand_masthead_light
+        } else {
+            R.drawable.brand_masthead_dark
+        }),
+        contentDescription = "",
+        contentScale = ContentScale.FillHeight,
+        modifier = Modifier
+            .padding(
+                vertical = Dimens.dp16
+            )
+            .fillMaxHeight()
+    )
+}
 
 @Preview
 @Composable
