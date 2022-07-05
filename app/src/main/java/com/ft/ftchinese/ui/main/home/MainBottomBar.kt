@@ -9,7 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.ft.ftchinese.ui.components.BottomNav
 import com.ft.ftchinese.ui.components.BottomNavItem
-import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.ui.theme.OColors
 
 val bottomNavItems = listOf(
     MainNavScreen.News,
@@ -48,8 +48,8 @@ fun MainBottomBar(
                 onClick = {
                     onClick(item)
                 },
-                selectedContentColor = OColor.claret,
-                unselectedContentColor = OColor.black60,
+                selectedContentColor = OColors.claretWhite,
+                unselectedContentColor = OColors.black60or30
             )
         }
     }
