@@ -5,174 +5,20 @@
     <!-- See it here: https://developer.android.com/guide/topics/ui/look-and-feel/themes#Customize -->
     <!-- It's great Google finally added this line to their docs. -->
     <!-- Also see https://stackoverflow.com/questions/45379276/how-does-inheritance-behave-when-a-style-has-both-a-parent-attribute-and-a-dotte before Google clarifies this point. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <!-- Update for compose ui: unfortunately you still need this xml theme even if you use none the xml-layout. You have to keep this style to remove android's default action bar.   -->
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:colorBackground">@color/colorPaper</item>
-        <!-- Primary color is not used as the base color of the whole app. It mostly affects the color of drawer when clicked. -->
-        <item name="colorPrimary">@color/colorBlack60</item>
-        <item name="colorPrimaryDark">@color/colorBlack30</item>
-
-        <!-- Determines the color of progress bar -->
-        <item name="colorSecondary">@color/colorClaret</item>
-        <item name="colorOnSecondary">@color/colorWhite</item>
-
-        <item name="toolbarStyle">@style/AppToolbar</item>
-
-        <item name="bottomNavigationStyle">@style/AppBottomNavigation</item>
-
-        <item name="materialButtonStyle">@style/AppButton</item>
-
-        <!-- To make both the dammed MaterialAlertDialog and AlertDialog appears the same. -->
-        <item name="alertDialogTheme">@style/DialogTheme</item>
-        <item name="materialAlertDialogTheme">@style/DialogTheme</item>
-        <item name="textInputStyle">@style/AppTextField</item>
-    </style>
-
-    <!--Style for edit text -->
-    <style name="AppTextField" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="boxStrokeColor">@color/colorClaret</item>
-    </style>
-
-    <!-- Style for buttons -->
-    <style name="AppButton" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">@color/btn_bg_color_selector</item>
-        <item name="android:textColor">@color/colorWhite</item>
-        <item name="cornerRadius">0dp</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-    </style>
-
-
-    <!-- A button sticking to the bottom the screen and fills the horizontal space of the screen -->
-    <style name="AppButton.BottomSticky">
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:minHeight">?attr/actionBarSize</item>
-    </style>
-
-    <!-- Override default outlined button color -->
-    <style name="AppButton.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <!--Stroke controls the border color -->
-        <item name="strokeColor">@color/btn_stroke_color_selector</item>
-        <item name="android:textColor">@color/btn_text_color_selector</item>
-        <item name="cornerRadius">0dp</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-    </style>
-
-    <style name="AppButton.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@color/btn_text_color_selector</item>
-    </style>
-
-    <style name="AppButton.InlineText" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="android:padding">0dp</item>
-        <item name="android:textColor">@color/btn_text_color_selector</item>
-    </style>
-
-    <!-- Style to force color on dialog buttons -->
-    <style name="DialogTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
-        <item name="colorPrimary">@color/colorClaret</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
     <!--Theme used by the splash screen-->
     <style name="AppTheme.SplashScreen">
+        <item name="android:colorBackground">@color/colorPaper</item>
+        <!-- Primary color is not used as the base color of the whole app. It mostly affects the color of drawer when clicked. -->
+        <item name="colorPrimary">@color/colorBlack60</item>
+        <item name="colorPrimaryDark">@color/colorBlack30</item>
         <item name="android:windowBackground">@drawable/splash_bg</item>
-    </style>
-
-
-    <style name="TabRadioButton" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
-        <item name="android:background">@drawable/radio_bg_color_selector</item>
-        <item name="android:textColor">@color/radio_text_color_selector</item>
-        <item name="android:paddingStart">8dp</item>
-        <item name="android:paddingEnd">8dp</item>
-        <item name="android:textAlignment">center</item>
-    </style>
-
-    <style name="TabRadioButton.Toolbar">
-        <item name="android:minHeight">0dp</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingBottom">4dp</item>
-    </style>
-
-    <!-- Style for toolbar -->
-    <style name="AppToolbar" parent="Widget.AppCompat.Toolbar">
-        <item name="android:background">@color/colorWheat</item>
-    </style>
-
-    <!-- Style for bottom navigation -->
-    <style name="AppBottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
-        <item name="itemBackground">@color/colorWheat</item>
-        <item name="itemTextColor">@color/bottom_nav_text_color_selector</item>
-        <item name="itemIconTint">@color/bottom_nav_text_color_selector</item>
-        <item name="itemHorizontalTranslationEnabled">false</item>
-    </style>
-
-
-    <!-- 34sp text as product heading -->
-    <style name="OrigamiText.Heading1" parent="TextAppearance.MaterialComponents.Headline4"/>
-    <style name="OrigamiText.Heading1.Center">
-        <item name="android:textAlignment">center</item>
-    </style>
-
-    <!-- 24 sp text as product heading -->
-    <style name="OrigamiText.Heading2" parent="TextAppearance.MaterialComponents.Headline5"/>
-    <style name="OrigamiText.Heading2.Light">
-        <item name="android:textColor">@color/colorBlack60</item>
-    </style>
-    <style name="OrigamiText.Heading2.Center">
-        <item name="android:textAlignment">center</item>
-    </style>
-
-
-    <!-- 20 sp text as product heading -->
-    <style name="OrigamiText.Heading3" parent="TextAppearance.MaterialComponents.Headline6"/>
-    <style name="OrigamiText.Heading3.Light">
-        <item name="android:textColor">@color/colorBlack60</item>
-    </style>
-    <style name="OrigamiText.Heading3.Center">
-        <item name="android:textAlignment">center</item>
-    </style>
-    <style name="OrigamiText.Heading3.Light.Center">
-        <item name="android:textColor">@color/colorBlack60</item>
-    </style>
-
-    <!-- 18sp text body with variants -->
-    <style name="OrigamiText.Body1" parent="TextAppearance.MaterialComponents.Body1">
-        <item name="android:textSize">@dimen/font_size_18</item>
-    </style>
-    <style name="OrigamiText.Body1.Center">
-        <item name="android:textAlignment">center</item>
-    </style>
-    <style name="OrigamiText.Body1.Light">
-        <item name="android:textColor">@color/colorBlack60</item>
-    </style>
-    <style name="OrigamiText.Body1.Light.Center">
-        <item name="android:textAlignment">center</item>
-    </style>
-
-    <!-- 16sp text with variants -->
-    <style name="OrigamiText.Body2" parent="TextAppearance.MaterialComponents.Body2">
-        <item name="android:textSize">@dimen/font_size_16</item>
-    </style>
-
-    <style name="OrigamiText.Body2.Center">
-        <item name="android:textAlignment">center</item>
-    </style>
-
-    <style name="OrigamiText.Body2.Light">
-        <item name="android:textColor">@color/colorBlack60</item>
-    </style>
-
-    <style name="OrigamiText.Body2.Light.Center">
-        <item name="android:textAlignment">center</item>
-    </style>
-
-    <style name="OrigamiText.Body2.Warning">
-        <item name="android:textColor">@color/colorClaret80</item>
-        <item name="android:textAlignment">center</item>
     </style>
 </resources>
