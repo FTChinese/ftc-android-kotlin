@@ -85,7 +85,7 @@ fun BottomNavItem(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewBottomNavItem() {
+fun PreviewBottomNavItemSelected() {
     BottomNavItem(
         selected = true,
         onClick = {},
@@ -105,3 +105,24 @@ fun PreviewBottomNavItem() {
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewBottomNavItemUnselected() {
+    BottomNavItem(
+        selected = false,
+        onClick = {},
+        icon = {
+            Icon(
+                painter = painterResource(id = R.drawable.english_inactive),
+                contentDescription = null
+            )
+        },
+        label = {
+            Text(
+                text = "English",
+                softWrap = false,
+            )
+        },
+        selectedContentColor = OColor.claret
+    )
+}
