@@ -139,8 +139,6 @@ var androidUserAddress = ${addr.toJsonString()}
         ctx["{story-byline}"] = story.byline
         ctx["{story-body}"] = body
 
-
-
         ctx["{comments-order}"] = story.teaser?.getCommentsOrder() ?: ""
 
         // side-container
@@ -161,6 +159,11 @@ var androidUserAddress = ${addr.toJsonString()}
 
         this.shouldHideAd = shouldHideAd
 
+        return this
+    }
+
+    fun withTheme(isLight: Boolean): TemplateBuilder {
+        ctx["{night-class}"] = if (isLight) "" else "night"
         return this
     }
 
