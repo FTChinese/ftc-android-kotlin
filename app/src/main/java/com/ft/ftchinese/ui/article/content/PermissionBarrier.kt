@@ -21,6 +21,7 @@ import com.ft.ftchinese.model.reader.MemberStatus
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OColors
 
 sealed class BarrierEvent {
     object Login : BarrierEvent()
@@ -53,7 +54,7 @@ fun PermissionBarrier(
 
         Column(
             modifier = Modifier
-                .background(Color.White)
+                .background(OColors.whiteBackground)
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
         ) {

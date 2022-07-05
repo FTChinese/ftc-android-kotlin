@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.article.chl
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -35,7 +36,8 @@ class ChannelState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     connState: State<ConnectionState>,
-    context: Context
+    context: Context,
+    private val isLight: Boolean,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
     private val cache = FileStore(context)
     private val startTime = Date().time / 1000
@@ -255,6 +257,7 @@ class ChannelState(
             TemplateBuilder(template)
                 .withChannel(content)
                 .withUserInfo(account)
+                .withTheme(isLight = isLight)
                 .render()
         }
     }
@@ -281,11 +284,13 @@ fun rememberChannelState(
     connState: State<ConnectionState> = connectivityState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     context: Context = LocalContext.current,
-) = remember(scaffoldState, connState) {
+    isLight: Boolean = MaterialTheme.colors.isLight,
+) = remember(scaffoldState, connState, isLight) {
     ChannelState(
         scaffoldState = scaffoldState,
         scope = scope,
         connState = connState,
-        context = context
+        context = context,
+        isLight = isLight,
     )
 }

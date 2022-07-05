@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.main.search
 
 import android.content.Context
 import android.webkit.WebView
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -24,7 +25,8 @@ class SearchState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     connState: State<ConnectionState>,
-    context: Context
+    context: Context,
+    private val isLight: Boolean,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
     private val cache = FileStore(context)
@@ -122,6 +124,7 @@ class SearchState(
             val template = cache.readSearchTemplate()
                 htmlLoaded = TemplateBuilder(template)
                 .withSearch(kw)
+                .withTheme(isLight)
                 .render()
 
             progress.value = false
@@ -137,11 +140,13 @@ fun rememberSearchState(
     connState: State<ConnectionState> = connectivityState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     context: Context = LocalContext.current,
-) = remember(scaffoldState, connState) {
+    isLight: Boolean = MaterialTheme.colors.isLight,
+) = remember(scaffoldState, connState, isLight) {
     SearchState(
         scaffoldState = scaffoldState,
         scope = scope,
         connState = connState,
         context = context,
+        isLight = isLight
     )
 }

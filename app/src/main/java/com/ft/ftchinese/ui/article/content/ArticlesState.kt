@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -42,7 +43,8 @@ class ArticlesState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     connState: State<ConnectionState>,
-    context: Context
+    context: Context,
+    private val isLight: Boolean,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
     private val cache = FileStore(context)
@@ -289,6 +291,7 @@ class ArticlesState(
                 .withStory(story)
                 .withFollows(topics)
                 .withUserInfo(account)
+                .withTheme(isLight = isLight)
                 .render()
         }
     }
@@ -518,11 +521,13 @@ fun rememberArticleState(
     connState: State<ConnectionState> = connectivityState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     context: Context = LocalContext.current,
-) = remember(scaffoldState, connState) {
+    isLight: Boolean = MaterialTheme.colors.isLight,
+) = remember(scaffoldState, connState, isLight) {
     ArticlesState(
         scaffoldState = scaffoldState,
         scope = scope,
         connState = connState,
-        context = context
+        context = context,
+        isLight = isLight
     )
 }

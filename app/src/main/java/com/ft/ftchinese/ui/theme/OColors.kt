@@ -20,4 +20,12 @@ object OColors {
         } else {
             OColor.black30
         }
+
+    val whiteBackground: Color
+        @Composable
+        get() = if (MaterialTheme.colors.isLight) {
+            OColor.white
+        } else {
+            OColor.black
+        }
 }

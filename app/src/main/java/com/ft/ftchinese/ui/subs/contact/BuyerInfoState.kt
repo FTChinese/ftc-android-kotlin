@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.subs.contact
 
 import android.content.res.Resources
 import android.util.Log
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
@@ -31,6 +32,7 @@ class BuyerInfoState(
     scope: CoroutineScope,
     resources: Resources,
     connState: State<ConnectionState>,
+    private val isLight: Boolean,
 ) : BaseState(scaffoldState, scope, resources, connState), JsEventListener {
     var exit by mutableStateOf(false)
         private set
@@ -122,6 +124,7 @@ class BuyerInfoState(
                 .withUserInfo(account)
                 .withAddress(address)
                 .withChannel(content)
+                .withTheme(isLight)
                 .render()
         }
     }
@@ -154,12 +157,14 @@ fun rememberBuyerInfoState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
-    connState: State<ConnectionState> = connectivityState()
-) = remember(scaffoldState, resources, connState) {
+    connState: State<ConnectionState> = connectivityState(),
+    isLight: Boolean = MaterialTheme.colors.isLight,
+) = remember(scaffoldState, connState, isLight) {
     BuyerInfoState(
         scaffoldState = scaffoldState,
         scope = scope,
         resources = resources,
-        connState = connState
+        connState = connState,
+        isLight = isLight
     )
 }
