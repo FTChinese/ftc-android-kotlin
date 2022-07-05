@@ -14,10 +14,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -32,11 +33,11 @@ import androidx.work.WorkManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
@@ -49,10 +50,13 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
-import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.components.Heading3
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.ui.main.MainApp
-import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
 import com.ft.ftchinese.ui.main.search.SearchActivityScreen
+import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.ConnectionState
@@ -62,7 +66,6 @@ import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
-import okhttp3.internal.toLongOrDefault
 import org.threeten.bp.LocalDate
 
 private const val TAG = "TestActivity"
@@ -463,8 +466,6 @@ private fun TestActivityScreen(
         Divider()
 
         TestWxPay()
-        
-        TestCountDown()
 
         TestTimer()
     }
@@ -514,35 +515,6 @@ fun TestWxPay() {
         },
         text = "Launch Wx Pay Entry Activity"
     )
-}
-
-@Composable
-fun TestCountDown() {
-    val (running, setRunning) = remember {
-        mutableStateOf(false)
-    }
-
-    val inputState = rememberInputState(
-        initialValue = "10"
-    )
-    TextInput(
-        label = "Timer length in seconds",
-        state = inputState,
-        keyboardType = KeyboardType.Number
-    )
-    SecondaryButton(
-        onClick = {
-            setRunning(true)
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Timer(
-            totalTime = inputState.field.value.toLongOrDefault(60),
-            isRunning = running,
-            initialText = "获取短信",
-            onFinish = { setRunning(false) }
-        )
-    }
 }
 
 @Composable

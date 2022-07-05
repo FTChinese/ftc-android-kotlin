@@ -1,43 +1,9 @@
 package com.ft.ftchinese.ui.components
 
-import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
 import kotlinx.coroutines.*
-
-@Composable
-fun Timer(
-    totalTime: Long,
-    isRunning: Boolean,
-    initialText: String,
-    onFinish: () -> Unit,
-) {
-    var currentTime by remember {
-        mutableStateOf(totalTime)
-    }
-    
-    LaunchedEffect(key1 = currentTime, key2 = isRunning) {
-        if (isRunning) {
-            if (currentTime > 0) {
-                delay(1000L)
-                currentTime -= 1
-            } else {
-                onFinish()
-            }
-        } else {
-            currentTime = totalTime
-        }
-    }
-
-    Text(
-        text = if (isRunning) {
-            "${currentTime}s"
-        } else {
-            initialText
-        }
-    )
-}
 
 class TimerState(
     private val totalTime: Long,
