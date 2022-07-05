@@ -1,13 +1,10 @@
 package com.ft.ftchinese.ui.settings
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -31,7 +28,6 @@ import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.settings.overview.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.util.IntentsUtil
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
 class SettingsActivity : ComponentActivity() {
@@ -40,19 +36,9 @@ class SettingsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            SettingsApp(
-                onLoggedOut = {
-                    // Immediately close current screen to force UI update; otherwise
-                    // the UI does not update if user exit by pressing the back key
-                    // rather than clicking the toolbar back button.
-                    // Back key press won't trigger setResult().
-                    setResult(Activity.RESULT_OK, IntentsUtil.loggedOut)
-                    finish()
-                },
-                onExit = {
-                    finish()
-                }
-            )
+            SettingsApp {
+                finish()
+            }
         }
     }
 
@@ -67,17 +53,6 @@ class SettingsActivity : ComponentActivity() {
             SettingsActivity::class.java
         )
 
-        // If user logged out, notify the calling activity.
-        @JvmStatic
-        fun launch(
-            launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-            context: Context,
-        ) {
-            launcher.launch(
-                Intent(context, SettingsActivity::class.java)
-            )
-        }
-
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(context, SettingsActivity::class.java))
@@ -87,7 +62,6 @@ class SettingsActivity : ComponentActivity() {
 
 @Composable
 fun SettingsApp(
-    onLoggedOut: () -> Unit,
     onExit: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -125,15 +99,13 @@ fun SettingsApp(
                     route = SettingScreen.Overview.name
                 ) {
                     PreferenceActivityScreen(
-                        scaffoldState = scaffoldState,
-                        onNavigateTo =  { screen ->
-                            navigateToScreen(
-                                navController,
-                                screen,
-                            )
-                        },
-                        onLoggedOut = onLoggedOut
-                    )
+                        scaffoldState = scaffoldState
+                    ) { screen ->
+                        navigateToScreen(
+                            navController,
+                            screen,
+                        )
+                    }
                 }
 
                 composable(
