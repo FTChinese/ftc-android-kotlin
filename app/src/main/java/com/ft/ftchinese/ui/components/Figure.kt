@@ -1,10 +1,10 @@
 package com.ft.ftchinese.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -61,14 +61,13 @@ fun Figure(
             .fillMaxWidth()
             .then(modifier)
     ) {
-        Image(
+        Icon(
             painter = painter,
-            contentDescription = null,
+            contentDescription = "avatar",
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .size(imageSize)
                 .clip(RoundedCornerShape(10.dp)),
-            contentScale = ContentScale.Fit,
         )
 
         Text(
