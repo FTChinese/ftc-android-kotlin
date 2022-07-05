@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.em
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -44,7 +43,6 @@ fun ArticleItem(
                 style = MaterialTheme
                     .typography
                     .body2,
-                color = OColor.black70,
                 lineHeight = 2.em
             )
         }
