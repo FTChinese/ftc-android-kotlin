@@ -54,7 +54,7 @@ fun ProductCard(
             item.stripeItems.forEach { cartItem ->
                 Card(
                     onClick = { onStripePay(cartItem) },
-                    backgroundColor = OColor.wheat,
+                    backgroundColor = MaterialTheme.colors.primarySurface,
                     elevation = Dimens.dp4,
                 ) {
                     PriceCard(
@@ -113,7 +113,7 @@ private fun ProductDescRow(text: String) {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewProductCard() {
     val product = defaultPaywall.products[0]
