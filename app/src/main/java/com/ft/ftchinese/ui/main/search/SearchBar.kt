@@ -9,7 +9,6 @@ import com.ft.ftchinese.ui.components.IconArrowBackIOS
 import com.ft.ftchinese.ui.components.SearchInputState
 import com.ft.ftchinese.ui.components.SearchTextField
 import com.ft.ftchinese.ui.components.rememberSearchInputState
-import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun SearchBar(
@@ -18,9 +17,7 @@ fun SearchBar(
     onBack: () -> Unit,
 ) {
 
-    TopAppBar(
-        backgroundColor = OColor.wheat
-    ) {
+    TopAppBar {
        IconButton(
            onClick = {
                onBack()

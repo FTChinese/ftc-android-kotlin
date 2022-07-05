@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.main.search
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +38,7 @@ fun SearchScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .align(Alignment.TopStart)
-                            .background(OColor.white)
+                            .background(MaterialTheme.colors.background)
                             .padding(Dimens.dp16),
                         keywords = history,
                         onClear = onClearHistory,
