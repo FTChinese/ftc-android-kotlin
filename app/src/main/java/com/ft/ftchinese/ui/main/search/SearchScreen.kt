@@ -38,7 +38,7 @@ fun SearchScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .align(Alignment.TopStart)
-                            .background(OColors.whiteBackground)
+                            .background(OColors.whiteBlack90)
                             .padding(Dimens.dp16),
                         keywords = history,
                         onClear = onClearHistory,

@@ -49,31 +49,3 @@ fun Figure(
     }
 }
 
-@Composable
-fun Figure(
-    painter: Painter = painterResource(id = R.drawable.ic_account_circle_black_24dp),
-    modifier: Modifier = Modifier,
-    imageSize: Dp = 128.dp,
-    caption: String = "",
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(modifier)
-    ) {
-        Icon(
-            painter = painter,
-            contentDescription = "avatar",
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .size(imageSize)
-                .clip(RoundedCornerShape(10.dp)),
-        )
-
-        Text(
-            text = caption,
-            style = MaterialTheme.typography.subtitle2,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-    }
-}
