@@ -46,8 +46,6 @@ val articleRows: List<MyFtRow> = listOf(
     MyFtRow.Topics
 )
 
-
-
 fun buildMyFtRows(loggedIn: Boolean): List<TableGroup<MyFtRow>> {
     return if (loggedIn) {
         listOf(
