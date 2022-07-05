@@ -248,9 +248,9 @@ dependencies {
     // Material Design
     implementation "androidx.compose.material:material:$compose_ui"
     // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.activity:activity-compose:1.5.0'
     // Integration with ViewModels
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.0'
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$compose_ui"
     implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist"
