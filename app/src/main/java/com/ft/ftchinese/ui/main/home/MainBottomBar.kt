@@ -49,7 +49,7 @@ fun MainBottomBar(
                     onClick(item)
                 },
                 selectedContentColor = OColors.claretWhite,
-                unselectedContentColor = OColors.black60or30
+                unselectedContentColor = OColors.black80or30
             )
         }
     }

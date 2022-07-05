@@ -13,10 +13,10 @@ object OColors {
             OColor.white
         }
 
-    val black60or30: Color
+    val black80or30: Color
         @Composable
         get() = if (MaterialTheme.colors.isLight) {
-            OColor.black60
+            OColor.black80
         } else {
             OColor.black30
         }
