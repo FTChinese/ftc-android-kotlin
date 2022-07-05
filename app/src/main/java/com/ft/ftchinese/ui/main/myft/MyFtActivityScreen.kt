@@ -6,6 +6,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
@@ -35,12 +37,9 @@ fun MyFtActivityScreen(
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 // Note the account state enclosed here won't be updated.
-                val a = userViewModel.reloadAccount()
+                userViewModel.reloadAccount()
                 result.data?.let {
                     when (IntentsUtil.getAccountAction(it)) {
-                        AccountAction.LoggedOut -> {
-                            context.toast(R.string.action_logout)
-                        }
                         AccountAction.SignedIn -> {
                             context.toast(R.string.login_success)
                         }
@@ -57,16 +56,23 @@ fun MyFtActivityScreen(
         }
     }
 
+    val (alertLogout, setAlertLogout) = remember {
+        mutableStateOf(false)
+    }
+
+    if (alertLogout) {
+        AlertLogout(
+            onDismiss = {setAlertLogout(false)},
+            onConfirm = {
+                userViewModel.logout()
+                setAlertLogout(false)
+                context.toast(R.string.action_logout)
+            }
+        )
+    }
+
     MyFtScreen(
         loggedIn = isLoggedIn.value,
-        avatarUrl = account?.wechat?.avatarUrl,
-        displayName = account?.displayName,
-        onLogin = {
-            AuthActivity.launch(
-                launcher = launcher,
-                context = context
-            )
-        },
         onClick = { row ->
             when (row) {
                 MyFtRow.Account -> {
@@ -83,10 +89,7 @@ fun MyFtActivityScreen(
                 }
                 MyFtRow.Settings -> {
                     // Launch setting for result in case user clicked logout button.
-                    SettingsActivity.launch(
-                        launcher = launcher,
-                        context = context
-                    )
+                    SettingsActivity.start(context)
                 }
                 MyFtRow.MySubs -> {
                     MemberActivity.launch(
@@ -105,5 +108,20 @@ fun MyFtActivityScreen(
                 }
             }
         }
-    )
+    ) {
+        Avatar(
+            loggedIn = isLoggedIn.value,
+            onLogin = {
+                AuthActivity.launch(
+                    launcher = launcher,
+                    context = context
+                )
+            },
+            onLogout = {
+                setAlertLogout(true)
+            },
+            displayName = account?.displayName,
+            imageUrl = account?.wechat?.avatarUrl
+        )
+    }
 }
