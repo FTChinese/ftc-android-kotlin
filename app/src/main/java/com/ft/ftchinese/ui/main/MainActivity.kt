@@ -4,12 +4,14 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
@@ -44,6 +46,12 @@ class MainActivity : ComponentActivity() {
         createNotificationChannel()
         setupWorker()
         setupConversion()
+
+        val locale2 = Resources.getSystem().getConfiguration().getLocales().get(0).toLanguageTag()
+        val locale = ConfigurationCompat
+            .getLocales(Resources.getSystem().configuration)
+            .get(0)
+        Log.i(TAG, "${locale?.script}: $locale2")
     }
 
     private fun createNotificationChannel() {
