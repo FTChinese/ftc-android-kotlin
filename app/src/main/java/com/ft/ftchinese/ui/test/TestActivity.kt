@@ -115,7 +115,6 @@ class TestActivity : AppCompatActivity() {
             TestApp(
                 onFinish = { finish() }
             )
-//            MainApp()
         }
 
         intent.extras?.let {
@@ -441,14 +440,21 @@ private fun TestActivityScreen(
         )
 
         Divider()
-
+        Heading3(text = "Compose UI Component")
         PrimaryBlockButton(
             onClick = { onNavigate(TestAppScreen.ModalBottomSheet) },
             text = "Show Bottom Sheet"
         )
 
         Divider()
+        Heading3(text = "Fake data")
+        PrimaryBlockButton(
+            onClick = { onNavigate(TestAppScreen.MockUser) },
+            text = "Fake Users"
+        )
+        WxMiniButton()
 
+        Divider()
         Heading3(text = "Content")
         PrimaryBlockButton(
             onClick = { onNavigate(TestAppScreen.Search) },
