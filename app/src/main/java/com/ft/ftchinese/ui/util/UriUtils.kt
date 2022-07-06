@@ -15,7 +15,14 @@ import com.ft.ftchinese.repository.currentFlavor
 import java.util.*
 
 object UriUtils {
-    // https://en.wikipedia.org/wiki/ISO_15924
+    //
+    /**
+     * See https://en.wikipedia.org/wiki/ISO_15924 for how `script` is defined.
+     * See https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags for how the laugnage tag is defined:
+     * language-<Script>-<REGION>
+     *  Since only the `language` is required, there might be devices omitting
+     *  any of the `script` or `region` tag, or both.
+     */
     private val TRADITIONAL_CHINESE: Locale = Locale.Builder()
         .setLanguage("zh")
         .setRegion("TW")
@@ -26,8 +33,26 @@ object UriUtils {
         .getLocales(Resources.getSystem().configuration)
         .get(0)
 
+    /**
+     * See https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
+     */
+    private val cnLangRegions = arrayOf("HK", "HKG", "MO", "MAC", "TW", "TWN", "SG", "SGP", "CHT")
+
+    /**
+     * The definition of locale varies greatly across manufacturers.
+     * Some contains the script field setting to `Hant`
+     * while some setting it to empty.
+     */
     private val isTraditionalCn: Boolean
-        get() = locale?.script == TRADITIONAL_CHINESE.script
+        get() = if (locale?.script.isNullOrBlank()) {
+            if (locale?.language.equals(Locale.CHINESE.language)) {
+                cnLangRegions.contains(locale?.country)
+            } else {
+                false
+            }
+        } else {
+            locale?.script == TRADITIONAL_CHINESE.script
+        }
 
     private val scriptSuffix: String
         get() = if (isTraditionalCn) "tc" else "sc"
