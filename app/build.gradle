@@ -188,7 +188,7 @@ dependencies {
     def room_version = '2.4.2'
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
-    def compose_ui = "1.2.0-rc02"
+    def compose_ui = "1.2.0-rc03"
     def accompanist = "0.24.10-beta"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
