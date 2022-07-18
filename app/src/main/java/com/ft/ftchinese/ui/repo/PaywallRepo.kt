@@ -18,23 +18,30 @@ object PaywallRepo {
             .findLast { it.id == priceId }
             ?: return null
 
-        return price.buildCartItem(m)
+        return CartItemFtc.newInstance(price, m)
     }
 
     fun stripeCheckoutItem(
         priceId: String,
         trialId: String?,
+        couponId: String?,
         m: Membership
     ): CartItemStripe? {
         val pwItem = stripeItems[priceId] ?: return null
 
         return CartItemStripe(
-            intent = pwItem.price.checkoutIntent(m),
+            intent = CheckoutIntent.ofStripe(
+                source = m,
+                target = pwItem.price,
+                hasCoupon = couponId != null
+            ),
             recurring = pwItem.price,
             trial = trialId?.let { id ->
                 stripeItems[id]?.price
             },
-            coupon = pwItem.getCoupon()
+            coupon = couponId?.let { id ->
+                pwItem.coupons.find { it.id == id }
+            }
         )
     }
 
