@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
@@ -18,6 +17,7 @@ import com.ft.ftchinese.model.paywall.ProductItem
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.ProductHeader
+import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
@@ -29,6 +29,8 @@ fun ProductCard(
     onFtcPay: (item: CartItemFtc) -> Unit,
     onStripePay: (item: CartItemStripe) -> Unit,
 ) {
+
+    val context = LocalContext.current
 
     Card {
         Column(
@@ -65,11 +67,15 @@ fun ProductCard(
                 Spacer(modifier = Modifier.height(Dimens.dp16))
             }
 
-            Text(
-                text = stringResource(id = R.string.stripe_requirement),
-                style = MaterialTheme.typography.body2,
-                color = OColor.black50,
-            )
+            context
+                .resources
+                .getStringArray(R.array.stripe_footnotes)
+                .map {
+                    SubHeading2(
+                        text = it,
+                        color = OColor.black50,
+                    )
+                }
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
 
@@ -117,12 +123,16 @@ private fun ProductDescRow(text: String) {
 @Composable
 fun PreviewProductCard() {
     val product = defaultPaywall.products[0]
-    val uiItem = product.buildUiItem(Membership(
-        tier = Tier.STANDARD,
-        cycle = Cycle.YEAR,
-        expireDate = LocalDate.now().plusMonths(6),
-        payMethod = PayMethod.ALIPAY,
-    ), mapOf())
+    val uiItem = ProductItem.newInstance(
+        product = product,
+        m = Membership(
+            tier = Tier.STANDARD,
+            cycle = Cycle.YEAR,
+            expireDate = LocalDate.now().plusMonths(6),
+            payMethod = PayMethod.ALIPAY,
+        ),
+        stripeStore = mapOf()
+    )
 
     ProductCard(
         item = uiItem,

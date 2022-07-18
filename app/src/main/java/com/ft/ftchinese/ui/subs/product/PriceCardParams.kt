@@ -6,17 +6,23 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.PriceParts
 import com.ft.ftchinese.ui.formatter.FormatHelper
-import com.ft.ftchinese.ui.formatter.PeriodFormatter
+import com.ft.ftchinese.ui.formatter.formatMoneyParts
+
+data class OverriddenPrice(
+    val description: String,
+    val parts: PriceParts,
+)
 
 data class PriceCardParams(
     val heading: String,
     val title: String?,
     val payable: PriceParts,
-    val original: PriceParts?,
+    val overridden: OverriddenPrice? = null,
     val isAutoRenew: Boolean,
     val smallPrint: String?,
 ) {
     companion object {
+        @JvmStatic
         fun ofFtc(ctx: Context, item: CartItemFtc): PriceCardParams {
             val heading = if (item.isIntro)
                 ctx.getString(R.string.price_heading_aliwx_trial)
@@ -26,8 +32,6 @@ data class PriceCardParams(
                     FormatHelper.cycleOfYMD(ctx, item.normalizePeriod())
                 )
 
-            val currencySymbol = PriceParts.findSymbol(item.price.currency)
-
             val smallPrint = ctx.getString(R.string.limited_to_aliwx)
 
             // For regular price with discount
@@ -35,21 +39,13 @@ data class PriceCardParams(
                 return PriceCardParams(
                     heading = heading,
                     title = item.discount.description,
-                    payable = PriceParts(
-                        symbol = currencySymbol,
-                        amount = FormatHelper.formatMoney(ctx, item.payableAmount()),
-                        cycle = PeriodFormatter(
-                            ymd = item.normalizePeriod()
-                        ).format(ctx, false),
-                    ),
-                    original = PriceParts(
-                        symbol = currencySymbol,
-                        amount = FormatHelper.formatMoney(ctx, item.price.unitAmount),
-                        cycle = PeriodFormatter(
-                            ymd = item.price.periodCount
-                        ).format(ctx, false),
-                        notes = ctx.getString(R.string.price_original_aliwx_prefix),
-                    ),
+                    payable = item.payablePrice(),
+                    overridden = item.overriddenPrice()?.let {
+                        OverriddenPrice(
+                            description = ctx.getString(R.string.price_original_prefix),
+                            parts = it,
+                        )
+                    },
                     isAutoRenew = false,
                     smallPrint = smallPrint,
                 )
@@ -58,26 +54,19 @@ data class PriceCardParams(
             return PriceCardParams(
                 heading = heading,
                 title = null,
-                payable = PriceParts(
-                    symbol = currencySymbol,
-                    amount = FormatHelper.formatMoney(ctx, item.price.unitAmount),
-                    cycle = PeriodFormatter(
-                        ymd = item.price.periodCount
-                    ).format(ctx, false),
-                ),
-                original = null,
+                payable = item.payablePrice(),
                 isAutoRenew = false,
                 smallPrint = smallPrint
             )
         }
 
+
+        @JvmStatic
         fun ofStripe(ctx: Context, item: CartItemStripe): PriceCardParams {
             val heading = ctx.getString(
                 R.string.price_heading_stripe,
                 FormatHelper.cycleOfYMD(ctx, item.recurring.periodCount)
             )
-
-            val currencySymbol = PriceParts.findSymbol(item.recurring.currency)
 
             val smallPrint = ctx.getString(R.string.limited_to_stripe)
 
@@ -85,21 +74,29 @@ data class PriceCardParams(
                 return PriceCardParams(
                     heading = heading,
                     title = ctx.getString(R.string.price_heading_stripe_trial),
-                    payable = PriceParts(
-                        symbol = currencySymbol,
-                        amount = FormatHelper.formatMoney(ctx, item.trial.moneyAmount),
-                        cycle = PeriodFormatter(
-                            ymd = item.trial.periodCount
-                        ).format(ctx, false)
-                    ),
-                    original = PriceParts(
-                        symbol = currencySymbol,
-                        amount = FormatHelper.formatMoney(ctx, item.recurring.moneyAmount),
-                        cycle = PeriodFormatter(
-                            ymd = item.recurring.periodCount
-                        ).format(ctx, true),
-                        notes = ctx.getString(R.string.price_original_stripe_prefix)
-                    ),
+                    payable = item.payablePrice(),
+                    overridden = item.overriddenPrice()?.let {
+                        OverriddenPrice(
+                            description = ctx.getString(R.string.price_original_stripe_prefix),
+                            parts = it,
+                        )
+                    },
+                    isAutoRenew = true,
+                    smallPrint = smallPrint,
+                )
+            }
+
+            if (item.coupon != null) {
+                return PriceCardParams(
+                    heading = heading,
+                    title = "领取优惠 -${formatMoneyParts(ctx, item.coupon.moneyParts)}",
+                    payable = item.payablePrice(),
+                    overridden = item.overriddenPrice()?.let {
+                        OverriddenPrice(
+                            description = ctx.getString(R.string.price_original_prefix),
+                            parts = it,
+                        )
+                    },
                     isAutoRenew = true,
                     smallPrint = smallPrint,
                 )
@@ -108,14 +105,7 @@ data class PriceCardParams(
             return PriceCardParams(
                 heading = heading,
                 title = null,
-                payable = PriceParts(
-                    symbol = currencySymbol,
-                    amount = FormatHelper.formatMoney(ctx, item.recurring.moneyAmount),
-                    cycle = PeriodFormatter(
-                        ymd = item.recurring.periodCount
-                    ).format(ctx, true)
-                ),
-                original = null,
+                payable = item.payablePrice(),
                 isAutoRenew = true,
                 smallPrint = smallPrint,
             )

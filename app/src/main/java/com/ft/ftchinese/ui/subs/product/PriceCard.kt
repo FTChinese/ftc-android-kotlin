@@ -1,21 +1,30 @@
 package com.ft.ftchinese.ui.subs.product
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.em
+import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.PriceParts
+import com.ft.ftchinese.ui.formatter.formatMoney
+import com.ft.ftchinese.ui.formatter.formatYMD
+import com.ft.ftchinese.ui.formatter.joinPriceParts
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 private fun PricePayable(parts: PriceParts) {
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
@@ -24,9 +33,10 @@ private fun PricePayable(parts: PriceParts) {
             text = buildAnnotatedString {
                 append(parts.symbol)
                 withStyle(style = SpanStyle(fontSize = 2.em)) {
-                    append(parts.amount)
+                    append(formatMoney(context, parts.amount))
                 }
-                append(parts.cycle)
+                append(parts.separator)
+                append(formatYMD(context, parts.period, parts.isRecurring))
             },
             style = MaterialTheme.typography.subtitle1
         )
@@ -34,23 +44,28 @@ private fun PricePayable(parts: PriceParts) {
 }
 
 @Composable
-private fun PriceOriginal(parts: PriceParts, crossed: Boolean = true) {
-    
+private fun PriceOriginal(
+    description: String,
+    parts: PriceParts
+) {
+
+    val context = LocalContext.current
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
     ) {
         Text(
             text = buildAnnotatedString {
-                append(parts.notes)
-                if (crossed) {
+                append(description)
+                if (parts.crossed) {
                     withStyle(
                         style = SpanStyle(textDecoration = TextDecoration.LineThrough)
                     ) {
-                        append(parts.string())
+                        append(joinPriceParts(context, parts))
                     }
                 } else {
-                    append(parts.string())
+                    append(joinPriceParts(context, parts))
                 }
             },
             style = MaterialTheme.typography.subtitle2
@@ -119,10 +134,10 @@ fun PriceCard(
             parts = params.payable,
         )
 
-        params.original?.let {
+        params.overridden?.let {
             PriceOriginal(
-                parts = params.original,
-                crossed = !params.isAutoRenew
+                description = it.description,
+                parts = it.parts,
             )
         }
 
@@ -136,24 +151,140 @@ fun PriceCard(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewDiscountPrice() {
+fun PreviewPriceCard_OneOffPurchase() {
     PriceCard(
         params = PriceCardParams(
             heading = "包年",
             title = null,
             payable = PriceParts(
                 symbol = "¥",
-                amount = "258.00",
-                cycle = "/1年"
-            ),
-            original = PriceParts(
-                symbol = "¥",
-                amount = "298.00",
-                cycle = "/1年",
-                notes = "原价",
+                amount = 298.00,
+                period = YearMonthDay(
+                    years = 1,
+                ),
+                isRecurring = false,
             ),
             isAutoRenew = false,
             smallPrint = "* 仅限支付宝或微信支付"
+        ),
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPriceCard_OneOffDiscount() {
+    PriceCard(
+        params = PriceCardParams(
+            heading = "包年",
+            title = null,
+            payable = PriceParts(
+                symbol = "¥",
+                amount = 258.00,
+                period = YearMonthDay(
+                    years = 1,
+                ),
+                isRecurring = false,
+            ),
+            overridden = OverriddenPrice(
+                description = "原价",
+                parts = PriceParts(
+                    symbol = "¥",
+                    amount = 298.00,
+                    period = YearMonthDay(
+                        years = 1,
+                    ),
+                    isRecurring = false,
+                    crossed = true,
+                )
+            ),
+            isAutoRenew = false,
+            smallPrint = "* 仅限支付宝或微信支付"
+        ),
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPriceCard_Stripe() {
+    PriceCard(
+        params = PriceCardParams(
+            heading = "Auto Renewal",
+            title = null,
+            payable = PriceParts(
+                symbol = "£",
+                amount = 39.00,
+                period = YearMonthDay(
+                    years = 1,
+                ),
+                isRecurring = true,
+            ),
+            overridden = null,
+            isAutoRenew = true,
+            smallPrint = "* Limited only to Stripe"
+        ),
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPriceCard_StripeTrial() {
+    PriceCard(
+        params = PriceCardParams(
+            heading = "Auto Renewal",
+            title = "New subscription trial offer",
+            payable = PriceParts(
+                symbol = "£",
+                amount = 1.00,
+                period = YearMonthDay(
+                    months = 1,
+                ),
+                isRecurring = false,
+            ),
+            overridden = OverriddenPrice(
+                description = "Original ",
+                parts = PriceParts(
+                    symbol = "£",
+                    amount = 39.00,
+                    period = YearMonthDay(
+                        years = 1,
+                    ),
+                    isRecurring = true,
+                )
+            ),
+            isAutoRenew = true,
+            smallPrint = "* Limited only to Stripe"
+        ),
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPriceCard_StripeCoupon() {
+    PriceCard(
+        params = PriceCardParams(
+            heading = "Auto Renewal",
+            title = "Coupon offer -£10.00",
+            payable = PriceParts(
+                symbol = "£",
+                amount = 29.00,
+                period = YearMonthDay(
+                    years = 1,
+                ),
+                isRecurring = false,
+            ),
+            overridden = OverriddenPrice(
+                description = "Original ",
+                parts = PriceParts(
+                    symbol = "£",
+                    amount = 39.00,
+                    period = YearMonthDay(
+                        years = 1,
+                    ),
+                    isRecurring = true,
+                )
+            ),
+            isAutoRenew = true,
+            smallPrint = "* Limited only to Stripe"
         ),
     )
 }
