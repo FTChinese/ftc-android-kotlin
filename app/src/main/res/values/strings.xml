@@ -277,12 +277,11 @@
     <string name="price_heading_stripe">连续包%1$s</string>
     <string name="limited_to_aliwx">* 仅限支付宝或微信支付</string>
     <string name="limited_to_stripe">* 仅限Stripe支付，每年订阅到期日前24小时自动扣款</string>
-    <string name="price_original_aliwx_prefix">原价</string>
+    <string name="price_original_prefix">原价</string>
     <string name="price_original_stripe_prefix">试用结束后自动续订</string>
     <string-array name="stripe_footnotes">
-        <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
-        <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
-        <item>* 通过支付宝或者微信支付购买的会员、且会员尚未到期，无法使用Stripe订阅</item>
+        <item>* Stripe订阅FT中文网会员以英镑计价，需使用支持国际货币的信用卡，建议中国大陆以外地区使用</item>
+        <item>* Stripe如有优惠活动，一个付款周期内仅可使用一次优惠券，优惠额度在下次发票开出时扣除</item>
     </string-array>
 
     <!-- Example: 标准会员/年-->
@@ -363,7 +362,6 @@
     <string name="stripe_retrieve_customer">查询Stripe账号&#8230;</string>
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_requirement">* Stripe订阅FT中文网会员以英镑计价，需使用支持国际货币的信用卡，建议中国大陆以外地区使用</string>
     <string name="payment_method">支付方式</string>
     <string name="stripe_init">设置Stripe支付</string>
     <string name="stripe_default_bank_brand">我的银行卡</string>

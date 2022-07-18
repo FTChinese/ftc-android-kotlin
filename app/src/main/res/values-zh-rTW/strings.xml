@@ -244,7 +244,6 @@
     <string name="stripe_customer_not_created">創建Stripe使用者失敗，請重试！</string>
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_requirement">* 使用Stripe訂閱FT中文網會員以英镑计价</string>
     <string name="payment_method">支付方式</string>
     <string name="stripe_init">設置Stripe支付</string>
     <string name="stripe_default_bank_brand">我的銀行卡</string>
@@ -397,11 +396,6 @@
 
     <string name="forgot_password_code_not_found">您似乎使用了無效的驗證码，请重新獲取重設密碼信件</string>
 
-    <string-array name="stripe_footnotes">
-        <item>* FT中文網的Stripe支付不接受人民幣計價的銀行卡，建議中國大陸以外地區用戶使用</item>
-        <item>* 微信登入的用户需要綁定FT中文網帳號後才可以使用Stripe訂閱</item>
-        <item>* 通过支付寶或者微信支付購買的會員、且會員尚未到期，無法使用Stripe訂閱</item>
-    </string-array>
     <string name="formatter_month_date">%1$d月%2$d日</string>
     <string name="formatter_date">%1$d日</string>
     <string name="switch_to_stripe">转为Stripe訂閱</string>
@@ -463,7 +457,7 @@
     <string name="limited_to_aliwx">* 仅限支付宝或微信支付</string>
     <string name="limited_to_stripe">* 仅限Stripe支付，每年订阅到期日前24小时自动扣款</string>
     <string name="unlink_missing_union_id">无法解除绑定：您似乎尚未绑定微信</string>
-    <string name="price_original_aliwx_prefix">原价</string>
+    <string name="price_original_prefix">原价</string>
     <string name="price_original_stripe_prefix">试用结束后自动续订</string>
 
     <string name="cycle_day">天</string>
