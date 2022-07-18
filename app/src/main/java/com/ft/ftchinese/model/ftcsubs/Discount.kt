@@ -1,14 +1,11 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import android.os.Parcelable
 import com.ft.ftchinese.model.enums.DiscountStatus
 import com.ft.ftchinese.model.enums.OfferKind
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
-@Parcelize
 @Serializable
 data class Discount(
     val id: String = "",
@@ -26,7 +23,7 @@ data class Discount(
     val recurring: Boolean = false,
     val liveMode: Boolean = false,
     val status: DiscountStatus? = null,
-) : Parcelable {
+) {
 
     // isValid checks whether a discount exists and whether it is in valid period.
     fun isValid(): Boolean {
@@ -48,7 +45,4 @@ data class Discount(
         return true
     }
 
-    fun isIntroductory(): Boolean {
-        return kind == OfferKind.Introductory
-    }
 }
