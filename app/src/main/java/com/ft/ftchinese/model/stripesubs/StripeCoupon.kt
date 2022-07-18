@@ -1,12 +1,12 @@
 package com.ft.ftchinese.model.stripesubs
 
-import android.os.Parcelable
+import com.ft.ftchinese.model.paywall.MoneyParts
+import com.ft.ftchinese.model.paywall.convertCent
+import com.ft.ftchinese.model.paywall.getCurrencySymbol
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
-@Parcelize
 @Serializable
 data class StripeCoupon(
     val id: String,
@@ -18,4 +18,24 @@ data class StripeCoupon(
     val startUtc: ZonedDateTime? = null,
     @Serializable(with = DateTimeAsStringSerializer::class)
     val endUtc: ZonedDateTime? = null,
-) : Parcelable
+) {
+    fun isValid(): Boolean {
+        if (startUtc == null || endUtc == null) {
+            return amountOff > 0
+        }
+
+        val now = ZonedDateTime.now()
+
+        if (now.isBefore(startUtc) || now.isAfter(endUtc)) {
+            return false
+        }
+
+        return true
+    }
+
+    val moneyParts: MoneyParts
+        get() = MoneyParts(
+            symbol = getCurrencySymbol(currency),
+            amount = convertCent(amountOff),
+        )
+}
