@@ -48,7 +48,10 @@ data class Paywall(
         }
 
         return products.map {
-            it.buildUiItem(m, stripeItemStore)
+            ProductItem.newInstance(
+                product = it,
+                m = m,
+                stripeStore = stripeItemStore)
         }
     }
 }
