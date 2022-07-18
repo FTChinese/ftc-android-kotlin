@@ -9,11 +9,17 @@ data class StripePaywallItem(
     val price: StripePrice,
     val coupons: List<StripeCoupon>,
 ) {
-    fun getCoupon(): StripeCoupon? {
-        return when (coupons.size) {
-            0 -> null
-            1 -> coupons[0]
-            else -> coupons.sortedByDescending { it.amountOff }[0]
+    fun applicableCoupon(): StripeCoupon? {
+        if (coupons.isEmpty()) {
+            return null
         }
+
+        val filtered = coupons.filter { it.isValid() }.sortedByDescending { it.amountOff }
+
+        if (filtered.isEmpty()) {
+            return null
+        }
+
+        return filtered[0]
     }
 }
