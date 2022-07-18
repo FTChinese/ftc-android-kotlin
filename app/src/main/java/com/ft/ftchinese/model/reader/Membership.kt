@@ -268,7 +268,7 @@ data class Membership(
      */
     fun beyondMaxRenewalPeriod(): Boolean {
         if (expireDate == null) {
-            return true
+            return false
         }
 
         val threeYearsLater = LocalDate.now().plusYears(3)
