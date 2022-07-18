@@ -24,12 +24,22 @@ data class StripePriceIDs(
         recurring.forEach { id ->
             val pwItem = prices[id]
             if (pwItem != null) {
+                val coupon = if (trialItem != null) {
+                    pwItem.applicableCoupon()
+                } else {
+                    null
+                }
+
                 items.add(
                     CartItemStripe(
-                        intent = pwItem.price.checkoutIntent(m),
+                        intent = CheckoutIntent.ofStripe(
+                            source = m,
+                            target = pwItem.price,
+                            hasCoupon = coupon != null
+                        ),
                         recurring = pwItem.price,
                         trial = trialItem?.price,
-                        coupon = pwItem.getCoupon()
+                        coupon = coupon
                     )
                 )
             }
