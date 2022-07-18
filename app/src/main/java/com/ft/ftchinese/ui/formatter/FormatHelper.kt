@@ -5,21 +5,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.IntentKind
-import java.util.*
 
 object FormatHelper {
-    fun currencySymbol(currency: String): String {
-        if (currency.isEmpty()) {
-            return ""
-        }
-
-        return when (currency) {
-            "cny" -> "¥"
-            "usd" -> "$"
-            "gbp" -> "£"
-            else -> currency.uppercase(Locale.ROOT)
-        }
-    }
 
     fun getTier(ctx: Context, tier: Tier): String {
         return when (tier) {
@@ -78,16 +65,6 @@ object FormatHelper {
             R.string.formatter_edition,
             getTier(ctx, e.tier),
             getCycle(ctx, e.cycle),
-        )
-    }
-
-    /**
-     * Format money into a string with 2 precision: 298.00
-     */
-    fun formatMoney(ctx: Context, amount: Double): String {
-        return ctx.getString(
-            R.string.formatter_money,
-            amount
         )
     }
 
