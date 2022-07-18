@@ -14,12 +14,13 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.invoice.Invoice
+import com.ft.ftchinese.model.paywall.getCurrencySymbol
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.BodyText1
 import com.ft.ftchinese.ui.components.PrimaryBlockButton
-import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.components.WeightedColumn
 import com.ft.ftchinese.ui.formatter.FormatHelper
+import com.ft.ftchinese.ui.formatter.formatMoney
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatusCard
 import com.ft.ftchinese.ui.theme.Dimens
@@ -105,7 +106,7 @@ private fun invoiceRow(ctx: Context, inv: Invoice): List<Pair<String, String>> {
         ),
         Pair(
             "支付金额",
-            FormatHelper.currencySymbol(inv.currency) + FormatHelper.formatMoney(ctx, inv.paidAmount),
+            getCurrencySymbol(inv.currency) + formatMoney(ctx, inv.paidAmount),
         ),
         Pair(
             "支付方式",
