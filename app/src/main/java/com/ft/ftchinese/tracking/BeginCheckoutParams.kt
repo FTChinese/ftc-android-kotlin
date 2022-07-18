@@ -3,6 +3,7 @@ package com.ft.ftchinese.tracking
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
+import com.ft.ftchinese.model.paywall.convertCent
 
 data class BeginCheckoutParams(
     val value: Double,
@@ -23,9 +24,9 @@ data class BeginCheckoutParams(
         fun ofStripe(item: CartItemStripe): BeginCheckoutParams {
             return BeginCheckoutParams(
                 value = if (item.trial != null) {
-                    item.trial.moneyAmount
+                    convertCent(item.trial.unitAmount)
                 } else {
-                    item.recurring.moneyAmount
+                    convertCent((item.recurring.unitAmount))
                 },
                 currency = item.recurring.currency,
                 payMethod = PayMethod.STRIPE,
