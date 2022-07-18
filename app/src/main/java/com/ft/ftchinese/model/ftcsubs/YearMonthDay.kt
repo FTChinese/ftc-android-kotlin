@@ -1,19 +1,41 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
-import kotlinx.parcelize.Parcelize
+import com.ft.ftchinese.model.enums.PeriodUnit
 import kotlinx.serialization.Serializable
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Period
 
-@Parcelize
+data class PeriodInterval(
+    val count: Int,
+    val unit: PeriodUnit,
+)
+
 @Serializable
 data class YearMonthDay(
     val years: Int = 0,
     val months: Int = 0,
     val days: Int = 0,
-) : Parcelable {
+) {
+
+    fun intervals(): List<PeriodInterval> {
+        return listOf(
+            PeriodInterval(
+                count = years,
+                unit = PeriodUnit.Year
+            ),
+            PeriodInterval(
+                count = months,
+                unit = PeriodUnit.Month,
+            ),
+            PeriodInterval(
+                count = days,
+                unit = PeriodUnit.Day,
+            )
+        ).filter {
+            it.count > 0
+        }
+    }
 
     fun isZero(): Boolean {
         return arrayOf(years, months, days).none { it > 0 }
@@ -47,18 +69,6 @@ data class YearMonthDay(
         val localDate = LocalDate.now()
 
         return years * localDate.lengthOfYear() + months * localDate.lengthOfMonth() + days
-    }
-
-    fun isYearOnly(): Boolean {
-        return years > 0 && months == 0 && days == 0
-    }
-
-    fun isMonthOnly(): Boolean {
-        return years == 0 && months > 0 && days == 0
-    }
-
-    fun isDayOnly(): Boolean {
-        return years == 0 && months == 0 && days > 0
     }
 
     companion object {
