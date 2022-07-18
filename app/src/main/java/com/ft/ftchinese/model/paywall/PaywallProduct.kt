@@ -19,7 +19,7 @@ data class PaywallProduct(
     val introductory: Price? = null,
     val prices: List<Price>,
 ) {
-    fun descWithDailyCost(): String {
+    private fun descWithDailyCost(): String {
         if (description.isEmpty()) {
             return ""
         }
@@ -33,7 +33,7 @@ data class PaywallProduct(
         return desc
     }
 
-    private fun buildContent(): ProductContent {
+    fun buildContent(): ProductContent {
         return ProductContent(
             id = id,
             tier = tier,
@@ -44,19 +44,25 @@ data class PaywallProduct(
     }
 
     // Collect price items application to a membership.
-    private fun collectFtcItems(m: Membership): Pair<List<CartItemFtc>, StripePriceIDs> {
+    fun collectPriceItems(m: Membership): Pair<List<CartItemFtc>, StripePriceIDs> {
         val offerKinds = m.offerKinds
 
         val recurringItems = prices.map { price ->
             CartItemFtc(
-                intent = price.checkoutIntent(m),
+                intent = CheckoutIntent.ofFtc(m, price),
                 price = price,
                 discount = price.filterOffer(offerKinds),
                 isIntro = false,
             )
         }
 
-        if (introductory == null || !introductory.isValid() || !m.isZero) {
+        val introItem = if (m.isZero) {
+            CartItemFtc.ofIntro(introductory)
+        } else {
+            null
+        }
+
+        if (introItem == null) {
             return Pair(
                 recurringItems,
                 StripePriceIDs(
@@ -67,35 +73,11 @@ data class PaywallProduct(
         }
 
         return Pair(
-            listOf(
-                CartItemFtc(
-                    intent = CheckoutIntent.newMember,
-                    price = introductory,
-                    discount = null,
-                    isIntro = true,
-                )
-            ) + recurringItems,
+            listOf(introItem) + recurringItems,
             StripePriceIDs(
                 recurring = prices.map { it.stripePriceId },
-                trial = introductory.stripePriceId
+                trial = introItem.price.stripePriceId
             )
-        )
-    }
-
-    fun buildUiItem(m: Membership, stripeStore: Map<String, StripePaywallItem>): ProductItem {
-        val content = buildContent()
-
-        val (ftcItems, stripeIds) = collectFtcItems(m)
-
-        val stripeItems = stripeIds.buildCartItems(
-            prices = stripeStore,
-            m = m
-        )
-
-        return ProductItem(
-            content = content,
-            ftcItems = ftcItems,
-            stripeItems = stripeItems,
         )
     }
 }
@@ -112,4 +94,28 @@ data class ProductItem(
     val content: ProductContent,
     val ftcItems: List<CartItemFtc>,
     val stripeItems: List<CartItemStripe>,
-)
+) {
+    companion object {
+        @JvmStatic
+        fun newInstance(
+            product: PaywallProduct,
+            m: Membership,
+            stripeStore: Map<String, StripePaywallItem>
+        ): ProductItem {
+            val content = product.buildContent()
+
+            val (ftcItems, stripeIds) = product.collectPriceItems(m)
+
+            val stripeItems = stripeIds.buildCartItems(
+                prices = stripeStore,
+                m = m
+            )
+
+            return ProductItem(
+                content = content,
+                ftcItems = ftcItems,
+                stripeItems = stripeItems,
+            )
+        }
+    }
+}
