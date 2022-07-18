@@ -245,7 +245,7 @@ fun SubsApp(
                 }
 
                 composable(
-                    route = "${SubsAppScreen.StripePay.name}/{priceId}?trialId={trialId}",
+                    route = "${SubsAppScreen.StripePay.name}/{priceId}?trialId={trialId}&couponId={couponId}",
                     arguments = listOf(
                         navArgument("priceId") {
                             type = NavType.StringType
@@ -257,11 +257,13 @@ fun SubsApp(
                 ) { entry ->
                     val priceId = entry.arguments?.getString("priceId")
                     val trialId = entry.arguments?.getString("trialId")
+                    val couponId = entry.arguments?.getString("couponId")
                     StripeSubActivityScreen(
                         userViewModel = userViewModel,
                         scaffoldState = scaffoldState,
                         priceId = priceId,
                         trialId = trialId,
+                        couponId = couponId,
                         onSuccess = onPaid
                     ) {
                         navController.popBackStack()
@@ -284,7 +286,7 @@ private fun navigateToStripePay(
     navController: NavHostController,
     item: CartItemStripe,
 ) {
-    navController.navigate("${SubsAppScreen.StripePay.name}/${item.recurring.id}?trialId=${item.trial?.id}")
+    navController.navigate("${SubsAppScreen.StripePay.name}/${item.recurring.id}?trialId=${item.trial?.id}&couponId=${item.coupon?.id}")
 }
 
 private fun navigateToInvoices(

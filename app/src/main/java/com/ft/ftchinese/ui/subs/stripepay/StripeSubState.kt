@@ -58,12 +58,14 @@ class StripeSubState(
     fun loadCheckoutItem(
         priceId: String,
         trialId: String?,
+        couponId: String?,
         membership: Membership
     ) {
         progress.value = true
         cartItem = PaywallRepo.stripeCheckoutItem(
             priceId = priceId,
             trialId = trialId,
+            couponId = couponId,
             m = membership
         )
 

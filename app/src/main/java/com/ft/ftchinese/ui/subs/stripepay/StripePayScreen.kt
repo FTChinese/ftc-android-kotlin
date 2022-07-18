@@ -79,8 +79,6 @@ fun StripePayScreen(
                 onClick = onPaymentMethod
             )
 
-            Footnote()
-
             subs?.let {
                 StripeSubsDetails(subs = it)
             }
@@ -104,15 +102,6 @@ fun StripePayScreen(
             )
         }
     }
-}
-
-@Composable
-private fun Footnote() {
-    Text(
-        text = stringResource(id = R.string.stripe_requirement),
-        style = MaterialTheme.typography.body2,
-        color = OColor.black60,
-    )
 }
 
 @Preview(showBackground = true)

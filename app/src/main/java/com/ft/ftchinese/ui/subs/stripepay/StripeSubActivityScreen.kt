@@ -30,6 +30,7 @@ fun StripeSubActivityScreen(
     scaffoldState: ScaffoldState,
     priceId: String?,
     trialId: String?,
+    couponId: String?,
     onSuccess: () -> Unit,
     onCancelled: () -> Unit
 ) {
@@ -64,6 +65,7 @@ fun StripeSubActivityScreen(
             paymentState.loadCheckoutItem(
                 priceId = priceId,
                 trialId = trialId,
+                couponId = couponId,
                 membership = account.membership
             )
         }
