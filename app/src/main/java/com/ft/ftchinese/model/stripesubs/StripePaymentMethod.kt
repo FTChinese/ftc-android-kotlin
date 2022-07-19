@@ -1,18 +1,14 @@
 package com.ft.ftchinese.model.stripesubs
 
-import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
-
-@Parcelize
 @Serializable
 data class StripePaymentMethod(
     val id: String,
     val customerId: String,
     val card: StripePaymentCard,
-) : Parcelable {
+) {
     companion object {
         @JvmStatic
         fun newInstance(pm: PaymentMethod): StripePaymentMethod {
@@ -31,7 +27,6 @@ data class StripePaymentMethod(
     }
 }
 
-@Parcelize
 @Serializable
 data class StripePaymentCard(
     val brand: String,
@@ -39,4 +34,4 @@ data class StripePaymentCard(
     val expMonth: Int,
     val expYear: Int,
     val last4: String,
-) : Parcelable
+)
