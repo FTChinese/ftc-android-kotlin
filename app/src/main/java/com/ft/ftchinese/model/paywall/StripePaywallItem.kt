@@ -14,7 +14,9 @@ data class StripePaywallItem(
             return null
         }
 
-        val filtered = coupons.filter { it.isValid() }.sortedByDescending { it.amountOff }
+        val filtered = coupons
+            .filter { it.isValid() }
+            .sortedByDescending { it.amountOff }
 
         if (filtered.isEmpty()) {
             return null
