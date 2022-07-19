@@ -25,7 +25,7 @@ data class CartItemFtc(
 
     fun payablePrice(): PriceParts {
         return PriceParts(
-            symbol = price.currency,
+            symbol = getCurrencySymbol(price.currency),
             amount = if (discount != null) {
                 price.unitAmount - (discount.priceOff ?: 0.0)
             } else {
@@ -43,7 +43,7 @@ data class CartItemFtc(
         }
 
         return PriceParts(
-            symbol = price.currency,
+            symbol = getCurrencySymbol(price.currency),
             amount = price.unitAmount,
             period = price.periodCount,
             isRecurring = false,
