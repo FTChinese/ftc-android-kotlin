@@ -11,17 +11,18 @@ import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.stripesubs.CouponApplied
 import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
-import com.ft.ftchinese.model.stripesubs.SubParams
+import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.tracking.BeginCheckoutParams
 import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.account.stripewallet.StripeWalletState
+import com.ft.ftchinese.ui.repo.PaywallRepo
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
-import com.ft.ftchinese.ui.repo.PaywallRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -47,6 +48,15 @@ class StripeSubState(
 
     var subsResult by mutableStateOf<StripeSubsResult?>(null)
         private set
+
+    private var checkingCoupon by mutableStateOf(true)
+
+    var couponApplied by mutableStateOf<CouponApplied?>(null)
+        private set
+
+    val loadingState = derivedStateOf {
+        progress.value && checkingCoupon
+    }
 
     var failure by mutableStateOf<FailureStatus?>(null)
         private set
@@ -75,6 +85,37 @@ class StripeSubState(
         }
     }
 
+    fun findCouponApplied(
+        api: ApiConfig,
+        ftcId: String,
+        subsId: String,
+    ) {
+        checkingCoupon = true
+        scope.launch {
+            val result = StripeClient.asyncLoadCouponApplied(
+                api = api,
+                ftcId = ftcId,
+                subsId = subsId,
+            )
+            when (result) {
+                is FetchResult.LocalizedError -> {
+//                    showSnackBar(result.msgId)
+                }
+                is FetchResult.TextError -> {
+//                    showSnackBar(result.text)
+                }
+                is FetchResult.Success -> {
+                    result.data.let {
+                        if (it.couponId.isNotBlank()) {
+                            couponApplied = it
+                        }
+                    }
+                }
+            }
+            checkingCoupon = false
+        }
+    }
+
     fun subscribe(account: Account, itemStripe: CartItemStripe) {
         if (!ensureConnected()) {
             return
@@ -85,12 +126,19 @@ class StripeSubState(
         }
 
         when (itemStripe.intent.kind) {
-            IntentKind.Create -> {
+            IntentKind.Create,
+            IntentKind.OneTimeToAutoRenew -> {
                 showSnackBar(R.string.creating_subscription)
-                createSub(account, itemStripe)
+                createSub(
+                    account,
+                    itemStripe,
+                )
             }
-            IntentKind.Upgrade, IntentKind.Downgrade -> {
-                showSnackBar(R.string.confirm_upgrade)
+            IntentKind.Upgrade,
+            IntentKind.Downgrade,
+            IntentKind.SwitchInterval,
+            IntentKind.ApplyCoupon -> {
+                showSnackBar(R.string.updating_subscription)
                 updateSub(account, itemStripe)
             }
             else -> {
@@ -102,11 +150,9 @@ class StripeSubState(
 
     private fun createSub(account: Account, item: CartItemStripe) {
         progress.value = true
-        val params = SubParams(
-            priceId = item.recurring.id,
-            introductoryPriceId = item.trial?.id,
-            defaultPaymentMethod = paymentMethodSelected?.id,
-            idempotency = idempotency.retrieveKey(),
+        val params = item.subsParams(
+            paymentMethodSelected,
+            idempotency.retrieveKey()
         )
 
         scope.launch {
@@ -156,11 +202,9 @@ class StripeSubState(
 
     private fun updateSub(account: Account, item: CartItemStripe) {
         progress.value = true
-        val params = SubParams(
-            priceId = item.recurring.id,
-            introductoryPriceId = item.trial?.id,
-            defaultPaymentMethod = paymentMethodSelected?.id,
-            idempotency = idempotency.retrieveKey(),
+        val params = item.subsParams(
+            payMethod = paymentMethodSelected,
+            idemKey = idempotency.retrieveKey()
         )
 
         scope.launch {
