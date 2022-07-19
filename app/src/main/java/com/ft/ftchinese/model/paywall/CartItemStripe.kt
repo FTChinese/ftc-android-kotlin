@@ -15,6 +15,9 @@ data class CartItemStripe(
     val isApplyCoupon: Boolean
         get() = intent.kind == IntentKind.ApplyCoupon
 
+    val isForbidden: Boolean
+        get() = intent.kind == IntentKind.Forbidden
+
     fun payablePrice(): PriceParts {
         if (trial != null) {
             PriceParts(
