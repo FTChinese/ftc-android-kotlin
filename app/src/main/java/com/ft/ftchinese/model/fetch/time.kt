@@ -30,6 +30,10 @@ fun formatLocalDate(d: LocalDate?): String? {
     }
 }
 
+fun formatLocalDate(isoDate: ZonedDateTime): String {
+    return isoDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+}
+
 /**
  * Parses ISO8601 date time string in UTC.
  * @throws DateTimeParseException
