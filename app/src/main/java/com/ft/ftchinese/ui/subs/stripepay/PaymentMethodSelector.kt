@@ -15,12 +15,7 @@ fun PaymentMethodSelector(
     clickable: Boolean,
     onClick: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.padding(
-            top = Dimens.dp8,
-            bottom = Dimens.dp8
-        )
-    ) {
+    Column {
 
         if (card != null) {
             BankCard(
