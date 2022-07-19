@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.PriceParts
 import com.ft.ftchinese.ui.formatter.FormatHelper
-import com.ft.ftchinese.ui.formatter.formatMoneyParts
+import com.ft.ftchinese.ui.formatter.formatAmountOff
 
 data class OverriddenPrice(
     val description: String,
@@ -89,7 +89,7 @@ data class PriceCardParams(
             if (item.coupon != null) {
                 return PriceCardParams(
                     heading = heading,
-                    title = "领取优惠 -${formatMoneyParts(ctx, item.coupon.moneyParts)}",
+                    title = "领取优惠 ${formatAmountOff(ctx, item.coupon.moneyParts)}",
                     payable = item.payablePrice(),
                     overridden = item.overriddenPrice()?.let {
                         OverriddenPrice(
