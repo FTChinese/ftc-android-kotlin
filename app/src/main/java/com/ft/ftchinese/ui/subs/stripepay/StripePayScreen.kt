@@ -1,14 +1,12 @@
 package com.ft.ftchinese.ui.subs.stripepay
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -19,17 +17,15 @@ import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
-import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
-import com.ft.ftchinese.model.stripesubs.StripePrice
-import com.ft.ftchinese.model.stripesubs.StripeSubs
+import com.ft.ftchinese.model.stripesubs.*
 import com.ft.ftchinese.repository.ApiMode
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.form.AutoRenewAgreement
-import com.ft.ftchinese.ui.formatter.FormatHelper
+import com.ft.ftchinese.ui.formatter.*
 import com.ft.ftchinese.ui.subs.product.PriceCard
 import com.ft.ftchinese.ui.subs.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
+import org.threeten.bp.ZonedDateTime
 
 @Composable
 fun StripePayScreen(
@@ -37,6 +33,7 @@ fun StripePayScreen(
     loading: Boolean,
     mode: ApiMode,
     paymentMethod: StripePaymentMethod?,
+    couponApplied: CouponApplied?,
     subs: StripeSubs?,
     onPaymentMethod: () -> Unit,
     onSubscribe: () -> Unit,
@@ -45,7 +42,15 @@ fun StripePayScreen(
 
     val context = LocalContext.current
 
-    val forbidden = cartItem.intent.kind == IntentKind.Forbidden
+    val forbidden = cartItem.isForbidden
+    val isApplyCoupon = cartItem.isApplyCoupon
+    val couponEnjoyed = isApplyCoupon && couponApplied != null
+
+    val enabledState = remember {
+        derivedStateOf {
+            !loading && (paymentMethod != null) && !forbidden && !couponEnjoyed
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -73,6 +78,17 @@ fun StripePayScreen(
 
             CheckoutMessage(text = cartItem.intent.message)
 
+            cartItem.coupon?.let {
+                Spacer(modifier = Modifier.height(Dimens.dp8))
+
+                CouponApplicable(
+                    coupon = it,
+                    applied = couponApplied
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Dimens.dp8))
+
             PaymentMethodSelector(
                 card = paymentMethod?.card,
                 clickable = !loading,
@@ -80,7 +96,10 @@ fun StripePayScreen(
             )
 
             subs?.let {
-                StripeSubsDetails(subs = it)
+                StripeSubsDetails(
+                    subs = it,
+                    coupon = if (isApplyCoupon) cartItem.coupon else null
+                )
             }
         }
 
@@ -89,8 +108,8 @@ fun StripePayScreen(
 
             PrimaryBlockButton(
                 onClick = onSubscribe,
-                enabled = (!loading && paymentMethod != null && !forbidden),
-                text = FormatHelper.stripeIntentText(
+                enabled = enabledState.value,
+                text = formatStripeSubsBtn(
                     context,
                     cartItem.intent.kind
                 ),
@@ -128,10 +147,19 @@ fun PreviewStripePayScreen() {
                 unitAmount = 3999,
             ),
             trial = null,
-            coupon = null
+            coupon = StripeCoupon(
+                id = "coupon-id",
+                amountOff = 100,
+                currency = "gbp",
+                redeemBy = 0,
+                priceId = "attached-price-id",
+                startUtc = ZonedDateTime.now(),
+                endUtc = ZonedDateTime.now().plusDays(7)
+            )
         ),
         paymentMethod = null,
         subs = null,
+        couponApplied = null,
         loading = false,
         onPaymentMethod = {  },
         onSubscribe = {},
