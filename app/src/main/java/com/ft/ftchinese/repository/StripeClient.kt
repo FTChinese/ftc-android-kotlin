@@ -177,25 +177,6 @@ object StripeClient {
         }
     }
 
-    @Deprecated("")
-    fun createEphemeralKey(account: Account, apiVersion: String): String? {
-        if (account.stripeId.isNullOrBlank()) {
-            return null
-        }
-
-        val api = ApiConfig.ofSubs(account.isTest)
-
-        return Fetch()
-            .setBearer(api.accessToken)
-            .post("${api.stripeCustomers}/${account.stripeId}/ephemeral-keys")
-            .setUserId(account.id)
-            .addQuery("api_version", apiVersion)
-            .noCache()
-            .send()
-            .endText()
-            .body
-    }
-
     private fun setupWithEphemeral(isTest: Boolean, customerId: String): HttpResp<PaymentSheetParams> {
         val api = ApiConfig.ofSubs(isTest)
         return Fetch()
@@ -288,6 +269,41 @@ object StripeClient {
             } else {
                 FetchResult.Success(resp.body)
             }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
+    private fun loadCouponApplied(api: ApiConfig, ftcId: String, subsId: String): CouponApplied? {
+        return Fetch()
+            .setBearer(api.accessToken)
+            .setUserId(ftcId)
+            .get("${api.stripeSubs}/${subsId}/latest-invoice/any-coupon")
+            .noCache()
+            .endJson<CouponApplied>()
+            .body
+    }
+
+    suspend fun asyncLoadCouponApplied(
+        api: ApiConfig,
+        ftcId: String,
+        subsId: String,
+    ): FetchResult<CouponApplied> {
+
+        return try {
+            val result = withContext(Dispatchers.IO) {
+                loadCouponApplied(
+                    api = api,
+                    ftcId = ftcId,
+                    subsId = subsId
+                )
+            }
+            if (result == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(result)
+            }
+
         } catch (e: Exception) {
             FetchResult.fromException(e)
         }
