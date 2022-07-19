@@ -22,18 +22,7 @@ object FormatSubs {
     }
 
     private fun formatAutoRenewMoment(ctx: Context, moment: AutoRenewMoment): String {
-        val monthDate =  if (moment.month != null) {
-            ctx.getString(
-                R.string.formatter_month_date,
-                moment.month,
-                moment.date
-            )
-        } else {
-            ctx.getString(
-                R.string.formatter_date,
-                moment.date
-            )
-        }
+        val monthDate =  formatMoment(ctx, moment)
 
         return ctx.getString(
             R.string.formatter_edition,
@@ -57,5 +46,4 @@ object FormatSubs {
             ctx.getString(R.string.auto_renew_off)
         )
     }
-
 }

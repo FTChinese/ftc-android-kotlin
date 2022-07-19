@@ -68,12 +68,14 @@ object FormatHelper {
         )
     }
 
-    fun stripeIntentText(ctx: Context, kind: IntentKind): String {
-        return when (kind) {
-            IntentKind.SwitchInterval -> ctx.getString(R.string.stripe_switch_cycle)
-            IntentKind.Upgrade -> ctx.getString(R.string.stripe_upgrade)
-            IntentKind.Downgrade -> ctx.getString(R.string.stripe_downgrade)
-            else -> ctx.getString(R.string.subs_create)
-        }
+}
+
+fun formatStripeSubsBtn(ctx: Context, kind: IntentKind): String {
+    return when (kind) {
+        IntentKind.SwitchInterval -> ctx.getString(R.string.stripe_switch_cycle)
+        IntentKind.Upgrade -> ctx.getString(R.string.stripe_upgrade)
+        IntentKind.Downgrade -> ctx.getString(R.string.stripe_downgrade)
+        IntentKind.ApplyCoupon -> ctx.getString(R.string.redeem_coupon)
+        else -> ctx.getString(R.string.subs_create)
     }
 }
