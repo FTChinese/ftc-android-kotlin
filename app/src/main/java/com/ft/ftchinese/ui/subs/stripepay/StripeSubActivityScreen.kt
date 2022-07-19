@@ -76,6 +76,7 @@ fun StripeSubActivityScreen(
         Stripe(context, BuildConfig.STRIPE_KEY)
     }
 
+    // Payment sheet launcher
     val launcher = rememberLauncherForActivityResult(
         contract = PaymentSheetContract()
     ) {
@@ -92,12 +93,14 @@ fun StripeSubActivityScreen(
         }
     }
 
+    // Update account after customer created.
     LaunchedEffect(key1 = paymentState.customer) {
         paymentState.customer?.let {
             userViewModel.saveAccount(account.withCustomerID(it.id))
         }
     }
 
+    // Ask user to create a stripe customer registered yet.
     if (account.stripeId.isNullOrBlank()) {
         CreateCustomerDialog(
             email = account.email,
@@ -108,22 +111,42 @@ fun StripeSubActivityScreen(
         )
     }
 
+    // Show payment sheet if payment sheet setup present.
     LaunchedEffect(key1 = paymentState.paymentSheetSetup) {
         paymentState.paymentSheetSetup?.let {
             launchPaymentSheet(launcher, it)
         }
     }
 
+    // Update membership after subscription created/updated.
     LaunchedEffect(key1 = paymentState.subsResult) {
         paymentState.subsResult?.let {
             userViewModel.saveMembership(it.membership)
         }
     }
 
+    // Load default payment method upon ui initialization.
     LaunchedEffect(key1 = Unit) {
         paymentState.loadDefaultPaymentMethod(account)
     }
 
+    // If there's coupon, check whether user have already used any coupon
+    // during the lifecycle of current subscription period.
+    LaunchedEffect(key1 = paymentState.cartItem) {
+        if (paymentState.cartItem?.isApplyCoupon != true) {
+            return@LaunchedEffect
+        }
+
+        account.membership.stripeSubsId?.let {
+            paymentState.findCouponApplied(
+                api = apiConfig,
+                ftcId = account.id,
+                subsId = it,
+            )
+        }
+    }
+
+    // Handle payment sheet failure.
     paymentState.failure?.let {
         when (it) {
             is FailureStatus.Message -> {
@@ -149,16 +172,17 @@ fun StripeSubActivityScreen(
     }
 
     ProgressLayout(
-        loading = paymentState.progress.value,
+        loading = paymentState.loadingState.value,
         modifier = Modifier.fillMaxSize()
     ) {
         paymentState.cartItem?.let {
             StripePayScreen(
                 cartItem = it,
-                loading = paymentState.progress.value,
+                loading = paymentState.loadingState.value,
                 mode = apiConfig.mode,
                 paymentMethod = paymentState.paymentMethodSelected,
                 subs = paymentState.subsResult?.subs,
+                couponApplied = paymentState.couponApplied,
                 onPaymentMethod = {
                       paymentState.showPaymentSheet(account)
                 },
