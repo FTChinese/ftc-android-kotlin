@@ -17,14 +17,15 @@ data class StripePriceIDs(
             return listOf()
         }
 
-        val trialItem = trial?.let { prices[it] }
+        val trialPrice = trial?.let { prices[it] }?.price
 
         val items = mutableListOf<CartItemStripe>()
 
         recurring.forEach { id ->
             val pwItem = prices[id]
             if (pwItem != null) {
-                val coupon = if (trialItem != null) {
+                // Trial and coupon are mutually exclusive.
+                val coupon = if (trialPrice == null) {
                     pwItem.applicableCoupon()
                 } else {
                     null
@@ -38,7 +39,7 @@ data class StripePriceIDs(
                             hasCoupon = coupon != null
                         ),
                         recurring = pwItem.price,
-                        trial = trialItem?.price,
+                        trial = trialPrice,
                         coupon = coupon
                     )
                 )
