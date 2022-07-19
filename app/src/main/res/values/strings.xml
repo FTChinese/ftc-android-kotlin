@@ -288,6 +288,7 @@
     <string name="formatter_edition">%1$s/%2$s</string>
     <string name="formatter_month_date">%1$d月%2$d日</string>
     <string name="formatter_date">%1$d日</string>
+    <string name="formatter_year_month_date">%1$d年%2$d月%3$d日</string>
     <string name="cycle_year">年</string>
     <string name="cycle_month">月</string>
     <string name="cycle_day">天</string>
@@ -306,6 +307,11 @@
     <string name="stripe_switch_cycle">更改订阅周期</string>
     <string name="stripe_upgrade">转为高端会员</string>
     <string name="stripe_downgrade">转为标准会员</string>
+    <string name="title_coupon">优惠券</string>
+    <string name="redeem_period">领取期限 %1$s ~ %2$s</string>
+    <string name="coupon_enjoyed">您已经于 %1$s 使用过一次优惠券，一个付款周期内只能使用一次优惠券。</string>
+    <string name="redeem_coupon">领取优惠券</string>
+    <string name="coupon_redeemed">优惠%1$s将在下次发票中扣除</string>
     <string name="pay_brand_ali">支付宝</string>
     <string name="pay_brand_wechat">微信支付</string>
     <string name="pay_brand_stripe">Stripe</string>
@@ -379,6 +385,7 @@
     <string name="title_requires_action">需要验证</string>
     <string name="stripe_requires_action">Stripe支付尚未完成，您的发卡行需要进行安全验证，点击确认开始验证</string>
     <string name="creating_subscription">创建订阅&#8230;</string>
+    <string name="updating_subscription">更新订阅&#8230;</string>
 
     <!--  Membership status  -->
     <string name="label_current_subs">会员订阅</string>
