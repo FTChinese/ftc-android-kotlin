@@ -28,6 +28,12 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    val testUserLiveData = MediatorLiveData<Boolean>().apply {
+        addSource(accountLiveData) {
+            value = accountLiveData.value?.isTest == true
+        }
+    }
+
     /**
      * When you changed account and wants to access its latest value in a callback,
      * use this getter since the callback might be using the values enclosed rather than
