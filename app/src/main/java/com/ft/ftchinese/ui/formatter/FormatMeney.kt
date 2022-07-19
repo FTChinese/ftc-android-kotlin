@@ -22,3 +22,7 @@ fun formatMoney(ctx: Context, amount: Double): String {
 fun formatMoneyParts(ctx: Context, parts: MoneyParts): String {
     return "${parts.symbol}${formatMoney(ctx, parts.amount)}"
 }
+
+fun formatAmountOff(ctx: Context, parts: MoneyParts): String {
+    return "-${parts.symbol}${formatMoney(ctx, parts.amount)}"
+}
