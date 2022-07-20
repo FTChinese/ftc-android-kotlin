@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.subs
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -252,6 +253,11 @@ fun SubsApp(
                         },
                         navArgument("trialId") {
                             type = NavType.StringType
+                            nullable = true
+                        },
+                        navArgument("couponId") {
+                            type = NavType.StringType
+                            nullable = true
                         }
                     )
                 ) { entry ->
@@ -286,7 +292,27 @@ private fun navigateToStripePay(
     navController: NavHostController,
     item: CartItemStripe,
 ) {
-    navController.navigate("${SubsAppScreen.StripePay.name}/${item.recurring.id}?trialId=${item.trial?.id}&couponId=${item.coupon?.id}")
+    // Here we are using Uri.Builder to build the navigation route
+    // since the two query parameters are all optional.
+    // By optional Compose UI means you should not set the key related to
+    // the missing value. String concatenation does not work here since
+    // even an empty string is treated as a valid value.
+    // A null value is converted directly to string "null", which might
+    // not be what you want.
+    val b = Uri.Builder()
+        .appendPath(SubsAppScreen.StripePay.name)
+        .appendPath(item.recurring.id)
+
+    if (item.trial != null) {
+        b.appendQueryParameter("trialId", item.trial.id)
+    }
+    if (item.coupon != null) {
+        b.appendQueryParameter("couponId", item.coupon.id)
+    }
+
+    val dest = b.build().toString().removePrefix("/")
+
+    navController.navigate(dest)
 }
 
 private fun navigateToInvoices(
