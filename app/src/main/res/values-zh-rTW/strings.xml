@@ -280,8 +280,8 @@
     <string name="price_original_prefix">原價</string>
     <string name="price_original_stripe_prefix">試用結束後自動續訂</string>
     <string-array name="stripe_footnotes">
-        <item>* Stripe訂閱FT中文網會員以英鎊計價，需使用支援國際貨幣的信用卡，建議中國大陸以外地區使用</item>
-        <item>* Stripe如有優惠活動，一個付款週期內僅可使用一次優惠券，優惠額度在下次發票開出時扣除</item>
+        <item>Stripe訂閱FT中文網會員以英鎊計價，需使用支援國際貨幣的信用卡，建議中國大陸以外地區使用</item>
+        <item>Stripe如有優惠活動，一個付款週期內僅可使用一次優惠券，優惠額度在下次發票開出時扣除</item>
     </string-array>
 
     <!-- Example: 標準會員/年-->

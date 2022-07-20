@@ -280,8 +280,8 @@
     <string name="price_original_prefix">原价</string>
     <string name="price_original_stripe_prefix">试用结束后自动续订</string>
     <string-array name="stripe_footnotes">
-        <item>* Stripe订阅FT中文网会员以英镑计价，需使用支持国际货币的信用卡，建议中国大陆以外地区使用</item>
-        <item>* Stripe如有优惠活动，一个付款周期内仅可使用一次优惠券，优惠额度在下次发票开出时扣除</item>
+        <item>Stripe订阅FT中文网会员以英镑计价，需使用支持国际货币的信用卡，建议中国大陆以外地区使用</item>
+        <item>Stripe如有优惠活动，一个付款周期内仅可使用一次优惠券，优惠额度在下次发票开出时扣除</item>
     </string-array>
 
     <!-- Example: 标准会员/年-->
