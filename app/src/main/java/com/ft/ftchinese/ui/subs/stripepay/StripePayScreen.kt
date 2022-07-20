@@ -5,8 +5,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -49,11 +47,7 @@ fun StripePayScreen(
     val isApplyCoupon = cartItem.isApplyCoupon
     val couponEnjoyed = isApplyCoupon && couponApplied != null
 
-    val enabledState = remember {
-        derivedStateOf {
-            !loading && (paymentMethod != null) && !forbidden && !couponEnjoyed
-        }
-    }
+    val enabled = !loading && (paymentMethod != null) && !forbidden && !couponEnjoyed
 
     Column(
         modifier = Modifier
@@ -110,7 +104,7 @@ fun StripePayScreen(
         if (subs == null) {
             PrimaryBlockButton(
                 onClick = onSubscribe,
-                enabled = enabledState.value,
+                enabled = enabled,
                 text = formatStripeSubsBtn(
                     context,
                     cartItem.intent.kind
