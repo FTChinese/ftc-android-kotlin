@@ -17,10 +17,11 @@ import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.ProductItem
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.ui.components.BodyText2
 import com.ft.ftchinese.ui.components.ProductHeader
 import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.ui.theme.OColors
 import org.threeten.bp.LocalDate
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -72,12 +73,7 @@ fun ProductCard(
                 .resources
                 .getStringArray(R.array.stripe_footnotes)
                 .map {
-                    SubHeading2(
-                        text = it,
-                        color = OColor.black50,
-                        textAlign = TextAlign.Start
-                    )
-                    Spacer(modifier = Modifier.height(Dimens.dp4))
+                    AsteriskRow(text = it,)
                 }
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
@@ -91,10 +87,9 @@ fun ProductCard(
             Spacer(modifier = Modifier.height(Dimens.dp8))
 
             item.content.smallPrint?.let {
-                Text(
+                BodyText2(
                     text = it,
-                    style = MaterialTheme.typography.body2,
-                    color = OColor.black50,
+                    color = OColors.black50Default,
                 )
             }
 
@@ -104,17 +99,33 @@ fun ProductCard(
 }
 
 @Composable
+private fun AsteriskRow(
+    text: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(text = "*")
+        Spacer(modifier = Modifier.width(Dimens.dp4))
+        SubHeading2(
+            text = text,
+            textAlign = TextAlign.Start,
+            color = OColors.black50Default
+        )
+    }
+}
+
+@Composable
 private fun ProductDescRow(text: String) {
-    Row {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
 
         Icon(
             painter = painterResource(id = R.drawable.ic_baseline_done_24),
             contentDescription = null,
-            tint = OColor.black60
         )
-
         Spacer(modifier = Modifier.width(Dimens.dp4))
-
         Text(
             text = text,
             style = MaterialTheme.typography.body1,

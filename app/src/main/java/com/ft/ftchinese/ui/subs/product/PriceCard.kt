@@ -9,17 +9,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.em
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.PriceParts
+import com.ft.ftchinese.ui.components.BodyText2
 import com.ft.ftchinese.ui.formatter.formatMoney
 import com.ft.ftchinese.ui.formatter.formatYMD
 import com.ft.ftchinese.ui.formatter.joinPriceParts
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.ui.theme.OColors
 
 @Composable
 private fun PricePayable(parts: PriceParts) {
@@ -108,10 +111,10 @@ private fun PriceSmallPrint(text: String) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
     ) {
-        Text(
+        BodyText2(
             text = text,
-            color = OColor.black50,
-            style = MaterialTheme.typography.body2
+            color = OColors.black50Default,
+            textAlign = TextAlign.Center
         )
     }
 }
