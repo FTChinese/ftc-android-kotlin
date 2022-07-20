@@ -32,9 +32,7 @@ fun CouponApplicable(
 ) {
     val context = LocalContext.current
 
-    Card(
-        elevation = Dimens.dp4
-    ) {
+    Card {
         Column(
             modifier = Modifier.padding(Dimens.dp8)
         ) {
