@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.ft.ftchinese.model.content.WebpageMeta
+import com.ft.ftchinese.ui.theme.OTheme
 
 class WebpageActivity : ComponentActivity() {
 
@@ -15,10 +16,12 @@ class WebpageActivity : ComponentActivity() {
         intent.getParcelableExtra<WebpageMeta>(EXTRA_WEB_META)
             ?.let {
                 setContent {
-                    WebpageScreen(
-                        pageMeta = it
-                    ) {
-                        finish()
+                    OTheme {
+                        WebpageScreen(
+                            pageMeta = it
+                        ) {
+                            finish()
+                        }
                     }
                 }
             }
