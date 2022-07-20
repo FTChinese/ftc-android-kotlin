@@ -36,6 +36,10 @@ data class Discount(
             return true
         }
 
+        if (status != DiscountStatus.Active) {
+            return false
+        }
+
         val now = ZonedDateTime.now()
 
         if (now.isBefore(startUtc) || now.isAfter(endUtc)) {
