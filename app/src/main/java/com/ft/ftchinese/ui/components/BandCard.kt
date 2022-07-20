@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.sp
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
+import java.util.*
 
 @Composable
 fun BankCard(
@@ -29,7 +30,13 @@ fun BankCard(
             modifier = Modifier.padding(Dimens.dp16)
         ) {
             Text(
-                text = brand,
+                text = brand.replaceFirstChar {
+                    if (it.isLowerCase()) {
+                        it.titlecase(Locale.getDefault())
+                    } else {
+                        it.toString()
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.h6,
                 color = OColor.black80
@@ -103,7 +110,7 @@ fun AddBankCard(
 @Composable
 fun PreviewBankCard() {
     BankCard(
-        brand = "American Express",
+        brand = "american Express",
         last4 = "4242",
         expYear = 2025,
         expMonth = 9
