@@ -57,13 +57,13 @@ fun StripePayScreen(
 
     Column(
         modifier = Modifier
+            .padding(all = Dimens.dp16)
             .fillMaxSize()
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(all = Dimens.dp16)
         ) {
             if (mode != ApiMode.Live) {
                 Mode(mode = mode)
@@ -103,28 +103,26 @@ fun StripePayScreen(
                     coupon = if (isApplyCoupon) cartItem.coupon else null
                 )
             }
+
+            Spacer(modifier = Modifier.height(Dimens.dp16))
         }
 
-        Column(
-            modifier = Modifier.padding(all = Dimens.dp16)
-        ) {
-            if (subs == null) {
-                AutoRenewAgreement()
+        if (subs == null) {
+            PrimaryBlockButton(
+                onClick = onSubscribe,
+                enabled = enabledState.value,
+                text = formatStripeSubsBtn(
+                    context,
+                    cartItem.intent.kind
+                ),
+            )
 
-                PrimaryBlockButton(
-                    onClick = onSubscribe,
-                    enabled = enabledState.value,
-                    text = formatStripeSubsBtn(
-                        context,
-                        cartItem.intent.kind
-                    ),
-                )
-            } else {
-                PrimaryBlockButton(
-                    onClick = onDone,
-                    text = stringResource(id = R.string.btn_done)
-                )
-            }
+            AutoRenewAgreement()
+        } else {
+            PrimaryBlockButton(
+                onClick = onDone,
+                text = stringResource(id = R.string.btn_done)
+            )
         }
     }
 }
