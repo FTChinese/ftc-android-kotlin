@@ -1,15 +1,10 @@
 package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.model.enums.ApiMode
 
-private const val devIP = "http://192.168.1.51"
+private const val devIP = "http://192.168.1.54"
 private const val devPort = "8206"
-
-enum class ApiMode {
-    Debug,
-    Sandbox,
-    Live,
-}
 
 data class ApiConfig(
     val baseUrl: String,
@@ -54,12 +49,11 @@ data class ApiConfig(
                 BuildConfig.FLAVOR == flavorWx  -> {
                     debugApi
                 }
-                // For other Build Variants xxxDebug
+                // Debug environment always uses debug api.
                 BuildConfig.DEBUG -> {
                     debugApi
                 }
-                // For Build Variants xxxRelease.
-                // Sandbox is dynamically determined by user's account.
+                // Distinguish between sandbox/live API in release app
                 isTest -> {
                     releaseSandboxApi
                 }
