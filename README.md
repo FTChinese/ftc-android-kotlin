@@ -168,6 +168,8 @@ Do not edit images used as app icon manually. Follow this guide to create them u
 
 https://developer.android.com/studio/write/image-asset-studio
 
+NOTE: when generating icons using Image Asset Studio, you are recommended to delete existing ones if you mean to override them. Android Studio cannot properly handle file overridden, even though it claims it will override files with the same name.
+
 # Issues
 
 ## Protobuf
