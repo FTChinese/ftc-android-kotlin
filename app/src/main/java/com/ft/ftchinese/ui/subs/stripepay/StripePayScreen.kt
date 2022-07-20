@@ -12,16 +12,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.enums.ApiMode
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.stripesubs.*
-import com.ft.ftchinese.repository.ApiMode
-import com.ft.ftchinese.ui.components.*
+import com.ft.ftchinese.ui.components.CheckoutHeader
+import com.ft.ftchinese.ui.components.CheckoutMessage
+import com.ft.ftchinese.ui.components.Mode
+import com.ft.ftchinese.ui.components.PrimaryBlockButton
 import com.ft.ftchinese.ui.form.AutoRenewAgreement
-import com.ft.ftchinese.ui.formatter.*
+import com.ft.ftchinese.ui.formatter.formatStripeSubsBtn
 import com.ft.ftchinese.ui.subs.product.PriceCard
 import com.ft.ftchinese.ui.subs.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
@@ -55,12 +58,12 @@ fun StripePayScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(all = Dimens.dp16),
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
+                .padding(all = Dimens.dp16)
         ) {
             if (mode != ApiMode.Live) {
                 Mode(mode = mode)
@@ -80,7 +83,6 @@ fun StripePayScreen(
 
             cartItem.coupon?.let {
                 Spacer(modifier = Modifier.height(Dimens.dp8))
-
                 CouponApplicable(
                     coupon = it,
                     applied = couponApplied
@@ -88,7 +90,6 @@ fun StripePayScreen(
             }
 
             Spacer(modifier = Modifier.height(Dimens.dp8))
-
             PaymentMethodSelector(
                 card = paymentMethod?.card,
                 clickable = !loading,
@@ -96,6 +97,7 @@ fun StripePayScreen(
             )
 
             subs?.let {
+                Spacer(modifier = Modifier.height(Dimens.dp8))
                 StripeSubsDetails(
                     subs = it,
                     coupon = if (isApplyCoupon) cartItem.coupon else null
@@ -103,22 +105,26 @@ fun StripePayScreen(
             }
         }
 
-        if (subs == null) {
-            AutoRenewAgreement()
+        Column(
+            modifier = Modifier.padding(all = Dimens.dp16)
+        ) {
+            if (subs == null) {
+                AutoRenewAgreement()
 
-            PrimaryBlockButton(
-                onClick = onSubscribe,
-                enabled = enabledState.value,
-                text = formatStripeSubsBtn(
-                    context,
-                    cartItem.intent.kind
-                ),
-            )
-        } else {
-            PrimaryBlockButton(
-                onClick = onDone,
-                text = stringResource(id = R.string.btn_done)
-            )
+                PrimaryBlockButton(
+                    onClick = onSubscribe,
+                    enabled = enabledState.value,
+                    text = formatStripeSubsBtn(
+                        context,
+                        cartItem.intent.kind
+                    ),
+                )
+            } else {
+                PrimaryBlockButton(
+                    onClick = onDone,
+                    text = stringResource(id = R.string.btn_done)
+                )
+            }
         }
     }
 }
