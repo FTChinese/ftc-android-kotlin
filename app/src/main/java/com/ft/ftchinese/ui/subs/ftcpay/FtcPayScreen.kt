@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.defaultPaywall
-import com.ft.ftchinese.repository.ApiMode
+import com.ft.ftchinese.model.enums.ApiMode
 import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.subs.product.PriceCard
 import com.ft.ftchinese.ui.subs.product.PriceCardParams

@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.store.FileStore
+import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.AuthActivity
@@ -34,9 +34,6 @@ fun PaywallActivityScreen(
 ) {
 
     val context = LocalContext.current
-    val cache = remember {
-        FileStore(context)
-    }
     val tracker = remember {
         StatsTracker.getInstance(context)
     }
@@ -44,6 +41,11 @@ fun PaywallActivityScreen(
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
     val isLoggedIn by userViewModel.loggedInLiveData.observeAsState(false)
+    val isTest by userViewModel.testUserLiveData.observeAsState(false)
+
+    val apiConfig = remember(key1 = isTest) {
+        ApiConfig.ofSubs(isTest)
+    }
 
     val (openDialog, setOpenDialog) = remember {
         mutableStateOf(false)
@@ -53,6 +55,7 @@ fun PaywallActivityScreen(
         scaffoldState = scaffoldState
     )
 
+    // Launcher if user is not logged in.
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
@@ -71,10 +74,10 @@ fun PaywallActivityScreen(
         }
     }
 
+    // Load paywall.
     LaunchedEffect(key1 = Unit) {
         paywallState.loadPaywall(
-            isTest = account?.isTest ?: false,
-            cache = cache
+            api = apiConfig,
         )
 
         tracker.displayPaywall()
@@ -103,8 +106,7 @@ fun PaywallActivityScreen(
         ),
         onRefresh = {
             paywallState.refreshPaywall(
-                isTest = account?.isTest ?: false,
-                cache = cache
+                api = apiConfig,
             )
         },
     ) {

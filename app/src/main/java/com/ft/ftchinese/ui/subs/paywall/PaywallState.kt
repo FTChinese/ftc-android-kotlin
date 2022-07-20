@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.subs.paywall
 
-import android.content.res.Resources
+import android.content.Context
 import android.util.Log
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
@@ -8,11 +8,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.store.FileStore
-import com.ft.ftchinese.ui.util.ConnectionState
-import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.repo.PaywallRepo
+import com.ft.ftchinese.ui.util.ConnectionState
+import com.ft.ftchinese.ui.util.connectivityState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -21,9 +22,11 @@ private const val TAG = "Paywall"
 class PaywallState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
-    resources: Resources,
     connState: State<ConnectionState>,
-) : BaseState(scaffoldState, scope, resources, connState) {
+    context: Context
+) : BaseState(scaffoldState, scope, context.resources, connState) {
+
+    private val cache = FileStore(context)
 
     var refreshing by mutableStateOf(false)
         private set
@@ -32,12 +35,11 @@ class PaywallState(
         private set
 
     fun loadPaywall(
-        isTest: Boolean,
-        cache: FileStore
+        api: ApiConfig,
     ) {
         progress.value = true
         scope.launch {
-            val pw = PaywallRepo.fromFileCache(isTest, cache)
+            val pw = PaywallRepo.fromFileCache(api.mode, cache)
 
             var cacheFound = false
             if (pw != null) {
@@ -57,7 +59,7 @@ class PaywallState(
             }
 
             val result = PaywallRepo.fromServer(
-                isTest = isTest,
+                api = api,
                 scope = scope,
                 cache = cache,
             )
@@ -82,8 +84,7 @@ class PaywallState(
     }
 
     fun refreshPaywall(
-        isTest: Boolean,
-        cache: FileStore,
+        api: ApiConfig
     ) {
         if (!ensureConnected()) {
             return
@@ -92,7 +93,7 @@ class PaywallState(
         refreshing = true
         scope.launch {
             val result = PaywallRepo.fromServer(
-                isTest = isTest,
+                api = api,
                 scope = scope,
                 cache = cache
             )
@@ -118,13 +119,13 @@ class PaywallState(
 fun rememberPaywallState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
-    resources: Resources = LocalContext.current.resources,
-    connState: State<ConnectionState> = connectivityState()
-) = remember(scaffoldState, resources, connState) {
+    connState: State<ConnectionState> = connectivityState(),
+    context: Context = LocalContext.current
+) = remember(scaffoldState, connState) {
     PaywallState(
         scaffoldState = scaffoldState,
         scope = scope,
-        resources = resources,
-        connState = connState
+        connState = connState,
+        context = context,
     )
 }
