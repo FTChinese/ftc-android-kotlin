@@ -1,3 +1,10 @@
+## 6.7.0
+
+* Support Stripe coupon;
+* Fixed disappearing status bar;
+* Fixed Stripe default payment method not shown after data loaded;
+* Re-generate app icon.
+
 ##  (2019-03-21)
 
 
