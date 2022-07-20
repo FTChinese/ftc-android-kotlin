@@ -180,7 +180,7 @@ fun StripeSubActivityScreen(
                 cartItem = it,
                 loading = paymentState.loadingState.value,
                 mode = apiConfig.mode,
-                paymentMethod = paymentState.paymentMethodSelected,
+                paymentMethod = paymentState.paymentMethodInUse.value?.current,
                 subs = paymentState.subsResult?.subs,
                 couponApplied = paymentState.couponApplied,
                 onPaymentMethod = {
