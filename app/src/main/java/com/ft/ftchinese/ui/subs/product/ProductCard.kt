@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
@@ -74,7 +75,9 @@ fun ProductCard(
                     SubHeading2(
                         text = it,
                         color = OColor.black50,
+                        textAlign = TextAlign.Start
                     )
+                    Spacer(modifier = Modifier.height(Dimens.dp4))
                 }
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
