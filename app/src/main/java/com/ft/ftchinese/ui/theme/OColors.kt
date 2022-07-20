@@ -22,6 +22,14 @@ object OColors {
             OColor.black30
         }
 
+    val black50Default: Color
+        @Composable
+        get() = if (MaterialTheme.colors.isLight) {
+            OColor.black50
+        } else {
+            Color.Unspecified
+        }
+
     val whiteBlack90: Color
         @Composable
         get() = if (MaterialTheme.colors.isLight) {
