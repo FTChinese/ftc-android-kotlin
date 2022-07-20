@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.enums.ApiMode
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.paywall.Paywall
 import com.jakewharton.byteunits.BinaryByteUnit
@@ -14,15 +15,14 @@ import java.io.File
 import java.io.FileInputStream
 
 object CacheFileNames {
-    const val wxAvatar = "wx_avatar.jpg"
     const val splashSchedule = "splash_schedule.json"
 }
 
 // The paywall cached file are versioned therefore whenever
 // app updated, it won't be bothered by json parsing failure
 // caused by data structure changes.
-fun paywallFileName(isTest: Boolean): String {
-    return "paywall.${BuildConfig.VERSION_CODE}.${if (isTest) "test" else "live"}.json"
+private fun pwFileName(mode: ApiMode): String {
+    return "paywall.${BuildConfig.VERSION_CODE}.${mode.symbol}.json"
 }
 
 val templateCache: MutableMap<String, String> = HashMap()
@@ -69,14 +69,14 @@ class FileStore (private val context: Context) {
         }
     }
 
-    fun savePaywall(isTest: Boolean, text: String) {
+    fun savePaywall(mode: ApiMode, text: String) {
         Log.i(TAG, "Caching paywall data to file")
-        saveText(paywallFileName(isTest), text = text)
+        saveText(pwFileName(mode), text = text)
     }
 
-    suspend fun asyncLoadPaywall(isTest: Boolean): Paywall? {
+    suspend fun asyncLoadPaywall(mode: ApiMode): Paywall? {
         return withContext(Dispatchers.IO) {
-            val data = loadText(paywallFileName(isTest = isTest))
+            val data = loadText(pwFileName(mode))
             if (data.isNullOrBlank()) {
                 null
             } else {
