@@ -1,8 +1,10 @@
 package com.ft.ftchinese.ui.repo
 
+import com.ft.ftchinese.model.enums.ApiMode
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.paywall.*
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.store.FileStore
 import kotlinx.coroutines.CoroutineScope
@@ -53,8 +55,8 @@ object PaywallRepo {
             }
     }
 
-    suspend fun fromFileCache(isTest: Boolean, cache: FileStore): Paywall? {
-        val pw = cache.asyncLoadPaywall(isTest)
+    suspend fun fromFileCache(mode: ApiMode, cache: FileStore): Paywall? {
+        val pw = cache.asyncLoadPaywall(mode)
         if (pw != null) {
             updateCache(pw)
         }
@@ -62,15 +64,19 @@ object PaywallRepo {
         return pw
     }
 
-    suspend fun fromServer(isTest: Boolean, scope: CoroutineScope, cache: FileStore): FetchResult<Paywall> {
-        return when (val result = PaywallClient.asyncRetrieve(isTest)) {
+    suspend fun fromServer(
+        api: ApiConfig,
+        scope: CoroutineScope,
+        cache: FileStore
+    ): FetchResult<Paywall> {
+        return when (val result = PaywallClient.asyncRetrieve(api)) {
             is FetchResult.LocalizedError -> result
             is FetchResult.TextError -> result
             is FetchResult.Success -> {
                 val (paywall, raw) = result.data
                 if (raw.isNotBlank()) {
                     scope.launch(Dispatchers.IO) {
-                        cache.savePaywall(isTest, raw)
+                        cache.savePaywall(api.mode, raw)
                     }
                 }
 
