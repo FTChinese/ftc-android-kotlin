@@ -1,3 +1,27 @@
+# Build
+
+## Files
+
+Add those two files in the root of the project:
+
+`config.properties`
+
+```
+wechat.appId="......."
+access_token="......."
+```
+
+`keystore.properties`
+
+```
+storePassword="......"
+keyPassword="......"
+keyAlias="......."
+storeFile="......."
+```
+
+Add `google-service.json` to the `app` directory.
+
 # Product Design
 
 ## Splash Screen
@@ -118,46 +142,6 @@ Do not use the payment intent workflow. Use setup intent instead.
     * customer id, 
     * publishable key.
 
-# Issues
-
-## Protobuf
-
-Usage guide on protobuf is scattered on the web. The official documentation failed to includes any working configuration.
-
-You have to refer to:
-
-* https://medium.com/supercharges-mobile-product-guide/new-way-of-storing-data-in-android-jetpack-datastore-a1073d09393d
-* https://github.com/google/protobuf-gradle-plugin
-
-
-## Data Binding
-
-### Nested Layout
-
-If you include a layout inside another layout:
-
-```
-<include
-    android:id="@+id/toolbar"
-    layout="@layout/simple_toolbar" />
-```
-
-And the toolbar:
-
-```
-<androidx.appcompat.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/toolbar"
-    android:layout_width="0dp"
-    android:layout_height="?attr/actionBarSize"
-    android:elevation="4dp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
-```
-
-The IDs are chained like this: `binding.toolbar.toolbar`
-
 ## Localization
 
 ```
@@ -178,45 +162,22 @@ values-b+zh+HK
 values-b+zh+MO
 ```
 
-## Files
+## Image Assets
 
-Add those two files in the root of the project:
+Do not edit images used as app icon manually. Follow this guide to create them using Android Studio:
 
-`config.properties`
+https://developer.android.com/studio/write/image-asset-studio
 
-```
-wechat.appId="......."
-access_token="......."
-```
+# Issues
 
-`keystore.properties`
+## Protobuf
 
-```
-storePassword="......"
-keyPassword="......"
-keyAlias="......."
-storeFile="......."
-```
+Usage guide on protobuf is scattered on the web. The official documentation failed to includes any working configuration.
 
-Add `google-service.json` to the `app` directory.
+You have to refer to:
 
-## Logo on ActionBar
-
-Reference: https://developer.android.com/training/multiscreen/screendensities
-
-* xhdpi：2.0
-* hdpi：1.5
-* mdpi：1.0（基准）
-
-Reference: https://stackoverflow.com/questions/15248207/actionbar-logo-size
-
-* drawable-mdpi/ic_logo_wide.png (75 x 32 px)
-* drawable-hdpi/ic_logo_wide.png (112 x 48 px)
-* drawable-xhdpi/ic_logo_wide.png (149 x 64 px)
-
-## Problems with Android Studio
-
-* As of Android Studio Arctic Fox 2020.3.1 Canary 14, clicking app inspection will crash your app! You need to unplug your device and close kill Android Studio.
+* https://medium.com/supercharges-mobile-product-guide/new-way-of-storing-data-in-android-jetpack-datastore-a1073d09393d
+* https://github.com/google/protobuf-gradle-plugin
 
 ## WebView
 
@@ -260,18 +221,6 @@ Mozilla/5.0 (Linux; Android 9; TA-1041 Build/PPR1.180610.011; wv) AppleWebKit/53
 
 Mozilla/5.0 (Linux; Android 9; TA-1041) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Mobile Safari/537.36
 ```
-
-### Data binding with `app:srcCompat`
-
-It seems when you are using data binding layout, you cannot use `app:srcCompat` to set images. It won't compile. Use `android:src` instead.
-
-### Data binding with `include` tag
-
-See:
-
-https://medium.com/androiddevelopers/android-data-binding-that-include-thing-1c8791dd6038
-
-https://medium.com/@elia.maracani/android-data-binding-passing-a-variable-to-an-include-d-layout-3567099b58f
 
 ## Versions
 
