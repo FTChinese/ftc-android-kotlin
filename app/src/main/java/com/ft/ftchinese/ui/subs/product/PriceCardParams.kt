@@ -2,9 +2,7 @@ package com.ft.ftchinese.ui.subs.product
 
 import android.content.Context
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.paywall.CartItemFtc
-import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.model.paywall.PriceParts
+import com.ft.ftchinese.model.paywall.*
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.formatter.formatAmountOff
 
@@ -74,13 +72,17 @@ data class PriceCardParams(
                 return PriceCardParams(
                     heading = heading,
                     title = ctx.getString(R.string.price_heading_stripe_trial),
-                    payable = item.payablePrice(),
-                    overridden = item.overriddenPrice()?.let {
-                        OverriddenPrice(
-                            description = ctx.getString(R.string.price_original_stripe_prefix),
-                            parts = it,
-                        )
-                    },
+                    payable = PriceParts(
+                        symbol = getCurrencySymbol(item.trial.currency),
+                        amount = convertCent(item.trial.unitAmount),
+                        period = item.trial.periodCount,
+                        isRecurring = false,
+                        highlighted = true
+                    ),
+                    overridden = OverriddenPrice(
+                        description = ctx.getString(R.string.price_original_stripe_prefix),
+                        parts = item.recurPrice(),
+                    ),
                     isAutoRenew = true,
                     smallPrint = smallPrint,
                 )
@@ -90,13 +92,17 @@ data class PriceCardParams(
                 return PriceCardParams(
                     heading = heading,
                     title = "领取优惠 ${formatAmountOff(ctx, item.coupon.moneyParts)}",
-                    payable = item.payablePrice(),
-                    overridden = item.overriddenPrice()?.let {
-                        OverriddenPrice(
-                            description = ctx.getString(R.string.price_original_prefix),
-                            parts = it,
-                        )
-                    },
+                    payable = PriceParts(
+                        symbol = getCurrencySymbol(item.coupon.currency),
+                        amount = convertCent(item.recurring.unitAmount - item.coupon.amountOff),
+                        period = item.recurring.periodCount,
+                        isRecurring = false,
+                        highlighted = true,
+                    ),
+                    overridden = OverriddenPrice(
+                        description = ctx.getString(R.string.price_original_prefix),
+                        parts = item.recurPrice(),
+                    ),
                     isAutoRenew = true,
                     smallPrint = smallPrint,
                 )
@@ -105,7 +111,7 @@ data class PriceCardParams(
             return PriceCardParams(
                 heading = heading,
                 title = null,
-                payable = item.payablePrice(),
+                payable = item.recurPrice(),
                 isAutoRenew = true,
                 smallPrint = smallPrint,
             )
