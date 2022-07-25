@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.formatter
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PeriodUnit
+import com.ft.ftchinese.model.ftcsubs.PeriodInterval
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 
 private fun getUnitStr(ctx: Context, unit: PeriodUnit): String {
@@ -13,7 +14,7 @@ private fun getUnitStr(ctx: Context, unit: PeriodUnit): String {
     }
 }
 
-private fun formatInterval(ctx: Context, interval: com.ft.ftchinese.model.ftcsubs.PeriodInterval, recurring: Boolean): String {
+private fun formatInterval(ctx: Context, interval: PeriodInterval, recurring: Boolean): String {
     if (interval.count <= 0) {
         return ""
     }
