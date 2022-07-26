@@ -94,7 +94,7 @@ fun StripePayScreen(
                 Spacer(modifier = Modifier.height(Dimens.dp8))
                 StripeSubsDetails(
                     subs = it,
-                    coupon = if (isApplyCoupon) cartItem.coupon else null
+                    coupon = cartItem.coupon
                 )
             }
 
