@@ -163,6 +163,10 @@ android {
             dimension "appStore"
             versionNameSuffix "-wechat"
         }
+        stripe {
+            dimension "appStore"
+            versionNameSuffix "-stripe"
+        }
     }
 
     testOptions {
