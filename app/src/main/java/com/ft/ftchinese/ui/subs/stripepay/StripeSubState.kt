@@ -12,7 +12,6 @@ import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.CouponApplied
-import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.StripeClient
@@ -34,17 +33,9 @@ class StripeSubState(
 ) : StripeWalletState(scaffoldState, scope, context.resources, connState) {
 
     private val tracker = StatsTracker.getInstance(context)
-    private val idempotency = Idempotency.getInstance(context)
-
-    fun clearIdempotency() {
-        idempotency.clear()
-    }
 
     var cartItem by mutableStateOf<CartItemStripe?>(null)
         private set
-
-    private val isUpdate: Boolean
-        get() = cartItem?.intent?.kind == IntentKind.Upgrade
 
     var subsResult by mutableStateOf<StripeSubsResult?>(null)
         private set
@@ -121,10 +112,6 @@ class StripeSubState(
             return
         }
 
-        if (isUpdate) {
-            idempotency.clear()
-        }
-
         when (itemStripe.intent.kind) {
             IntentKind.Create,
             IntentKind.OneTimeToAutoRenew -> {
@@ -152,7 +139,6 @@ class StripeSubState(
         progress.value = true
         val params = item.subsParams(
             paymentMethodSelected,
-            idempotency.retrieveKey()
         )
 
         scope.launch {
@@ -192,7 +178,6 @@ class StripeSubState(
         }
 
         if (result.subs.paymentIntent?.clientSecret == null) {
-            idempotency.clear()
             failure = FailureStatus.Message("订阅失败！请重试或更换支付方式")
             return
         }
@@ -204,7 +189,6 @@ class StripeSubState(
         progress.value = true
         val params = item.subsParams(
             payMethod = paymentMethodSelected,
-            idemKey = idempotency.retrieveKey()
         )
 
         scope.launch {
@@ -227,6 +211,7 @@ class StripeSubState(
                 }
             }
 
+            progress.value = false
         }
     }
 }
