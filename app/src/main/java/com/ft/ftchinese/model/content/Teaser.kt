@@ -2,6 +2,7 @@ package com.ft.ftchinese.model.content
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.ArticleType
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Permission
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
@@ -156,10 +157,10 @@ data class Teaser(
                 SUB_TYPE_RADIO -> "Radio/interactive/$id"
                 SUB_TYPE_SPEED_READING -> "SpeedReading/interactive/$id"
                 else -> when {
-                    tag.contains("FT研究院") && tag.contains("会员专享") -> "StandardIntelligence/interactive/$id"
-                    tag.contains("FT研究院") && tag.contains("高端专享") -> "PremiumIntelligence/interactive/$id"
-                    tag.contains("会员专享") -> "Standard/interactive/$id"
-                    tag.contains("高端专享") -> "Premium/interactive/$id"
+                    tag.contains("FT研究院") && (tag.contains("会员专享") || tag.contains("會員專享")) -> "StandardIntelligence/interactive/$id"
+                    tag.contains("FT研究院") && (tag.contains("高端专享") || tag.contains("高端專享")) -> "PremiumIntelligence/interactive/$id"
+                    tag.contains("会员专享") || tag.contains("會員專享") -> "Standard/interactive/$id"
+                    tag.contains("高端专享") || tag.contains("高端專享") -> "Premium/interactive/$id"
                     else -> "$type/$id"
                 }
             }
@@ -238,11 +239,11 @@ data class Teaser(
             return p
         }
 
-        if (tag.contains("会员专享")) {
+        if (tag.contains("会员专享") || tag.contains("會員專享")) {
             return Permission.STANDARD
         }
 
-        if (tag.contains("高端专享")) {
+        if (tag.contains("高端专享") || tag.contains("高端專享")) {
             return Permission.PREMIUM
         }
 
