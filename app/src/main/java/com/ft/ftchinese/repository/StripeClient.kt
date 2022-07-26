@@ -238,11 +238,21 @@ object StripeClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         if (account.membership.stripeSubsId != null) {
-            return subsDefaultPaymentMethod(
-                api,
-                subsId = account.membership.stripeSubsId,
-                ftcId = account.id,
-            )
+            try {
+                val resp = subsDefaultPaymentMethod(
+                    api,
+                    subsId = account.membership.stripeSubsId,
+                    ftcId = account.id,
+                )
+
+                if (resp.code == 200) {
+                    return resp
+                }
+            } catch (e: Exception) {
+                // In case user has a stripe subscription but payment method is missing,
+                // try to fall back to the one set on customer.
+                println(e.message)
+            }
         }
 
         account.stripeId ?: throw Exception("Not a stripe customer")
