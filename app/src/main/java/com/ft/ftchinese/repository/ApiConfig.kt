@@ -13,6 +13,7 @@ data class ApiConfig(
 ) {
     companion object {
         private const val flavorWx = "wechat"
+        private const val flavorStripe = "stripe"
 
         // Used for development.
         private val debugApi = ApiConfig(
@@ -48,6 +49,9 @@ data class ApiConfig(
                 // use local ip so that we could debug requests.
                 BuildConfig.FLAVOR == flavorWx  -> {
                     debugApi
+                }
+                BuildConfig.FLAVOR == flavorStripe && BuildConfig.DEBUG && isTest -> {
+                    releaseSandboxApi
                 }
                 // Debug environment always uses debug api.
                 BuildConfig.DEBUG -> {
