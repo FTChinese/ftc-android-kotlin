@@ -133,10 +133,13 @@ fun StripeSubActivityScreen(
     // If there's coupon, check whether user have already used any coupon
     // during the lifecycle of current subscription period.
     LaunchedEffect(key1 = paymentState.cartItem) {
+        // Only check duplicate redeem when intent is apply coupon.
+        // If user is switching cycle or tier, we simply let user go ahead.
         if (paymentState.cartItem?.isApplyCoupon != true) {
             return@LaunchedEffect
         }
 
+        // TODO: avoid multiple request.
         account.membership.stripeSubsId?.let {
             paymentState.findCouponApplied(
                 api = apiConfig,
@@ -160,7 +163,6 @@ fun StripeSubActivityScreen(
             is FailureStatus.NextAction -> {
                 AlertAuthentication(
                     onConfirm = {
-                        paymentState.clearIdempotency()
                         paymentState.clearFailureState()
                     },
                     onDismiss = {
@@ -189,9 +191,7 @@ fun StripeSubActivityScreen(
                 onSubscribe = {
                     paymentState.subscribe(account, it)
                 },
-                onDone = {
-                    onSuccess()
-                }
+                onDone = onSuccess
             )
         }
     }
