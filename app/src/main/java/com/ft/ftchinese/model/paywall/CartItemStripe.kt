@@ -30,14 +30,12 @@ data class CartItemStripe(
 
     fun subsParams(
         payMethod: StripePaymentMethod?,
-        idemKey: String?
     ): SubParams {
         return SubParams(
             priceId = recurring.id,
             introductoryPriceId = trial?.id,
             coupon = coupon?.id,
             defaultPaymentMethod = payMethod?.id,
-            idempotency = idemKey,
         )
     }
 }
