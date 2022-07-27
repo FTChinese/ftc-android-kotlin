@@ -202,22 +202,22 @@ class FileStore (private val context: Context) {
     }
 
     fun readChannelTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "list-big5.html" else "list.html"
+        val htmlFileName = if (UriUtils.isTraditionalCn) "list_big5.html" else "list.html"
         return readRaw(htmlFileName, R.raw.list)
     }
 
     fun readStoryTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "story-big5.html" else "story.html"
+        val htmlFileName = if (UriUtils.isTraditionalCn) "story_big5.html" else "story.html"
         return readRaw(htmlFileName, R.raw.story)
     }
 
     fun readSearchTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "search-big5.html" else "search.html"
+        val htmlFileName = if (UriUtils.isTraditionalCn) "search_big5.html" else "search.html"
         return readRaw(htmlFileName, R.raw.search)
     }
 
     fun readGymTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "gym-big5.html" else "gym.html"
+        val htmlFileName = if (UriUtils.isTraditionalCn) "gym_big5.html" else "gym.html"
         return readRaw(htmlFileName, R.raw.gym)
     }
 
