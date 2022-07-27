@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.util
 
 import android.content.res.Resources
 import android.net.Uri
+import android.nfc.Tag
 import androidx.core.os.ConfigurationCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.content.ChannelSource
@@ -148,7 +149,7 @@ object UriUtils {
             if (source.isFragment) {
                 builder.appendQueryParameter("bodyonly", "yes")
             }
-
+            val url = appendUtm(builder).build().toString()
             appendUtm(builder).build().toString()
         } catch (e: Exception) {
             null

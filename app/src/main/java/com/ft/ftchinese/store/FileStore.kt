@@ -203,6 +203,7 @@ class FileStore (private val context: Context) {
 
     fun readChannelTemplate(): String {
         val htmlFileName = if (UriUtils.isTraditionalCn) "list_big5.html" else "list.html"
+        Log.i(TAG, "Using template: $htmlFileName")
         return readRaw(htmlFileName, R.raw.list)
     }
 
