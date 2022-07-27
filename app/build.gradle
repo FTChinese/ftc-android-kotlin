@@ -316,7 +316,7 @@ task copy(type: Copy, group: "Archive", description: "Copies sources to the dest
 
 task template(type: Copy, group: "Archive", description: "Copies html template files") {
     from("../../NewFTCApp-iOS/page/FTChinese") {
-        include("gym.html", "list.html", "search.html", "story.html")
+        include("gym.html", "list.html", "search.html", "story.html", "gym-big5.html", "list-big5.html", "search-big5.html", "story-big5.html")
     }
     into "./src/main/res/raw"
 }

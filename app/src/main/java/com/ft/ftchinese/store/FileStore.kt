@@ -7,6 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.ApiMode
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.ui.util.UriUtils
 import com.jakewharton.byteunits.BinaryByteUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -201,19 +202,23 @@ class FileStore (private val context: Context) {
     }
 
     fun readChannelTemplate(): String {
-        return readRaw("list.html", R.raw.list)
+        val htmlFileName = if (UriUtils.isTraditionalCn) "list-big5.html" else "list.html"
+        return readRaw(htmlFileName, R.raw.list)
     }
 
     fun readStoryTemplate(): String {
-        return readRaw("story.html", R.raw.story)
+        val htmlFileName = if (UriUtils.isTraditionalCn) "story-big5.html" else "story.html"
+        return readRaw(htmlFileName, R.raw.story)
     }
 
     fun readSearchTemplate(): String {
-        return readRaw("search.html", R.raw.search)
+        val htmlFileName = if (UriUtils.isTraditionalCn) "search-big5.html" else "search.html"
+        return readRaw(htmlFileName, R.raw.search)
     }
 
     fun readGymTemplate(): String {
-        return readRaw("gym.html", R.raw.gym)
+        val htmlFileName = if (UriUtils.isTraditionalCn) "gym-big5.html" else "gym.html"
+        return readRaw(htmlFileName, R.raw.gym)
     }
 
     fun readTestHtml(): String {

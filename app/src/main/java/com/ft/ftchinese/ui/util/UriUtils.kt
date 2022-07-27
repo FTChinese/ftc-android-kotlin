@@ -43,7 +43,7 @@ object UriUtils {
      * Some contains the script field setting to `Hant`
      * while some setting it to empty.
      */
-    private val isTraditionalCn: Boolean
+    public val isTraditionalCn: Boolean
         get() = if (locale?.script.isNullOrBlank()) {
             if (locale?.language.equals(Locale.CHINESE.language)) {
                 cnLangRegions.contains(locale?.country)
