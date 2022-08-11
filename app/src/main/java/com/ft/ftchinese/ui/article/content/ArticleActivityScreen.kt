@@ -294,27 +294,7 @@ fun ArticleActivityScreen(
                     )
                 },
             ) {
-//                SwipeRefresh(
-//                    state = rememberSwipeRefreshState(
-//                        isRefreshing = articleState.refreshing
-//                    ),
-//                    onRefresh = {
-//                        articleState.refresh(
-//                            account = userViewModel.account
-//                        )
-//                    },
-//                    modifier = Modifier.fillMaxSize(),
-//                ) {
-//                    // SwipeRefresh must have a vertical scrollable children.
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .verticalScroll(rememberScrollState())
-//                    ) {
-//
-//
-//                    }
-//                }
+
                 FtcWebView(
                     wvState = wvState,
                     webClientCallback = wvCallback,
