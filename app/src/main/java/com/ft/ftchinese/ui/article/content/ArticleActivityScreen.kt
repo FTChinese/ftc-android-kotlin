@@ -4,11 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import android.webkit.WebView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -41,8 +42,6 @@ import com.ft.ftchinese.ui.web.FtcJsEventListener
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -159,6 +158,19 @@ fun ArticleActivityScreen(
         }
     }
 
+    val screenshotWVCb = remember {
+        object : WebViewCallback(context) {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                articleState.createScreenshot()
+            }
+        }
+    }
+
+    val (showScreenshot, setShowScreenshot) = remember {
+        mutableStateOf(false)
+    }
+
     // Start loading data.
     LaunchedEffect(
         key1 = articleState.currentTeaser,
@@ -179,6 +191,7 @@ fun ArticleActivityScreen(
 
     LaunchedEffect(key1 = articleState.screenshotMeta) {
         articleState.screenshotMeta?.let {
+            setShowScreenshot(false)
             onScreenshot(NavStore.saveScreenshot(it))
         }
     }
@@ -234,7 +247,8 @@ fun ArticleActivityScreen(
                             articleState.trackShare(article)
                         }
                         ShareApp.Screenshot -> {
-                            articleState.createScreenshot()
+                            setShowScreenshot(true)
+//                            articleState.createScreenshot()
                         }
                         ShareApp.Browser -> {
                             openInBrowser(
@@ -347,6 +361,19 @@ fun ArticleActivityScreen(
                     }
                 )
             }
+
+            if (showScreenshot) {
+                Box(
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    FtcWebView(
+                        wvState = wvState,
+                        webClientCallback = screenshotWVCb
+                    ) {
+                        articleState.onScreenshotWV(it)
+                    }
+                }
+            }
         }
     }
 }
@@ -357,12 +384,10 @@ private fun openInBrowser(
 ) {
     try {
         val webpageUri = Uri.parse(article.canonicalUrl)
-        val intent = Intent(Intent.ACTION_VIEW, webpageUri)
-        if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
-        }
+        Log.i("ArticleActivity", "$webpageUri")
+        IntentsUtil.openInBrowser(context, webpageUri)
     } catch (e: Exception) {
-        context.toast("URL not found")
+        e.message?.let { context.toast(it) }
     }
 }
 

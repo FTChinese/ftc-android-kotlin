@@ -54,9 +54,6 @@ class ArticlesState(
     private val contentResolver = context.contentResolver
     private val tracker = StatsTracker.getInstance(context)
 
-    var refreshing by mutableStateOf(false)
-        private set
-
     var language by mutableStateOf(Language.CHINESE)
         private set
 
@@ -90,6 +87,7 @@ class ArticlesState(
         get() = currentStory?.aiAudioTeaser(language)
 
     private var webView: WebView? = null
+    private var screenshotWV: WebView? = null
 
     fun findTeaser(id: String) {
         val t = NavStore.getTeaser(id)
@@ -105,6 +103,10 @@ class ArticlesState(
 
     fun onWebViewCreated(wv: WebView) {
         webView = wv
+    }
+
+    fun onScreenshotWV(wv: WebView) {
+        screenshotWV = wv
     }
 
     fun switchLang(
@@ -165,38 +167,6 @@ class ArticlesState(
             }
 
             progress.value = false
-        }
-    }
-
-    fun refresh(account: Account?) {
-        val t = currentTeaser ?: return
-
-        refreshing = true
-        scope.launch {
-            val result = loadArticle(
-                teaser = t,
-                account = account,
-                refresh = true,
-            )
-
-            when (result) {
-                is FetchResult.LocalizedError -> {
-                    showSnackBar(result.msgId)
-                }
-                is FetchResult.TextError -> {
-                    showSnackBar(result.text)
-                }
-                is FetchResult.Success -> {
-                    onArticleLoaded(
-                        teaser = t,
-                        content = result.data,
-                        account = account
-                    )
-                    showRefreshed()
-                }
-            }
-
-            refreshing = false
         }
     }
 
@@ -400,7 +370,7 @@ class ArticlesState(
      * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,
      * isCreatedFromUrl=false,)
      */
-    fun evaluateOpenGraph(account: Account?) {
+    private fun evaluateOpenGraph(account: Account?) {
         webView?.evaluateJavascript(
             JsSnippets.openGraph
         ) {
@@ -415,7 +385,7 @@ class ArticlesState(
         }
     }
 
-    fun lastResortByOG(og: OpenGraphMeta, account: Account?) {
+    private fun lastResortByOG(og: OpenGraphMeta, account: Account?) {
         if (currentTeaser?.hasJsAPI == true) {
             return
         }
@@ -439,7 +409,7 @@ class ArticlesState(
         tracker.sharedToWx(article)
     }
 
-    fun trackClickTeaser(teaser: Teaser) {
+    private fun trackClickTeaser(teaser: Teaser) {
         tracker.selectListItem(teaser)
     }
 
@@ -449,7 +419,7 @@ class ArticlesState(
 
     fun createScreenshot() {
         val article = articleRead ?: return
-        val wv = webView ?: return
+        val wv = screenshotWV ?: return
 
         showSnackBar("生成截图...")
 
