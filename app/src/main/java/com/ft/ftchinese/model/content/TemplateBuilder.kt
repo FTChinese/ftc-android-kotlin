@@ -79,6 +79,15 @@ var androidUserAddress = ${addr.toJsonString()}
             }
         }
 
+        // MARK: - Show a prefix for special events such as the 8.31 promotion. For now, only do this for tags because Ad sales might have different requirements.
+        var storyPrefix = ""
+        if (story.tag.contains(Regex("高端限免|17周年大视野精选|高端限免|17周年大視野精選"))) {
+            storyPrefix = "【高端限免】"
+        } else if (story.tag.contains(Regex("限免"))) {
+            storyPrefix = "【限免】"
+        }
+        title = storyPrefix + title
+
         // todo
         ctx["{{story-css}}"] = ""
         ctx["{story-tag}"] = story.tag
