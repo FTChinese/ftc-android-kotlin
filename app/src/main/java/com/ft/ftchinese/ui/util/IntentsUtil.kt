@@ -58,6 +58,52 @@ object IntentsUtil {
         }
     }
 
+    private fun emailIntent(uri: Uri): Intent {
+        return Intent(Intent.ACTION_SENDTO).apply {
+            data = uri
+        }
+    }
+
+    private fun browserIntent(uri: Uri): Intent {
+        return Intent(Intent.ACTION_VIEW).apply {
+            data = uri
+        }
+    }
+
+    private fun emailIntentFeedback(): Intent {
+        return Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:ftchinese.feedback@gmail.com")
+            putExtra(Intent.EXTRA_SUBJECT, "Feedback from FTC Android App")
+        }
+    }
+
+    private fun sendEmail(context: Context, intent: Intent): Boolean {
+        return if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+            true
+        } else {
+            false
+        }
+    }
+
+    fun openInBrowser(context: Context, uri: Uri): Boolean {
+        val intent = browserIntent(uri)
+        return if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+            true
+        } else {
+            false
+        }
+    }
+
+    fun sendEmail(context: Context, uri: Uri): Boolean {
+        return sendEmail(context, emailIntent(uri))
+    }
+
+    fun sendFeedbackEmail(context: Context): Boolean {
+        return sendEmail(context, emailIntentFeedback())
+    }
+
     fun sendCustomerServiceEmail(context: Context): Boolean {
         return sendEmail(
             context,
@@ -78,36 +124,6 @@ object IntentsUtil {
                 body = composeDeletionEmail(context, account)
             )
         )
-    }
-
-    private fun emailIntentFeedback(): Intent {
-        return Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:ftchinese.feedback@gmail.com")
-            putExtra(Intent.EXTRA_SUBJECT, "Feedback from FTC Android App")
-        }
-    }
-
-    fun sendFeedbackEmail(context: Context): Boolean {
-        return sendEmail(context, emailIntentFeedback())
-    }
-
-    private fun emailIntent(uri: Uri): Intent {
-        return Intent(Intent.ACTION_SENDTO).apply {
-            data = uri
-        }
-    }
-
-    private fun sendEmail(context: Context, intent: Intent): Boolean {
-        return if (intent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(intent)
-            true
-        } else {
-            false
-        }
-    }
-
-    fun sendEmail(context: Context, uri: Uri): Boolean {
-        return sendEmail(context, emailIntent(uri))
     }
 
     fun openSetting(context: Context) {
