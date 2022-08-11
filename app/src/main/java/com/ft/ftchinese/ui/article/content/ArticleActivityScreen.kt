@@ -294,32 +294,34 @@ fun ArticleActivityScreen(
                     )
                 },
             ) {
-                SwipeRefresh(
-                    state = rememberSwipeRefreshState(
-                        isRefreshing = articleState.refreshing
-                    ),
-                    onRefresh = {
-                        articleState.refresh(
-                            account = userViewModel.account
-                        )
-                    },
-                    modifier = Modifier.fillMaxSize(),
+//                SwipeRefresh(
+//                    state = rememberSwipeRefreshState(
+//                        isRefreshing = articleState.refreshing
+//                    ),
+//                    onRefresh = {
+//                        articleState.refresh(
+//                            account = userViewModel.account
+//                        )
+//                    },
+//                    modifier = Modifier.fillMaxSize(),
+//                ) {
+//                    // SwipeRefresh must have a vertical scrollable children.
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .verticalScroll(rememberScrollState())
+//                    ) {
+//
+//
+//                    }
+//                }
+                FtcWebView(
+                    wvState = wvState,
+                    webClientCallback = wvCallback,
+                    jsListener = jsCallback,
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    // SwipeRefresh must have a vertical scrollable children.
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-
-                        FtcWebView(
-                            wvState = wvState,
-                            webClientCallback = wvCallback,
-                            jsListener = jsCallback,
-                        ) {
-                            articleState.onWebViewCreated(it)
-                        }
-                    }
+                    articleState.onWebViewCreated(it)
                 }
             }
 
