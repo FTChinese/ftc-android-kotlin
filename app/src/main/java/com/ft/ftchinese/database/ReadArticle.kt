@@ -188,8 +188,8 @@ data class ReadArticle(
                 radioUrl = teaser?.radioUrl ?: "",
                 publishedAt = "",
                 tier =  when {
-                    og.keywords.contains("会员专享") -> Tier.STANDARD.toString()
-                    og.keywords.contains("高端专享") -> Tier.PREMIUM.toString()
+                    og.keywords.contains("会员专享") || og.keywords.contains("會員專享") -> Tier.STANDARD.toString()
+                    og.keywords.contains("高端专享") || og.keywords.contains("高端專享") -> Tier.PREMIUM.toString()
                     else -> ""
                 },
                 readAt = formatSQLDateTime(LocalDateTime.now()),
