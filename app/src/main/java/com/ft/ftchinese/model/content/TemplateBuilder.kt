@@ -88,6 +88,25 @@ var androidUserAddress = ${addr.toJsonString()}
         }
         title = storyPrefix + title
 
+        // MARK: - Show big headline for paid content
+        var storyHeadlineClass = ""
+        if (story.tag.contains(Regex("专享|限免|精选|双语阅读|專享|限免|精選|雙語閱讀")) || story.whitelist == 1) {
+            storyHeadlineClass = " story-headline-large"
+        }
+
+        // MARK: - Get story headline styles and headshots
+        val storyHeadlineStyle = getStoryHeaderStyle(story, body)
+        val fullGridClass = if (body.contains("full-grid")) " full-grid-story" else ""
+        val scrollyTellingClass = if (body.contains("scrollable-block")) " has-scrolly-telling" else ""
+        val storyHeaderStyleClass = storyHeadlineStyle.style
+        val storyBodyClass = fullGridClass + scrollyTellingClass + storyHeaderStyleClass
+        val storyImageNoContainer = "<figure data-url=\"${story.cover.smallbutton}\" class=\"loading\"></figure>"
+        ctx["<!--{story-body-class}-->"] = storyBodyClass
+        ctx["<!--{story-image-no-container}-->"] = storyImageNoContainer
+        ctx["<!--{Story-Header-Background}-->"] = storyHeadlineStyle.background
+        ctx["<!--{story-author-headcut}-->"] = storyHeadlineStyle.headshot
+            
+
         // todo
         ctx["{{story-css}}"] = ""
         ctx["{story-tag}"] = story.tag
@@ -102,6 +121,8 @@ var androidUserAddress = ${addr.toJsonString()}
         ctx["{{story-js-key}}"] = ""
         ctx["{{ad-pollyfill-js}}"] = ""
         ctx["{{db-zone-helper-js}}"] = ""
+
+
 
         val adTopic = story.getAdTopic()
         val cntopicScript = if (adTopic.isBlank()) "" else "window.cntopic = '$adTopic'"
@@ -136,7 +157,7 @@ var androidUserAddress = ${addr.toJsonString()}
 
         // Follow button
         ctx["{story-theme}"] = story.htmlForTheme(sponsorTitle)
-        ctx["<!--{story-headline-class}-->"] = ""
+        ctx["<!--{story-headline-class}-->"] = storyHeadlineClass
         // headline. Shown two times: one in title tag
         // other in body.
         ctx["{story-headline}"] = title
@@ -199,5 +220,24 @@ var androidUserAddress = ${addr.toJsonString()}
         ctx["{search-html}"] = ""
         ctx["/*run-android-search-js*/"] = JsSnippets.search(keyword)
         return this
+    }
+
+    private data class StoryHeaderStyle(val style: String, val headshot: String, val background: String)
+    private fun getStoryHeaderStyle(story: Story, body: String): StoryHeaderStyle {
+        val tag = story.tag
+        val imageHTML = story.htmlForCoverImage()
+        val heroClass = " show-story-hero-container"
+        val columnistClass = " show-story-columnist-topper"
+        val pinkBackgroundClass = " story-hero-theme-pink"
+        if (imageHTML != "") {
+            if (body.contains("full-grid") || body.contains("scrollable-block")) {
+                return StoryHeaderStyle(heroClass, "", "")
+            } else if (tag.contains(Regex("FT大视野|卧底经济学家|FT杂志|FT大視野|臥底經濟學家|FT雜誌"))) {
+                return StoryHeaderStyle(heroClass, "", "")
+            } else if (tag.contains(Regex("周末随笔|周末隨筆"))) {
+                return StoryHeaderStyle(heroClass, "", pinkBackgroundClass)
+            }
+        }
+        return StoryHeaderStyle("", "", "")
     }
 }
