@@ -81,7 +81,7 @@ object AuthClient {
      * - A mobile phone user is trying to login for the first time and
      * choose to create a new email account with mobile linked.
      */
-    fun emailSignUp(c: Credentials): Account? {
+    private fun emailSignUp(c: Credentials): Account? {
         return Fetch()
             .post(Endpoint.emailSignUp)
             .noCache()
