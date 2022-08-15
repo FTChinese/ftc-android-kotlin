@@ -29,7 +29,7 @@ class ForgotPasswordState(
     var verified by mutableStateOf<PwResetBearer?>(null)
         private set
 
-    fun requestCode(params: PasswordResetLetterParams) {
+    fun requestCode(email: String) {
         if (!ensureConnected()) {
             return
         }
@@ -38,7 +38,10 @@ class ForgotPasswordState(
         progress.value = true
         scope.launch {
             val result = AuthClient.asyncPasswordResetLetter(
-                params
+                PasswordResetLetterParams(
+                    email = email,
+                    useCode = true
+                )
             )
 
             progress.value = false

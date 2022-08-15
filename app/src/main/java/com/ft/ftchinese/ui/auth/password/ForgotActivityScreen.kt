@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.ft.ftchinese.model.reader.PwResetBearer
-import com.ft.ftchinese.model.request.PasswordResetLetterParams
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberTimerState
 
@@ -52,11 +51,7 @@ fun ForgotActivityScreen(
             loading = forgotState.progress.value,
             timerState = timerState,
             onRequestCode = { email ->
-                forgotState.requestCode(
-                    PasswordResetLetterParams(
-                        email = email,
-                    )
-                )
+                forgotState.requestCode(email)
             }
         ) {
             forgotState.verifyCode(it)
