@@ -44,6 +44,21 @@ data class AiAudio(
     val interactiveId: String = "",
 )
 
+
+@Serializable
+data class ColumnInfo(
+    @SerialName("id")
+    val id: String? = null,
+    @SerialName("headline")
+    val headline: String? = null,
+    @SerialName("author_name_cn")
+    val author: String? = null,
+    @SerialName("description")
+    val description: String? = null,
+    @SerialName("piclink")
+    val headshot: String? = null,
+)
+
 @Serializable
 class Story (
     @Transient
@@ -111,6 +126,9 @@ class Story (
 
     @SerialName("story_audio")
     val aiAudios: AiAudio? = null,
+
+    @SerialName("columninfo")
+    val columnInfo: ColumnInfo? = null,
 
     @SerialName("relative_story")
     val relatedStory: List<RelatedStory> = listOf(),
