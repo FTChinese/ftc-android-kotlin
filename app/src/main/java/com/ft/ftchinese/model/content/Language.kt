@@ -17,4 +17,12 @@ enum class Language(
             else -> symbol
         }
     }
+
+    companion object {
+        private val map = Language.values().associateBy(Language::symbol)
+        fun fromSymbol(symbol: String) = map[symbol]
+    }
+
 }
+
+

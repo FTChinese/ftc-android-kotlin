@@ -38,7 +38,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 
 private const val TAG = "ArticleState"
-
+private const val MyPreferences = "MyPreferences"
+private const val LanguageKey = "language"
 class ArticlesState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
@@ -89,6 +90,12 @@ class ArticlesState(
     private var webView: WebView? = null
     private var screenshotWV: WebView? = null
 
+
+    private val myPreferences by lazy {
+        context.getSharedPreferences(MyPreferences, Context.MODE_PRIVATE)
+    }
+
+
     fun findTeaser(id: String) {
         val t = NavStore.getTeaser(id)
         if (t == null) {
@@ -131,6 +138,12 @@ class ArticlesState(
         }
 
         language = lang
+
+        with(myPreferences.edit()) {
+            putString(LanguageKey, language.symbol)
+            commit()
+        }
+
         initLoading(
             account = account,
         )
@@ -219,6 +232,20 @@ class ArticlesState(
 
         if (teaser.hasJsAPI) {
             val story = marshaller.decodeFromString<Story>(content)
+            // MARK: - This is when the app knows the story is bilingual.
+            if (story.isBilingual) {
+                val languageSymbol = myPreferences.getString(LanguageKey, Language.CHINESE.symbol) ?: Language.CHINESE.symbol
+                val myLanguage = Language.fromSymbol(languageSymbol) ?: Language.CHINESE
+                Log.i(TAG, "myLanguage: ${myLanguage}")
+                if (myLanguage != language) {
+                    Log.i(TAG, "Switch To: ${myLanguage}")
+                    switchLang(
+                        lang = myLanguage,
+                        account = account
+                    )
+                    return
+                }
+            }
             story.teaser = teaser
             currentStory = story
 
@@ -227,7 +254,7 @@ class ArticlesState(
 
             htmlLoaded = renderStory(story, account)
 
-            onStoryLoaded(story)
+            onStoryLoaded(story, account)
         } else {
             Log.i(TAG, "Checking html file permission")
             updateAccess(teaser.permission(), account)
@@ -267,11 +294,11 @@ class ArticlesState(
     }
 
     private suspend fun onStoryLoaded(
-        story: Story
+        story: Story,
+        account: Account?
     ) {
         audioFound = story.hasAudio(language)
         isBilingual = story.isBilingual
-
         addReadingHistory(ReadArticle.fromStory(story))
     }
 
