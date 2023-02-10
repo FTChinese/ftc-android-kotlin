@@ -1,8 +1,11 @@
 package com.ft.ftchinese.service
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -66,10 +69,10 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(applicationContext).run {
             addNextIntentWithParentStack(intent)
-            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
-
+        // See https://developer.android.com/develop/ui/views/notifications/build-notification
         val builder = NotificationCompat.Builder(
             applicationContext,
             applicationContext.getString(R.string.news_notification_channel_id)
@@ -82,6 +85,20 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
             .setAutoCancel(true)
 
         with(NotificationManagerCompat.from(applicationContext)) {
+            if (ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
             notify(1, builder.build())
         }
     }

@@ -25,6 +25,7 @@
         android:maxSdkVersion="28" /> <!-- Required by Google advertising -->
     <!-- https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="false"

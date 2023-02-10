@@ -1,8 +1,11 @@
 package com.ft.ftchinese.service
 
+import android.Manifest
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.R
@@ -16,7 +19,6 @@ import com.google.firebase.messaging.RemoteMessage
 
 private const val TAG = "NewsMessagingService"
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class NewsMessagingService : FirebaseMessagingService() {
     // Handle messages when app is in foreground.
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -71,6 +73,20 @@ class NewsMessagingService : FirebaseMessagingService() {
                 .setContentIntent(intent)
 
         with(NotificationManagerCompat.from(this)) {
+            if (ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
             notify(1, builder.build())
         }
     }
@@ -104,8 +120,10 @@ class NewsMessagingService : FirebaseMessagingService() {
             )
         }
 
-        return TaskStackBuilder.create(this).addNextIntentWithParentStack(intent)
-                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        return TaskStackBuilder
+            .create(this)
+            .addNextIntentWithParentStack(intent)
+            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun sendRegistrationToServer(token: String?) {

@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
 //        Log.i(TAG, "Language: ${locale?.language}\nScript ${locale?.script}\nRegion: ${locale?.country}\nLanguage tag: ${locale?.toLanguageTag()}")
     }
 
+    // See https://developer.android.com/develop/ui/views/notifications/build-notification#Priority
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelId = getString(R.string.news_notification_channel_id)

@@ -1,10 +1,13 @@
 package com.ft.ftchinese.service
 
+import android.Manifest
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
@@ -74,15 +77,22 @@ class VerifySubsWorker(
         val remains = m.remainingDays()
         Log.i(TAG, "Membership remaining days $remains")
 
-        if (remains == null || remains > 10) {
+        if ((remains == null) || (remains > 10)) {
             return
         }
 
+        // See https://developer.android.com/develop/ui/views/notifications/navigation
+        // Create an Intent for the activity you want to start.
+        val intent = Intent(ctx, MemberActivity::class.java)
+        // Create the TaskStackBuilder
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(ctx).run {
-            addNextIntentWithParentStack(Intent(ctx, MemberActivity::class.java))
-            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+            // Add the intent, which inflates the back stack
+            addNextIntentWithParentStack(intent)
+            // Get the PendingIntent containing the entire back stack
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
+        // See https://developer.android.com/develop/ui/views/notifications/build-notification
         val builder = NotificationCompat.Builder(ctx, ctx.getString(R.string.news_notification_channel_id))
             .setSmallIcon(R.drawable.logo_round)
             .setContentTitle(if (remains > 0) {
@@ -100,6 +110,20 @@ class VerifySubsWorker(
             .setAutoCancel(true)
 
         with(NotificationManagerCompat.from(ctx)) {
+            if (ActivityCompat.checkSelfPermission(
+                    ctx,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
             notify(1, builder.build())
         }
     }
