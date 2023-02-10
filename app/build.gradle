@@ -34,7 +34,7 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     // minSdkVersion <= targetSdkVersion <= compileSdkVersion
-    compileSdkVersion 32
+    compileSdkVersion 33
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -55,7 +55,7 @@ android {
         minSdkVersion 21
         // Target sdk version 30 cannot call wechat SDK.
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode 108
         versionName "6.7.2"
 
