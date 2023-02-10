@@ -191,13 +191,13 @@ android {
 dependencies {
     def room_version = '2.4.3'
     def lifecycle_version = "2.2.0"
-    def work_version = "2.7.1"
+    def work_version = "2.7.1" // Cannot upgrade to 2.8.0?
     def compose_ui = "1.2.0-rc03"
     def accompanist = "0.24.10-beta"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
 
     // See https://firebase.google.com/support/release-notes/android
     // on how to install firebase as of 2021.04
