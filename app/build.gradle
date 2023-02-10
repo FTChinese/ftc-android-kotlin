@@ -210,7 +210,7 @@ dependencies {
 //    implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    implementation 'com.google.android.gms:play-services-analytics:18.0.1'
+    implementation 'com.google.android.gms:play-services-analytics:18.0.2'
     implementation 'com.google.android.gms:play-services-base:18.1.0'
 
     // Payment
