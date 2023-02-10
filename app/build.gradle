@@ -193,7 +193,7 @@ dependencies {
     def lifecycle_version = "2.2.0"
     def work_version = "2.8.0" // Cannot upgrade to 2.8.0?
     def compose_ui = "1.2.1"
-    def accompanist = "0.24.10-beta"
+    def accompanist = "0.25.1"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
