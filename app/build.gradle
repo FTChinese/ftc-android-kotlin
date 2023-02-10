@@ -191,9 +191,9 @@ android {
 dependencies {
     def room_version = '2.5.0'
     def lifecycle_version = "2.2.0"
-    def work_version = "2.8.0" // Cannot upgrade to 2.8.0?
-    def compose_ui = "1.2.1"
-    def accompanist = "0.25.1"
+    def work_version = "2.8.0"
+    def compose_ui = "1.3.0-alpha01"
+    def accompanist = "0.28.0" // Version 0.27.1 cannot build.
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
