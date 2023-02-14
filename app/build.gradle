@@ -8,6 +8,7 @@ plugins {
     id 'kotlin-kapt'
     id "kotlin-parcelize"
     id "kotlinx-serialization"
+    id 'org.jetbrains.kotlin.android'
 }
 
 apply plugin: 'com.google.gms.google-services'
