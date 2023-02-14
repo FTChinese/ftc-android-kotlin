@@ -21,7 +21,7 @@ fun ReleaseScreen(
     onCheckedChange: (Boolean) -> Unit,
     downloadStage: DownloadStage,
     newRelease: AppRelease?,
-    onClick: (AppRelease) -> Unit,
+    onClick: (AppRelease) -> Unit, // The click action wil pass the variable newRelease back to parent.
     onDelete: (Long) -> Unit,
     onViewDownloads: () -> Unit,
 ) {
@@ -74,7 +74,7 @@ fun ReleaseScreen(
 
                     PrimaryBlockButton(
                         onClick = {
-                            onClick(newRelease)
+                            onClick(release)
                         },
 
                         enabled = !loading && (downloadStage !is DownloadStage.Progress),
