@@ -1,9 +1,11 @@
 package com.ft.ftchinese.ui.settings.release
 
 import android.app.DownloadManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInstaller
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Environment
@@ -12,15 +14,18 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppDownloaded
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.ReleaseStore
+import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
-import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,16 +33,20 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 private const val TAG = "ReleaseState"
+private const val PI_INSTALL = 3439
 
 class ReleaseState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     connState: State<ConnectionState>,
-    context: Context
+    val context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
     private val releaseStore = ReleaseStore(context)
     private val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    // Reference: https://gitlab.com/commonsguy/cw-android-q/blob/vFINAL/AppInstaller/src/main/java/com/commonsware/q/appinstaller/MainMotor.kt
+    private val installer = context.packageManager.packageInstaller
+    private val resolver = context.contentResolver
 
     var checkOnLaunch by mutableStateOf(releaseStore.getCheckOnLaunch())
         private set
@@ -175,7 +184,7 @@ class ReleaseState(
     // Get the downloaded uri when we try to install it.
     // It seems the uri returned by DownloadManager.getUriForDownloadedFile
     // is not valid for installation.
-    fun getUriForApk(id: Long): Uri? {
+    private fun getUriForApk(id: Long): Uri? {
 
         val query = DownloadManager.Query().setFilterById(id)
         val c = downloadManager.query(query) ?: return null
@@ -188,12 +197,86 @@ class ReleaseState(
         return try {
             // Uri where downloaded file will be stored.
             val localUri = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI)) ?: return null
-
+            // Something like file:///storage/emulated/0/Download/ftchinese-v6.8.0-ftc-release.apk
+            Log.i(TAG, "Downloaded APK uri: $localUri")
             Uri.parse(localUri)
         } catch (e: Exception) {
             null
         } finally {
             c.close()
+        }
+    }
+
+    // Build file uri of downloaded file when we try to install it.
+    // Turn file to a content uri so that it could be shared with installer:
+    // content://com.ft.ftchinese.fileprovider/my_download/ftchinese-v6.3.4-ftc-release.apk
+    private fun buildInstallerUri(
+        apkUri: Uri
+    ): Uri? {
+        // Path removes the scheme part of file://
+        // Example: /storage/emulated/0/Download/ftchinese-v6.3.4-ftc-release.apk
+        val filePath = apkUri.path ?: return null
+
+        val file = File(filePath)
+
+        return FileProvider
+            .getUriForFile(
+                context,
+                "${BuildConfig.APPLICATION_ID}.fileprovider",
+                file
+            )
+    }
+
+    fun getInstallerUri(downloadId: Long): Uri? {
+        val apkUri = getUriForApk(downloadId)
+        Log.i(TAG, "APK uri: $apkUri")
+        if (apkUri == null) {
+            showSnackBar(R.string.download_failed)
+            removeApk(downloadId)
+            return null
+        }
+
+        val installerUri = buildInstallerUri(apkUri)
+        Log.i(TAG, "Installer uri: $installerUri")
+        return if (installerUri == null) {
+            showSnackBar(R.string.download_failed)
+            null
+        } else {
+            installerUri
+        }
+    }
+
+    fun install(apkUri: Uri) {
+        scope.launch(Dispatchers.Main) {
+            withContext(Dispatchers.IO) {
+                Log.i(TAG, "Open apk stream")
+                resolver.openInputStream(apkUri)?.use { apkStream ->
+                    val length = DocumentFile.fromSingleUri(context, apkUri)?.length() ?: -1
+                    Log.i(TAG, "APK length $length")
+                    val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL)
+                    val sessionId = installer.createSession(params)
+                    val session = installer.openSession(sessionId)
+                    Log.i(TAG, "Install session created")
+
+                    session.openWrite("com.ft.ftchinese", 0, length).use { sessionStream ->
+                        apkStream.copyTo(sessionStream)
+                        session.fsync(sessionStream)
+                    }
+
+                    val intent = Intent(context, InstallReceiver::class.java)
+                    val pi = PendingIntent.getBroadcast(
+                        context,
+                        PI_INSTALL,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+
+                    session.commit(pi.intentSender)
+                    Log.i(TAG, "Commit session")
+                    session.close()
+                    Log.i(TAG, "Close session")
+                }
+            }
         }
     }
 

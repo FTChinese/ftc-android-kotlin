@@ -11,13 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.FileProvider
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.SimpleDialog
-import java.io.File
+import com.ft.ftchinese.ui.util.toast
 
 @Composable
 fun ReleaseActivityScreen(
@@ -50,6 +47,16 @@ fun ReleaseActivityScreen(
             context.unregisterReceiver(releaseState.onDownloadComplete)
         }
     }
+
+//    val launcher = rememberLauncherForActivityResult(
+//        contract = ActivityResultContracts.RequestPermission()
+//    ) { isGranted ->
+//        if (isGranted) {
+//            Log.e(TAG, "Permission granted")
+//        } else {
+//            context.toast("Permission to access external storage denied!")
+//        }
+//    }
 
     val (showDialog, setShowDialog) = remember {
         mutableStateOf(false)
@@ -105,22 +112,18 @@ fun ReleaseActivityScreen(
                         context.toast("Please wait for download to finish")
                     }
                     is DownloadStage.Completed -> {
-                        val apkUri = releaseState.getUriForApk(stage.downloadId)
-                        if (apkUri == null) {
-                            context.toast(R.string.download_failed)
-                            releaseState.removeApk(stage.downloadId)
-                            return@ReleaseScreen
-                        }
 
-                        val installerUri = buildInstallerUri(
-                            context = context,
-                            apkUri = apkUri
-                        )
+                        val installerUri = releaseState.getInstallerUri(stage.downloadId) ?: return@ReleaseScreen
 
-                        if (installerUri == null) {
-                            context.toast("Invalid installation file uri")
-                            return@ReleaseScreen
-                        }
+//                        when (PackageManager.PERMISSION_GRANTED) {
+//                            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) -> {
+//                                Log.i(TAG, "Start install apk")
+//                                releaseState.install(installerUri)
+//                            }
+//                            else -> {
+//                                launcher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+//                            }
+//                        }
 
                         try {
                             install(
@@ -143,27 +146,6 @@ fun ReleaseActivityScreen(
             }
         )
     }
-}
-
-// Build file uri of downloaded file when we try to install it.
-// Turn file to a content uri so that it could be shared with installer:
-// content://com.ft.ftchinese.fileprovider/my_download/ftchinese-v6.3.4-ftc-release.apk
-private fun buildInstallerUri(
-    context: Context,
-    apkUri: Uri
-): Uri? {
-    // Path removes the scheme part of file://
-    // Example: /storage/emulated/0/Download/ftchinese-v6.3.4-ftc-release.apk
-    val filePath = apkUri.path ?: return null
-
-    val file = File(filePath)
-
-    return FileProvider
-        .getUriForFile(
-            context,
-            "${BuildConfig.APPLICATION_ID}.fileprovider",
-            file
-        )
 }
 
 private fun install(
