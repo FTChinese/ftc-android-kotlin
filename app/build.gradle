@@ -57,8 +57,8 @@ android {
         // Target sdk version 30 cannot call wechat SDK.
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 33
-        versionCode 109
-        versionName "6.8.0"
+        versionCode 110
+        versionName "6.8.1"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -212,7 +212,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
     implementation 'com.google.android.gms:play-services-analytics:18.0.2'
-    implementation 'com.google.android.gms:play-services-base:18.1.0'
+    implementation 'com.google.android.gms:play-services-base:18.2.0'
 
     // Payment
     implementation(name: 'alipaysdk-15.8.03.210428205839', ext: 'aar')
@@ -297,7 +297,7 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.8.1'
     testImplementation "androidx.room:room-testing:$room_version"
     // optional - Test helpers for LiveData
-    testImplementation "androidx.arch.core:core-testing:2.1.0"
+    testImplementation "androidx.arch.core:core-testing:2.2.0"
 //    androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
 }
