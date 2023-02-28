@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.ProductItem
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.ui.components.BodyText2
+import com.ft.ftchinese.ui.components.MarkdownText
 import com.ft.ftchinese.ui.components.ProductHeader
 import com.ft.ftchinese.ui.components.SubHeading2
 import com.ft.ftchinese.ui.theme.Dimens
@@ -87,9 +87,13 @@ fun ProductCard(
             Spacer(modifier = Modifier.height(Dimens.dp8))
 
             item.content.smallPrint?.let {
-                BodyText2(
-                    text = it,
-                    color = OColors.black50Default,
+//                BodyText2(
+//                    text = it,
+//                    color = OColors.black50Default,
+//                )
+                MarkdownText(
+                    markdown = it,
+                    color=OColors.black50Default,
                 )
             }
 
@@ -136,7 +140,7 @@ private fun ProductDescRow(text: String) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewProductCard() {
-    val product = defaultPaywall.products[0]
+    val product = defaultPaywall.products[1]
     val uiItem = ProductItem.newInstance(
         product = product,
         m = Membership(
