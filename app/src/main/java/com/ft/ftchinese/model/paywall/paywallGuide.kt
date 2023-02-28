@@ -1,6 +1,8 @@
 package com.ft.ftchinese.model.paywall
 
 const val paywallGuide = """
+* 以上所有订阅类产品均为虚拟内容服务，此类产品一经订阅成功概不退款，请您理解。
+
 ## 订阅规则说明
 
 根据购买渠道不同，FTC中文网订阅方式分为**一次性购买**和**自动续订**两种模式。通过支付宝/微信购买的为一次性购买，通过Stripe或苹果内购为订阅模式。
