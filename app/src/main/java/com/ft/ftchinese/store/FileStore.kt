@@ -172,6 +172,8 @@ class FileStore (private val context: Context) {
 
     /**
      * Read files from the the `raw` directory of the package.
+     * @param name - the cached file key
+     * @param resId - the actual file id when cached name is not found.
      */
     private fun readRaw(name: String, resId: Int): String {
         val cached = templateCache[name]
@@ -202,24 +204,35 @@ class FileStore (private val context: Context) {
     }
 
     fun readChannelTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "list_big5.html" else "list.html"
-        Log.i(TAG, "Using template: $htmlFileName")
-        return readRaw(htmlFileName, R.raw.list)
+        if (UriUtils.isTraditionalCn) {
+            return readRaw("list_big5.html", R.raw.list_big5)
+        }
+
+        return readRaw("list.html", R.raw.list)
     }
 
     fun readStoryTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "story_big5.html" else "story.html"
-        return readRaw(htmlFileName, R.raw.story)
+        if (UriUtils.isTraditionalCn) {
+            return readRaw("story_big5.html", R.raw.story_big5)
+        }
+
+        return readRaw("story.html", R.raw.story)
     }
 
     fun readSearchTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "search_big5.html" else "search.html"
-        return readRaw(htmlFileName, R.raw.search)
+        if (UriUtils.isTraditionalCn) {
+            return readRaw("search_big5.html", R.raw.search_big5)
+        }
+
+        return readRaw("search.html", R.raw.search)
     }
 
     fun readGymTemplate(): String {
-        val htmlFileName = if (UriUtils.isTraditionalCn) "gym_big5.html" else "gym.html"
-        return readRaw(htmlFileName, R.raw.gym)
+        if (UriUtils.isTraditionalCn) {
+            return readRaw("gym_big5.html", R.raw.gym_big5)
+        }
+
+        return readRaw("gym.html", R.raw.gym)
     }
 
     fun readTestHtml(): String {
