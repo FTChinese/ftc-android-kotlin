@@ -21,7 +21,7 @@ import com.ft.ftchinese.ui.article.chl.rememberChannelState
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberBaseUrl
 import com.ft.ftchinese.ui.web.FtcWebView
-import com.ft.ftchinese.ui.web.JsSnippets
+import com.ft.ftchinese.model.content.JsSnippets
 import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.ui.web.rememberFtcJsEventListener
 import com.ft.ftchinese.viewmodel.UserViewModel

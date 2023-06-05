@@ -1,8 +1,9 @@
-package com.ft.ftchinese.ui.web
+package com.ft.ftchinese.model.content
 
 import com.ft.ftchinese.model.enums.Tier
 
 object JsSnippets {
+
     fun lockerIcon(tier: Tier?): String {
         val prvl = when (tier) {
             Tier.STANDARD -> """['premium']"""
@@ -19,6 +20,12 @@ object JsSnippets {
     """.trimIndent()
     }
 
+    /**
+     * Get open graph data from HTML and return the data
+     * to native code.
+     * Since we need the result, it is impossible to
+     * inject JS into html.
+     */
     val openGraph = """
     (function getOpenGraph() {
         var metaElms = document.getElementsByTagName('meta');
