@@ -200,7 +200,13 @@ var androidUserAddress = ${addr.toJsonString()}
         return this
     }
 
+    fun withJs(snippets: String): TemplateBuilder {
+        ctx["<!--android-scripts-->"] = snippets
+        return this
+    }
+
     fun render(): String {
+
         var result = template
 
         ctx.forEach { (key, value) ->
