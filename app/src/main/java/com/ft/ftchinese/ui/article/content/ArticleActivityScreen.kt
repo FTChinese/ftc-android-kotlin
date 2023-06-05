@@ -70,6 +70,8 @@ fun ArticleActivityScreen(
         scope = scope
     )
 
+    // Find current article teaser by md5 hash.
+    // This must be called before loading article.
     LaunchedEffect(key1 = Unit) {
         id?.let {
             articleState.findTeaser(it)
@@ -204,6 +206,7 @@ fun ArticleActivityScreen(
         }
     }
 
+    // Track reading duration upon unmounting this component.
     DisposableEffect(key1 = Unit) {
         onDispose {
             val a = userViewModel.account ?: return@onDispose
