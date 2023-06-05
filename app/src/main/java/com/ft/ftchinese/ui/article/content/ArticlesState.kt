@@ -25,6 +25,7 @@ import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.FollowedTopics
+import com.ft.ftchinese.store.SettingStore
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
@@ -38,8 +39,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 
 private const val TAG = "ArticleState"
-private const val MyPreferences = "MyPreferences"
-private const val LanguageKey = "language"
+
 class ArticlesState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
@@ -54,6 +54,7 @@ class ArticlesState(
     private val topicStore = FollowedTopics.getInstance(context)
     private val contentResolver = context.contentResolver
     private val tracker = StatsTracker.getInstance(context)
+    private val settings = SettingStore.getInstance(context)
 
     var language by mutableStateOf(Language.CHINESE)
         private set
@@ -147,6 +148,10 @@ class ArticlesState(
         initLoading(
             account = account,
         )
+
+        // Persist selected language as default language
+        // next time an article opened.
+        settings.saveLang(lang)
     }
 
     fun initLoading(
@@ -232,18 +237,11 @@ class ArticlesState(
 
         if (teaser.hasJsAPI) {
             val story = marshaller.decodeFromString<Story>(content)
-            // MARK: - This is when the app knows the story is bilingual.
+            // Use the language user selected last time..
             if (story.isBilingual) {
-                val languageSymbol = myPreferences.getString(LanguageKey, Language.CHINESE.symbol) ?: Language.CHINESE.symbol
-                val myLanguage = Language.fromSymbol(languageSymbol) ?: Language.CHINESE
-                Log.i(TAG, "myLanguage: ${myLanguage}")
-                if (myLanguage != language) {
-                    Log.i(TAG, "Switch To: ${myLanguage}")
-                    switchLang(
-                        lang = myLanguage,
-                        account = account
-                    )
-                    return
+                val myLang = settings.loadLang()
+                if (myLang != language) {
+                    language = myLang
                 }
             }
             story.teaser = teaser
