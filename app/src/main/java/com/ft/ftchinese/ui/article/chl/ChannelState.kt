@@ -8,6 +8,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.JsBuilder
 import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
@@ -252,12 +253,16 @@ class ChannelState(
         val template = withContext(Dispatchers.IO) {
             cache.readChannelTemplate()
         }
+        val js = JsBuilder()
+            .withLockerIcon(account?.membership?.tier)
+            .build()
 
         return withContext(Dispatchers.Default) {
             TemplateBuilder(template)
                 .withChannel(content)
                 .withUserInfo(account)
                 .withTheme(isLight = isLight)
+                .withJs(js)
                 .render()
         }
     }

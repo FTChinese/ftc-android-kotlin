@@ -1,15 +1,19 @@
 package com.ft.ftchinese.ui.article.chl
 
 import android.util.Log
-import android.webkit.WebView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ScaffoldState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -18,7 +22,9 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberBaseUrl
-import com.ft.ftchinese.ui.web.*
+import com.ft.ftchinese.ui.web.FtcJsEventListener
+import com.ft.ftchinese.ui.web.FtcWebView
+import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -80,14 +86,14 @@ fun ChannelActivityScreen(
             context,
             channelSource = channelState.channelSource
         ) {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                view?.evaluateJavascript(
-                    JsSnippets.lockerIcon(userViewModel.account?.membership?.tier)
-                ) {
-                    Log.i(TAG, "Privilege result: $it")
-                }
-                super.onPageFinished(view, url)
-            }
+//            override fun onPageFinished(view: WebView?, url: String?) {
+//                view?.evaluateJavascript(
+//                    JsSnippets.lockerIcon(userViewModel.account?.membership?.tier)
+//                ) {
+//                    Log.i(TAG, "Privilege result: $it")
+//                }
+//                super.onPageFinished(view, url)
+//            }
 
             override fun onClickChannel(source: ChannelSource) {
                 Log.i(TAG, "Clicked a channel link $source")
