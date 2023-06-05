@@ -270,6 +270,20 @@ class ArticlesState(
         )
     }
 
+    /**
+     * Add js to a complete HTML file by replacing
+     * the final </html> tag with JS snippets.
+     */
+    private suspend fun renderHtml(content: String): String {
+        return withContext(Dispatchers.Default) {
+            val fontSize = settings.loadFontSize()
+
+            JsBuilder()
+                .withFontSize(fontSize)
+                .appendToHtml(content)
+        }
+    }
+
     private suspend fun renderStory(
         story: Story,
         account: Account?
