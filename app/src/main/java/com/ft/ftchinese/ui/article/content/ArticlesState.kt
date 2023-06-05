@@ -56,18 +56,23 @@ class ArticlesState(
     private val tracker = StatsTracker.getInstance(context)
     private val settings = SettingStore.getInstance(context)
 
+    // Trigger language bar change.
     var language by mutableStateOf(Language.CHINESE)
         private set
 
+    // WebView state.
     var htmlLoaded by mutableStateOf("")
         private set
 
+    // Trigger bookmark icon change.
     var bookmarked by mutableStateOf(false)
         private set
 
+    // Trigger page view tracking..
     var articleRead by mutableStateOf<ReadArticle?>(null)
         private set
 
+    // Trigger paywall barrier.
     var access by mutableStateOf<Access?>(null)
         private set
 
@@ -77,11 +82,14 @@ class ArticlesState(
     var isBilingual by mutableStateOf(false)
         private set
 
+    // Trigger screenshot UI.
     var screenshotMeta by mutableStateOf<ScreenshotMeta?>(null)
         private set
 
     private var currentStory: Story? = null
 
+    // Current article teaser user is reading.
+    // Initially loaded from NavStore.
     var currentTeaser by mutableStateOf<Teaser?>(null)
         private set
 
@@ -91,16 +99,15 @@ class ArticlesState(
     private var webView: WebView? = null
     private var screenshotWV: WebView? = null
 
-
-    private val myPreferences by lazy {
-        context.getSharedPreferences(MyPreferences, Context.MODE_PRIVATE)
-    }
-
-
+    /**
+     * Find article teaser from in-memory cache.
+     * You should call this method before initLoading.
+     * @param id - the md5 hash calculated when caching the teaser.
+     */
     fun findTeaser(id: String) {
         val t = NavStore.getTeaser(id)
         if (t == null) {
-            showSnackBar("Missing required parameters")
+            showSnackBar("Article teaser not found!")
             return
         }
 
@@ -122,28 +129,29 @@ class ArticlesState(
         account: Account?
     ) {
 
+        // If target language is equal to current visible
+        // language, no need to re-render.
         if (lang == language) {
             return
         }
 
+        // If target language is not Chinese, we need
+        // to check whether user have access to other English version.
         if (lang != Language.CHINESE) {
             val access = Access.ofEnglishArticle(
                 who = account,
                 lang = lang
             )
 
+            // If access is not granted, notify UI to show alert.
             if (!access.granted) {
                 this.access = access
                 return
             }
         }
 
+        // Update currently selected language.
         language = lang
-
-        with(myPreferences.edit()) {
-            putString(LanguageKey, language.symbol)
-            commit()
-        }
 
         initLoading(
             account = account,
@@ -154,12 +162,16 @@ class ArticlesState(
         settings.saveLang(lang)
     }
 
+    // initLoading is the entry point to load a story.
+    // It always tries to load data from device cache,
+    // then fallback to server.
     fun initLoading(
         account: Account?
     ) {
 
         val t = currentTeaser ?: return
 
+        // Show progress indicator.
         progress.value = true
         scope.launch {
             val result = loadArticle(
@@ -176,6 +188,7 @@ class ArticlesState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
+                    // Upon data loaded.
                     onArticleLoaded(
                         teaser = t,
                         content = result.data,
@@ -184,39 +197,59 @@ class ArticlesState(
                 }
             }
 
+            // Hide progress indicator regardless of
+            // success or not.
             progress.value = false
         }
     }
 
+    /**
+     * loadArticle performs article loading from
+     * either device cache or server.
+     * @param teaser - teaser contains metadata about the article to load.
+     * @param account - distinguish which server to use.
+     * @param refresh - If true, circumvent device cache.
+     * @return - a FetchResult containing a string.
+     */
     private suspend fun loadArticle(
         teaser: Teaser,
         account: Account?,
         refresh: Boolean
     ): FetchResult<String> {
+        // Compose cache file name.
         val cachedFileName = UriUtils.articleCacheName(teaser)
 
+        // If not refreshing, first try to find it
+        // in cache.
         if (!refresh) {
             Log.i(TAG, "Try to find cached file $cachedFileName")
+            // Load plain text file.
             val content = cache.asyncLoadText(cachedFileName)
 
+            // Cached file is found.
             if (!content.isNullOrBlank()) {
                 return FetchResult.Success(content)
             }
         }
 
+        // Otherwise build API endpoint.
         val url = UriUtils.teaserUrl(teaser, account)
         Log.i(TAG, "Try to fetch data from $url")
 
+        // This usually won't happen.
         if (url.isNullOrBlank()) {
             return FetchResult.TextError("Empty url to load")
         }
 
+        // Check network.
         if (!isConnected) {
             return FetchResult.notConnected
         }
 
+        // Start http request.
         val result = ArticleClient.asyncCrawlFile(url)
 
+        // Cache it.
         if (result is FetchResult.Success) {
             scope.launch(Dispatchers.IO) {
                 Log.i(TAG, "Cache file $cachedFileName")
@@ -227,12 +260,17 @@ class ArticlesState(
         return result
     }
 
+    /**
+     * After an article is loaded, we should present it
+     * on UI, update access rights, checking bookmark status.
+     */
     private suspend fun onArticleLoaded(
         teaser: Teaser,
         content: String,
         account: Account?
     ) {
         currentStory = null
+        // Update current teaser.
         currentTeaser = teaser
 
         if (teaser.hasJsAPI) {
@@ -359,6 +397,9 @@ class ArticlesState(
         updateAccess(permission, account)
     }
 
+    /**
+     * Star/unstar an article and change ui icon.
+     */
     fun bookmark(star: Boolean) {
 
         val read = articleRead ?: return
@@ -424,7 +465,7 @@ class ArticlesState(
 
                 lastResortByOG(og, account)
             } catch (e: Exception) {
-
+                Log.e(TAG, e.message ?: "")
             }
         }
     }
