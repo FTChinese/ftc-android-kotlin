@@ -31,7 +31,7 @@ import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.util.*
-import com.ft.ftchinese.ui.web.JsSnippets
+import com.ft.ftchinese.model.content.JsSnippets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
