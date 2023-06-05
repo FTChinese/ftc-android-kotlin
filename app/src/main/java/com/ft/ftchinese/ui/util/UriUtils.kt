@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.util
 
 import android.content.res.Resources
 import android.net.Uri
-import android.nfc.Tag
 import androidx.core.os.ConfigurationCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.content.ChannelSource
@@ -13,7 +12,8 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.repository.currentFlavor
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 object UriUtils {
     //
