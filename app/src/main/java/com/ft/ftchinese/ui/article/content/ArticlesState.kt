@@ -317,7 +317,7 @@ class ArticlesState(
             val fontSize = settings.loadFontSize()
 
             JsBuilder()
-                .withFontSize(fontSize)
+                .withFontSize(fontSize.key)
                 .appendToHtml(content)
         }
     }
@@ -334,7 +334,7 @@ class ArticlesState(
             val topics = topicStore.loadTemplateCtx()
             val fontSize = settings.loadFontSize()
             val jsSnippets = JsBuilder()
-                .withFontSize(fontSize)
+                .withFontSize(fontSize.key)
                 .build()
 
             TemplateBuilder(template)

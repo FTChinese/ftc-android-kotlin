@@ -3,6 +3,7 @@ package com.ft.ftchinese.store
 import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.content.Language
+import com.ft.ftchinese.model.enums.FontSize
 
 private const val SETTING_PREF_NAME = "com.ft.ftchinese.settings"
 private const val PREF_FONT_SIZE = "font_size"
@@ -19,14 +20,16 @@ class SettingStore private constructor(context: Context) {
      * - bigger
      * - biggest
      */
-    fun saveFontSize(size: String) {
+    fun saveFontSize(size: FontSize) {
         sharedPref.edit(commit = true) {
-            putString(PREF_FONT_SIZE, size)
+            putString(PREF_FONT_SIZE, size.key)
         }
     }
 
-    fun loadFontSize(): String {
-        return sharedPref.getString(PREF_FONT_SIZE, null) ?: "normal"
+    fun loadFontSize(): FontSize {
+        val key = sharedPref.getString(PREF_FONT_SIZE, null) ?: return FontSize.Normal
+
+        return FontSize.fromKey(key) ?: FontSize.Normal
     }
 
     fun saveLang(l: Language) {
