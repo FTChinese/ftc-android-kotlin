@@ -280,6 +280,10 @@ class ArticlesState(
 
         return withContext(Dispatchers.Default) {
             val topics = topicStore.loadTemplateCtx()
+            val fontSize = settings.loadFontSize()
+            val jsSnippets = JsBuilder()
+                .withFontSize(fontSize)
+                .build()
 
             TemplateBuilder(template)
                 .setLanguage(language)
@@ -287,6 +291,7 @@ class ArticlesState(
                 .withFollows(topics)
                 .withUserInfo(account)
                 .withTheme(isLight = isLight)
+                .withJs(jsSnippets)
                 .render()
         }
     }
