@@ -24,6 +24,7 @@ import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.settings.about.AboutActivityScreen
 import com.ft.ftchinese.ui.settings.about.LegalDocActivityScreen
 import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
+import com.ft.ftchinese.ui.settings.fontsize.FontSizeActivityScreen
 import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.settings.overview.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
@@ -95,17 +96,26 @@ fun SettingsApp(
                 startDestination = SettingScreen.Overview.name,
                 modifier = Modifier.padding(innerPadding)
             ) {
+                // Show a list of setting options.
                 composable(
                     route = SettingScreen.Overview.name
                 ) {
                     PreferenceActivityScreen(
                         scaffoldState = scaffoldState
                     ) { screen ->
+                        // When user clicked one of the setting rows,
+                        // go to below-listed screens.
                         navigateToScreen(
                             navController,
                             screen,
                         )
                     }
+                }
+
+                composable(
+                    route = SettingScreen.FontSize.name
+                ) {
+                    FontSizeActivityScreen()
                 }
 
                 composable(
