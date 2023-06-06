@@ -9,6 +9,7 @@ enum class SettingScreen(
     val showToolBar: Boolean = true,
 ) {
     Overview(titleId = R.string.title_settings),
+    FontSize(titleId = R.string.title_font_size),
     ClearCache(titleId = R.string.pref_clear_cache),
     ClearHistory(titleId = R.string.pref_clear_history),
     Notification(titleId = R.string.fcm_pref),
@@ -28,6 +29,7 @@ enum class SettingScreen(
         fun fromRoute(route: String?): SettingScreen =
             when (route?.substringBefore("/")) {
                 Overview.name -> Overview
+                FontSize.name -> FontSize
                 ClearCache.name -> ClearCache
                 ClearHistory.name -> ClearHistory
                 Notification.name -> Notification
