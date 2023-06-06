@@ -6,7 +6,7 @@ import com.ft.ftchinese.R
 enum class FontSize(
     val key: String,
     val size: Int,
-    @StringRes val fontSizeId: Int
+    @StringRes val stringId: Int
 ) {
     Smallest("smallest", 12, R.string.font_size_smallest),
     Smaller("smaller", 14, R.string.font_size_smaller),
