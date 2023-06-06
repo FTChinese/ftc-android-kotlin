@@ -33,6 +33,12 @@ data class SettingRow(
         ): List<SettingRow> {
             return listOf(
                 SettingRow(
+                    id = SettingScreen.FontSize,
+                    summary = null,
+                    iconId = R.drawable.baseline_format_size_black_24,
+                    disclosure = true,
+                ),
+                SettingRow(
                     id = SettingScreen.ClearCache,
                     summary = cacheSize,
                     iconId = R.drawable.ic_baseline_clear_all_24,
@@ -103,7 +109,7 @@ fun PreferenceRow(
                     end = Dimens.dp8
                 )
         ) {
-            BodyText1(text = row.id.titleId?.let { stringResource(id = it) } ?: "")
+            BodyText1(text = row.id.titleId.let { stringResource(id = it) })
 
             row.summary?.let {
                 Spacer(modifier = Modifier.height(Dimens.dp8))
