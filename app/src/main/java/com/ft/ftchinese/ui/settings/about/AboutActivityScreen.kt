@@ -35,7 +35,7 @@ fun AboutActivityScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewAboutListScreen() {
+fun PreviewAboutScreen() {
     AboutActivityScreen(
         onNavigate = {}
     )
