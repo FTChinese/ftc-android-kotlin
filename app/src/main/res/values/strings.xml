@@ -497,6 +497,7 @@
     <string name="wait_download_finish">开始后台下载，请稍候。下载完成后会提示您安装，或者点击通知栏的下载完成通知开始安装。下载的文件位于手机存储/Download文件夹下下。</string>
     <string name="action_open_download">打开下载文件夹</string>
     <string name="summary_articles_read">已阅读 %1$d 篇文章</string>
+    <string name="title_font_size">字体设置</string>
     <string name="font_size_smallest">最小</string>
     <string name="font_size_smaller">较小</string>
     <string name="font_size_normal">默认</string>

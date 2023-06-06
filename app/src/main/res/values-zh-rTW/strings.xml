@@ -497,6 +497,7 @@
     <string name="wait_download_finish">開始後臺下載，請稍候。下載完成後會提示您安裝，或者點選通知欄的下載完成通知開始安裝。下載的檔案位於手機儲存/Download資料夾下下。</string>
     <string name="action_open_download">開啟下載資料夾</string>
     <string name="summary_articles_read">已閱讀 %1$d 篇文章</string>
+    <string name="title_font_size">字型設定</string>
     <string name="font_size_smallest">最小</string>
     <string name="font_size_smaller">較小</string>
     <string name="font_size_normal">預設</string>
