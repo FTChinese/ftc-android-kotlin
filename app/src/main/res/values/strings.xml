@@ -486,7 +486,7 @@
     <string name="btn_install">安装</string>
     <string name="title_install">安装App</string>
     <string name="installation_failed">安装失败</string>
-    <string name="btn_download_complete">下载完成，开始安装？</string>
+    <string name="btn_download_complete">下载完成，打开文件夹？</string>
     <string name="download_not_found">没有找到下载文件</string>
     <string name="download_title">FT中文网%1$s</string>
     <string name="download_pending">等待下载</string>
