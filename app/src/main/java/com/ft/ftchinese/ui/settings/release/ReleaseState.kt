@@ -48,9 +48,11 @@ class ReleaseState(
     private val installer = context.packageManager.packageInstaller
     private val resolver = context.contentResolver
 
+    // Load saved settings.
     var checkOnLaunch by mutableStateOf(releaseStore.getCheckOnLaunch())
         private set
 
+    // If any new release is found.
     var newRelease by mutableStateOf<AppRelease?>(null)
         private set
 
@@ -62,26 +64,22 @@ class ReleaseState(
         releaseStore.saveCheckOnLaunch(on)
     }
 
-    private suspend fun loadCachedRelease(): AppDownloaded? {
-        return try {
-            withContext(Dispatchers.IO) {
-                releaseStore.loadDownload()
-            }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
+    /**
+     * Load release if upon screen load, or user clicked download button.
+     * @param useCache - use cached data on device if tru, otherwise fetch from server.
+     */
     fun loadRelease(useCache: Boolean) {
 
         progress.value = true
 
         scope.launch {
             if (useCache) {
+                // Cached data found.
                 val cached = loadCachedRelease()
                 if (cached != null) {
+                    // If cached release is new and valid, use it.
                     if (cached.release.isNew && cached.release.isValid) {
-                        updatedReleaseStatus(cached)
+                        updateReleaseStatus(cached)
                         progress.value = false
                         return@launch
                     }
@@ -105,7 +103,7 @@ class ReleaseState(
                     }
 
                     Log.i(TAG, "Release downloaded: $cached")
-                    updatedReleaseStatus(cached)
+                    updateReleaseStatus(cached)
                 }
             }
 
@@ -113,27 +111,48 @@ class ReleaseState(
         }
     }
 
-    // Check if apk for current release already exists.
-    private fun updatedReleaseStatus(down: AppDownloaded) {
+    /**
+     * Try to load cached release data from device.
+     * If null returned, it means no cache is found.
+     */
+    private suspend fun loadCachedRelease(): AppDownloaded? {
+        return try {
+            withContext(Dispatchers.IO) {
+                releaseStore.loadDownload()
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // Check if apk for current release already exists so that
+    // download state could be changed.
+    private fun updateReleaseStatus(down: AppDownloaded) {
         Log.i(TAG, "$down")
+        // If release data is found, but apk is not downloaded yet.
         if (down.downloadId < 0) {
+            // Update release data only.
             newRelease = down.release
             return
         }
 
+        // Try to find the apk uri by download id.
         val uri = getUriForApk(down.downloadId)
         Log.i(TAG, "Downloaded file uri: $uri")
 
+        // If uri is not found.
         if (uri == null) {
             newRelease = down.release
             return
         }
 
+        // If uri does not actually exist.
         val exists = uri.path?.let {
             File(it).exists()
         } ?: false
 
         Log.i(TAG, "Downloaded file exists: $exists")
+        // If apk file is found, change download stage.
         if (exists) {
             downloadStage = DownloadStage.Completed(
                 downloadId = down.downloadId
@@ -143,6 +162,9 @@ class ReleaseState(
         newRelease = down.release
     }
 
+    /**
+     * Initialize apk download of the specified app release.
+     */
     fun initDownload(release: AppRelease) {
         progress.value = true
 
@@ -156,11 +178,14 @@ class ReleaseState(
             return
         }
 
+        // The download id we need to save to later use.
         val downloadId = downloadManager.enqueue(downloadReq)
         progress.value = false
 
+        // Change download stage to progress.
         downloadStage = DownloadStage.Progress
 
+        // Save download id for later user.
         scope.launch {
             withContext(Dispatchers.IO) {
                 releaseStore.saveDownload(downloadId, release)
@@ -168,7 +193,18 @@ class ReleaseState(
         }
     }
 
-    fun removeApk(id: Long) {
+    /**
+     * Remove whatever apk downloaded for last download id.
+     */
+    fun removeAnyApk() {
+        downloadStage.let { stage ->
+            if (stage is DownloadStage.Completed) {
+                removeApk(stage.downloadId)
+            }
+        }
+    }
+
+    private fun removeApk(id: Long) {
         downloadManager.remove(id)
         downloadStage = DownloadStage.NotStarted
 
