@@ -214,3 +214,13 @@ fun IconSearch(
     )
 }
 
+@Composable
+fun IconRefresh(
+    tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.baseline_refresh_black_24),
+        contentDescription = "Refresh",
+        tint = tint,
+    )
+}
