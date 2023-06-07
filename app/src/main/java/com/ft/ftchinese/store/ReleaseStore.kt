@@ -67,6 +67,10 @@ class ReleaseStore(context: Context) {
         }
     }
 
+    /**
+     * Save download id together with the release data
+     * so that we know which apk the id is referring to.
+     */
     fun saveDownload(id: Long, release: AppRelease) {
         sharedPref.edit(commit = true) {
             putLong(PREF_KEY_DOWNLOAD_ID, id)
