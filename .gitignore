@@ -13,6 +13,9 @@ bin/
 gen/
 out/
 app/release
+app/ftc/
+app/play/
+*.zip
 
 # Gradle files
 .gradle/

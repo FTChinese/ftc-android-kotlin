@@ -22,6 +22,8 @@ storeFile="......."
 
 Add `google-service.json` to the `app` directory.
 
+The files are here at our Beijing Office, /tech/android-release/, unzip it and copy to the root and app folders
+
 # Product Design
 
 ## Splash Screen
