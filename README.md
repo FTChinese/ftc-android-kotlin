@@ -1,28 +1,114 @@
-# Build
+# Development
 
-## Files
+## Getting Started
 
-Add those two files in the root of the project:
-
-`config.properties`
+源代码中有4个关键文件出于隐私原因未保存到源码库中，但是在Android Studio载入本项目时会检查它们是否存在。这些文件压缩后放在共享盘目录：`/Zion/Departments/Tech/android-release/ftc-android.config.zip`。解压缩该文件后复制到Android项目对应的目录结构下：
 
 ```
-wechat.appId="......."
-access_token="......."
+--Root
+   |--config.properties
+   |--android.jks
+   |--keystore.properties
+   |--app
+      |--google-service.json
 ```
 
-`keystore.properties`
+* `config.properties` 是Java常用的配置文件格式，包含app的配置信息
+   * `wechat.subs.appId`: 调用微信接口的 app id
+   * `access_token.test`: 访问本地测试版api许可，在superyard中生成
+   * `access_token.live`: 访问线上版api的许可
+   * `stripe.test`: Stripe sandbox版publishable key, 在Developers -> API keys下面获取
+   * `stripe.live`: Stripe live版publishable key
+   * `base_url.<xxxx>`: 抓取内容需要各种URL
+   * `api_url.subs.live`: api运行的url
+   * `api_url.subs.sandbox`: 测试版api运行的url
+   * `conversion.dev_token`
+   * `conversion.link_id`
+
+* `android.jks` 和 `keystore.properties`
+
+See https://developer.android.com/studio/publish/app-signing
+
+`keystore.properties`保存了生成`android.jks`时的密码，这些密码默认保存在`app/build.gradle`文件中的 `android.signingConfigs.release`中：
 
 ```
-storePassword="......"
-keyPassword="......"
-keyAlias="......."
-storeFile="......."
+keyAlias:      string
+keyPassword:   string
+storePassword: string
 ```
 
-Add `google-service.json` to the `app` directory.
+但是为了保密，这些数据存储到了被git ignore的外部文件中，在build时注入进`app/build.gradle`文件，方法如下。
 
-The files are here at our Beijing Office, /tech/android-release/, unzip it and copy to the root and app folders
+首先，在`app/build.gradle`文件的`android`前，加入如下代码：
+
+```
+// Creates a variable called keystorePropertiesFile, and initializes it to the
+// keystore.properties file.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+// Initializes a new Properties() object called keystoreProperties.
+def keystoreProperties = new Properties()
+
+// Loads the keystore.properties file into the keystoreProperties object.
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+```
+
+然后，在`android.signingConfigs.release`加入如下值：
+
+```
+android {
+  signingConfigs {
+    release {
+      keyAlias keystoreProperties['keyAlias']            // 载入keyAlias的值
+      keyPassword keystoreProperties['keyPassword']      // 载入keyPassword的值
+      storeFile file("$rootDir/android.jks")              // 载入android.jks文件的内容
+      storePassword keystoreProperties['storePassword']  // 载入storePassword的值
+    }
+  }
+}
+```
+
+## 生成正式版APK
+
+在`Build`菜单中`Generate Signed Bundle / APK`，在打开对话框中选择`APK`选项，点击`Next`进入下一步。
+
+这一步中有4个字段需要填写：
+
+* Key store path: 即此前保存在项目根目录下的`android.jks`，通过`Choose existing`选中该文件。
+* Key store password: 即`keystore.properties`中`storePassword`的值
+* Key alias: `kotlin_native`
+* Key password: 即`keystore.properties`中`keyPassword`的值
+
+选中`Remember passwords`。
+
+点击`Next`。
+
+这一步的`Destination Folder`选择APK文件存放目录，如`app/build/outputs`，请务必选择一个gitignore的目录，以免把APK保存到git中。
+
+在Build Variants中按住Command键可以选择多个生成的目标APK。
+
+点击`Create`开始生成apk，初次build所需时间较长。
+
+## App内升级
+
+App每次启动时会启动进程查询API服务器做两项检查：一个是用户最新的订阅状态，一个是app是否有新版本。
+
+检查App新版本从API获取JSON文档，比较JSON中的版本号和当前APK中的版本号，有新版本则发通知。创建该数据需要：
+
+1. 把APK上传到Minio存储
+2. 在Superyard中的Android部分创建一个新的release数据
+
+参见`service.LatestReleaseWorkder.kt`。
+
+## 访问API
+
+访问API分为三种模式：
+
+* 开发：访问的URL通常是本机，因此需要开发者在本地运行[API](https://github.com/FTChinese/subscription-api).
+* Sandbox: 访问的URL是生产环境下的模拟数据，主要针对支付，如果在Superyard 的 Paywall部分设置了sandbox的价格（如设为1分钱），可以使用1分钱支付测试微信和支付宝，或使用Stripe的模拟信用卡测试支付。
+* Live：生产环境的实际数据。
+
+参见`repository.ApiConfig.kt`针对 `BuildConfig`的值生成不同的URL。`devIP`是开发者运行API的机器地址，它通常不是localhost，而是实际IP，因为对于Android而言，localhost是设备的地址。
 
 # Product Design
 
