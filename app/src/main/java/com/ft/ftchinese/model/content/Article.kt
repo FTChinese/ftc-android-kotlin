@@ -469,6 +469,13 @@ class Story (
     }
 
     fun htmlForCoverImage(): String {
+        if (bodyCN.startsWith("<div class=\"pic")) {
+            return ""
+        }
+        val imageUrl = cover.smallbutton
+        if (imageUrl.isNullOrEmpty()) {
+            return ""
+        }
         return """
             <div class="story-image image" style="margin-bottom:0;">
                 <figure data-url="${cover.smallbutton}" class="loading"></figure>
@@ -510,7 +517,13 @@ class Story (
             arrBody.joinToString("")
         } else {
             arrBody.joinToString("") {
-                "<p>$it</p>"
+                if (it.startsWith("<") && it.endsWith(">")) {
+                    // Assuming $it is already properly wrapped in a tag
+                    it
+                } else {
+                    // Wrap $it in <p> tags
+                    "<p>$it</p>"
+                }
             }
         }
     }
