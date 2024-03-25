@@ -93,30 +93,39 @@
         <activity android:name=".ui.account.AccountActivity" />
         <activity android:name=".ui.wxlink.WxLinkEmailActivity" />
         <activity android:name=".ui.subs.MemberActivity" />
+
+
+
+
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
+                <category android:name="android.intent.category.BROWSABLE" /> <!-- Add this line -->
                 <data android:scheme="wxacddf1c20516eb69" />
             </intent-filter>
         </activity>
+
+
+
+
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
-
+                <category android:name="android.intent.category.BROWSABLE" /> <!-- Add this line -->
                 <data android:scheme="wxacddf1c20516eb69" />
             </intent-filter>
         </activity>
+
+
+
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:exported="true"
