@@ -83,6 +83,8 @@
     <string name="titlebar_cn">中文</string>
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">對照</string>
+    <string name="follow">關注</string>
+    <string name="followed">已關注</string>
     <string name="title_about_us">關於我們</string>
     <string name="menu_audio">朗讀</string>
     <string name="share_to">分享到</string>

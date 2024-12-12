@@ -40,6 +40,7 @@ class FtcWebViewClient(
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
 
+
         val uri = request?.url ?: return super.shouldOverrideUrlLoading(view, request)
 
         Log.i(TAG, "shouldOverrideUrlLoading: $uri")

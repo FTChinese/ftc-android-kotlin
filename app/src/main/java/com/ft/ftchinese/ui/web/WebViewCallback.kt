@@ -139,7 +139,9 @@ sealed class WvUrlEvent {
 
             val pathSegments = uri.pathSegments
 
-            Log.i(TAG, "Handle in-site link. Path segments: $pathSegments")
+            Log.i(TAG, "Pagination Debug: Handle in-site link. uri: $uri")
+
+            Log.i(TAG, "Pagination Debug: Handle in-site link. Path segments: $pathSegments")
 
             /**
              * Handle pagination links.
@@ -162,8 +164,13 @@ sealed class WvUrlEvent {
             val pageNumber = uri.getQueryParameter("page")
                 ?: uri.getQueryParameter("p")
 
+
+            Log.i(TAG, "Pagination Debug: Handling URL: $uri")
+            Log.i(TAG, "Pagination Debug: Page Number: $pageNumber")
+
+
             if (pageNumber != null) {
-                Log.i(TAG, "Open channel pagination for uri: $uri")
+                Log.i(TAG, "Pagination Debug: Open channel pagination for uri: $uri")
 
                 val paging = Paging(
                     key = if (uri.getQueryParameter("page") != null)
@@ -177,6 +184,8 @@ sealed class WvUrlEvent {
                 // Let host activity/fragment to handle pagination link
                 Pagination(paging)
             }
+
+
 
             // In case no path segments
             if (pathSegments.size == 0) {

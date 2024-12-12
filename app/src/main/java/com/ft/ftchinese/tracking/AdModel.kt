@@ -1,6 +1,10 @@
 package com.ft.ftchinese.tracking
-
+import com.ft.ftchinese.R
 import kotlinx.serialization.Serializable
+import android.content.Context
+import android.util.Log
+import com.ft.ftchinese.App
+
 
 data class AdModel(
         val imageString: String,
@@ -287,13 +291,25 @@ object JSCodes {
         }
     }
 
+
     fun getCleanHTML(storyHTML: String): String {
-        return if (storyHTML.contains("<div class=\"story-theme\"><a target=\"_blank\" href=\"/tag/\"></a><button class=\"myft-follow plus\" data-tag=\"\" data-type=\"tag\">关注</button></div>")) {
-            storyHTML.replace("\"<div class=\"story-theme\"><a target=\"_blank\" href=\"/tag/\"></a><button class=\"myft-follow plus\" data-tag=\"\" data-type=\"tag\">关注</button></div>\"", "")
-                    .replace("<div class=\"story-image image\" style=\"margin-bottom:0;\"><figure data-webUrl=\"\" class=\"loading\"></figure></div>", "")
-                    .replace("<div class=\"story-box last-child\" ><h2 class=\"box-title\"><a>相关话题</a></h2><ul class=\"top10\"><li class=\"story-theme mp1\"><a target=\"_blank\" href=\"/tag/\"></a><div class=\"icon-right\"><button class=\"myft-follow plus\" data-tag=\"\" data-type=\"tag\">关注</button></div></li></ul></div>", "")
-        } else {
-            storyHTML
-        }
+        Log.d("getCleanHTML", "Function called with input length: ${storyHTML.length}")
+
+        // Access the application context from the App singleton
+        val context = App.instance.applicationContext
+
+        // Retrieve localized strings
+        val followText = context.getString(R.string.follow)
+        val followedText = context.getString(R.string.followed)
+
+        // Replace placeholders
+        val cleanedHTML = storyHTML
+            .replace("{{follow}}", followText)
+            .replace("{{followed}}", followedText)
+
+        Log.d("getCleanHTML", "Replacements completed. Output length: ${cleanedHTML.length}")
+        return cleanedHTML
     }
+
+
 }
