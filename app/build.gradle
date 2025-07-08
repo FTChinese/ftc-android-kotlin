@@ -59,8 +59,8 @@ android {
         // Target sdk version 30 cannot call wechat SDK.
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 35
-        versionCode 133
-        versionName "6.8.24"
+        versionCode 135
+        versionName "6.8.26"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -327,13 +327,59 @@ task template(type: Copy, group: "Archive", description: "Copies html template f
     into "./src/main/res/raw"
 }
 
-task sendReleaseEmail(type: Exec) {
-    workingDir file('../../../ft/tokens')
-    commandLine 'node', 'send-android-release-notification'
-}
 
-tasks.whenTaskAdded { task ->
-    if (task.name == "assembleFtcRelease") {
-        task.finalizedBy "sendReleaseEmail"
+
+task sendReleaseEmail(type: Exec) {
+    def tokensDir = new File(System.getProperty("user.home"), "ft/tokens")
+    def script = new File(tokensDir, "send-android-release-notification.js")
+
+    doFirst {
+        // This block runs during execution, which is allowed
+        def nodePath = ['which', 'node'].execute().text.trim()
+        if (!nodePath || !new File(nodePath).exists()) {
+            throw new GradleException("❌ 'node' not found in PATH.")
+        }
+
+        println "▶ Running sendReleaseEmail"
+        println "🔍 Node path: ${nodePath}"
+        println "🔍 Working dir: ${tokensDir.absolutePath}"
+        println "🔍 Script: ${script.absolutePath}"
+
+        if (!tokensDir.exists()) {
+            throw new GradleException("❌ Directory not found: ${tokensDir.absolutePath}")
+        }
+        if (!script.exists()) {
+            throw new GradleException("❌ Script not found: ${script.absolutePath}")
+        }
+
+        workingDir = tokensDir
+        commandLine nodePath, script.name
     }
 }
+
+
+
+afterEvaluate {
+    tasks.named("assembleFtcRelease") {
+        finalizedBy("sendReleaseEmail")
+    }
+}
+
+
+
+//tasks.whenTaskAdded { task ->
+//    if (task.name == "assembleFtcRelease") {
+////        task.finalizedBy "sendReleaseEmail"
+//    }
+//}
+//
+//tasks.whenTaskAdded { task ->
+//    if (task.name == "assembleFtcRelease") {
+//        task.finalizedBy("sendReleaseEmail")
+//    }
+//}
+
+
+
+
+
