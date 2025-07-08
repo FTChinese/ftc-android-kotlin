@@ -1,29 +1,74 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+//buildscript {
+//    ext.support_version = '1.0.0'
+//    ext.kotlin_version = '1.8.21'
+//
+//    repositories {
+//
+//        maven{ url 'https://maven.aliyun.com/repository/central'}
+//        maven{ url 'https://maven.aliyun.com/repository/public'}
+//        maven{ url 'https://maven.aliyun.com/repository/google'}
+//
+//        mavenCentral()
+//        google()
+//    }
+//    dependencies {
+//        classpath 'com.android.tools.build:gradle:8.0.2'
+//        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21'
+//        // https://developers.google.com/android/guides/google-services-plugin
+//        // As part of enabling Google APIs or Firebase services
+//        // Process the google-services.json file and produce Android resources that can be used in your application's code
+//        classpath 'com.google.gms:google-services:4.3.15'
+//        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+////        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.6.1'
+//        // NOTE: Do not place your application dependencies here; they belong
+//        // in the individual module build.gradle files
+//    }
+//}
+
+
 buildscript {
     ext.support_version = '1.0.0'
-    ext.kotlin_version = '1.8.21'
+    ext.kotlin_version = '1.9.23' // Or latest stable Kotlin compatible with AGP 8.4
+
+
+//    repositories {
+//        maven { url 'https://maven.aliyun.com/repository/central' }
+//        maven { url 'https://maven.aliyun.com/repository/public' }
+//        maven { url 'https://maven.aliyun.com/repository/google' }
+//        mavenCentral()
+//        google()
+//    }
+
+
+
 
     repositories {
+        // Priority: fast domestic mirrors
+        maven { url 'https://repo.huaweicloud.com/repository/maven/' }
+        maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+        maven { url 'https://mirrors.ustc.edu.cn/maven/maven2/' }
+        maven { url 'https://mirrors.tuna.tsinghua.edu.cn/maven/' }
 
-        maven{ url 'https://maven.aliyun.com/repository/central'}
-        maven{ url 'https://maven.aliyun.com/repository/public'}
-        maven{ url 'https://maven.aliyun.com/repository/google'}
+        // Kotlin-specific
+        maven { url 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
 
-        mavenCentral()
+        // Final fallback
         google()
+        mavenCentral()
     }
+
+
+
+
+
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.2'
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21'
-        // https://developers.google.com/android/guides/google-services-plugin
-        // As part of enabling Google APIs or Firebase services
-        // Process the google-services.json file and produce Android resources that can be used in your application's code
+        classpath 'com.android.tools.build:gradle:8.4.0' // upgrade AGP
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" // now consistent
         classpath 'com.google.gms:google-services:4.3.15'
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-//        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.6.1'
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 

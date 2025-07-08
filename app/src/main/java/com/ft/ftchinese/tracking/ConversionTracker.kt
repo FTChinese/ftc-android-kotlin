@@ -73,14 +73,18 @@ class ConversionTracker(
         }
     }
 
+
+
     private fun getAppVersion(): String {
         return context
             .packageManager
             .getPackageInfo(
                 context.packageName,
                 PackageManager.GET_META_DATA
-            ).versionName
+            ).versionName ?: ""
     }
+
+
 
     private fun requestUA(): ConversionTrackingUA {
         return ConversionTrackingUA(

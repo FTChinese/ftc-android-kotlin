@@ -28,7 +28,12 @@ class VerificationResultTest {
         "confirmedAt": null,
         "startDate": null,
         "endDate": null,
-        "live": true
+        "live": true,
+        "kind": "create",
+        "payableAmount": 258.0,
+        "yearsCount": 1,
+        "monthsCount": 0,
+        "daysCount": 0
     },
     "membership": {
         "ftcId": "e1a1f5c0-0e23-11e8-aa75-977ba2bcc6ae",
@@ -57,10 +62,13 @@ class VerificationResultTest {
 
     @Test
     fun parseJson() {
-        val vrfResult = Json.decodeFromString<VerificationResult>(data)
+        val json = Json {
+            ignoreUnknownKeys = true
+        }
+
+        val vrfResult = json.decodeFromString<VerificationResult>(data)
 
         assertNotNull(vrfResult)
-
         println(vrfResult)
     }
 }

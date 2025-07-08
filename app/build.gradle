@@ -35,7 +35,7 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     // minSdkVersion <= targetSdkVersion <= compileSdkVersion
-    compileSdkVersion 34
+    compileSdkVersion 35
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -49,16 +49,18 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "1.4.7"
+//        kotlinCompilerExtensionVersion "1.4.7"
+        kotlinCompilerExtensionVersion "1.5.13"
+
     }
     defaultConfig {
         applicationId "com.ft.ftchinese"
         minSdkVersion 23
         // Target sdk version 30 cannot call wechat SDK.
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
-        targetSdkVersion 34
-        versionCode 132
-        versionName "6.8.23"
+        targetSdkVersion 35
+        versionCode 133
+        versionName "6.8.24"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
