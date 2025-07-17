@@ -23,14 +23,33 @@ import com.ft.ftchinese.ui.auth.password.ForgotActivityScreen
 import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import androidx.core.view.WindowCompat
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.MaterialTheme
+import com.ft.ftchinese.ui.theme.OColor
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
 
 class PasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Use dark icons for light backgrounds
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = true
+
         val email = intent.getStringExtra(ARG_EMAIL)
 
         setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             PasswordApp(
                 email = email,
                 onExit =  {
@@ -39,6 +58,7 @@ class PasswordActivity : ComponentActivity() {
             )
         }
     }
+
 
     companion object {
         private const val ARG_EMAIL = "arg_email"
@@ -69,6 +89,10 @@ fun PasswordApp(
         )
 
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.primary)
+                .systemBarsPadding(),
             topBar = {
                 Toolbar(
                     heading = stringResource(id = currentScreen.titleId),

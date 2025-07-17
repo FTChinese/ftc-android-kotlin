@@ -12,7 +12,11 @@ private val LightColors = lightColors(
     background = OColor.paper,
 )
 
-private val DarkColors = darkColors()
+private val DarkColors = darkColors(
+    primary = OColor.wheat,       // Use same wheat color to stay consistent
+    onPrimary = OColor.black,
+    background = OColor.paper,    // Optional: use a different dark color if preferred
+)
 
 @Composable
 fun OTheme(

@@ -32,6 +32,13 @@ import com.ft.ftchinese.ui.main.search.SearchActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.ShareUtils
 import com.ft.ftchinese.viewmodel.UserViewModel
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
+
+
 
 @Composable
 fun MainApp(
@@ -78,6 +85,10 @@ fun MainApp(
 
     OTheme {
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.primary)
+                .systemBarsPadding(),
             topBar = {
                 if (currentScreen.showTopBar) {
                     MainToolBar(

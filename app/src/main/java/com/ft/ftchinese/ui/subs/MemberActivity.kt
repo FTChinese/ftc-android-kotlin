@@ -22,6 +22,14 @@ import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
+import androidx.core.view.WindowCompat
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.MaterialTheme
+import com.ft.ftchinese.ui.theme.OColor
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
 
 class MemberActivity : ComponentActivity() {
 
@@ -31,14 +39,29 @@ class MemberActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge layout
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Use dark icons on light background
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = true
+
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             OTheme {
                 val scaffoldState = rememberScaffoldState()
                 val scope = rememberCoroutineScope()
 
                 Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colors.primary)
+                        .systemBarsPadding(),
                     topBar = {
                         Toolbar(
                             heading = stringResource(id = R.string.title_my_subs),

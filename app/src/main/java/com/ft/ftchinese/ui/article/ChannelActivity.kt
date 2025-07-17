@@ -13,7 +13,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -31,6 +30,15 @@ import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.google.firebase.analytics.FirebaseAnalytics
+import androidx.core.view.WindowCompat
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.layout.systemBarsPadding
+import com.ft.ftchinese.ui.theme.OColor
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
 
 private const val EXTRA_CHANNEL_SOURCE = "extra_channel_source"
 private const val TAG = "ChannelActivity"
@@ -45,6 +53,12 @@ class ChannelActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Use dark icons (black) for light backgrounds
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
+
         val channelSource = intent.getParcelableExtra<ChannelSource>(EXTRA_CHANNEL_SOURCE)
         if (channelSource == null) {
             toast(R.string.loading_failed)
@@ -54,17 +68,21 @@ class ChannelActivity : ComponentActivity() {
         val id = NavStore.saveChannel(channelSource)
 
         setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             ChannelApp(
                 initialId = id,
                 onExit = { finish() }
             )
         }
-        FirebaseAnalytics.getInstance(this)
-            .logEvent(
-                    FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, channelSource.title
-            )
-        })
+
+        FirebaseAnalytics.getInstance(this).logEvent(
+            FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
+                putString(FirebaseAnalytics.Param.ITEM_CATEGORY, channelSource.title)
+            }
+        )
     }
 
     /**
@@ -126,6 +144,10 @@ fun ChannelApp(
 
     OTheme {
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.primary)
+                .systemBarsPadding(),
             topBar = {
                 if (currentScreen != ArticleAppScreen.Story) {
                     Toolbar(

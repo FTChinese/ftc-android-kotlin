@@ -24,6 +24,14 @@ import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.MaterialTheme
+import androidx.core.view.WindowCompat
+import com.ft.ftchinese.ui.theme.OColor
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
 
 /**
  * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
@@ -34,17 +42,28 @@ class ArticleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge drawing
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Make status bar icons dark (good for light backgrounds like wheat)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
+
         val teaser = intent
             .getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER)
             ?: return
 
         setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             ArticleApp(
                 onExit = { finish() },
                 initialId = NavStore.saveTeaser(teaser),
             )
         }
     }
+
 
     companion object {
         const val EXTRA_ARTICLE_TEASER = "com.ft.ftchinese.ArticleTeaser"
@@ -102,6 +121,10 @@ private fun ArticleApp(
 
     OTheme {
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.primary)
+                .systemBarsPadding(),
             topBar = {
                 if (currentScreen != ArticleAppScreen.Story) {
                     Toolbar(

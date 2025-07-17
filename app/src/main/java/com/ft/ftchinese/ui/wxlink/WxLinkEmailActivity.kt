@@ -27,6 +27,14 @@ import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.wxlink.linkauth.SignInActivityScreen
 import com.ft.ftchinese.ui.wxlink.merge.MergeActivityScreen
 import com.ft.ftchinese.ui.wxlink.linkauth.WxSignUpActivityScreen
+import androidx.core.view.WindowCompat
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.MaterialTheme
+import com.ft.ftchinese.ui.theme.OColor
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
 
 /**
  * UI for a wx-only user to link to an email account.
@@ -37,13 +45,25 @@ class WxLinkEmailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge layout
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Use dark icons for light background (OColor.wheat or paper)
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = true
+
         setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             LinkApp {
                 setResult(Activity.RESULT_OK)
                 finish()
             }
         }
     }
+
 
     companion object {
 
@@ -66,6 +86,10 @@ fun LinkApp(
         )
 
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.primary)
+                .systemBarsPadding(),
             topBar = {
                 Toolbar(
                     heading = stringResource(id = currentScreen.titleId),

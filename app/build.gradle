@@ -59,8 +59,8 @@ android {
         // Target sdk version 30 cannot call wechat SDK.
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 35
-        versionCode 135
-        versionName "6.8.26"
+        versionCode 139
+        versionName "6.8.30"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -233,7 +233,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:2.6.1"
 
     implementation "androidx.work:work-runtime:$work_version"
-    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.core:core-ktx:1.13.1'
     // The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation "androidx.work:work-runtime-ktx:$work_version"
@@ -258,7 +258,7 @@ dependencies {
     // Material Design
     implementation "androidx.compose.material:material:$compose_ui"
     // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation 'androidx.activity:activity-compose:1.8.0'
     // Integration with ViewModels
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
     // Integration with observables

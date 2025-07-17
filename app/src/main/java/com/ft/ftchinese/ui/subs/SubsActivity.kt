@@ -41,6 +41,14 @@ import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
 import kotlinx.coroutines.*
+import androidx.core.view.WindowCompat
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.MaterialTheme
+import com.ft.ftchinese.ui.theme.OColor
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
 
 class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
@@ -50,12 +58,23 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge layout
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Use dark status bar icons for light backgrounds
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = true
+
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
         ftcPayViewModel = ViewModelProvider(this)[FtcPayViewModel::class.java]
 
         val premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
         setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             SubsApp(
                 userViewModel = userViewModel,
                 payViewModel = ftcPayViewModel,
@@ -71,6 +90,7 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
             )
         }
     }
+
 
     private fun launchAliPay(aliPayIntent: AliPayIntent) {
 
@@ -153,6 +173,10 @@ fun SubsApp(
         )
 
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.primary)
+                .systemBarsPadding(),
             topBar = {
                 Toolbar(
                     heading = stringResource(id = currentScreen.titleId),

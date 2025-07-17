@@ -29,6 +29,14 @@ import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.settings.overview.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
+import androidx.core.view.WindowCompat
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material.MaterialTheme
+import com.ft.ftchinese.ui.theme.OColor
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
 class SettingsActivity : ComponentActivity() {
@@ -36,12 +44,24 @@ class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Enable edge-to-edge
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Use dark status bar icons for light background
+        WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightStatusBars = true
+
         setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             SettingsApp {
                 finish()
             }
         }
     }
+
 
     companion object {
 
@@ -75,6 +95,10 @@ fun SettingsApp(
 
     OTheme {
         Scaffold(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.primary)
+                .systemBarsPadding(),
             topBar = {
                 if (currentScreen.showToolBar) {
                     Toolbar(

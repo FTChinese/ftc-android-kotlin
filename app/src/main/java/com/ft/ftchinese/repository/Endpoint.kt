@@ -6,12 +6,12 @@ object Endpoint {
 
 
     val conversionTracking = if (BuildConfig.DEBUG) {
-        "https://www.chineseft.com/index.php/jsapi/deeplinkcampaigntestdata"
+        "https://www.chineseft.net/index.php/jsapi/deeplinkcampaigntestdata"
     } else {
         "https://www.googleadservices.com/pagead/conversion/app/1.0"
     }
 
-    const val ftcCampaign = "https://www.chineseft.com/index.php/jsapi/deeplinkcampaign"
+    const val ftcCampaign = "https://www.chineseft.net/index.php/jsapi/deeplinkcampaign"
     const val splashSchedule = "/index.php/jsapi/applaunchschedule"
 
     val accessToken = ApiConfig.ofAuth.accessToken

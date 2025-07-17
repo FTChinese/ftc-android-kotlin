@@ -21,6 +21,12 @@ import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.viewmodel.ConversionViewModel
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.SideEffect
+import androidx.compose.material.MaterialTheme
+import com.ft.ftchinese.ui.theme.OColor
+
 
 class MainActivity : ComponentActivity() {
 
@@ -30,6 +36,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
         }
@@ -37,7 +45,11 @@ class MainActivity : ComponentActivity() {
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
         registerWx()
 
-        setContent { 
+        setContent {
+            val navColor = OColor.wheat.toArgb()
+            SideEffect {
+                window.navigationBarColor = navColor
+            }
             MainApp(userViewModel = userViewModel)
         }
 
