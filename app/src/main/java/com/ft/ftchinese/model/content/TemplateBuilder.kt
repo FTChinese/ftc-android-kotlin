@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.content
 import android.util.Log
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.tracking.AdParser
@@ -125,6 +126,17 @@ var androidUserAddress = ${addr.toJsonString()}
         ctx["{{story-js-key}}"] = ""
         ctx["{{ad-pollyfill-js}}"] = ""
         ctx["{{db-zone-helper-js}}"] = ""
+
+        ctx["{{id}}"] = story.id
+        ctx["{{type}}"] = story.teaser?.type?.symbol ?: ArticleType.Story.symbol
+
+        val canShowComments = story.teaser?.type?.let {
+            it == ArticleType.Story || it == ArticleType.Premium || it == ArticleType.Interactive
+        } ?: false
+        // TODO: - How do we pass user login info to Android user web view
+        val hasFiguredOutAndroidUsers = false
+        val commentsClass = if (canShowComments && language != Language.ENGLISH && hasFiguredOutAndroidUsers) "" else "hide"
+        ctx["{story-comments-container-class}"] = commentsClass
 
 
 

@@ -284,8 +284,7 @@ object JSCodes {
 
     fun getInlineVideo(storyHTML: String): String {
         return if (storyHTML.contains("inlinevideo")) {
-            storyHTML.replace(Regex("</div>"), "</div>\n")
-                    .replace(Regex("<div class=[\"]*inlinevideo[\"]* id=[\"]([^\"]*)[\"]* auto[sS]tart=[\"]*([a-zA-Z]+)[\"]* title=\"(.*)\" image=\"([^\"]*)\" vid=\"([^\"]*)\" vsource=\"([^\"]*)\"></div>"), "<div class='o-responsive-video-container'><div class='o-responsive-video-wrapper-outer'><div class='o-responsive-video-wrapper-inner'><script src='http://union.bokecc.com/player?vid=$1&siteid=922662811F1A49E9&autoStart=$2&width=100%&height=100%&playerid=3571A3BF2AEC8829&playertype=1'></script></div></div><a class='o-responsive-video-caption' href='/video/$5' target='_blank'>$3</a></div>")
+            storyHTML.replace(Regex("<div class=[\"]*inlinevideo[\"]* id=[\"]([^\"]*)[\"]* auto[sS]tart=[\"]*([a-zA-Z]+)[\"]* title=\"(.*)\" image=\"([^\"]*)\" vid=\"([^\"]*)\" vsource=\"([^\"]*)\"></div>"), "<div class='o-responsive-video-container'><div class='o-responsive-video-wrapper-outer'><div class='o-responsive-video-wrapper-inner'><script src='http://union.bokecc.com/player?vid=$1&siteid=922662811F1A49E9&autoStart=$2&width=100%&height=100%&playerid=3571A3BF2AEC8829&playertype=1'></script></div></div><a class='o-responsive-video-caption' href='/video/$5' target='_blank'>$3</a></div>")
         } else {
             storyHTML
         }
