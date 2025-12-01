@@ -337,9 +337,19 @@ class ArticlesState(
                 .withFontSize(fontSize.key)
                 .build()
 
+            val hasAccess = Access.of(
+                contentPerm = story.permission,
+                who = account,
+                lang = language
+            ).granted
+
+            val showCustomHero = hasAccess &&
+                story.customHtml.isNotBlank() &&
+                story.tag.contains("原声视频")
+
             TemplateBuilder(template)
                 .setLanguage(language)
-                .withStory(story)
+                .withStory(story, showCustomHero)
                 .withFollows(topics)
                 .withUserInfo(account)
                 .withTheme(isLight = isLight)

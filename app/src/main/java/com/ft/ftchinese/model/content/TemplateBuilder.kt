@@ -60,7 +60,10 @@ var androidUserAddress = ${addr.toJsonString()}
         return this
     }
 
-    fun withStory(story: Story): TemplateBuilder {
+    fun withStory(
+        story: Story,
+        showCustomHero: Boolean = false
+    ): TemplateBuilder {
         val (shouldHideAd, sponsorTitle) = story.shouldHideAd()
 
         var body = ""
@@ -99,15 +102,30 @@ var androidUserAddress = ${addr.toJsonString()}
             storyHeadlineClass = " story-headline-large"
         }
 
+        val useCustomHero = showCustomHero &&
+            story.customHtml.isNotBlank() &&
+            story.tag.contains("原声视频")
+
+        val storyImage = if (useCustomHero) {
+            story.customHtml
+        } else {
+            story.htmlForCoverImage()
+        }
+
+        val storyHeroImage = if (useCustomHero) {
+            ""
+        } else {
+            "<figure data-url=\"${story.cover.smallbutton}\" class=\"loading\"></figure>"
+        }
+
         // MARK: - Get story headline styles and headshots
-        val storyHeadlineStyle = getStoryHeaderStyle(story, body)
+        val storyHeadlineStyle = getStoryHeaderStyle(story, body, storyHeroImage)
         val fullGridClass = if (body.contains("full-grid")) " full-grid-story" else ""
         val scrollyTellingClass = if (body.contains("scrollable-block")) " has-scrolly-telling" else ""
         val storyHeaderStyleClass = storyHeadlineStyle.style
         val storyBodyClass = fullGridClass + scrollyTellingClass + storyHeaderStyleClass
-        val storyImageNoContainer = "<figure data-url=\"${story.cover.smallbutton}\" class=\"loading\"></figure>"
         ctx["<!--{story-body-class}-->"] = storyBodyClass
-        ctx["<!--{story-image-no-container}-->"] = storyImageNoContainer
+        ctx["<!--{story-image-no-container}-->"] = storyHeroImage
         ctx["<!--{Story-Header-Background}-->"] = storyHeadlineStyle.background
         ctx["<!--{story-author-headcut}-->"] = storyHeadlineStyle.headshot
 
@@ -180,7 +198,7 @@ var androidUserAddress = ${addr.toJsonString()}
         // Lead-in
         ctx["{story-lead}"] = story.standfirstCN
         // Cover image
-        ctx["{story-image}"] = story.htmlForCoverImage()
+        ctx["{story-image}"] = storyImage
         ctx["{story-time}"] = story.formatPublishTime()
         ctx["{story-byline}"] = story.byline
         ctx["{story-body}"] = body
@@ -245,9 +263,12 @@ var androidUserAddress = ${addr.toJsonString()}
     }
 
     private data class StoryHeaderStyle(val style: String, val headshot: String, val background: String)
-    private fun getStoryHeaderStyle(story: Story, body: String): StoryHeaderStyle {
+    private fun getStoryHeaderStyle(
+        story: Story,
+        body: String,
+        imageHTML: String
+    ): StoryHeaderStyle {
         val tag = story.tag
-        val imageHTML = story.htmlForCoverImage()
         val heroClass = " show-story-hero-container"
         val columnistClass = " show-story-columnist-topper"
         val pinkBackgroundClass = " story-hero-theme-pink"

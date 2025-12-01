@@ -127,6 +127,11 @@ class Story (
     @SerialName("story_audio")
     val aiAudios: AiAudio? = null,
 
+    // Optional custom html snippet returned by interactive jsapi, often used
+    // to embed a video player for original-voice videos.
+    @SerialName("customHTML")
+    val customHtml: String = "",
+
     @SerialName("columninfo")
     val columnInfo: ColumnInfo? = null,
 
