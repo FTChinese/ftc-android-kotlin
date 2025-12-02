@@ -283,10 +283,43 @@ object JSCodes {
     """.trimIndent()
 
     fun getInlineVideo(storyHTML: String): String {
-        return if (storyHTML.contains("inlinevideo")) {
-            storyHTML.replace(Regex("<div class=[\"]*inlinevideo[\"]* id=[\"]([^\"]*)[\"]* auto[sS]tart=[\"]*([a-zA-Z]+)[\"]* title=\"(.*)\" image=\"([^\"]*)\" vid=\"([^\"]*)\" vsource=\"([^\"]*)\"></div>"), "<div class='o-responsive-video-container'><div class='o-responsive-video-wrapper-outer'><div class='o-responsive-video-wrapper-inner'><script src='http://union.bokecc.com/player?vid=$1&siteid=922662811F1A49E9&autoStart=$2&width=100%&height=100%&playerid=3571A3BF2AEC8829&playertype=1'></script></div></div><a class='o-responsive-video-caption' href='/video/$5' target='_blank'>$3</a></div>")
-        } else {
-            storyHTML
+        if (!storyHTML.contains("inlinevideo")) return storyHTML
+
+        // 1. Find the entire div tag first (non-greedy)
+        val tagRegex = Regex("""<div[^>]*class=["']inlinevideo["'][^>]*></div>""")
+
+        return tagRegex.replace(storyHTML) { matchResult ->
+            val fullTag = matchResult.value
+
+            // 2. Helper function to extract attributes safely (handles any order & quotes)
+            fun getAttr(name: String): String {
+                // Looks for name="value", name='value', or name=value
+                val pattern = Regex("""$name\s*=\s*(["'])(.*?)\1|${name}\s*=\s*([^\s>]+)""", RegexOption.IGNORE_CASE)
+                val match = pattern.find(fullTag)
+
+                // Returns group 2 (quoted value) OR group 3 (unquoted value)
+                return match?.groupValues?.get(2)?.ifEmpty { match.groupValues.get(3) } ?: ""
+            }
+
+            // 3. Extract the data
+            val id = getAttr("id")
+            // Default to "true" if missing, just in case
+            val autoStart = getAttr("auto[sS]tart").ifEmpty { "true" }
+            val title = getAttr("title")
+            val vid = getAttr("vid") // Internal ID for the link
+
+            // 4. Construct the Player URL (Using HTTPS)
+            val scriptUrl = "https://union.bokecc.com/player?vid=$id&siteid=922662811F1A49E9&autoStart=$autoStart&width=100%&height=100%&playerid=3571A3BF2AEC8829&playertype=1"
+
+            // 5. Construct the Caption Link (Only if title and vid exist)
+            val captionHtml = if (title.isNotEmpty() && vid.isNotEmpty()) {
+                """<a class='o-responsive-video-caption' href='/video/$vid' target='_blank'>$title</a>"""
+            } else {
+                "" // Render nothing if data is missing
+            }
+
+            // 6. Return the final Block
+            """<div class='o-responsive-video-container'><div class='o-responsive-video-wrapper-outer'><div class='o-responsive-video-wrapper-inner'><script src='$scriptUrl'></script></div></div>$captionHtml</div>"""
         }
     }
 
