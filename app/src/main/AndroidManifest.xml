@@ -51,7 +51,10 @@
         <activity
             android:name=".ui.subs.SubsActivity"
             android:exported="false" />
-        <activity android:name=".ui.webpage.WebpageActivity" />
+        <activity
+            android:name=".ui.webpage.WebpageActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
         <activity
             android:name=".ui.test.TestActivity"
             android:label="Test" />
@@ -76,7 +79,9 @@
             android:name="com.ft.ftchinese.ui.main.search.SearchableActivity"
             android:exported="false"
             android:launchMode="singleTop"
-            android:parentActivityName=".ui.main.MainActivity">
+            android:parentActivityName=".ui.main.MainActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -87,10 +92,14 @@
         </activity>
         <activity
             android:name=".ui.article.ChannelActivity"
-            android:parentActivityName=".ui.main.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
         <activity
             android:name=".ui.article.ArticleActivity"
-            android:parentActivityName=".ui.main.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
         <activity android:name=".ui.account.AccountActivity" />
         <activity android:name=".ui.wxlink.WxLinkEmailActivity" />
         <activity android:name=".ui.subs.MemberActivity" />
