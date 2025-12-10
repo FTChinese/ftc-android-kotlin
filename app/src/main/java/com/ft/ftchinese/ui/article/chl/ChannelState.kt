@@ -103,6 +103,7 @@ class ChannelState(
                         silentUpdate(
                             source = source,
                             account = account,
+                            cachedHtml = result.data.html,
                         )
                     }
                 }
@@ -112,7 +113,8 @@ class ChannelState(
 
     private suspend fun silentUpdate(
         source: ChannelSource,
-        account: Account?
+        account: Account?,
+        cachedHtml: String
     ) {
         val result = retrieveHtml(
             url = UriUtils.channelUrl(
@@ -127,14 +129,16 @@ class ChannelState(
 
         when (result) {
             is FetchResult.Success -> {
-                onChannelLoaded(
-                    content = result.data.html,
-                    isFragment = source.isFragment,
-                    account = account,
-                )
+                if (result.data.html != cachedHtml) {
+                    onChannelLoaded(
+                        content = result.data.html,
+                        isFragment = source.isFragment,
+                        account = account,
+                    )
+                }
             }
             else -> {
-
+                // Keep showing cached content when background refresh fails.
             }
         }
     }

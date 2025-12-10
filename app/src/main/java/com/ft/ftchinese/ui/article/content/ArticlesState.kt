@@ -223,37 +223,62 @@ class ArticlesState(
         // in cache.
         if (!refresh) {
             Log.i(TAG, "Try to find cached file $cachedFileName")
-            // Load plain text file.
-            val content = cache.asyncLoadText(cachedFileName)
+            val cached = cache.asyncLoadText(cachedFileName)
 
-            // Cached file is found.
-            if (!content.isNullOrBlank()) {
-                return FetchResult.Success(content)
+            if (!cached.isNullOrBlank()) {
+                // Fire-and-forget revalidation so cache stays fresh.
+                refreshArticle(teaser, account, cachedFileName, cached)
+
+                return FetchResult.Success(cached)
             }
         }
 
-        // Otherwise build API endpoint.
+        // Fall back to network fetch.
+        return fetchAndCacheArticle(teaser, account, cachedFileName)
+    }
+
+    private fun refreshArticle(
+        teaser: Teaser,
+        account: Account?,
+        cacheName: String,
+        cachedContent: String
+    ) {
+        scope.launch {
+            when (val fresh = fetchAndCacheArticle(teaser, account, cacheName)) {
+                is FetchResult.Success -> {
+                    if (fresh.data != cachedContent) {
+                        onArticleLoaded(teaser, fresh.data, account)
+                    }
+                }
+                else -> {
+                    // Ignore errors during background refresh so cached content remains visible.
+                }
+            }
+        }
+    }
+
+    private suspend fun fetchAndCacheArticle(
+        teaser: Teaser,
+        account: Account?,
+        cacheName: String
+    ): FetchResult<String> {
         val url = UriUtils.teaserUrl(teaser, account)
         Log.i(TAG, "Try to fetch data from $url")
 
-        // This usually won't happen.
         if (url.isNullOrBlank()) {
             return FetchResult.TextError("Empty url to load")
         }
 
-        // Check network.
         if (!isConnected) {
             return FetchResult.notConnected
         }
 
-        // Start http request.
         val result = ArticleClient.asyncCrawlFile(url)
 
-        // Cache it.
         if (result is FetchResult.Success) {
             scope.launch(Dispatchers.IO) {
-                Log.i(TAG, "Cache file $cachedFileName")
-                cache.saveText(cachedFileName, result.data)
+                Log.i(TAG, "Cache file $cacheName")
+                cache.saveText(cacheName, result.data)
             }
         }
 

@@ -1,5 +1,6 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.HttpResp
@@ -18,6 +19,16 @@ object ArticleClient {
         return try {
             val resp = withContext(Dispatchers.IO) {
                 crawlFile(url)
+            }
+
+            if (resp.code !in 200 until 300) {
+                val bodyText = resp.body ?: ""
+                return@try FetchResult.fromApi(
+                    APIError(
+                        message = if (bodyText.isNotBlank()) bodyText else resp.message,
+                        statusCode = resp.code
+                    )
+                )
             }
 
             if (resp.body.isNullOrBlank()) {
