@@ -33,6 +33,8 @@ object Endpoint {
     val passwordResetLetter = "${passwordReset}/letter"
     val passwordResetCodes = "${passwordReset}/codes"
 
+    val tokenSso = "${baseUrl}/auth/token_sso"
+
     private val authWxBase = "${baseUrl}/auth/wx"
     val wxLogin = "${authWxBase}/login"
     val wxRefresh = "${authWxBase}/refresh"
@@ -51,4 +53,3 @@ object Endpoint {
     val wxLink = "${wxAccount}/link"
     val wxUnlink = "${wxAccount}/unlink"
 }
-

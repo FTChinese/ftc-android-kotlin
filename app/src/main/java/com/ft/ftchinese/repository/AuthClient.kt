@@ -319,6 +319,31 @@ object AuthClient {
         }
     }
 
+    fun ssoLogin(token: String): Account? {
+        return Fetch()
+            .post(Endpoint.tokenSso)
+            .noCache()
+            .setApiKey()
+            .setClient()
+            .sendJson(mapOf("token" to token))
+            .endJson<Account>()
+            .body
+    }
+
+    suspend fun asyncSsoLogin(token: String): FetchResult<Account> {
+        return try {
+            val account = withContext(Dispatchers.IO) {
+                ssoLogin(token)
+            } ?: return FetchResult.loadingFailed
+
+            FetchResult.Success(account)
+        } catch (e: APIError) {
+            FetchResult.fromApi(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
     /**
      * Wecaht login does not return an [Account] instance.
      * It returns a [WxSession] which represents the access

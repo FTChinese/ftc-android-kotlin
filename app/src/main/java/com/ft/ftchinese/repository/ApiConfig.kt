@@ -4,7 +4,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.ApiMode
 
 private const val devIP = "http://192.168.1.20"
-private const val devPort = "8206"
+//private const val devPort = "8206"
+private const val devPort = "3000"
 
 data class ApiConfig(
     val baseUrl: String,
@@ -18,14 +19,14 @@ data class ApiConfig(
         // Used for development.
         private val debugApi = ApiConfig(
             // MARK: - We don't have the server side source code, just use live server for local debug
-            baseUrl = BuildConfig.API_SUBS_LIVE,
-            accessToken = BuildConfig.ACCESS_TOKEN_LIVE,
-            mode = ApiMode.Live
+//            baseUrl = BuildConfig.API_SUBS_LIVE,
+//            accessToken = BuildConfig.ACCESS_TOKEN_LIVE,
+//            mode = ApiMode.Live
 
 
-//            baseUrl = "$devIP:${devPort}",
-//            accessToken = BuildConfig.ACCESS_TOKEN_TEST,
-//            mode = ApiMode.Debug
+            baseUrl = "$devIP:${devPort}",
+            accessToken = BuildConfig.ACCESS_TOKEN_TEST,
+            mode = ApiMode.Debug
         )
 
         // Production server with sandbox data
