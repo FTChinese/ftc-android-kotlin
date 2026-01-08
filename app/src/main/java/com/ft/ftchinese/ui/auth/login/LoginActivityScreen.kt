@@ -25,6 +25,7 @@ fun LoginActivityScreen(
     userViewModel: UserViewModel,
     scaffoldState: ScaffoldState,
     email: String?,
+    ssoToken: String? = null,
     onSuccess: () -> Unit,
     onForgotPassword: (String) -> Unit,
     onSignUp: () -> Unit,
@@ -45,6 +46,12 @@ fun LoginActivityScreen(
         loginState.emailAccount?.let {
             userViewModel.saveAccount(it)
             onSuccess()
+        }
+    }
+
+    LaunchedEffect(key1 = ssoToken) {
+        if (!ssoToken.isNullOrBlank()) {
+            loginState.authenticateSso(ssoToken)
         }
     }
 

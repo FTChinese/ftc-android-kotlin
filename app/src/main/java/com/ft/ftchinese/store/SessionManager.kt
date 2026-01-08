@@ -10,6 +10,7 @@ import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.stripesubs.StripeSubs
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import com.ft.ftchinese.store.SessionTokenStore
 
 private const val SESSION_PREF_NAME_PLAIN = "account"
 private const val SESSION_PREF_NAME_SECURE = "account_secure"
@@ -50,32 +51,7 @@ private const val PREF_IAP_SUBS = "iap_subs"
 
 class SessionManager private constructor(context: Context) {
     private val appContext = context.applicationContext
-    private val sharedPreferences: SharedPreferences? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
-        PrefsMigration.migrateIfNeeded(
-            context = appContext,
-            oldFileName = SESSION_PREF_NAME_PLAIN,
-            newFileName = SESSION_PREF_NAME_SECURE,
-            sentinelKey = PREF_IS_LOGGED_IN,
-            initSentinel = { editor ->
-                editor.putBoolean(PREF_IS_LOGGED_IN, false)
-            }
-        )
-    }
-    @Volatile private var prefsFailed = false
-
-    private fun prefsOrNull(): SharedPreferences? {
-        val prefs = sharedPreferences
-        if (prefs == null && !prefsFailed) {
-            prefsFailed = true
-            AccountCache.clear()
-            appContext
-                .getSharedPreferences(SESSION_PREF_NAME_PLAIN, Context.MODE_PRIVATE)
-                .edit()
-                .clear()
-                .commit()
-        }
-        return prefs
-    }
+    private val sharedPreferences = appContext.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
 
     fun saveAccount(account: Account) {
         val prefs = prefsOrNull() ?: return
@@ -277,7 +253,10 @@ class SessionManager private constructor(context: Context) {
 
     fun logout() {
         AccountCache.clear()
-        prefsOrNull()?.edit { clear() }
+        SessionTokenStore.getInstance(appContext).clear()
+        sharedPreferences.edit {
+            clear()
+        }
     }
 
     companion object {
