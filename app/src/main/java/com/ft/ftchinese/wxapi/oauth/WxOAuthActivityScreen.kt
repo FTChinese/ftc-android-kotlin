@@ -8,10 +8,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.viewmodel.UserViewModel
 import com.ft.ftchinese.ui.wxlink.merge.MergerStore
 import com.ft.ftchinese.ui.wxlink.merge.WxEmailMerger
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -20,7 +22,8 @@ import com.tencent.mm.opensdk.modelbase.BaseResp
 fun WxOAuthActivityScreen(
     wxRespLiveData: LiveData<BaseResp?>,
     onFinish: () -> Unit,
-    onLink: () -> Unit
+    onLink: () -> Unit,
+    userViewModel: UserViewModel = viewModel()
 ) {
 
     val context = LocalContext.current
@@ -64,7 +67,7 @@ fun WxOAuthActivityScreen(
                 onLink()
             }
             is AuthStatus.LoginSuccess -> {
-                sessionStore.saveAccount(status.account)
+                userViewModel.saveAccount(status.account)
             }
             else -> {}
         }

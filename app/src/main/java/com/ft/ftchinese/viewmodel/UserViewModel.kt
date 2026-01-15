@@ -11,12 +11,14 @@ import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.tracking.StatsTracker
 import com.stripe.android.CustomerSession
 
 private const val TAG = "UserViewModel"
 
 open class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val session = SessionManager.getInstance(application)
+    private val tracker = StatsTracker.getInstance(application)
 
     val accountLiveData: MutableLiveData<Account> by lazy {
         MutableLiveData<Account>()
@@ -45,6 +47,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         accountLiveData.value = session.loadAccount(raw = true)
+        syncFirebaseUserId(accountLiveData.value)
     }
 
     val isLoggedIn: Boolean
@@ -57,6 +60,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         // TODO: the copy might not be needed.
         val a = session.loadAccount(raw = true)?.copy()
         accountLiveData.value = a
+        syncFirebaseUserId(a)
         Log.i(TAG, "Account reloaded $account")
         return a
     }
@@ -64,6 +68,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
     fun saveAccount(a: Account) {
         accountLiveData.value = a
         session.saveAccount(a)
+        syncFirebaseUserId(a)
     }
 
     fun saveMembership(m: Membership) {
@@ -107,7 +112,13 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun logout() {
         accountLiveData.value = null
+        syncFirebaseUserId(null)
         CustomerSession.endCustomerSession()
         session.logout()
+    }
+
+    private fun syncFirebaseUserId(account: Account?) {
+        val id = account?.id?.takeIf { it.isNotBlank() }
+        tracker.setUserId(id)
     }
 }
