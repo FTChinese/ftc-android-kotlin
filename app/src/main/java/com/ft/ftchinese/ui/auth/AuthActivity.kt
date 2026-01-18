@@ -8,10 +8,16 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarHost
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +37,7 @@ import com.ft.ftchinese.ui.auth.password.ForgotActivityScreen
 import com.ft.ftchinese.ui.auth.password.ResetActivityScreen
 import com.ft.ftchinese.ui.auth.signup.SignUpActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -99,7 +106,20 @@ fun AuthApp(
                     }
                 )
             },
-            scaffoldState = scaffold
+            snackbarHost = { hostState ->
+                Box(modifier = Modifier.fillMaxSize()) {
+                    SnackbarHost(
+                        hostState = hostState,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = Dimens.dp8, start = Dimens.dp16, end = Dimens.dp16)
+                    ) { data ->
+                        Snackbar(snackbarData = data)
+                    }
+                }
+            },
+            scaffoldState = scaffold,
+            modifier = Modifier.imePadding()
         ) { innerPadding ->
             NavHost(
                 navController = navController,

@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.formatter
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.reader.AutoRenewMoment
+import com.ft.ftchinese.model.reader.Membership
 
 object FormatSubs {
 
@@ -21,22 +21,26 @@ object FormatSubs {
         )
     }
 
-    private fun formatAutoRenewMoment(ctx: Context, moment: AutoRenewMoment): String {
-        val monthDate =  formatMoment(ctx, moment)
-
-        return ctx.getString(
-            R.string.formatter_edition,
-            monthDate,
-            ctx.getString(moment.cycle.stringRes)
+    fun rowAutoRenewOn(ctx: Context): Pair<String, String> {
+        return Pair(
+            ctx.getString(R.string.label_auto_renew),
+            ctx.getString(R.string.auto_renew_on)
         )
     }
 
-    fun rowAutoRenewOn(ctx: Context, mmt: AutoRenewMoment?): Pair<String, String> {
+    fun rowNextRenewDate(ctx: Context, m: Membership): Pair<String, String> {
+        val value = m.expireDate?.let { formatYearMonthDate(ctx, it) } ?: ""
         return Pair(
-            ctx.getString(R.string.label_auto_renew),
-            mmt?.let {
-                formatAutoRenewMoment(ctx, mmt)
-            } ?: ""
+            ctx.getString(R.string.label_next_renew_date),
+            value
+        )
+    }
+
+    fun rowRenewCycle(ctx: Context, m: Membership): Pair<String, String> {
+        val value = m.cycle?.let { ctx.getString(it.stringRes) } ?: ""
+        return Pair(
+            ctx.getString(R.string.label_renew_cycle),
+            value
         )
     }
 

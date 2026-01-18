@@ -399,6 +399,10 @@
     <string name="tier_premium">高階會員</string>
     <string name="tier_vip">超級會員</string>
     <string name="label_expiration_date">到期時間</string>
+    <string name="label_next_renew_date">下次扣費日期</string>
+    <string name="label_renew_cycle">續費週期</string>
+    <string name="auto_renew_on">開啟</string>
+    <string name="member_long_term">長期有效</string>
     <string name="vip_no_expiration">無限期</string>
     <string name="label_price">支付金額</string>
     <string name="label_ftc_account">郵箱賬號</string>

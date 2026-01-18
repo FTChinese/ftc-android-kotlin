@@ -1,6 +1,8 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
+import android.content.Context
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.invoice.AddOn
@@ -329,9 +331,9 @@ data class Membership(
 
     // For auto renewal only show month or date.
     // Use getMonthValue() and getDayOfMonth() with a formatter string.
-    fun localizeExpireDate(): String {
+    fun localizeExpireDate(ctx: Context? = null): String {
         if (vip) {
-            return "无限期"
+            return ctx?.getString(R.string.member_long_term) ?: "长期有效"
         }
 
         if (expireDate == null) {
@@ -418,4 +420,3 @@ data class Membership(
         )
     }
 }
-

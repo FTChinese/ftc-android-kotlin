@@ -37,7 +37,7 @@ fun composeDeletionEmail(
         )
     )
 
-    return "FT中文网，\n请删除我的账号 $emailOrMobile。\n我的账号已经购买了FT中文网付费订阅服务 $edition，到期时间 ${a.membership.localizeExpireDate()}。我已知悉删除账号的同时将删除我的订阅信息。"
+    return "FT中文网，\n请删除我的账号 $emailOrMobile。\n我的账号已经购买了FT中文网付费订阅服务 $edition，到期时间 ${a.membership.localizeExpireDate(context)}。我已知悉删除账号的同时将删除我的订阅信息。"
 }
 
 object IntentsUtil {

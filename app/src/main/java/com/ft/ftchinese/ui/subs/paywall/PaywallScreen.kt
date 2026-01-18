@@ -101,7 +101,7 @@ fun SubsStatusBox(
         text = stringResource(
             R.string.member_expired_on,
             FormatHelper.getTier(LocalContext.current, membership.tier),
-            membership.localizeExpireDate()
+            membership.localizeExpireDate(LocalContext.current)
         ),
         style = MaterialTheme.typography.body1
     )

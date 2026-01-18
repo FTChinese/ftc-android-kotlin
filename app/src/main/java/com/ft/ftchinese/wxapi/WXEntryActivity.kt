@@ -152,12 +152,13 @@ fun OAuthApp(
                 ) {
                     WxOAuthActivityScreen(
                         wxRespLiveData = wxRespLiveData,
-                        onFinish = onExit
-                    ) {
-                        navigateToLink(
-                            navController
-                        )
-                    }
+                        onFinish = onExit,
+                        onLink = {
+                            navigateToLink(
+                                navController
+                            )
+                        }
+                    )
                 }
 
                 composable(

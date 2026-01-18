@@ -3,9 +3,19 @@ package com.ft.ftchinese.ui.formatter
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.AutoRenewMoment
+import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 
 fun formatYearMonthDate(ctx: Context, date: ZonedDateTime): String {
+    return ctx.getString(
+        R.string.formatter_year_month_date,
+        date.year,
+        date.monthValue,
+        date.dayOfMonth,
+    )
+}
+
+fun formatYearMonthDate(ctx: Context, date: LocalDate): String {
     return ctx.getString(
         R.string.formatter_year_month_date,
         date.year,

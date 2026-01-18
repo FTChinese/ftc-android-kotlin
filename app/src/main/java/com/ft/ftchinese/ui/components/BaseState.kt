@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.components
 import android.content.res.Resources
 import androidx.annotation.StringRes
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.ft.ftchinese.R
@@ -40,7 +41,10 @@ open class BaseState(
 
     fun showSnackBar(message: String) {
         scope.launch {
-            scaffoldState.snackbarHostState.showSnackbar(message)
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Long
+            )
         }
     }
 

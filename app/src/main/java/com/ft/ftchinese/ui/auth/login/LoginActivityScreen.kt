@@ -10,6 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.request.Credentials
@@ -34,6 +35,7 @@ fun LoginActivityScreen(
     val tokenStore = remember {
         TokenManager.getInstance(context)
     }
+    val focusManager = LocalFocusManager.current
 
     val loginState = rememberLoginState(
         scaffoldState = scaffoldState
@@ -54,6 +56,7 @@ fun LoginActivityScreen(
             email = email,
             loading = loginState.progress.value,
             onSubmit = {
+                focusManager.clearFocus()
                 loginState.authenticate(
                     Credentials(
                         email = it.email,

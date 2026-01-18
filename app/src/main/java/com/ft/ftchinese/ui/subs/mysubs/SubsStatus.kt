@@ -43,7 +43,7 @@ data class SubsStatus(
                 return SubsStatus(
                     productName = ctx.getString(R.string.tier_vip),
                     details = listOf(
-                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate())
+                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx))
                     ),
                     addOns = listOf(),
                 )
@@ -69,7 +69,7 @@ data class SubsStatus(
                             }
                         },
                         productName = productTitle,
-                        details = listOf(FormatSubs.rowExpiration(ctx, m.localizeExpireDate())),
+                        details = listOf(FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx))),
                         addOns = addOns,
                     )
                 }
@@ -89,7 +89,9 @@ data class SubsStatus(
                             productName = productTitle,
                             details = listOf(
                                 FormatSubs.rowSubsSource(ctx, m.payMethod),
-                                FormatSubs.rowAutoRenewOn(ctx, m.autoRenewMoment),
+                                FormatSubs.rowAutoRenewOn(ctx),
+                                FormatSubs.rowNextRenewDate(ctx, m),
+                                FormatSubs.rowRenewCycle(ctx, m),
                             ),
                             addOns = addOns,
                         )
@@ -99,7 +101,7 @@ data class SubsStatus(
                             productName = productTitle,
                             details = listOf(
                                 FormatSubs.rowSubsSource(ctx, m.payMethod),
-                                FormatSubs.rowExpiration(ctx, m.localizeExpireDate()),
+                                FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx)),
                                 FormatSubs.rowAutoRenewOff(ctx),
                             ),
                             reactivateStripe = m.payMethod == PayMethod.STRIPE && !expired,
@@ -112,7 +114,7 @@ data class SubsStatus(
                     productName = productTitle,
                     details = listOf(
                         FormatSubs.rowSubsSource(ctx, m.payMethod),
-                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate())
+                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx))
                     ),
                     addOns = addOns,
                 )
@@ -126,6 +128,3 @@ data class SubsStatus(
         }
     }
 }
-
-
-
