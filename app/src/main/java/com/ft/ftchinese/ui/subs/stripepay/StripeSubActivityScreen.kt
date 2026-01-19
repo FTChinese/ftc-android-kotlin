@@ -205,7 +205,7 @@ private fun launchPaymentSheet(
         PaymentSheetContract.Args.createSetupIntentArgs(
             clientSecret = params.clientSecret,
             config = PaymentSheet.Configuration(
-                merchantDisplayName = "FTC Stripe Pay Setting",
+                merchantDisplayName = "FT中文网信用卡支付",
                 customer = PaymentSheet.CustomerConfiguration(
                     id = params.customerId,
                     ephemeralKeySecret = params.ephemeralKey

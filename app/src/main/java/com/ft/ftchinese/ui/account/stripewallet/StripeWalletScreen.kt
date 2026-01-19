@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.stripesubs.StripePaymentCard
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.ui.components.AddBankCard
@@ -53,7 +55,7 @@ fun StripeWalletScreen(
                 if (!isDefault) {
                     PlainTextButton(
                         onClick = { onSetDefault(pm) },
-                        text = "设为默认",
+                        text = stringResource(id = R.string.set_default_payment_method),
                         modifier = Modifier.align(Alignment.TopEnd),
                         enabled = !loading
                     )
@@ -76,11 +78,11 @@ fun AlertModifySubsPaymentMethod(
     onConfirm: () -> Unit,
 ) {
     SimpleDialog(
-        title = "更改订阅默认支付方式",
-        body = "是否更改当前订阅的默认支付方式？这将影响自动续订日后的支付，请确保该支付方式有效。",
+        title = stringResource(id = R.string.title_change_default_payment_method),
+        body = stringResource(id = R.string.body_change_default_payment_method),
         onDismiss = onDismiss,
         onConfirm = onConfirm,
-        confirmText = "确认更改"
+        confirmText = stringResource(id = R.string.confirm_change_payment_method)
     )
 }
 

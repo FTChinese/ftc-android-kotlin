@@ -19,7 +19,7 @@ fun LinkEmailDialog(
             Text(text = stringResource(id = R.string.title_link_email))
         },
         text = {
-            Text(text = "您当前使用了微信登录。Stripe支付要求提供邮箱，是否绑定邮箱？")
+            Text(text = stringResource(id = R.string.stripe_wx_only))
         },
         confirmButton = {
             TextButton(

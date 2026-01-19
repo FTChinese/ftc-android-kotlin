@@ -116,7 +116,7 @@ data class PaymentBrandRes(
         )
 
         val stripe = PaymentBrandRes(
-            drawableId = R.drawable.stripe,
+            drawableId = R.drawable.ic_card_membership_black_24dp,
             stringId = R.string.pay_brand_stripe
         )
 

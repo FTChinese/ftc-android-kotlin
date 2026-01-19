@@ -62,8 +62,8 @@ fun buildAccountRows(ctx: Context, account: Account): List<AccountRow> {
         ),
         AccountRow(
             id = AccountRowId.STRIPE,
-            primary = "Stripe钱包",
-            secondary = "添加银行卡或设置默认支付方式"
+            primary = ctx.getString(R.string.pay_brand_stripe),
+            secondary = ctx.getString(R.string.add_or_select_payment_method)
         ),
         AccountRow(
             id = AccountRowId.WECHAT,

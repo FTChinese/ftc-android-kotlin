@@ -20,7 +20,10 @@ fun CreateCustomerDialog(
         },
         text = {
             Text(
-                text = "Stripe支付要求提供邮箱地址，是否使用当前邮箱注册(${email})？"
+                text = stringResource(
+                    id = R.string.stripe_email_required_prompt,
+                    email
+                )
             )
         },
         confirmButton = {

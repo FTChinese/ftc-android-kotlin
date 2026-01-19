@@ -33,10 +33,10 @@ fun CancelStripeDialog(
             }
         },
         title = {
-            Text(text = "取消订阅")
+            Text(text = stringResource(id = R.string.title_cancel_auto_renew))
         },
         text = {
-            Text(text = "该操作将关闭Stripe自动续订，当前订阅在到期前依然有效。在订阅到期前，您随时可以重新打开自动续订。")
+            Text(text = stringResource(id = R.string.body_cancel_auto_renew))
         }
     )
 }

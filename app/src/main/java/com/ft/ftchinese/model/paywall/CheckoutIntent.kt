@@ -87,7 +87,7 @@ data class CheckoutIntent(
                         // Standard -> onetime premium
                         Tier.PREMIUM -> CheckoutIntent(
                             kind = IntentKind.Forbidden,
-                            message = "Stripe标准版订阅不能使用支付宝/微信购买升级到高端版，请继续使用Stripe支付升级"
+                            message = "信用卡/借记卡标准版订阅不能使用支付宝/微信购买升级到高端版，请继续使用信用卡/借记卡支付升级"
                         )
                         Tier.STANDARD -> autoRenewAddOn
                     }
@@ -133,7 +133,7 @@ data class CheckoutIntent(
                 PayMethod.ALIPAY,
                 PayMethod.WXPAY -> CheckoutIntent(
                     kind = IntentKind.OneTimeToAutoRenew,
-                    message = "使用Stripe转为自动续订，当前剩余时间将在新订阅失效后再次启用"
+                    message = "使用信用卡/借记卡转为自动续订，当前剩余时间将在新订阅失效后再次启用"
                 )
 
                 PayMethod.STRIPE -> if (source.tier == target.tier) {
@@ -152,30 +152,30 @@ data class CheckoutIntent(
                     } else {
                         CheckoutIntent(
                             kind = IntentKind.SwitchInterval,
-                            message = "更改Stripe自动扣款周期，建议您订阅年度版更划算"
+                            message = "更改信用卡/借记卡自动扣款周期，建议您订阅年度版更划算"
                         )
                     }
                 } else {
                     when (target.tier) {
                         Tier.PREMIUM -> CheckoutIntent(
                             kind = IntentKind.Upgrade,
-                            message = "升级高端会员，Stripe将自动调整您的扣款额度"
+                            message = "升级高端会员，信用卡/借记卡自动续订将调整您的扣款额度"
                         )
                         Tier.STANDARD -> CheckoutIntent(
                             kind = IntentKind.Downgrade,
-                            message = "降级为标准版会员， Stripe将自动调整您的扣款额度"
+                            message = "降级为标准版会员，信用卡/借记卡自动续订将调整您的扣款额度"
                         )
                     }
                 }
 
                 PayMethod.APPLE -> CheckoutIntent(
                     kind = IntentKind.Forbidden,
-                    message = "为避免重复订阅，苹果自动续订不能使用Stripe自动续订"
+                    message = "为避免重复订阅，苹果自动续订不能使用信用卡/借记卡自动续订"
                 )
 
                 PayMethod.B2B -> CheckoutIntent(
                     kind = IntentKind.Forbidden,
-                    message = "为避免重复订阅，企业版授权订阅不能使用Stripe自动续订"
+                    message = "为避免重复订阅，企业版授权订阅不能使用信用卡/借记卡自动续订"
                 )
 
                 else -> intentUnknown

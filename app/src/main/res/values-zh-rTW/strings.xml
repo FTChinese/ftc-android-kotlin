@@ -150,7 +150,7 @@
     <string name="ftc_account_linked">賬號 %1$s 已經綁定了其他微信賬號。一個FT中文網賬號只能繫結一個微信賬號。</string>
     <string name="wx_account_linked">微信賬號 %1$s 已經綁定了其他FT中文網賬號。一個FT中文網賬號只能繫結一個微信賬號。</string>
     <string name="accounts_member_valid">您的微信賬號和FT中文網的賬號均購買了會員服務，兩個會員均未到期。合併賬號會刪除其中一個賬號的會員資訊。為保障您的權益，暫不支援繫結兩個會員未過期的賬號。您可以尋求客服幫助。</string>
-    <string name="unlink_footnote">* Stripe、蘋果內購或企業訂閱資訊只能保留在FT中文網賬號下</string>
+    <string name="unlink_footnote">* 信用卡/借記卡、蘋果內購或企業訂閱資訊只能保留在FT中文網賬號下</string>
     <string name="prompt_linked">賬號已繫結</string>
     <string name="prompt_unlinked">賬號已解除繫結</string>
 
@@ -199,9 +199,9 @@
     <string name="sms_code_sent">驗證碼已傳送</string>
 
     <!--  Stripe Customer setting  -->
-    <string name="title_create_stripe_customer">註冊Stripe使用者</string>
+    <string name="title_create_stripe_customer">開通信用卡/借記卡支付</string>
     <string name="stripe_no_payment_selected">請選擇或新增支付方式</string>
-    <string name="stripe_customer_not_created">建立Stripe使用者失敗，請重試！</string>
+    <string name="stripe_customer_not_created">開通信用卡/借記卡支付失敗，請重試！</string>
 
     <!-- Account related -->
     <string name="label_current_name">當前使用者名稱</string>
@@ -278,12 +278,12 @@
     <string name="price_heading_wxali">包%1$s</string>
     <string name="price_heading_stripe">連續包%1$s</string>
     <string name="limited_to_aliwx">* 僅限支付寶或微信支付</string>
-    <string name="limited_to_stripe">* 僅限Stripe支付，每年訂閱到期日前24小時自動扣款</string>
+    <string name="limited_to_stripe">* 僅限信用卡/借記卡支付（由Stripe安全處理），每年訂閱到期日前24小時自動扣款</string>
     <string name="price_original_prefix">原價</string>
     <string name="price_original_stripe_prefix">試用結束後自動續訂</string>
     <string-array name="stripe_footnotes">
-        <item>Stripe訂閱FT中文網會員以英鎊計價，需使用支援國際貨幣的信用卡，建議中國大陸以外地區使用</item>
-        <item>Stripe如有優惠活動，一個付款週期內僅可使用一次優惠券，優惠額度在下次發票開出時扣除</item>
+        <item>信用卡/借記卡訂閱FT中文網會員以英鎊計價，需使用支援國際貨幣的信用卡，建議中國大陸以外地區使用（由Stripe安全處理）</item>
+        <item>如有優惠活動，一個付款週期內僅可使用一次優惠券，優惠額度在下次發票開出時扣除</item>
     </string-array>
 
     <!-- Example: 標準會員/年-->
@@ -316,13 +316,13 @@
     <string name="coupon_redeemed">優惠%1$s將在下次發票中扣除</string>
     <string name="pay_brand_ali">支付寶</string>
     <string name="pay_brand_wechat">微信支付</string>
-    <string name="pay_brand_stripe">Stripe</string>
+    <string name="pay_brand_stripe">信用卡/借記卡</string>
     <string name="pay_brand_b2b">企業訂閱</string>
     <string name="pay_brand_apple">蘋果App內購</string>
     <string name="pay_method_ali">支付寶支付</string>
     <string name="pay_method_wechat">微信支付</string>
-    <string name="pay_method_stripe">Stripe訂閱</string>
-    <string name="switch_to_stripe">轉為Stripe訂閱</string>
+    <string name="pay_method_stripe">信用卡/借記卡支付</string>
+    <string name="switch_to_stripe">轉為信用卡/借記卡訂閱</string>
     <string name="check_out">支付</string>
     <string name="unknown_order_kind">無法確定訂閱類別</string>
     <string name="toast_no_pay_method">請選擇支付方式</string>
@@ -363,29 +363,30 @@
     <string name="order_period">訂閱週期: %1$s ~ %2$s</string>
 
     <!-- Stripe payment -->
-    <string name="stripe_wx_only">您當前使用了微信登入。Stripe支付要求提供郵箱，是否繫結郵箱？</string>
-    <string name="stripe_setting">Stripe設定</string>
-    <string name="stripe_cancel">取消Stripe訂閱</string>
+    <string name="stripe_wx_only">您當前使用了微信登入。信用卡/借記卡支付要求提供郵箱，是否繫結郵箱？</string>
+    <string name="stripe_email_required_prompt">信用卡/借記卡支付要求提供郵箱地址，是否使用當前郵箱註冊（%1$s）？</string>
+    <string name="stripe_setting">信用卡/借記卡設定</string>
+    <string name="stripe_cancel">取消自動續訂</string>
     <string name="stripe_reactivate_auto_renew">開啟自動續訂</string>
-    <string name="stripe_retrieve_customer">查詢Stripe賬號&#8230;</string>
+    <string name="stripe_retrieve_customer">查詢支付賬號&#8230;</string>
     <string name="card_brand_last4">%1$s (尾號%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="payment_method">支付方式</string>
-    <string name="stripe_init">設定Stripe支付</string>
+    <string name="stripe_init">設定信用卡/借記卡支付</string>
     <string name="stripe_default_bank_brand">我的銀行卡</string>
     <string name="add_or_select_payment_method">新增或選擇預設支付方式</string>
     <string name="set_default_payment_method">設為預設支付方式</string>
-    <string name="stripe_customer_not_found">賬號不存在，請檢查賬號或者重新登入</string>
+    <string name="stripe_customer_not_found">支付賬號不存在，請檢查賬號或者重新登入</string>
 
-    <string name="stripe_authentication_failed">Stripe支付驗證似乎失敗了</string>
+    <string name="stripe_authentication_failed">信用卡/借記卡支付驗證似乎失敗了</string>
     <string name="stripe_unable_to_authenticate">無法驗證，請聯絡客服</string>
 
-    <string name="stripe_refreshing">更新Stripe訂閱資訊&#8230;</string>
-    <string name="stripe_refresh_success">Stripe訂閱已更新</string>
-    <string name="stripe_refresh_failed">無法更新Stripe訂閱資訊</string>
+    <string name="stripe_refreshing">更新信用卡/借記卡訂閱資訊&#8230;</string>
+    <string name="stripe_refresh_success">信用卡/借記卡訂閱已更新</string>
+    <string name="stripe_refresh_failed">無法更新信用卡/借記卡訂閱資訊</string>
 
     <string name="title_requires_action">需要驗證</string>
-    <string name="stripe_requires_action">Stripe支付尚未完成，您的髮卡行需要進行安全驗證，點選確認開始驗證</string>
+    <string name="stripe_requires_action">信用卡/借記卡支付尚未完成，您的髮卡行需要進行安全驗證，點選確認開始驗證</string>
     <string name="creating_subscription">建立訂閱&#8230;</string>
     <string name="updating_subscription">更新訂閱&#8230;</string>
 
@@ -423,7 +424,7 @@
 
     <string name="iap_guide">當前訂閱來自蘋果App內購。請在App Store中管理您的訂閱。</string>
     <!--  Prompt message for membership  -->
-    <string name="stripe_not_active">Stripe訂閱狀態異常</string>
+    <string name="stripe_not_active">訂閱狀態異常</string>
     <string name="member_status_invalid">訂閱狀態異常，請重新整理或聯絡客服</string>
     <string name="member_has_expired">會員已過期</string>
     <string name="member_is_expiring">會員將於今天過期</string>
@@ -437,7 +438,13 @@
     <string name="sub_status_canceled">已取消</string>
     <string name="sub_status_unpaid">未支付</string>
     <string name="sub_status_active">活躍</string>
-    <string name="stripe_status_invalid">Stripe訂閱狀態異常: %1$s，請重新整理或聯絡客服</string>
+    <string name="stripe_status_invalid">訂閱狀態異常: %1$s，請重新整理或聯絡客服</string>
+
+    <string name="title_change_default_payment_method">更改訂閱預設支付方式</string>
+    <string name="body_change_default_payment_method">是否更改當前訂閱的預設支付方式？這將影響自動續訂日後的支付，請確保該支付方式有效。</string>
+    <string name="confirm_change_payment_method">確認更改</string>
+    <string name="title_cancel_auto_renew">取消自動續訂</string>
+    <string name="body_cancel_auto_renew">該操作將關閉自動續訂，當前訂閱在到期前依然有效。在訂閱到期前，您隨時可以重新開啟自動續訂。</string>
 
     <!-- IAP -->
     <string name="iap_refreshing">正在訪問App Store獲取您的訂閱資料</string>
