@@ -1,6 +1,7 @@
 package com.ft.ftchinese.store
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
@@ -10,7 +11,8 @@ import com.ft.ftchinese.model.stripesubs.StripeSubs
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-private const val SESSION_PREF_NAME = "account"
+private const val SESSION_PREF_NAME_PLAIN = "account"
+private const val SESSION_PREF_NAME_SECURE = "account_secure"
 private const val PREF_USER_ID = "id"
 private const val PREF_UNION_ID = "union_id"
 private const val PREF_STRIPE_CUS_ID = "stripe_id"
@@ -47,12 +49,39 @@ private const val PREF_STRIPE_SUBS = "stripe_subs"
 private const val PREF_IAP_SUBS = "iap_subs"
 
 class SessionManager private constructor(context: Context) {
-    private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val sharedPreferences: SharedPreferences? by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        PrefsMigration.migrateIfNeeded(
+            context = appContext,
+            oldFileName = SESSION_PREF_NAME_PLAIN,
+            newFileName = SESSION_PREF_NAME_SECURE,
+            sentinelKey = PREF_IS_LOGGED_IN,
+            initSentinel = { editor ->
+                editor.putBoolean(PREF_IS_LOGGED_IN, false)
+            }
+        )
+    }
+    @Volatile private var prefsFailed = false
+
+    private fun prefsOrNull(): SharedPreferences? {
+        val prefs = sharedPreferences
+        if (prefs == null && !prefsFailed) {
+            prefsFailed = true
+            AccountCache.clear()
+            appContext
+                .getSharedPreferences(SESSION_PREF_NAME_PLAIN, Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .commit()
+        }
+        return prefs
+    }
 
     fun saveAccount(account: Account) {
+        val prefs = prefsOrNull() ?: return
         AccountCache.save(account)
 
-        sharedPreferences.edit(commit = true) {
+        prefs.edit(commit = true) {
             putString(PREF_USER_ID, account.id)
             putString(PREF_UNION_ID, account.unionId)
             putString(PREF_STRIPE_CUS_ID, account.stripeId)
@@ -73,8 +102,9 @@ class SessionManager private constructor(context: Context) {
 
     fun saveMembership(member: Membership) {
         AccountCache.updateMembership(member)
+        val prefs = prefsOrNull() ?: return
 
-        sharedPreferences.edit(commit = true) {
+        prefs.edit(commit = true) {
             putString(PREF_MEMBER_TIER, member.tier?.toString())
             putString(PREF_MEMBER_CYCLE, member.cycle?.toString())
             putString(PREF_MEMBER_EXPIRE, formatLocalDate(member.expireDate))
@@ -91,19 +121,19 @@ class SessionManager private constructor(context: Context) {
     }
 
     // Load the raw membership.
-    private fun loadMembership(): Membership {
-        val tier = sharedPreferences.getString(PREF_MEMBER_TIER, null)
-        val cycle = sharedPreferences.getString(PREF_MEMBER_CYCLE, null)
-        val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
-        val payMethod = sharedPreferences.getString(PREF_PAY_METHOD, null)
-        val stripeSubsId = sharedPreferences.getString(PREF_STRIPE_SUBS_ID, null)
-        val autoRenew = sharedPreferences.getBoolean(PREF_AUTO_RENEW, false)
-        val status = sharedPreferences.getString(PREF_SUB_STATUS, null)
-        val appleSubsId = sharedPreferences.getString(PREF_APPLE_SUBS_ID, null)
-        val b2bLicenceId = sharedPreferences.getString(PREF_B2B_LIC_ID, null)
-        val isVip = sharedPreferences.getBoolean(PREF_IS_VIP, false)
-        val stdAddOn = sharedPreferences.getLong(PREF_STD_ADDON, 0)
-        val prmAddOn = sharedPreferences.getLong(PREF_PRM_ADDON, 0)
+    private fun loadMembership(prefs: SharedPreferences): Membership {
+        val tier = prefs.getString(PREF_MEMBER_TIER, null)
+        val cycle = prefs.getString(PREF_MEMBER_CYCLE, null)
+        val expireDate = prefs.getString(PREF_MEMBER_EXPIRE, null)
+        val payMethod = prefs.getString(PREF_PAY_METHOD, null)
+        val stripeSubsId = prefs.getString(PREF_STRIPE_SUBS_ID, null)
+        val autoRenew = prefs.getBoolean(PREF_AUTO_RENEW, false)
+        val status = prefs.getString(PREF_SUB_STATUS, null)
+        val appleSubsId = prefs.getString(PREF_APPLE_SUBS_ID, null)
+        val b2bLicenceId = prefs.getString(PREF_B2B_LIC_ID, null)
+        val isVip = prefs.getBoolean(PREF_IS_VIP, false)
+        val stdAddOn = prefs.getLong(PREF_STD_ADDON, 0)
+        val prmAddOn = prefs.getLong(PREF_PRM_ADDON, 0)
 
         return Membership(
             tier = Tier.fromString(tier),
@@ -124,6 +154,9 @@ class SessionManager private constructor(context: Context) {
     // Load account. By default the membership is a normalized version.
     // If you pass true to raw, the membership will be retrieve as is, without migrating addon or extending auto renew on the client side.
     fun loadAccount(raw: Boolean = false): Account? {
+        if (prefsOrNull() == null) {
+            return null
+        }
         if (raw) {
             return retrieveAccount(raw = true)
         }
@@ -139,19 +172,20 @@ class SessionManager private constructor(context: Context) {
     }
 
     private fun retrieveAccount(raw: Boolean = false): Account? {
-        val userId = sharedPreferences.getString(PREF_USER_ID, null) ?: return null
-        val unionId = sharedPreferences.getString(PREF_UNION_ID, null)
-        val stripeId = sharedPreferences.getString(PREF_STRIPE_CUS_ID, null)
-        val userName = sharedPreferences.getString(PREF_USER_NAME, null)
-        val mobile = sharedPreferences.getString(PREF_MOBILE, null)
-        val email = sharedPreferences.getString(PREF_EMAIL, "") ?: ""
-        val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
-        val avatarUrl = sharedPreferences.getString(PREF_AVATAR_URL, null)
+        val prefs = prefsOrNull() ?: return null
+        val userId = prefs.getString(PREF_USER_ID, null) ?: return null
+        val unionId = prefs.getString(PREF_UNION_ID, null)
+        val stripeId = prefs.getString(PREF_STRIPE_CUS_ID, null)
+        val userName = prefs.getString(PREF_USER_NAME, null)
+        val mobile = prefs.getString(PREF_MOBILE, null)
+        val email = prefs.getString(PREF_EMAIL, "") ?: ""
+        val isVerified = prefs.getBoolean(PREF_IS_VERIFIED, false)
+        val avatarUrl = prefs.getString(PREF_AVATAR_URL, null)
 
-        val loginMethod = sharedPreferences.getString(PREF_LOGIN_METHOD, null)
+        val loginMethod = prefs.getString(PREF_LOGIN_METHOD, null)
 
-        val wxNickname = sharedPreferences.getString(PREF_WX_NICKNAME, null)
-        val wxAvatar = sharedPreferences.getString(PREF_WX_AVATAR, null)
+        val wxNickname = prefs.getString(PREF_WX_NICKNAME, null)
+        val wxAvatar = prefs.getString(PREF_WX_AVATAR, null)
 
         val wechat = Wechat(
             nickname = wxNickname,
@@ -170,49 +204,56 @@ class SessionManager private constructor(context: Context) {
             loginMethod = LoginMethod.fromString(loginMethod),
             wechat = wechat,
             membership = if (raw) {
-                loadMembership()
+                loadMembership(prefs)
             } else {
-                loadMembership().normalize()
+                loadMembership(prefs).normalize()
             }
         )
     }
 
     fun saveStripeId(id: String) {
         AccountCache.updateStripeID(id)
+        val prefs = prefsOrNull() ?: return
 
-        sharedPreferences.edit(commit = true) {
+        prefs.edit(commit = true) {
             putString(PREF_STRIPE_CUS_ID, id)
         }
     }
 
     fun saveStripeSubs(subs: StripeSubs) {
-        sharedPreferences.edit(commit = true) {
+        val prefs = prefsOrNull() ?: return
+        prefs.edit(commit = true) {
             putString(PREF_STRIPE_SUBS, marshaller.encodeToString(subs))
         }
     }
 
     fun loadStripeSubs(): StripeSubs? {
-        val subsStr = sharedPreferences.getString(PREF_STRIPE_SUBS, null) ?: return null
+        val prefs = prefsOrNull() ?: return null
+        val subsStr = prefs.getString(PREF_STRIPE_SUBS, null) ?: return null
         return marshaller.decodeFromString(subsStr)
     }
 
     fun saveIapSus(subs: IapSubs) {
-        sharedPreferences.edit(commit = true) {
+        val prefs = prefsOrNull() ?: return
+        prefs.edit(commit = true) {
             putString(PREF_IAP_SUBS, marshaller.encodeToString(subs))
         }
     }
 
     fun loadIapSubs(): IapSubs? {
-        val subsStr = sharedPreferences.getString(PREF_IAP_SUBS, null) ?: return null
+        val prefs = prefsOrNull() ?: return null
+        val subsStr = prefs.getString(PREF_IAP_SUBS, null) ?: return null
         return marshaller.decodeFromString(subsStr)
     }
 
     fun isLoggedIn(): Boolean {
-        return sharedPreferences.getBoolean(PREF_IS_LOGGED_IN, false)
+        val prefs = prefsOrNull() ?: return false
+        return prefs.getBoolean(PREF_IS_LOGGED_IN, false)
     }
 
     fun saveWxSession(session: WxSession) {
-        sharedPreferences.edit(commit = true) {
+        val prefs = prefsOrNull() ?: return
+        prefs.edit(commit = true) {
             putString(PREF_WX_SESSION_ID, session.sessionId)
             putString(PREF_WX_UNION_ID, session.unionId)
             putString(PREF_WX_OAUTH_TIME, formatISODateTime(session.createdAt))
@@ -220,9 +261,10 @@ class SessionManager private constructor(context: Context) {
     }
 
     fun loadWxSession(): WxSession? {
-        val id = sharedPreferences.getString(PREF_WX_SESSION_ID, null) ?: return null
-        val unionId = sharedPreferences.getString(PREF_WX_UNION_ID, null) ?: return null
-        val created = sharedPreferences.getString(PREF_WX_OAUTH_TIME, null)
+        val prefs = prefsOrNull() ?: return null
+        val id = prefs.getString(PREF_WX_SESSION_ID, null) ?: return null
+        val unionId = prefs.getString(PREF_WX_UNION_ID, null) ?: return null
+        val created = prefs.getString(PREF_WX_OAUTH_TIME, null)
 
         val createdAt = parseISODateTime(created) ?: return null
 
@@ -235,9 +277,7 @@ class SessionManager private constructor(context: Context) {
 
     fun logout() {
         AccountCache.clear()
-        sharedPreferences.edit {
-            clear()
-        }
+        prefsOrNull()?.edit { clear() }
     }
 
     companion object {

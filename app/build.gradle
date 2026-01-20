@@ -234,6 +234,7 @@ dependencies {
 
     implementation "androidx.work:work-runtime:$work_version"
     implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.security:security-crypto:1.0.0'
     // The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation "androidx.work:work-runtime-ktx:$work_version"
@@ -378,7 +379,6 @@ afterEvaluate {
 //        task.finalizedBy("sendReleaseEmail")
 //    }
 //}
-
 
 
 
