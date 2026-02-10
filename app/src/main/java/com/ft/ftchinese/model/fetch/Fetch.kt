@@ -280,7 +280,7 @@ class Fetch {
             .headers(headers.build())
 
         // Ensure device id is attached for single-device tracking if caller did not set it.
-        if (reqBuilder.header("X-Device-Id") == null) {
+        if (headers["X-Device-Id"] == null) {
             loadDeviceId()?.let {
                 reqBuilder.header("X-Device-Id", it)
             }
