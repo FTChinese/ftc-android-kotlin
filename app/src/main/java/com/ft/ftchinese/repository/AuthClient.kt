@@ -379,6 +379,15 @@ object AuthClient {
             // Possible 422 error key: code_missing_field, code_invalid.
             // We cannot make sure the exact meaning of each error, just
             // show user API's error message.
+            if (e is APIError) {
+                Log.e(
+                    "AuthClient",
+                    "Wechat login API error: status=${e.statusCode}, message=${e.message}, error=${e.error}",
+                    e
+                )
+            } else {
+                Log.e("AuthClient", "Wechat login exception: ${e.message}", e)
+            }
             return FetchResult.fromException(e)
         }
     }

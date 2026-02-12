@@ -132,6 +132,7 @@ android {
         }
         debug {
             debuggable true
+            signingConfig signingConfigs.release
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.test")
         }
     }

@@ -148,7 +148,6 @@ object StripeClient {
             .post("${api.stripeSubs}/$subsId/default-payment-method")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
             .sendJson(PaymentMethodParams(
                 defaultPaymentMethod = paymentMethodId
             ))

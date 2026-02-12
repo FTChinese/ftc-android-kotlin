@@ -54,7 +54,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler {
         try {
             api?.handleIntent(intent, this)
         } catch (e: Exception) {
-            e.message?.let { Log.i(TAG, it) }
+            Log.e(TAG, "Failed to handle wechat login intent in onCreate", e)
         }
     }
 
@@ -69,9 +69,18 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler {
     override fun onReq(req: BaseReq?) {}
 
     override fun onResp(resp: BaseResp?) {
-        Log.i(TAG, "Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
+        if (resp == null) {
+            Log.e(TAG, "Received null response from wechat sdk")
+            finish()
+            return
+        }
 
-        when (resp?.type) {
+        Log.i(
+            TAG,
+            "Wx login response type: ${resp.type}, error code: ${resp.errCode}, error message: ${resp.errStr}"
+        )
+
+        when (resp.type) {
             // Wechat Login.
             ConstantsAPI.COMMAND_SENDAUTH -> {
                 Log.i(TAG, "Start processing login...")
