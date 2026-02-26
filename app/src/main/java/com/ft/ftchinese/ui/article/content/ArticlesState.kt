@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.SerializationException
 
 private const val TAG = "ArticleState"
 
@@ -299,7 +300,11 @@ class ArticlesState(
         currentTeaser = teaser
 
         if (teaser.hasJsAPI) {
-            val story = marshaller.decodeFromString<Story>(content)
+            val story = loadValidStory(
+                teaser = teaser,
+                content = content,
+                account = account
+            ) ?: return
             // Use the language user selected last time..
             if (story.isBilingual) {
                 val myLang = settings.loadLang()
@@ -331,6 +336,59 @@ class ArticlesState(
             id = teaser.id,
             type = teaser.type
         )
+    }
+
+    /**
+     * Parse structured article payload safely. If a cached payload is stale/corrupted,
+     * drop it and try one clean refetch from server before giving up.
+     */
+    private suspend fun loadValidStory(
+        teaser: Teaser,
+        content: String,
+        account: Account?
+    ): Story? {
+        parseStory(content)?.let {
+            return it
+        }
+
+        val cacheName = UriUtils.articleCacheName(teaser)
+        Log.e(TAG, "Failed to parse story payload for ${teaser.id}; deleting cache $cacheName")
+        cache.deleteFile(cacheName)
+
+        val refreshed = fetchAndCacheArticle(
+            teaser = teaser,
+            account = account,
+            cacheName = cacheName
+        )
+
+        return when (refreshed) {
+            is FetchResult.Success -> {
+                parseStory(refreshed.data) ?: run {
+                    showSnackBar(R.string.loading_failed)
+                    null
+                }
+            }
+            is FetchResult.LocalizedError -> {
+                showSnackBar(refreshed.msgId)
+                null
+            }
+            is FetchResult.TextError -> {
+                showSnackBar(refreshed.text)
+                null
+            }
+        }
+    }
+
+    private fun parseStory(content: String): Story? {
+        return try {
+            marshaller.decodeFromString<Story>(content)
+        } catch (e: SerializationException) {
+            Log.e(TAG, "Story serialization failed: ${e.message}")
+            null
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Story payload is invalid: ${e.message}")
+            null
+        }
     }
 
     /**
