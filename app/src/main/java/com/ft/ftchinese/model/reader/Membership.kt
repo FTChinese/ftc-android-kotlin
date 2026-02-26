@@ -8,6 +8,7 @@ import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.invoice.AddOn
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.serializer.DateAsStringSerializer
+import com.ft.ftchinese.model.serializer.LenientBooleanSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -27,6 +28,7 @@ data class Membership(
     val payMethod: PayMethod? = null,
     val stripeSubsId: String? = null,
     // If autoRenew is true, ignore expireDate.
+    @Serializable(with = LenientBooleanSerializer::class)
     val autoRenew: Boolean = false,
     val status: StripeSubStatus? = null,
     val appleSubsId: String? = null,

@@ -53,6 +53,29 @@ open class LoginState(
             }
         }
     }
+
+    fun authenticateSso(token: String) {
+        if (token.isBlank() || !ensureConnected()) {
+            return
+        }
+
+        progress.value = true
+        scope.launch {
+            val result = AuthClient.asyncSsoLogin(token)
+            progress.value = false
+            when (result) {
+                is FetchResult.LocalizedError -> {
+                    showSnackBar(result.msgId)
+                }
+                is FetchResult.TextError -> {
+                    showSnackBar(result.text)
+                }
+                is FetchResult.Success -> {
+                    emailAccount = result.data
+                }
+            }
+        }
+    }
 }
 
 @Composable

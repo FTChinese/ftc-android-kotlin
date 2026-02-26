@@ -25,6 +25,7 @@ import com.ft.ftchinese.viewmodel.UserViewModel
 fun SignInActivityScreen(
     userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
+    ssoToken: String? = null,
     onSuccess: () -> Unit,
     onForgotPassword: (String) -> Unit,
     onSignUp: () -> Unit,
@@ -56,6 +57,12 @@ fun SignInActivityScreen(
                 )
             )
             onSuccess()
+        }
+    }
+
+    LaunchedEffect(key1 = ssoToken) {
+        if (!ssoToken.isNullOrBlank()) {
+            loginState.authenticateSso(ssoToken)
         }
     }
 

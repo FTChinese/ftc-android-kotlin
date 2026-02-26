@@ -2,7 +2,11 @@ package com.ft.ftchinese.model.fetch
 
 import android.util.Log
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.App
+import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.Endpoint
+import com.ft.ftchinese.store.SessionTokenStore
+import com.ft.ftchinese.store.TokenManager
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import okhttp3.*
@@ -28,6 +32,8 @@ class Fetch {
     private var mediaType: MediaType? = contentTypeJson
 
     private var disableCache = false
+    private var useApiKeyAuth = false
+    private var requestUsedSessionToken = false
 
     fun get(url: String) = apply {
         Log.i(TAG, "GET $url")
@@ -104,10 +110,11 @@ class Fetch {
 
     // Authorization: Bearer xxxxxxx
     fun setApiKey() = apply {
-        headers["Authorization"] = "Bearer ${Endpoint.accessToken}"
+        useApiKeyAuth = true
     }
 
     fun setBearer(v: String) = apply {
+        useApiKeyAuth = false
         headers["Authorization"] = "Bearer $v"
     }
 
@@ -252,6 +259,11 @@ class Fetch {
     fun endOrThrow(): Response {
         val resp = end()
 
+        // Clear cached session token only when this request actually used it and got rejected.
+        if (resp.code == 401 && requestUsedSessionToken) {
+            saveSessionToken("")
+        }
+
         if (resp.code in 200 until 400) {
             return resp
         }
@@ -263,9 +275,35 @@ class Fetch {
      * @return okhttp3.Response
      */
     fun end(): Response {
+        val requestUrl = urlBuilder.build()
+        val trustedApiRequest = isTrustedApiHost(requestUrl.host)
+        requestUsedSessionToken = false
+
+        if (useApiKeyAuth) {
+            if (trustedApiRequest) {
+                val sessionToken = loadSessionToken()
+                headers["Authorization"] = if (!sessionToken.isNullOrBlank()) {
+                    requestUsedSessionToken = true
+                    "Bearer $sessionToken"
+                } else {
+                    "Bearer ${Endpoint.accessToken}"
+                }
+            } else {
+                // Avoid leaking app auth header to non-API hosts.
+                headers.removeAll("Authorization")
+            }
+        }
+
         val reqBuilder = Request.Builder()
-            .url(urlBuilder.build())
+            .url(requestUrl)
             .headers(headers.build())
+
+        // Ensure device id is attached only for trusted API hosts.
+        if (trustedApiRequest && headers["X-Device-Id"] == null) {
+            loadDeviceId()?.let {
+                reqBuilder.header("X-Device-Id", it)
+            }
+        }
 
         if (disableCache) {
             reqBuilder.cacheControl(CacheControl.Builder()
@@ -307,7 +345,15 @@ class Fetch {
 
         this.call = call
 
-        return call.execute()
+        val response = call.execute()
+
+        // Trust and persist session token only from trusted API hosts.
+        if (trustedApiRequest) {
+            response.header("X-Session-Token")?.let { token ->
+                saveSessionToken(token)
+            }
+        }
+        return response
     }
 
     companion object {
@@ -317,6 +363,49 @@ class Fetch {
         private val contentTypePlainText = "text/plain".toMediaTypeOrNull()
         private val contentTypeUrlEncoded = "application/x-www-form-urlencoded".toMediaTypeOrNull()
         private val contentTypeOctet = "application/octet-stream".toMediaTypeOrNull()
+        private val trustedApiHosts = buildSet {
+            addTrustedHost(ApiConfig.ofAuth.baseUrl)
+            addTrustedHost(ApiConfig.ofSubs(isTest = false).baseUrl)
+            addTrustedHost(ApiConfig.ofSubs(isTest = true).baseUrl)
+        }
+
+        private fun loadDeviceId(): String? {
+            return try {
+                TokenManager.getInstance(App.instance).getToken()
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        private fun loadSessionToken(): String? {
+            return try {
+                SessionTokenStore.getInstance(App.instance).load()
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+        private fun saveSessionToken(token: String) {
+            try {
+                val store = SessionTokenStore.getInstance(App.instance)
+                if (token.isBlank()) {
+                    store.clear()
+                } else {
+                    store.save(token)
+                }
+            } catch (e: Exception) {
+                // Ignore persistence errors to avoid breaking the request flow.
+            }
+        }
+
+        private fun isTrustedApiHost(host: String): Boolean {
+            return trustedApiHosts.contains(host.lowercase())
+        }
+
+        private fun MutableSet<String>.addTrustedHost(baseUrl: String) {
+            runCatching {
+                add(baseUrl.toHttpUrl().host.lowercase())
+            }
+        }
     }
 }
-

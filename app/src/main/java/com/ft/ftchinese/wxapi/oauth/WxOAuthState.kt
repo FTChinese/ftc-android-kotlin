@@ -52,6 +52,10 @@ class WxOAuthState(
         when (resp.errCode) {
             BaseResp.ErrCode.ERR_OK -> {
                 if (resp !is SendAuth.Resp) {
+                    Log.e(
+                        TAG,
+                        "Wx login failed: expected SendAuth.Resp, actual=${resp::class.java.simpleName}, errCode=${resp.errCode}, errStr=${resp.errStr}"
+                    )
                     authStatus = AuthStatus.Failed(resp.errStr)
                     return
                 }
@@ -62,6 +66,10 @@ class WxOAuthState(
                 Log.i(TAG, "code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
 
                 if (!WxOAuth.codeMatched(resp.state)) {
+                    Log.e(
+                        TAG,
+                        "Wx login failed: oauth state mismatch. state=${resp.state}, errCode=${resp.errCode}, errStr=${resp.errStr}"
+                    )
                     authStatus =
                         AuthStatus.Failed(resources.getString(R.string.oauth_state_mismatch))
                     return
@@ -71,17 +79,33 @@ class WxOAuthState(
                 getSession(code = resp.code)
             }
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
+                Log.e(
+                    TAG,
+                    "Wx login canceled by user: errCode=${resp.errCode}, errStr=${resp.errStr}"
+                )
                 authStatus = AuthStatus.Failed(resources.getString(R.string.oauth_canceled))
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
+                Log.e(
+                    TAG,
+                    "Wx login denied by user: errCode=${resp.errCode}, errStr=${resp.errStr}"
+                )
                 authStatus = AuthStatus.Failed(resources.getString(R.string.oauth_denied))
             }
             BaseResp.ErrCode.ERR_SENT_FAILED,
             BaseResp.ErrCode.ERR_UNSUPPORT,
             BaseResp.ErrCode.ERR_BAN -> {
+                Log.e(
+                    TAG,
+                    "Wx login sdk error: errCode=${resp.errCode}, errStr=${resp.errStr}"
+                )
                 authStatus = AuthStatus.Failed(resp.errStr ?: "Wechat SDK error")
             }
             else -> {
+                Log.e(
+                    TAG,
+                    "Wx login unknown sdk error: errCode=${resp.errCode}, errStr=${resp.errStr}"
+                )
                 authStatus = AuthStatus.Failed("Unknown errors occurred")
             }
         }
@@ -111,9 +135,17 @@ class WxOAuthState(
 
             when (result) {
                 is FetchResult.LocalizedError -> {
+                    Log.e(
+                        TAG,
+                        "Wx login failed while exchanging oauth code: LocalizedError msgId=${result.msgId}"
+                    )
                     authStatus = AuthStatus.Failed(resources.getString(result.msgId))
                 }
                 is FetchResult.TextError -> {
+                    Log.e(
+                        TAG,
+                        "Wx login failed while exchanging oauth code: ${result.text}"
+                    )
                     authStatus = AuthStatus.Failed(result.text)
                 }
                 is FetchResult.Success -> {
@@ -129,9 +161,17 @@ class WxOAuthState(
 
         when (result) {
             is FetchResult.LocalizedError -> {
+                Log.e(
+                    TAG,
+                    "Wx login failed while loading account by unionId: LocalizedError msgId=${result.msgId}"
+                )
                 authStatus = AuthStatus.Failed(resources.getString(result.msgId))
             }
             is FetchResult.TextError -> {
+                Log.e(
+                    TAG,
+                    "Wx login failed while loading account by unionId: ${result.text}"
+                )
                 authStatus = AuthStatus.Failed(result.text)
             }
             is FetchResult.Success -> {
