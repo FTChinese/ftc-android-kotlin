@@ -32,10 +32,6 @@ fun FtcWebView(
         FullscreenAccompanistChromeClient(fullscreenState)
     }
 
-    val jsInterface = remember(jsListener) {
-        JsInterface(jsListener)
-    }
-
     val webClient = remember(webClientCallback) {
         FtcWebViewClient(
             callback = webClientCallback
@@ -55,7 +51,10 @@ fun FtcWebView(
                 webView.settings.loadsImagesAutomatically = true
                 webView.settings.domStorageEnabled = true
                 webView.settings.databaseEnabled = true
-                webView.addJavascriptInterface(jsInterface, JS_INTERFACE_NAME)
+                webView.addJavascriptInterface(
+                    JsInterface(jsListener),
+                    JS_INTERFACE_NAME
+                )
                 onCreated(webView)
             },
             client = webClient,

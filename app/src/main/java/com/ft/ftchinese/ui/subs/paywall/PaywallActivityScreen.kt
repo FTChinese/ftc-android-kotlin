@@ -3,9 +3,17 @@ package com.ft.ftchinese.ui.subs.paywall
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
@@ -21,9 +29,8 @@ import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PaywallActivityScreen(
     userViewModel: UserViewModel = viewModel(),
@@ -100,15 +107,18 @@ fun PaywallActivityScreen(
             .reOrderProducts(premiumOnTop)
     }
 
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(
-            isRefreshing = paywallState.refreshing,
-        ),
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = paywallState.refreshing,
         onRefresh = {
             paywallState.refreshPaywall(
                 api = apiConfig,
             )
         },
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pullRefresh(pullRefreshState)
     ) {
         PaywallScreen(
             paywall = pwData,
@@ -141,5 +151,10 @@ fun PaywallActivityScreen(
         ) {
             AuthActivity.launch(launcher, context)
         }
+        PullRefreshIndicator(
+            refreshing = paywallState.refreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }

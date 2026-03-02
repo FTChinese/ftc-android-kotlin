@@ -3,12 +3,18 @@ package com.ft.ftchinese.ui.subs.member
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,9 +22,8 @@ import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.util.AccountAction
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MemberActivityScreen(
     modifier: Modifier = Modifier,
@@ -97,14 +102,14 @@ fun MemberActivityScreen(
         )
     }
 
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(
-            isRefreshing = memberState.refreshing
-        ),
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = memberState.refreshing,
         onRefresh = {
             memberState.refresh(account)
         },
-        modifier = modifier,
+    )
+    Box(
+        modifier = modifier.pullRefresh(pullRefreshState)
     ) {
         MemberScreen(
             member = account.membership
@@ -124,6 +129,10 @@ fun MemberActivityScreen(
                 }
             }
         }
+        PullRefreshIndicator(
+            refreshing = memberState.refreshing,
+            state = pullRefreshState,
+            modifier = Modifier.align(Alignment.TopCenter)
+        )
     }
 }
-

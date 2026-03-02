@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.util.toast
 
@@ -30,15 +31,19 @@ fun ReleaseActivityScreen(
 
         // Broadcast intent action sent by the download manager when the user clicks on a running download,
         // either from a system notification or from the downloads UI.
-        context.registerReceiver(
+        ContextCompat.registerReceiver(
+            context,
             releaseState.onNotificationClicked,
-            IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED)
+            IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED),
+            ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
         // Broadcast intent action sent by the download manager when a download completes.
-        context.registerReceiver(
+        ContextCompat.registerReceiver(
+            context,
             releaseState.onDownloadComplete,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+            ContextCompat.RECEIVER_NOT_EXPORTED
         )
 
         onDispose {
@@ -121,4 +126,3 @@ fun ReleaseActivityScreen(
         }
     }
 }
-

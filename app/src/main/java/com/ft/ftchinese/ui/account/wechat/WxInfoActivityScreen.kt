@@ -3,12 +3,20 @@ package com.ft.ftchinese.ui.account.wechat
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.store.SessionManager
@@ -16,10 +24,9 @@ import com.ft.ftchinese.ui.components.launchWxForLink
 import com.ft.ftchinese.ui.components.launchWxLogin
 import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun WxInfoActivityScreen(
     userViewModel: UserViewModel,
@@ -90,18 +97,21 @@ fun WxInfoActivityScreen(
             }
         )
     } else {
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(
-                isRefreshing = uiState.refreshing
-            ),
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = uiState.refreshing,
             onRefresh = {
                 val wxSession = sessionStore.loadWxSession()
                 if (wxSession == null) {
                     setReAuth(true)
-                    return@SwipeRefresh
+                    return@rememberPullRefreshState
                 }
                 uiState.refresh(account, wxSession)
             },
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
         ) {
             WxInfoScreen(
                 wechat = account.wechat,
@@ -114,8 +124,12 @@ fun WxInfoActivityScreen(
                 },
                 onUnlinkEmail = onUnlink
             )
+            PullRefreshIndicator(
+                refreshing = uiState.refreshing,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }
-
 

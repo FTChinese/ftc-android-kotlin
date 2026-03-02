@@ -7,12 +7,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,12 +30,11 @@ import com.ft.ftchinese.model.content.JsSnippets
 import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.ui.web.rememberFtcJsEventListener
 import com.ft.ftchinese.viewmodel.UserViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
 private const val TAG = "ChannelTab"
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ChannelTabScreen(
     userViewModel: UserViewModel = viewModel(),
@@ -89,20 +93,23 @@ fun ChannelTabScreen(
         }
     }
 
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = channelState.refreshing,
+        onRefresh = {
+            channelState.refresh(
+                account = userViewModel.account
+            )
+        }
+    )
+
     ProgressLayout(
         loading = channelState.progress.value,
         modifier = Modifier.fillMaxSize(),
     ) {
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(
-                isRefreshing = channelState.refreshing
-            ),
-            onRefresh = {
-                channelState.refresh(
-                    account = userViewModel.account
-                )
-            },
-            modifier = Modifier.fillMaxSize(),
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pullRefresh(pullRefreshState)
         ) {
             Box(
                 modifier = Modifier
@@ -115,6 +122,11 @@ fun ChannelTabScreen(
                     jsListener = jsCallback,
                 )
             }
+            PullRefreshIndicator(
+                refreshing = channelState.refreshing,
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 }

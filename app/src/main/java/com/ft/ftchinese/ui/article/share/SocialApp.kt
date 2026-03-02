@@ -1,11 +1,11 @@
 package com.ft.ftchinese.ui.article.share
 
-import androidx.annotation.StringRes
+import androidx.annotation.DrawableRes
 import com.ft.ftchinese.R
 
 enum class ShareApp(
     val title: String,
-    @StringRes val iconId: Int
+    @DrawableRes val iconId: Int
 ) {
     WxFriend(
         title = "好友",
@@ -43,4 +43,3 @@ enum class ShareApp(
         )
     }
 }
-

@@ -46,13 +46,13 @@ buildscript {
 
     repositories {
         // Priority: fast domestic mirrors
-        maven { url 'https://repo.huaweicloud.com/repository/maven/' }
-        maven { url 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
-        maven { url 'https://mirrors.ustc.edu.cn/maven/maven2/' }
-        maven { url 'https://mirrors.tuna.tsinghua.edu.cn/maven/' }
+        maven { url = 'https://repo.huaweicloud.com/repository/maven/' }
+        maven { url = 'https://mirrors.cloud.tencent.com/nexus/repository/maven-public/' }
+        maven { url = 'https://mirrors.ustc.edu.cn/maven/maven2/' }
+        maven { url = 'https://mirrors.tuna.tsinghua.edu.cn/maven/' }
 
         // Kotlin-specific
-        maven { url 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
+        maven { url = 'https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven' }
 
         // Final fallback
         google()
@@ -65,7 +65,7 @@ buildscript {
 
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.9.1' // upgrade AGP
+        classpath 'com.android.tools.build:gradle:8.11.0' // upgrade AGP
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" // now consistent
         classpath 'com.google.gms:google-services:4.3.15'
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
@@ -79,8 +79,8 @@ allprojects {
             dirs 'libs'
         }
 
-        maven{ url 'https://maven.aliyun.com/repository/central'}
-        maven{ url 'https://maven.aliyun.com/repository/public'}
+        maven{ url = 'https://maven.aliyun.com/repository/central'}
+        maven{ url = 'https://maven.aliyun.com/repository/public'}
 //        maven{ url 'https://maven.aliyun.com/repository/google'}
 
         mavenCentral()
@@ -91,4 +91,3 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
-
