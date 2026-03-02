@@ -98,6 +98,8 @@
         <activity
             android:name=".ui.article.ArticleActivity"
             android:parentActivityName=".ui.main.MainActivity"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/AppTheme.Article"
             android:hardwareAccelerated="true"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
         <activity android:name=".ui.account.AccountActivity" />

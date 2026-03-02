@@ -58,7 +58,10 @@ class ArticleActivity : ComponentActivity() {
                 window.navigationBarColor = navColor
             }
             ArticleApp(
-                onExit = { finish() },
+                onExit = {
+                    finish()
+                    overridePendingTransition(0, 0)
+                },
                 initialId = NavStore.saveTeaser(teaser),
             )
         }

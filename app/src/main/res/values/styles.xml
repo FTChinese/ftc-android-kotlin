@@ -19,4 +19,10 @@
         <item name="colorPrimaryDark">@color/colorBlack30</item>
         <item name="android:windowBackground">@drawable/splash_bg</item>
     </style>
+
+    <style name="AppTheme.Article" parent="@style/AppTheme">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>

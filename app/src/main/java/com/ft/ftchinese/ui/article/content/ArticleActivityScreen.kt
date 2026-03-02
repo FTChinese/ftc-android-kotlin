@@ -8,8 +8,16 @@ import android.util.Log
 import android.webkit.WebView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -17,7 +25,15 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
@@ -44,7 +60,10 @@ import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -270,8 +289,9 @@ fun ArticleActivityScreen(
             )
         },
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
+        SwipeBackContainer(
+            enabled = !bottomSheetState.isVisible && !showScreenshot,
+            onBack = onBack,
         ) {
             ArticleLayout(
                 modifier = Modifier.align(Alignment.TopStart),
@@ -378,6 +398,177 @@ fun ArticleActivityScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SwipeBackContainer(
+    enabled: Boolean,
+    onBack: () -> Unit,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    val swipeOffset = remember { Animatable(0f) }
+    var settleJob by remember { mutableStateOf<Job?>(null) }
+    var dragOffset by remember { mutableStateOf(0f) }
+    var isDragging by remember { mutableStateOf(false) }
+    val density = LocalDensity.current
+
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        val containerWidthPx = with(density) { maxWidth.toPx() }.coerceAtLeast(1f)
+        val dismissThresholdPx = containerWidthPx * 0.3f
+        val offsetPx = if (isDragging) dragOffset else swipeOffset.value
+        val shadowProgress = (offsetPx / containerWidthPx).coerceIn(0f, 1f)
+
+        LaunchedEffect(enabled) {
+            if (!enabled && offsetPx > 0f) {
+                settleJob?.cancel()
+                settleJob = null
+                isDragging = false
+                swipeOffset.snapTo(offsetPx)
+                swipeOffset.animateTo(0f, animationSpec = tween(durationMillis = 120))
+                dragOffset = 0f
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.08f * (1f - shadowProgress)))
+        )
+
+        val gestureModifier = if (enabled) {
+            Modifier.pointerInput(containerWidthPx, enabled) {
+                awaitEachGesture {
+                    val horizontalDominanceRatio = 1.35f
+                    var accumulatedDx = 0f
+                    var accumulatedDy = 0f
+                    var lockedToSwipeBack = false
+                    var rejectedAsVerticalScroll = false
+
+                    val down = awaitFirstDown(
+                        requireUnconsumed = false,
+                        pass = PointerEventPass.Initial
+                    )
+
+                    // If a settle animation is in progress, hand control back to this gesture.
+                    settleJob?.cancel()
+                    settleJob = null
+                    isDragging = false
+                    dragOffset = swipeOffset.value
+
+                    var pointerId = down.id
+                    val touchSlop = viewConfiguration.touchSlop
+
+                    while (true) {
+                        val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+                        val change = event.changes.firstOrNull { it.id == pointerId }
+                            ?: event.changes.firstOrNull()
+                            ?: break
+
+                        pointerId = change.id
+
+                        if (!change.pressed) {
+                            break
+                        }
+
+                        val delta = change.positionChange()
+
+                        if (!lockedToSwipeBack && !rejectedAsVerticalScroll) {
+                            accumulatedDx += delta.x
+                            accumulatedDy += delta.y
+
+                            val absDx = abs(accumulatedDx)
+                            val absDy = abs(accumulatedDy)
+                            val passedSlop = absDx > touchSlop || absDy > touchSlop
+
+                            if (!passedSlop) {
+                                continue
+                            }
+
+                            val shouldLockHorizontal =
+                                accumulatedDx > 0f && absDx > absDy * horizontalDominanceRatio
+
+                            if (!shouldLockHorizontal) {
+                                rejectedAsVerticalScroll = true
+                                continue
+                            }
+
+                            lockedToSwipeBack = true
+                            isDragging = true
+                            val overSlop = (absDx - touchSlop).coerceAtLeast(0f)
+                            val nextOffset = (dragOffset + overSlop)
+                                .coerceIn(0f, containerWidthPx)
+                            change.consume()
+                            dragOffset = nextOffset
+                            continue
+                        }
+
+                        if (!lockedToSwipeBack) {
+                            continue
+                        }
+
+                        val nextOffset = (dragOffset + delta.x)
+                            .coerceIn(0f, containerWidthPx)
+
+                        if (nextOffset != dragOffset) {
+                            change.consume()
+                            dragOffset = nextOffset
+                        }
+                    }
+
+                    if (!lockedToSwipeBack) {
+                        isDragging = false
+                    } else {
+                        val finalOffset = dragOffset
+                        isDragging = false
+
+                        settleJob?.cancel()
+                        settleJob = scope.launch {
+                            swipeOffset.snapTo(finalOffset)
+
+                            if (finalOffset >= dismissThresholdPx) {
+                                swipeOffset.animateTo(
+                                    targetValue = containerWidthPx,
+                                    animationSpec = tween(durationMillis = 140)
+                                )
+                                onBack()
+                                swipeOffset.snapTo(0f)
+                                dragOffset = 0f
+                                settleJob = null
+                                return@launch
+                            }
+
+                            swipeOffset.animateTo(
+                                targetValue = 0f,
+                                animationSpec = tween(durationMillis = 180)
+                            )
+                            dragOffset = 0f
+                            settleJob = null
+                        }
+                    }
+                }
+            }
+        } else {
+            Modifier
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(gestureModifier)
+                .offset { IntOffset(offsetPx.roundToInt(), 0) }
+                .graphicsLayer {
+                    shadowElevation = if (offsetPx > 0f) {
+                        with(density) { 8.dp.toPx() }
+                    } else {
+                        0f
+                    }
+                },
+            content = content
+        )
     }
 }
 
