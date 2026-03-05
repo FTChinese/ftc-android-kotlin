@@ -40,6 +40,7 @@ import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.share.ShareApp
 import com.ft.ftchinese.ui.article.share.SocialShareList
@@ -144,7 +145,8 @@ fun ArticleActivityScreen(
         object : FtcJsEventListener(context) {
             override fun onClickTeaser(teaser: Teaser) {
                 scope.launch(Dispatchers.Main) {
-                    onArticle(NavStore.saveTeaser(teaser))
+                    // Open linked article in a new activity so returning keeps current article WebView state.
+                    ArticleActivity.start(context, teaser)
                 }
             }
 
@@ -163,7 +165,8 @@ fun ArticleActivityScreen(
             }
 
             override fun onClickStory(teaser: Teaser) {
-                onArticle(NavStore.saveTeaser(teaser))
+                // Keep current article instance untouched so back returns to previous scroll position.
+                ArticleActivity.start(context, teaser)
             }
 
             override fun onLogin() {
