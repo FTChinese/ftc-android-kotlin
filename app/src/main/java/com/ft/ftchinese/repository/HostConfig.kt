@@ -27,11 +27,13 @@ data class ContentHosts(
 object HostConfig {
 
     const val HOST_FTC = "www.ftchinese.com"
+    const val HOST_AI_CHAT = "ai.chineseft.net"
     private const val HOST_FTA = "www.ftacademy.cn"
 
     private const val urlScheme = "https://"
 
     const val canonicalUrl = "${urlScheme}${HOST_FTC}"
+    const val chatBootstrapUrl = "${urlScheme}${HOST_AI_CHAT}/chat/bootstrap?webview=ftcapp"
 
     val simplifiedContentHosts = ContentHosts(
         premium = BuildConfig.BASE_URL_PREMIUM,

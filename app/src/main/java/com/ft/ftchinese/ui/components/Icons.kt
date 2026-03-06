@@ -215,6 +215,17 @@ fun IconSearch(
 }
 
 @Composable
+fun IconChatBot(
+    tint: Color = Color.Unspecified
+) {
+    Icon(
+        painter = painterResource(id = R.drawable.ic_chatbot_ai),
+        contentDescription = "Chat bot",
+        tint = tint
+    )
+}
+
+@Composable
 fun IconRefresh(
     tint: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
 ) {

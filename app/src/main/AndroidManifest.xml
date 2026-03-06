@@ -56,6 +56,10 @@
             android:hardwareAccelerated="true"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
         <activity
+            android:name=".ui.webpage.ChatBotActivity"
+            android:hardwareAccelerated="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout" />
+        <activity
             android:name=".ui.test.TestActivity"
             android:label="Test" />
         <activity

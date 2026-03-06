@@ -2,15 +2,44 @@ package com.ft.ftchinese.repository
 
 import android.util.Log
 import com.ft.ftchinese.R
+import com.ft.ftchinese.App
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.request.*
+import com.ft.ftchinese.store.SessionTokenStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 object AuthClient {
+
+    private fun persistSessionTokenFromRaw(raw: String?) {
+        if (raw.isNullOrBlank()) {
+            return
+        }
+        runCatching {
+            val root = marshaller.parseToJsonElement(raw).jsonObject
+            val token = root["session"]
+                ?.jsonObject
+                ?.get("sessionToken")
+                ?.jsonPrimitive
+                ?.contentOrNull
+                ?: root["sessionToken"]
+                    ?.jsonPrimitive
+                    ?.contentOrNull
+
+            if (!token.isNullOrBlank()) {
+                SessionTokenStore.getInstance(App.instance).save(token)
+            }
+        }.onFailure {
+            Log.w("AuthClient", "Failed to parse session token from auth response: ${it.message}")
+        }
+    }
 
     fun emailExists(email: String): Boolean {
         val resp = Fetch()
@@ -47,14 +76,15 @@ object AuthClient {
     }
 
     fun emailLogin(c: Credentials): Account? {
-        return Fetch()
+        val resp = Fetch()
             .post(Endpoint.emailLogin)
             .noCache()
             .setApiKey()
             .setClient()
             .sendJson(c)
-            .endJson<Account>()
-            .body
+            .endJson<Account>(withRaw = true)
+        persistSessionTokenFromRaw(resp.raw)
+        return resp.body
     }
 
     suspend fun asyncEmailLogin(c: Credentials): FetchResult<Account> {
@@ -139,14 +169,15 @@ object AuthClient {
     }
 
     private fun verifySMSCode(params: MobileAuthParams): MobileEmailLinked? {
-        return Fetch()
+        val resp = Fetch()
             .post(Endpoint.mobileVerificationCode)
             .noCache()
             .setApiKey()
             .setClient()
             .sendJson(params)
-            .endJson<MobileEmailLinked>()
-            .body
+            .endJson<MobileEmailLinked>(withRaw = true)
+        persistSessionTokenFromRaw(resp.raw)
+        return resp.body
     }
 
     suspend fun asyncVerifySMSCode(params: MobileAuthParams): FetchResult<MobileEmailLinked> {
@@ -320,14 +351,15 @@ object AuthClient {
     }
 
     fun ssoLogin(token: String): Account? {
-        return Fetch()
+        val resp = Fetch()
             .post(Endpoint.tokenSso)
             .noCache()
             .setApiKey()
             .setClient()
             .sendJson(mapOf("token" to token))
-            .endJson<Account>()
-            .body
+            .endJson<Account>(withRaw = true)
+        persistSessionTokenFromRaw(resp.raw)
+        return resp.body
     }
 
     suspend fun asyncSsoLogin(token: String): FetchResult<Account> {

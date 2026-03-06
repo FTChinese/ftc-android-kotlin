@@ -11,6 +11,8 @@
     <string name="btn_yes">是</string>
     <string name="btn_no">否</string>
     <string name="dialog_title_error">出錯了！</string>
+    <string name="dialog_title_notice">溫馨提示</string>
+    <string name="chat_subscriber_only">該功能僅對訂閱用戶開放。</string>
     <string name="btn_login">登入</string>
     <string name="btn_sign_up">註冊</string>
     <string name="btn_send_email">傳送郵件</string>

@@ -37,6 +37,10 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import com.ft.ftchinese.model.reader.MemberStatus
+import com.ft.ftchinese.ui.webpage.ChatBotActivity
 
 
 
@@ -61,6 +65,10 @@ fun MainApp(
     val (wxReAuth, setWxReAuth) = remember {
         mutableStateOf(false)
     }
+    val (showChatPrivilegeDialog, setShowChatPrivilegeDialog) = remember {
+        mutableStateOf(false)
+    }
+    val account by userViewModel.accountLiveData.observeAsState()
 
     LaunchedEffect(key1 = Unit) {
         appState.trackAppOpened()
@@ -83,6 +91,16 @@ fun MainApp(
         )
     }
 
+    if (showChatPrivilegeDialog) {
+        SimpleDialog(
+            title = stringResource(id = R.string.dialog_title_notice),
+            body = stringResource(id = R.string.chat_subscriber_only),
+            onDismiss = { setShowChatPrivilegeDialog(false) },
+            onConfirm = { setShowChatPrivilegeDialog(false) },
+            dismissText = null
+        )
+    }
+
     OTheme {
         Scaffold(
             modifier = Modifier
@@ -93,6 +111,18 @@ fun MainApp(
                 if (currentScreen.showTopBar) {
                     MainToolBar(
                         screen = currentScreen,
+                        onChat = {
+                            when (MemberStatus.of(account)) {
+                                MemberStatus.ActiveStandard,
+                                MemberStatus.ActivePremium,
+                                MemberStatus.Vip -> {
+                                    ChatBotActivity.start(context)
+                                }
+                                else -> {
+                                    setShowChatPrivilegeDialog(true)
+                                }
+                            }
+                        },
                         onSearch = {
                             navigateToSearch(navController)
                         },
@@ -244,6 +274,3 @@ private fun navigate(
 ) {
     navController.navigate(screen.route)
 }
-
-
-
