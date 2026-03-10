@@ -40,6 +40,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import com.ft.ftchinese.model.reader.MemberStatus
+import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
 import com.ft.ftchinese.ui.webpage.ChatBotActivity
 
 
@@ -100,6 +101,8 @@ fun MainApp(
             dismissText = null
         )
     }
+
+    ForcedLogoutHandler(userViewModel = userViewModel)
 
     OTheme {
         Scaffold(

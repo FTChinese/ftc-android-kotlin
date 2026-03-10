@@ -5,6 +5,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.App
 import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.Endpoint
+import com.ft.ftchinese.store.ForcedLogoutReason
+import com.ft.ftchinese.store.ForcedLogoutStore
 import com.ft.ftchinese.store.SessionTokenStore
 import com.ft.ftchinese.store.TokenManager
 import kotlinx.serialization.decodeFromString
@@ -259,16 +261,14 @@ class Fetch {
     fun endOrThrow(): Response {
         val resp = end()
 
-        // Clear cached session token only when this request actually used it and got rejected.
-        if (resp.code == 401 && requestUsedSessionToken) {
-            saveSessionToken("")
-        }
-
         if (resp.code in 200 until 400) {
             return resp
         }
 
-        throw APIError.from(resp)
+        val apiError = APIError.from(resp)
+        handleRejectedSession(resp.code, apiError)
+
+        throw apiError
     }
 
     /**
@@ -303,6 +303,14 @@ class Fetch {
             loadDeviceId()?.let {
                 reqBuilder.header("X-Device-Id", it)
             }
+        }
+
+        if (trustedApiRequest && headers["X-Client-Type"] == null) {
+            reqBuilder.header("X-Client-Type", "android")
+        }
+
+        if (trustedApiRequest && headers["X-Client-Version"] == null) {
+            reqBuilder.header("X-Client-Version", BuildConfig.VERSION_NAME)
         }
 
         if (disableCache) {
@@ -354,6 +362,29 @@ class Fetch {
             }
         }
         return response
+    }
+
+    private fun handleRejectedSession(statusCode: Int, apiError: APIError) {
+        val authenticatedUserRequest = requestUsedSessionToken || !headers["X-User-Id"].isNullOrBlank()
+        if (!authenticatedUserRequest) {
+            return
+        }
+
+        val reason = when {
+            apiError.logout == true || apiError.message == "AccountSharingReminder" -> {
+                ForcedLogoutReason.ACCOUNT_REPLACED
+            }
+            statusCode == 401 -> {
+                ForcedLogoutReason.SESSION_EXPIRED
+            }
+            else -> {
+                null
+            }
+        } ?: return
+
+        saveSessionToken("")
+        ForcedLogoutStore.trigger(reason)
+        Log.w(TAG, "Forced logout triggered: reason=$reason status=$statusCode")
     }
 
     companion object {

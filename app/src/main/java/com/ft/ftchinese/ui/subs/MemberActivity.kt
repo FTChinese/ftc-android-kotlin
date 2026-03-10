@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.subs.member.MemberActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
@@ -56,6 +57,11 @@ class MemberActivity : ComponentActivity() {
             OTheme {
                 val scaffoldState = rememberScaffoldState()
                 val scope = rememberCoroutineScope()
+
+                ForcedLogoutHandler(
+                    userViewModel = userViewModel,
+                    onAfterConfirm = { finish() },
+                )
 
                 Scaffold(
                     modifier = Modifier

@@ -13,6 +13,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -22,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
 import com.ft.ftchinese.ui.article.audio.AiAudioActivityScreen
 import com.ft.ftchinese.ui.article.chl.ChannelActivityScreen
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
@@ -29,6 +31,7 @@ import com.ft.ftchinese.ui.article.screenshot.ScreenshotActivityScreen
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.Modifier
@@ -49,6 +52,7 @@ private const val TAG = "ChannelActivity"
  * Use cases: column channel, editor's choice, archive list.
  */
 class ChannelActivity : ComponentActivity() {
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +70,7 @@ class ChannelActivity : ComponentActivity() {
         }
 
         val id = NavStore.saveChannel(channelSource)
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         setContent {
             val navColor = OColor.wheat.toArgb()
@@ -73,6 +78,7 @@ class ChannelActivity : ComponentActivity() {
                 window.navigationBarColor = navColor
             }
             ChannelApp(
+                userViewModel = userViewModel,
                 initialId = id,
                 onExit = { finish() }
             )
@@ -83,6 +89,11 @@ class ChannelActivity : ComponentActivity() {
                 putString(FirebaseAnalytics.Param.ITEM_CATEGORY, channelSource.title)
             }
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        userViewModel.reloadAccount()
     }
 
     /**
@@ -128,6 +139,7 @@ class ChannelActivity : ComponentActivity() {
 
 @Composable
 fun ChannelApp(
+    userViewModel: UserViewModel,
     initialId: String,
     onExit: () -> Unit
 ) {
@@ -143,6 +155,8 @@ fun ChannelApp(
     }
 
     OTheme {
+        ForcedLogoutHandler(userViewModel = userViewModel)
+
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()

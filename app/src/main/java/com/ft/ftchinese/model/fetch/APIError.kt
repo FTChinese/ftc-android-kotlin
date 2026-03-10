@@ -3,7 +3,6 @@ package com.ft.ftchinese.model.fetch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import okhttp3.Response
 
 // API error.
@@ -11,6 +10,8 @@ import okhttp3.Response
 data class APIError(
     override val message: String,
     val error: Unprocessable? = null,
+    val logout: Boolean? = null,
+    val valid: Boolean? = null,
 
     // Not from API
     @Transient
@@ -47,7 +48,7 @@ data class APIError(
             }
 
 
-            return Json.decodeFromString<APIError>(body).apply {
+            return marshaller.decodeFromString<APIError>(body).apply {
                 statusCode = resp.code
             }
         }

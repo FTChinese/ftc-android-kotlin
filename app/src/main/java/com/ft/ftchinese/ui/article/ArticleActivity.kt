@@ -11,6 +11,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.app.TaskStackBuilder
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,11 +20,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
 import com.ft.ftchinese.ui.article.audio.AiAudioActivityScreen
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.viewmodel.UserViewModel
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -38,6 +41,7 @@ import androidx.compose.runtime.SideEffect
  * properly generated for CoordinatorLayout.
  */
 class ArticleActivity : ComponentActivity() {
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +55,7 @@ class ArticleActivity : ComponentActivity() {
         val teaser = intent
             .getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER)
             ?: return
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         setContent {
             val navColor = OColor.wheat.toArgb()
@@ -58,6 +63,7 @@ class ArticleActivity : ComponentActivity() {
                 window.navigationBarColor = navColor
             }
             ArticleApp(
+                userViewModel = userViewModel,
                 onExit = {
                     finish()
                     overridePendingTransition(0, 0)
@@ -65,6 +71,11 @@ class ArticleActivity : ComponentActivity() {
                 initialId = NavStore.saveTeaser(teaser),
             )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        userViewModel.reloadAccount()
     }
 
 
@@ -111,10 +122,10 @@ class ArticleActivity : ComponentActivity() {
 
 @Composable
 private fun ArticleApp(
+    userViewModel: UserViewModel,
     onExit: () -> Unit,
     initialId: String,
 ) {
-
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
     val backstackEntry = navController.currentBackStackEntryAsState()
@@ -123,6 +134,8 @@ private fun ArticleApp(
     )
 
     OTheme {
+        ForcedLogoutHandler(userViewModel = userViewModel)
+
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()

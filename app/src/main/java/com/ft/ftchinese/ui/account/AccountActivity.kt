@@ -29,6 +29,7 @@ import com.ft.ftchinese.ui.account.password.PasswordActivityScreen
 import com.ft.ftchinese.ui.account.stripewallet.StripeWalletActivityScreen
 import com.ft.ftchinese.ui.account.unlinkwx.UnlinkActivityScreen
 import com.ft.ftchinese.ui.account.wechat.WxInfoActivityScreen
+import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.IntentsUtil
@@ -116,6 +117,11 @@ fun AccountApp(
     onExit: () -> Unit,
 ) {
     val scaffold = rememberScaffoldState()
+
+    ForcedLogoutHandler(
+        userViewModel = userViewModel,
+        onAfterConfirm = onExit,
+    )
 
     OTheme {
         val navController = rememberNavController()
@@ -272,4 +278,3 @@ private fun navigateToScreen(
 ) {
     navController.navigate(screen.name)
 }
-

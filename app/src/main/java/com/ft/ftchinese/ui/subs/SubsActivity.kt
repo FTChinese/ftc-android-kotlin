@@ -30,6 +30,7 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
 import com.ft.ftchinese.ui.subs.contact.BuyerInfoActivityScreen
 import com.ft.ftchinese.ui.subs.ftcpay.AliPayResult
 import com.ft.ftchinese.ui.subs.ftcpay.FtcPayActivityScreen
@@ -163,6 +164,11 @@ fun SubsApp(
 ) {
 
     val scaffoldState = rememberScaffoldState()
+
+    ForcedLogoutHandler(
+        userViewModel = userViewModel,
+        onAfterConfirm = onExit,
+    )
 
     OTheme {
 
