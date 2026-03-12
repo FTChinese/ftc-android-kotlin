@@ -24,6 +24,7 @@ import androidx.navigation.navArgument
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
+import com.ft.ftchinese.ui.auth.validateSessionOnLaunch
 import com.ft.ftchinese.ui.article.audio.AiAudioActivityScreen
 import com.ft.ftchinese.ui.article.chl.ChannelActivityScreen
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
@@ -83,6 +84,8 @@ class ChannelActivity : ComponentActivity() {
                 onExit = { finish() }
             )
         }
+
+        validateSessionOnLaunch(userViewModel, TAG)
 
         FirebaseAnalytics.getInstance(this).logEvent(
             FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {

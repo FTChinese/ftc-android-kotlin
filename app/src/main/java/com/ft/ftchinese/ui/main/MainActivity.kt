@@ -17,6 +17,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
+import com.ft.ftchinese.ui.auth.validateSessionOnLaunch
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.viewmodel.ConversionViewModel
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -52,6 +53,8 @@ class MainActivity : ComponentActivity() {
             }
             MainApp(userViewModel = userViewModel)
         }
+
+        validateSessionOnLaunch(userViewModel, TAG)
 
         createNotificationChannel()
         setupWorker()
@@ -138,7 +141,6 @@ class MainActivity : ComponentActivity() {
 
         userViewModel.reloadAccount()
     }
-
     companion object {
         private const val TAG = "MainActivity"
 
@@ -148,5 +150,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-

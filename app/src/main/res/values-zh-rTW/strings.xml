@@ -135,7 +135,7 @@
     <string name="login_expired">登入過期</string>
     <string name="wx_session_expired">微信登入已過期，請重新登入。微信登入會定期失效，如果您以後不希望看到本提示，可以重新登入後在\"我的FT - 賬號與安全\"下繫結FT中文網賬號。</string>
     <string name="session_expired_relogin">您的登入狀態已失效，請重新登入。</string>
-    <string name="account_signed_in_elsewhere">您的賬號已在另一台裝置登入，請重新登入。</string>
+    <string name="account_signed_in_elsewhere">由於您的帳戶已在新設備上訪問，您在此設備上的會話已安全結束。您可以同時在三種不同類型的設備（手機、平板和桌面）上登錄。如果這不是您的操作，請重新登錄。</string>
     <string name="wx_refresh_token_expired">微信授權已過期，請重新授權後重新整理賬號資料。</string>
     <string name="wx_relogin">重新授權</string>
     <string name="action_wx_login">微信登入</string>

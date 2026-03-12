@@ -20,6 +20,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import androidx.lifecycle.ViewModelProvider
+import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
+import com.ft.ftchinese.ui.auth.validateSessionOnLaunch
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.settings.about.AboutActivityScreen
 import com.ft.ftchinese.ui.settings.about.LegalDocActivityScreen
@@ -37,9 +40,11 @@ import androidx.compose.material.MaterialTheme
 import com.ft.ftchinese.ui.theme.OColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.SideEffect
+import com.ft.ftchinese.viewmodel.UserViewModel
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
 class SettingsActivity : ComponentActivity() {
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,16 +55,21 @@ class SettingsActivity : ComponentActivity() {
         // Use dark status bar icons for light background
         WindowCompat.getInsetsController(window, window.decorView)
             .isAppearanceLightStatusBars = true
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         setContent {
             val navColor = OColor.wheat.toArgb()
             SideEffect {
                 window.navigationBarColor = navColor
             }
-            SettingsApp {
+            SettingsApp(
+                userViewModel = userViewModel,
+            ) {
                 finish()
             }
         }
+
+        validateSessionOnLaunch(userViewModel, "SettingsActivity")
     }
 
 
@@ -83,6 +93,7 @@ class SettingsActivity : ComponentActivity() {
 
 @Composable
 fun SettingsApp(
+    userViewModel: UserViewModel,
     onExit: () -> Unit,
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -94,6 +105,11 @@ fun SettingsApp(
     )
 
     OTheme {
+        ForcedLogoutHandler(
+            userViewModel = userViewModel,
+            onAfterConfirm = onExit,
+        )
+
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()

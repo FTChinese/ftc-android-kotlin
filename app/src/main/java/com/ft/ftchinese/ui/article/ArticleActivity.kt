@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
+import com.ft.ftchinese.ui.auth.validateSessionOnLaunch
 import com.ft.ftchinese.ui.article.audio.AiAudioActivityScreen
 import com.ft.ftchinese.ui.article.content.ArticleActivityScreen
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotActivityScreen
@@ -71,6 +72,8 @@ class ArticleActivity : ComponentActivity() {
                 initialId = NavStore.saveTeaser(teaser),
             )
         }
+
+        validateSessionOnLaunch(userViewModel, "ArticleActivity")
     }
 
     override fun onResume() {
