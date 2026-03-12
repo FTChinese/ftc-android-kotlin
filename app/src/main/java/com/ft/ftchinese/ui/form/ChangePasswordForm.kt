@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
@@ -20,6 +21,8 @@ import com.ft.ftchinese.ui.validator.requiredRule
 @Composable
 fun ChangePasswordForm(
     loading: Boolean,
+    clearForm: Boolean = false,
+    onFormCleared: () -> Unit = {},
     onSubmit: (PasswordUpdateParams) -> Unit,
 ) {
 
@@ -43,6 +46,15 @@ fun ChangePasswordForm(
             )
         )
     )
+
+    LaunchedEffect(clearForm) {
+        if (clearForm) {
+            oldPwState.clear()
+            pwState.clear()
+            repeatPwState.clear()
+            onFormCleared()
+        }
+    }
 
     val formValid = oldPwState.valid.value && pwState.valid.value && repeatPwState.valid.value
 

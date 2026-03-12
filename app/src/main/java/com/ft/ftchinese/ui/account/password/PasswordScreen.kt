@@ -15,6 +15,8 @@ import com.ft.ftchinese.ui.theme.Dimens
 @Composable
 fun PasswordScreen(
     loading: Boolean,
+    clearForm: Boolean = false,
+    onFormCleared: () -> Unit = {},
     onSave: (PasswordUpdateParams) -> Unit
 ) {
 
@@ -26,6 +28,8 @@ fun PasswordScreen(
 
         ChangePasswordForm(
             loading = loading,
+            clearForm = clearForm,
+            onFormCleared = onFormCleared,
             onSubmit = onSave
         )
     }

@@ -5,7 +5,6 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.request.PasswordUpdateParams
 import com.ft.ftchinese.model.request.PwUpdateResult
@@ -26,8 +25,22 @@ class PasswordUpdateState(
     var forgotPassword by mutableStateOf(false)
         private set
 
+    var clearForm by mutableStateOf(false)
+        private set
+
+    var showSuccessDialog by mutableStateOf(false)
+        private set
+
     fun closeForgotPassword() {
         forgotPassword = false
+    }
+
+    fun onFormCleared() {
+        clearForm = false
+    }
+
+    fun dismissSuccessDialog() {
+        showSuccessDialog = false
     }
 
     fun changePassword(ftcId: String, params: PasswordUpdateParams) {
@@ -53,7 +66,8 @@ class PasswordUpdateState(
                 is FetchResult.Success -> {
                     when (result.data) {
                         PwUpdateResult.Done -> {
-                            showSnackBar(R.string.prompt_saved)
+                            clearForm = true
+                            showSuccessDialog = true
                         }
                         PwUpdateResult.Mismatched -> {
                             forgotPassword = true

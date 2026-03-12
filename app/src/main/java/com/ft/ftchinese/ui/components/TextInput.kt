@@ -54,6 +54,12 @@ class InputState(
         touched.value = newValue.isNotBlank()
         field.value = newValue
     }
+
+    fun clear() {
+        field.value = ""
+        touched.value = false
+        error.value = ""
+    }
 }
 
 @Composable
