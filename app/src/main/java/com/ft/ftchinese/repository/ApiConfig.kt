@@ -4,7 +4,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.ApiMode
 
 //private const val devIP = "http://192.168.1.20"
-private const val devIP = "http://192.168.1.50"
+private const val devIP = "http://192.168.1.23"
 //private const val devPort = "8206"
 private const val devPort = "3000"
 

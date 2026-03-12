@@ -198,10 +198,10 @@ fun LinkApp(
                         token = token,
                         scaffoldState = scaffold,
                         onSuccess = {
-                            navController.popBackStack(
-                                route = LinkAppScreen.CurrentEmail.name,
-                                inclusive = true,
-                            )
+                            val ok = exitPasswordResetFlow(navController)
+                            if (!ok) {
+                                onExit()
+                            }
                         }
                     )
                 }
@@ -235,4 +235,16 @@ private fun navigateToPasswordReset(
     bearer: PwResetBearer,
 ) {
     navController.navigate("${LinkAppScreen.ResetPassword.name}/${bearer.token}?email=${bearer.email}")
+}
+
+private fun exitPasswordResetFlow(
+    navController: NavController,
+): Boolean {
+    val popReset = navController.popBackStack()
+    if (!popReset) {
+        return false
+    }
+
+    navController.popBackStack()
+    return true
 }

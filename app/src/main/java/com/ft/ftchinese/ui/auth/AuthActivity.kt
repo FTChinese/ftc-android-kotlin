@@ -288,9 +288,9 @@ fun AuthApp(
                         token = token,
                         scaffoldState = scaffold,
                         onSuccess = {
-                            navController.popBackStack(
-                                route = AuthScreen.EmailLogin.name,
-                                inclusive = true,
+                            navigateToLoginAfterReset(
+                                navController = navController,
+                                email = email ?: "",
                             )
                         }
                     )
@@ -339,4 +339,16 @@ private fun navigateToPasswordReset(
     bearer: PwResetBearer,
 ) {
     navController.navigate("${AuthScreen.ResetPassword.name}/${bearer.token}?email=${bearer.email}")
+}
+
+private fun navigateToLoginAfterReset(
+    navController: NavController,
+    email: String,
+) {
+    navController.navigate("${AuthScreen.EmailLogin.name}/?email=${email}") {
+        popUpTo(AuthScreen.MobileLogin.name) {
+            inclusive = false
+        }
+        launchSingleTop = true
+    }
 }
