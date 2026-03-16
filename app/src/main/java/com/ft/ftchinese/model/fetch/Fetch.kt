@@ -18,6 +18,11 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+internal data class ApiAuthorization(
+    val headerValue: String,
+    val usedSessionToken: Boolean,
+)
+
 /**
  * To use okhttp, you need to build url first using `HttpUrl.Builder`;
  * next build request using `Request.Builder`.
@@ -281,12 +286,13 @@ class Fetch {
 
         if (useApiKeyAuth) {
             if (trustedApiRequest) {
-                val sessionToken = loadSessionToken()
-                headers["Authorization"] = if (!sessionToken.isNullOrBlank()) {
-                    requestUsedSessionToken = true
-                    "Bearer $sessionToken"
-                } else {
-                    "Bearer ${Endpoint.accessToken}"
+                resolveApiAuthorization(
+                    sessionToken = loadSessionToken(),
+                    userId = headers["X-User-Id"],
+                    unionId = headers["X-Union-Id"],
+                ).let { auth ->
+                    requestUsedSessionToken = auth.usedSessionToken
+                    headers["Authorization"] = auth.headerValue
                 }
             } else {
                 // Avoid leaking app auth header to non-API hosts.
@@ -398,6 +404,24 @@ class Fetch {
             addTrustedHost(ApiConfig.ofAuth.baseUrl)
             addTrustedHost(ApiConfig.ofSubs(isTest = false).baseUrl)
             addTrustedHost(ApiConfig.ofSubs(isTest = true).baseUrl)
+        }
+
+        internal fun resolveApiAuthorization(
+            sessionToken: String?,
+            userId: String?,
+            unionId: String?,
+        ): ApiAuthorization {
+            val hasUserIdentity = !userId.isNullOrBlank() || !unionId.isNullOrBlank()
+            val useSessionToken = hasUserIdentity && !sessionToken.isNullOrBlank()
+
+            return ApiAuthorization(
+                headerValue = if (useSessionToken) {
+                    "Bearer $sessionToken"
+                } else {
+                    "Bearer ${Endpoint.accessToken}"
+                },
+                usedSessionToken = useSessionToken,
+            )
         }
 
         private fun loadDeviceId(): String? {
