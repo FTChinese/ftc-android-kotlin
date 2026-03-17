@@ -20,7 +20,7 @@ object LinkRepo {
             .post(Endpoint.wxLink)
             .setUnionId(unionId)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .sendJson(params)
             .endOrThrow()
             .code == 204
@@ -70,7 +70,7 @@ object LinkRepo {
             .setUnionId(unionId)
             .setClient()
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .sendJson(c)
             .endJson<Account>()
             .body
@@ -98,7 +98,7 @@ object LinkRepo {
         return Fetch()
             .post(Endpoint.wxUnlink)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .setUnionId(unionId)
             .sendJson(params)
             .endOrThrow()

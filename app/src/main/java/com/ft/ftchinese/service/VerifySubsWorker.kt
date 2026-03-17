@@ -16,6 +16,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.repository.StripeClient
@@ -60,7 +61,7 @@ class VerifySubsWorker(
                 return refreshIAP(account)
             }
             PayMethod.STRIPE -> {
-                Log.i(TAG, "Refresh Stripe...")
+                Log.i(TAG, "Refresh Stripe subscription...")
                 return refreshStripe(account)
             }
            else -> {
@@ -203,12 +204,28 @@ class VerifySubsWorker(
         }
     }
 
-    // Refresh stripe subscription for current user in background.
+    // Refresh account and membership data for current user in background.
+    private fun refreshAccount(account: Account): Result {
+        try {
+            val result = AccountRepo
+                .refresh(account)
+                ?: return Result.failure()
+
+            SessionManager
+                .getInstance(ctx)
+                .saveAccount(result)
+
+            return Result.success()
+        } catch (e: Exception) {
+            Log.i(TAG, "$e")
+            return Result.failure()
+        }
+    }
+
     private fun refreshStripe(account: Account): Result {
         try {
             val result = StripeClient
                 .refreshSub(account)
-
                 ?: return Result.failure()
 
             SessionManager

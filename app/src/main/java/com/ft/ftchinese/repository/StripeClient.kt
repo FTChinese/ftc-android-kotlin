@@ -1,5 +1,6 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
@@ -19,7 +20,7 @@ object StripeClient {
     private fun createCustomer(account: Account): HttpResp<StripeCustomer> {
         val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post(api.stripeCustomers)
             .setUserId(account.id)
             .noCache()
@@ -53,7 +54,7 @@ object StripeClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .get("${api.stripeCustomers}/${account.stripeId}")
             .setUserId(account.id)
             .noCache()
@@ -105,7 +106,7 @@ object StripeClient {
     private fun setCusDefaultPayment(account: Account, pmId: String): HttpResp<StripeCustomer> {
         val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post("${api.stripeCustomers}/${account.stripeId}/default-payment-method")
             .setUserId(account.id)
             .noCache()
@@ -144,7 +145,7 @@ object StripeClient {
 
         val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post("${api.stripeSubs}/$subsId/default-payment-method")
             .setUserId(account.id)
             .noCache()
@@ -210,7 +211,7 @@ object StripeClient {
         ftcId: String
     ): HttpResp<StripePaymentMethod> {
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .get("${api.stripeSubs}/${subsId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
@@ -224,7 +225,7 @@ object StripeClient {
     ): HttpResp<StripePaymentMethod> {
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .get("${api.stripeCustomers}/${cusId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
@@ -285,7 +286,7 @@ object StripeClient {
 
     private fun loadCouponApplied(api: ApiConfig, ftcId: String, subsId: String): CouponApplied? {
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .setUserId(ftcId)
             .get("${api.stripeSubs}/${subsId}/latest-invoice/any-coupon")
             .noCache()
@@ -321,7 +322,7 @@ object StripeClient {
     fun loadSubscription(account: Account, subsId: String): HttpResp<StripeSubs> {
         val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .get("${api.stripeSubs}/${subsId}")
             .setUserId(account.id)
             .noCache()
@@ -333,7 +334,7 @@ object StripeClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post(api.stripeSubs)
             .setUserId(account.id)
             .noCache()
@@ -362,11 +363,10 @@ object StripeClient {
 
     // Ask API to update user's Stripe subscription data.
     fun refreshSub(account: Account): StripeSubsResult? {
-
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
         val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post("${api.stripeSubs}/$subsId/refresh")
             .setUserId(account.id)
             .noCache()
@@ -376,6 +376,8 @@ object StripeClient {
     }
 
     suspend fun asyncRefreshSub(account: Account): FetchResult<StripeSubsResult> {
+        val subsId = account.membership.stripeSubsId ?: return FetchResult.TextError("Not a stripe subscription")
+        val api = ApiConfig.ofSubs(account.isTest)
         try {
             val stripeSub = withContext(Dispatchers.IO) {
                 refreshSub(account)
@@ -387,7 +389,9 @@ object StripeClient {
                 FetchResult.Success(stripeSub)
             }
         } catch (e: APIError) {
-            return if (e.statusCode == 404) {
+            return if (BuildConfig.DEBUG) {
+                FetchResult.TextError(buildStripeRefreshDiagnostics(account, subsId, api, e))
+            } else if (e.statusCode == 404) {
                 FetchResult.LocalizedError(R.string.loading_failed)
             } else {
                 FetchResult.fromApi(e)
@@ -398,6 +402,38 @@ object StripeClient {
         }
     }
 
+    private fun buildStripeRefreshDiagnostics(
+        account: Account,
+        subsId: String,
+        api: ApiConfig,
+        e: APIError,
+    ): String {
+        val summary = when (e.statusCode) {
+            401 -> "没有访问服务器的权限"
+            404 -> "加载失败"
+            else -> e.message
+        }
+        val maskedUserId = account.id.take(8)
+        val maskedSubsId = subsId.takeLast(8)
+
+        return buildString {
+            append(summary)
+            append("\n\n")
+            append("调试信息:")
+            append("\nmethod=POST")
+            append("\nendpoint=${api.stripeSubs}/$subsId/refresh")
+            append("\nauth=legacy_app_token")
+            append("\nstatus=${e.statusCode}")
+            append("\nserverMessage=${e.message}")
+            append("\nserverError=${e.error}")
+            append("\napiMode=${api.mode}")
+            append("\nisTestAccount=${account.isTest}")
+            append("\nuserIdPrefix=$maskedUserId")
+            append("\nsubsIdSuffix=$maskedSubsId")
+            append("\nclientVersion=${BuildConfig.VERSION_NAME}")
+        }
+    }
+
     private fun updateSubs(account: Account, params: SubParams): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
@@ -405,7 +441,7 @@ object StripeClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post("${api.stripeSubs}/$subsId")
             .setUserId(account.id)
             .noCache()
@@ -436,7 +472,7 @@ object StripeClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post("${api.stripeSubs}/$subsId/cancel")
             .setUserId(account.id)
             .noCache()
@@ -477,7 +513,7 @@ object StripeClient {
             .post("${api.stripeSubs}/$subsId/reactivate")
             .setUserId(account.id)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .send()
             .endJson<StripeSubsResult>()
             .body

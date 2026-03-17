@@ -1,5 +1,6 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.fetch.APIError
@@ -60,7 +61,7 @@ object AccountRepo {
             .get(Endpoint.wxAccount)
             .setUnionId(unionId)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .endJson<Account>()
             .body
     }
@@ -122,7 +123,7 @@ object AccountRepo {
     private fun updateEmail(ftcId: String, email: String): BaseAccount? {
         return Fetch().patch(Endpoint.email)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .setUserId(ftcId)
             .sendJson(mapOf("email" to email))
             .endJson<BaseAccount>()
@@ -187,11 +188,85 @@ object AccountRepo {
                     "userName_already_exists" -> FetchResult.LocalizedError(R.string.api_name_taken)
                     else -> FetchResult.fromApi(e)
                 }
+            } else if (BuildConfig.DEBUG) {
+                FetchResult.TextError(
+                    buildUpdateNameDiagnostics(
+                        ftcId = ftcId,
+                        name = name,
+                        e = e,
+                    )
+                )
             } else {
                 FetchResult.fromApi(e)
             }
         } catch (e: Exception) {
-            return FetchResult.fromException(e)
+            return if (BuildConfig.DEBUG) {
+                FetchResult.TextError(
+                    buildUpdateNameExceptionDiagnostics(
+                        ftcId = ftcId,
+                        name = name,
+                        e = e,
+                    )
+                )
+            } else {
+                FetchResult.fromException(e)
+            }
+        }
+    }
+
+    private fun buildUpdateNameDiagnostics(
+        ftcId: String,
+        name: String,
+        e: APIError,
+    ): String {
+        val summary = when (e.statusCode) {
+            401 -> "没有访问服务器的权限"
+            404 -> "加载失败"
+            else -> e.message
+        }
+        val maskedUserId = ftcId.take(8)
+
+        return buildString {
+            append(summary)
+            append("\n\n")
+            append("调试信息:")
+            append("\nmethod=PATCH")
+            append("\nendpoint=${Endpoint.userName}")
+            append("\nauth=session_aware")
+            append("\nstatus=${e.statusCode}")
+            append("\nserverMessage=${e.message}")
+            append("\nserverError=${e.error}")
+            append("\napiMode=${ApiConfig.ofAuth.mode}")
+            append("\nuserIdPrefix=$maskedUserId")
+            append("\nrequestedUserName=$name")
+            append("\nclientVersion=${BuildConfig.VERSION_NAME}")
+        }
+    }
+
+    private fun buildUpdateNameExceptionDiagnostics(
+        ftcId: String,
+        name: String,
+        e: Exception,
+    ): String {
+        val maskedUserId = ftcId.take(8)
+        val stackPreview = e.stackTrace
+            .take(4)
+            .joinToString(separator = "\n") { it.toString() }
+
+        return buildString {
+            append(e.message ?: e::class.java.simpleName)
+            append("\n\n")
+            append("调试信息:")
+            append("\nmethod=PATCH")
+            append("\nendpoint=${Endpoint.userName}")
+            append("\nauth=session_aware")
+            append("\nexception=${e::class.java.name}")
+            append("\nuserIdPrefix=$maskedUserId")
+            append("\nrequestedUserName=$name")
+            append("\nclientVersion=${BuildConfig.VERSION_NAME}")
+            if (stackPreview.isNotBlank()) {
+                append("\nstack=\n$stackPreview")
+            }
         }
     }
 
@@ -241,7 +316,7 @@ object AccountRepo {
             .post(Endpoint.emailVrfLetter)
             .setTimeout(30)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .setClient()
             .setUserId(ftcId)
             .send()
@@ -326,7 +401,7 @@ object AccountRepo {
         return Fetch()
             .patch(Endpoint.updateMobile)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .setClient()
             .setUserId(ftcId)
             .sendJson(params)
@@ -455,7 +530,7 @@ object AccountRepo {
         val resp =  Fetch()
             .delete(Endpoint.ftcAccount)
             .noCache()
-            .setApiKey()
+            .setLegacyApiKey()
             .setUserId(ftcId)
             .sendJson(params)
             .endOrThrow()

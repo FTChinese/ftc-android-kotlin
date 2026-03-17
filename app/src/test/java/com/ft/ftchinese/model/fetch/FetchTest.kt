@@ -55,4 +55,45 @@ class FetchTest {
         assertFalse(auth.usedSessionToken)
         assertEquals("Bearer ${Endpoint.accessToken}", auth.headerValue)
     }
+
+    @Test
+    fun legacyUserScopedRequestsAlwaysKeepUsingAppToken() {
+        val auth = Fetch.resolveLegacyApiAuthorization()
+
+        assertFalse(auth.usedSessionToken)
+        assertEquals("Bearer ${Endpoint.accessToken}", auth.headerValue)
+    }
+
+    @Test
+    fun accountRefreshUnauthorizedStillForcesLogoutWithoutSessionToken() {
+        val shouldLogout = Fetch.shouldForceLogoutOnRejectedSession(
+            requestUsedSessionToken = false,
+            userId = "ftc-user-id",
+            path = "/api/account",
+        )
+
+        assertTrue(shouldLogout)
+    }
+
+    @Test
+    fun nonAccountUnauthorizedDoesNotForceLogoutWhenSessionTokenWasNotUsed() {
+        val shouldLogout = Fetch.shouldForceLogoutOnRejectedSession(
+            requestUsedSessionToken = false,
+            userId = "ftc-user-id",
+            path = "/api/stripe/subs/sub_123/refresh",
+        )
+
+        assertFalse(shouldLogout)
+    }
+
+    @Test
+    fun sessionBackedRequestsStillForceLogoutOutsideAccountRefresh() {
+        val shouldLogout = Fetch.shouldForceLogoutOnRejectedSession(
+            requestUsedSessionToken = true,
+            userId = "ftc-user-id",
+            path = "/api/stripe/subs/sub_123/refresh",
+        )
+
+        assertTrue(shouldLogout)
+    }
 }

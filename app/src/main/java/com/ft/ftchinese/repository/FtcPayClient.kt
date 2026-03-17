@@ -20,7 +20,7 @@ object FtcPayClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post(api.verifyOrder(orderId))
             .addHeaders(account.headers())
             .noCache()
@@ -34,7 +34,7 @@ object FtcPayClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post(api.wxOrder)
             .addHeaders(account.headers())
             .setTimeout(30)
@@ -70,7 +70,7 @@ object FtcPayClient {
     private fun createAliOrder(account: Account, params: OrderParams): AliPayIntent? {
         val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
             .post(api.aliOrder)
             .setTimeout(30)
             .addHeaders(account.headers())
@@ -104,7 +104,7 @@ object FtcPayClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setBearer(api.accessToken)
+            .setLegacyApiKey()
            .post(api.addOn)
            .addHeaders(account.headers())
            .noCache()

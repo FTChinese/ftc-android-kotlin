@@ -109,15 +109,14 @@ class MembershipState(
         }
     }
 
-    // Ask the latest stripe subscription data.
     private fun refreshStripe(a: Account) {
         if (!ensureConnected()) {
             return
         }
 
         showSnackBar(R.string.stripe_refreshing)
+        refreshing = true
         scope.launch {
-
             val result = StripeClient.asyncRefreshSub(a)
             refreshing = false
             when (result) {
@@ -132,7 +131,6 @@ class MembershipState(
                     stripeSubsUpdated = result.data
                 }
             }
-
         }
     }
 

@@ -23,6 +23,12 @@ internal data class ApiAuthorization(
     val usedSessionToken: Boolean,
 )
 
+private enum class ApiAuthMode {
+    NONE,
+    SESSION_AWARE,
+    LEGACY_APP_TOKEN,
+}
+
 /**
  * To use okhttp, you need to build url first using `HttpUrl.Builder`;
  * next build request using `Request.Builder`.
@@ -39,7 +45,7 @@ class Fetch {
     private var mediaType: MediaType? = contentTypeJson
 
     private var disableCache = false
-    private var useApiKeyAuth = false
+    private var apiAuthMode = ApiAuthMode.NONE
     private var requestUsedSessionToken = false
 
     fun get(url: String) = apply {
@@ -117,11 +123,15 @@ class Fetch {
 
     // Authorization: Bearer xxxxxxx
     fun setApiKey() = apply {
-        useApiKeyAuth = true
+        apiAuthMode = ApiAuthMode.SESSION_AWARE
+    }
+
+    fun setLegacyApiKey() = apply {
+        apiAuthMode = ApiAuthMode.LEGACY_APP_TOKEN
     }
 
     fun setBearer(v: String) = apply {
-        useApiKeyAuth = false
+        apiAuthMode = ApiAuthMode.NONE
         headers["Authorization"] = "Bearer $v"
     }
 
@@ -284,13 +294,18 @@ class Fetch {
         val trustedApiRequest = isTrustedApiHost(requestUrl.host)
         requestUsedSessionToken = false
 
-        if (useApiKeyAuth) {
+        if (apiAuthMode != ApiAuthMode.NONE) {
             if (trustedApiRequest) {
-                resolveApiAuthorization(
-                    sessionToken = loadSessionToken(),
-                    userId = headers["X-User-Id"],
-                    unionId = headers["X-Union-Id"],
-                ).let { auth ->
+                val auth = when (apiAuthMode) {
+                    ApiAuthMode.SESSION_AWARE -> resolveApiAuthorization(
+                        sessionToken = loadSessionToken(),
+                        userId = headers["X-User-Id"],
+                        unionId = headers["X-Union-Id"],
+                    )
+                    ApiAuthMode.LEGACY_APP_TOKEN -> resolveLegacyApiAuthorization()
+                    ApiAuthMode.NONE -> null
+                }
+                auth?.let {
                     requestUsedSessionToken = auth.usedSessionToken
                     headers["Authorization"] = auth.headerValue
                 }
@@ -371,8 +386,13 @@ class Fetch {
     }
 
     private fun handleRejectedSession(statusCode: Int, apiError: APIError) {
-        val authenticatedUserRequest = requestUsedSessionToken || !headers["X-User-Id"].isNullOrBlank()
-        if (!authenticatedUserRequest) {
+        val requestPath = request?.url?.encodedPath.orEmpty()
+        val shouldForceLogout = shouldForceLogoutOnRejectedSession(
+            requestUsedSessionToken = requestUsedSessionToken,
+            userId = headers["X-User-Id"],
+            path = requestPath,
+        )
+        if (!shouldForceLogout) {
             return
         }
 
@@ -422,6 +442,29 @@ class Fetch {
                 },
                 usedSessionToken = useSessionToken,
             )
+        }
+
+        internal fun resolveLegacyApiAuthorization(): ApiAuthorization {
+            return ApiAuthorization(
+                headerValue = "Bearer ${Endpoint.accessToken}",
+                usedSessionToken = false,
+            )
+        }
+
+        internal fun shouldForceLogoutOnRejectedSession(
+            requestUsedSessionToken: Boolean,
+            userId: String?,
+            path: String,
+        ): Boolean {
+            if (requestUsedSessionToken) {
+                return true
+            }
+
+            if (userId.isNullOrBlank()) {
+                return false
+            }
+
+            return path == "/api/account" || path == "/api/v6/account"
         }
 
         private fun loadDeviceId(): String? {
