@@ -63,7 +63,7 @@ fun ChannelTabScreen(
         object : WebViewCallback(context) {
             override fun onPageFinished(view: WebView?, url: String?) {
                 view?.evaluateJavascript(
-                    JsSnippets.lockerIcon(userViewModel.account?.membership?.tier)
+                    JsSnippets.lockerIcon(userViewModel.account?.membership?.webPrivilegeTier)
                 ) {
                     Log.i(TAG, "Privilege result: $it")
                 }

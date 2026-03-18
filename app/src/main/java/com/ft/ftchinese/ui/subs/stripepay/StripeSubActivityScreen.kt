@@ -19,7 +19,6 @@ import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.Stripe
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetResult
@@ -53,12 +52,7 @@ fun StripeSubActivityScreen(
         scaffoldState = scaffoldState
     )
 
-    // Initialize payment configuration
     LaunchedEffect(key1 = Unit) {
-        PaymentConfiguration.init(
-            context = context,
-            publishableKey = BuildConfig.STRIPE_KEY
-        )
         if (priceId.isNullOrBlank()) {
             context.toast("Error: price id not provided!")
         } else {
@@ -71,11 +65,6 @@ fun StripeSubActivityScreen(
         }
     }
 
-    // Create stripe instance.
-    val stripe = remember {
-        Stripe(context, BuildConfig.STRIPE_KEY)
-    }
-
     // Payment sheet launcher
     val launcher = rememberLauncherForActivityResult(
         contract = PaymentSheetContract()
@@ -85,10 +74,10 @@ fun StripeSubActivityScreen(
                 context.toast("支付设置已取消")
             }
             is PaymentSheetResult.Failed -> {
-                context.toast("支付设置失败")
+                context.toast(formatPaymentSheetFailure(it.error))
             }
             is PaymentSheetResult.Completed -> {
-                paymentState.retrieveSetupIntent(stripe, account)
+                paymentState.retrieveSetupIntent(context, account)
             }
         }
     }
@@ -114,7 +103,7 @@ fun StripeSubActivityScreen(
     // Show payment sheet if payment sheet setup present.
     LaunchedEffect(key1 = paymentState.paymentSheetSetup) {
         paymentState.paymentSheetSetup?.let {
-            launchPaymentSheet(launcher, it)
+            launchPaymentSheet(context, launcher, it)
         }
     }
 
@@ -198,9 +187,15 @@ fun StripeSubActivityScreen(
 }
 
 private fun launchPaymentSheet(
+    context: android.content.Context,
     launcher: ManagedActivityResultLauncher<PaymentSheetContract.Args, PaymentSheetResult>,
     params: PaymentSheetParams,
 ) {
+    PaymentConfiguration.init(
+        context = context,
+        publishableKey = params.publishableKey
+    )
+
     launcher.launch(
         PaymentSheetContract.Args.createSetupIntentArgs(
             clientSecret = params.clientSecret,
@@ -213,4 +208,12 @@ private fun launchPaymentSheet(
             )
         )
     )
+}
+
+private fun formatPaymentSheetFailure(error: Throwable): String {
+    return if (BuildConfig.DEBUG) {
+        "支付设置失败: ${error.message ?: error.javaClass.simpleName}"
+    } else {
+        "支付设置失败"
+    }
 }

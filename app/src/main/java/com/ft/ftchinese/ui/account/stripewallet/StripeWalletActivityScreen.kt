@@ -42,19 +42,6 @@ fun StripeWalletActivityScreen(
         return
     }
 
-    // Initialize payment configuration
-    LaunchedEffect(key1 = Unit) {
-        PaymentConfiguration.init(
-            context = context,
-            publishableKey = BuildConfig.STRIPE_KEY
-        )
-    }
-
-    // Create stripe instance.
-    val stripe = remember {
-        Stripe(context, BuildConfig.STRIPE_KEY)
-    }
-
     val walletState = rememberStripeWalletState(
         scaffoldState = scaffoldState
     )
@@ -67,10 +54,10 @@ fun StripeWalletActivityScreen(
                 context.toast("支付设置已取消")
             }
             is PaymentSheetResult.Failed -> {
-                context.toast("支付设置失败")
+                context.toast(formatPaymentSheetFailure(it.error))
             }
             is PaymentSheetResult.Completed -> {
-                walletState.retrieveSetupIntent(stripe, account)
+                walletState.retrieveSetupIntent(context, account)
             }
         }
     }
@@ -116,7 +103,7 @@ fun StripeWalletActivityScreen(
 
     LaunchedEffect(key1 = walletState.paymentSheetSetup) {
         walletState.paymentSheetSetup?.let{
-            launchPaymentSheet(launcher, it)
+            launchPaymentSheet(context, launcher, it)
         }
     }
 
@@ -159,9 +146,15 @@ fun StripeWalletActivityScreen(
 
 
 private fun launchPaymentSheet(
+    context: android.content.Context,
     launcher: ManagedActivityResultLauncher<PaymentSheetContract.Args, PaymentSheetResult>,
     params: PaymentSheetParams,
 ) {
+    PaymentConfiguration.init(
+        context = context,
+        publishableKey = params.publishableKey
+    )
+
     launcher.launch(
         PaymentSheetContract.Args.createSetupIntentArgs(
             clientSecret = params.clientSecret,
@@ -174,4 +167,12 @@ private fun launchPaymentSheet(
             )
         )
     )
+}
+
+private fun formatPaymentSheetFailure(error: Throwable): String {
+    return if (BuildConfig.DEBUG) {
+        "支付设置失败: ${error.message ?: error.javaClass.simpleName}"
+    } else {
+        "支付设置失败"
+    }
 }

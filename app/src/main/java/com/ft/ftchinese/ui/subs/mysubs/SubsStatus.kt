@@ -56,18 +56,22 @@ data class SubsStatus(
                 Pair(FormatHelper.getTier(ctx, it.first), "${it.second}天")
             }
 
+            fun expirationReminder(): String? {
+                return m.remainingDays().let {
+                    when {
+                        it == null -> null
+                        it < 0 -> ctx.getString(R.string.member_has_expired)
+                        it == 0L -> ctx.getString(R.string.member_is_expiring)
+                        it <= 7 -> ctx.getString(R.string.member_will_expire, it)
+                        else -> null
+                    }
+                }
+            }
+
             return when (m.payMethod) {
                 PayMethod.ALIPAY, PayMethod.WXPAY -> {
                     SubsStatus(
-                        reminder = m.remainingDays().let {
-                            when {
-                                it == null -> null
-                                it < 0 -> ctx.getString(R.string.member_has_expired)
-                                it == 0L -> ctx.getString(R.string.member_is_expiring)
-                                it <= 7 -> ctx.getString(R.string.member_will_expire, it)
-                                else -> null
-                            }
-                        },
+                        reminder = expirationReminder(),
                         productName = productTitle,
                         details = listOf(FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx))),
                         addOns = addOns,
@@ -118,12 +122,19 @@ data class SubsStatus(
                     ),
                     addOns = addOns,
                 )
-                else -> SubsStatus(
-                    reminder = "订阅方式缺失",
-                    productName = productTitle,
-                    details = addOns,
-                    addOns = addOns
-                )
+                else -> {
+                    val hasExpiration = m.expireDate != null
+                    SubsStatus(
+                        reminder = expirationReminder() ?: "订阅方式缺失",
+                        productName = productTitle,
+                        details = if (hasExpiration) {
+                            listOf(FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx)))
+                        } else {
+                            listOf()
+                        },
+                        addOns = addOns
+                    )
+                }
             }
         }
     }

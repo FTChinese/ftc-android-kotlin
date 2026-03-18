@@ -205,6 +205,17 @@ data class Membership(
                 null
             }
 
+    // WebView locker icons should reflect current effective access, not the raw tier
+    // persisted on the account. Expired premium members may still keep tier=PREMIUM
+    // in backend data, but they should not receive premium/editor privileges in JS.
+    val webPrivilegeTier: Tier?
+        get() = when (accessRights().second) {
+            MemberStatus.ActiveStandard -> Tier.STANDARD
+            MemberStatus.ActivePremium,
+            MemberStatus.Vip -> Tier.PREMIUM
+            else -> null
+        }
+
     val isStripe: Boolean
         get() = payMethod == PayMethod.STRIPE && stripeSubsId != null
 

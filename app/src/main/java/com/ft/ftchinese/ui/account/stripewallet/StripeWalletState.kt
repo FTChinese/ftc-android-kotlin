@@ -227,10 +227,11 @@ open class StripeWalletState(
     // The payment method is retrieved from two sources:
     // 1. Use stripe SDK, which might given null, then
     // 2. Use the payment method id to retrieve it from our server.
-    fun retrieveSetupIntent(stripe: Stripe, account: Account) {
+    fun retrieveSetupIntent(context: android.content.Context, account: Account) {
         paymentSheetSetup?.let {
             Log.i(TAG, "Retrieving setup intent")
             progress.value = true
+            val stripe = Stripe(context, it.publishableKey)
             stripe.retrieveSetupIntent(
                 clientSecret = it.clientSecret,
                 callback = object : ApiResultCallback<SetupIntent> {

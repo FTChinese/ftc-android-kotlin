@@ -4,13 +4,12 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.ApiMode
 
 //private const val devIP = "http://192.168.1.20"
-//private const val devIP = "http://192.168.1.57"
-private const val devIP = "http://192.168.1.131"
+private const val devIP = "http://192.168.1.57"
+//private const val devIP = "http://192.168.1.131"
 //private const val devIP = "https://www.ftcn.net.cn/api"
 
 //private const val devPort = "8206"
 private const val devPort = "3000"
-
 data class ApiConfig(
     val baseUrl: String,
     val accessToken: String,

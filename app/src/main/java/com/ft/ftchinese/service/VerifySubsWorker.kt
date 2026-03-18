@@ -38,10 +38,14 @@ class VerifySubsWorker(
     override fun doWork(): Result {
         Log.i(TAG, "Run subscription verification work")
 
-        val account = SessionManager
+        val currentAccount = SessionManager
             .getInstance(ctx)
             .loadAccount(raw = true)
             ?: return Result.success()
+
+        // Pull the latest account first so a web-side payment-method change can
+        // replace a stale local provider classification before any provider sync.
+        val account = refreshCanonicalAccount(currentAccount) ?: return Result.failure()
 
         // If add-on is being used, ask API to put it expiration date.
         // In such case we know it has nothing to do with Stripe or IAP, and it is not actually expired.
@@ -51,22 +55,47 @@ class VerifySubsWorker(
 
         checkExpiration(account.membership)
 
-       when (account.membership.payMethod) {
+        when (account.membership.payMethod) {
             PayMethod.ALIPAY, PayMethod.WXPAY -> {
                 Log.i(TAG, "Verify ftc pay...")
                 return verifyFtcPay(account)
             }
             PayMethod.APPLE -> {
+                if (account.membership.appleSubsId.isNullOrBlank()) {
+                    Log.i(TAG, "Skip IAP refresh because apple subscription id is missing")
+                    return Result.success()
+                }
                 Log.i(TAG, "Refresh IAP...")
                 return refreshIAP(account)
             }
             PayMethod.STRIPE -> {
+                if (account.membership.stripeSubsId.isNullOrBlank()) {
+                    Log.i(TAG, "Skip Stripe refresh because subscription id is missing")
+                    return Result.success()
+                }
                 Log.i(TAG, "Refresh Stripe subscription...")
                 return refreshStripe(account)
             }
-           else -> {
-               return Result.success()
-           }
+            else -> {
+                return Result.success()
+            }
+        }
+    }
+
+    private fun refreshCanonicalAccount(account: Account): Account? {
+        return try {
+            val result = AccountRepo
+                .refresh(account)
+                ?: return null
+
+            SessionManager
+                .getInstance(ctx)
+                .saveAccount(result)
+
+            result
+        } catch (e: Exception) {
+            Log.i(TAG, "Failed to refresh canonical account: $e")
+            null
         }
     }
 
@@ -196,24 +225,6 @@ class VerifySubsWorker(
             SessionManager
                 .getInstance(ctx)
                 .saveMembership(result.membership)
-
-            return Result.success()
-        } catch (e: Exception) {
-            Log.i(TAG, "$e")
-            return Result.failure()
-        }
-    }
-
-    // Refresh account and membership data for current user in background.
-    private fun refreshAccount(account: Account): Result {
-        try {
-            val result = AccountRepo
-                .refresh(account)
-                ?: return Result.failure()
-
-            SessionManager
-                .getInstance(ctx)
-                .saveAccount(result)
 
             return Result.success()
         } catch (e: Exception) {

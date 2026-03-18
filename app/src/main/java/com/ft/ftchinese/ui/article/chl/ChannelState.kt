@@ -258,7 +258,7 @@ class ChannelState(
             cache.readChannelTemplate()
         }
         val js = JsBuilder()
-            .withLockerIcon(account?.membership?.tier)
+            .withLockerIcon(account?.membership?.webPrivilegeTier)
             .build()
 
         return withContext(Dispatchers.Default) {

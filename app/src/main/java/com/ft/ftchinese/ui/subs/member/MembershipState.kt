@@ -40,25 +40,50 @@ class MembershipState(
         private set
     
     fun refresh(account: Account) {
-        if (account.membership.autoRenewOffExpired && account.membership.hasAddOn) {
-            migrateAddOn(account)
+        // Always refresh the canonical account first so provider changes
+        // made on web/backend can replace a stale local payMethod.
+        refreshFromAccount(account)
+    }
+
+    private fun refreshFromAccount(account: Account) {
+        if (!ensureConnected()) {
             return
         }
 
-        when (account.membership.payMethod) {
-            PayMethod.ALIPAY,
-            PayMethod.WXPAY,
-            PayMethod.B2B -> {
-                refreshAccount(account)
-            }
-            PayMethod.STRIPE -> {
-                refreshStripe(account)
-            }
-            PayMethod.APPLE -> {
-                refreshIAP(account)
-            }
-            else -> {
-                showSnackBar("Current payment method unknown!")
+        refreshing = true
+        scope.launch {
+            val result = AccountRepo.asyncRefresh(account)
+            when (result) {
+                is FetchResult.LocalizedError -> {
+                    refreshing = false
+                    showSnackBar(result.msgId)
+                }
+                is FetchResult.TextError -> {
+                    refreshing = false
+                    showSnackBar(result.text)
+                }
+                is FetchResult.Success -> {
+                    val updatedAccount = result.data
+                    accountUpdated = updatedAccount
+
+                    when {
+                        updatedAccount.membership.shouldUseAddOn -> {
+                            refreshing = false
+                            migrateAddOn(updatedAccount)
+                        }
+                        updatedAccount.membership.payMethod == PayMethod.STRIPE &&
+                            !updatedAccount.membership.stripeSubsId.isNullOrBlank() -> {
+                            refreshStripe(updatedAccount)
+                        }
+                        updatedAccount.membership.payMethod == PayMethod.APPLE &&
+                            !updatedAccount.membership.appleSubsId.isNullOrBlank() -> {
+                            refreshIAP(updatedAccount)
+                        }
+                        else -> {
+                            refreshing = false
+                        }
+                    }
+                }
             }
         }
     }
@@ -81,29 +106,6 @@ class MembershipState(
                 is FetchResult.Success -> {
                     showSnackBar(R.string.refresh_success)
                     accountUpdated = a.withMembership(result.data)
-                }
-            }
-        }
-    }
-
-    private fun refreshAccount(a: Account) {
-        if (!ensureConnected()) {
-            return
-        }
-
-        refreshing = true
-        scope.launch {
-            val result = AccountRepo.asyncRefresh(a)
-            refreshing = false
-            when (result) {
-                is FetchResult.LocalizedError -> {
-                    showSnackBar(result.msgId)
-                }
-                is FetchResult.TextError -> {
-                    showSnackBar(result.text)
-                }
-                is FetchResult.Success -> {
-                    accountUpdated = result.data
                 }
             }
         }
