@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.components.PlainTextButton
@@ -226,24 +227,45 @@ fun SubsApp(
                                 navController,
                                 item
                             )
+                        },
+                        onFtcPayById = { priceId, payMethod ->
+                            navigateToFtcPay(
+                                navController = navController,
+                                priceId = priceId,
+                                payMethod = payMethod
+                            )
+                        },
+                        onStripePayByIds = { priceId, trialId, couponId ->
+                            navigateToStripePay(
+                                navController = navController,
+                                priceId = priceId,
+                                trialId = trialId,
+                                couponId = couponId
+                            )
                         }
                     )
                 }
 
                 composable(
-                    route = "${SubsAppScreen.FtcPay.name}/{priceId}",
+                    route = "${SubsAppScreen.FtcPay.name}/{priceId}?payMethod={payMethod}",
                     arguments = listOf(
                         navArgument("priceId") {
                             type = NavType.StringType
+                        },
+                        navArgument("payMethod") {
+                            type = NavType.StringType
+                            nullable = true
                         }
                     )
                 ) { entry ->
                     val priceId = entry.arguments?.getString("priceId")
+                    val payMethod = PayMethod.fromString(entry.arguments?.getString("payMethod"))
                     FtcPayActivityScreen(
                         userViewModel = userViewModel,
                         payViewModel = payViewModel,
                         scaffoldState = scaffoldState,
                         priceId = priceId,
+                        payMethod = payMethod,
                         onAliPay = onAliPay,
                         onSuccess = {
                             navigateToInvoices(
@@ -314,34 +336,51 @@ fun SubsApp(
 private fun navigateToFtcPay(
     navController: NavHostController,
     priceId: String,
+    payMethod: PayMethod? = null,
 ) {
-    navController.navigate("${SubsAppScreen.FtcPay.name}/$priceId")
+    val builder = Uri.Builder()
+        .appendPath(SubsAppScreen.FtcPay.name)
+        .appendPath(priceId)
+
+    if (payMethod != null) {
+        builder.appendQueryParameter("payMethod", payMethod.symbol)
+    }
+
+    val dest = builder.build().toString().removePrefix("/")
+    navController.navigate(dest)
 }
 
 private fun navigateToStripePay(
     navController: NavHostController,
     item: CartItemStripe,
 ) {
-    // Here we are using Uri.Builder to build the navigation route
-    // since the two query parameters are all optional.
-    // By optional Compose UI means you should not set the key related to
-    // the missing value. String concatenation does not work here since
-    // even an empty string is treated as a valid value.
-    // A null value is converted directly to string "null", which might
-    // not be what you want.
-    val b = Uri.Builder()
+    navigateToStripePay(
+        navController = navController,
+        priceId = item.recurring.id,
+        trialId = item.trial?.id,
+        couponId = item.coupon?.id
+    )
+}
+
+private fun navigateToStripePay(
+    navController: NavHostController,
+    priceId: String,
+    trialId: String?,
+    couponId: String?
+) {
+    // Build the route with optional query parameters for trial/coupon checkout.
+    val builder = Uri.Builder()
         .appendPath(SubsAppScreen.StripePay.name)
-        .appendPath(item.recurring.id)
+        .appendPath(priceId)
 
-    if (item.trial != null) {
-        b.appendQueryParameter("trialId", item.trial.id)
+    if (!trialId.isNullOrBlank()) {
+        builder.appendQueryParameter("trialId", trialId)
     }
-    if (item.coupon != null) {
-        b.appendQueryParameter("couponId", item.coupon.id)
+    if (!couponId.isNullOrBlank()) {
+        builder.appendQueryParameter("couponId", couponId)
     }
 
-    val dest = b.build().toString().removePrefix("/")
-
+    val dest = builder.build().toString().removePrefix("/")
     navController.navigate(dest)
 }
 

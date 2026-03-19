@@ -58,6 +58,10 @@ freeline.py
 freeline/
 freeline_project_description.json
 
+# temp files
+subscription_page_migration_plan.md
+tmp/
+
 # fastlane
 fastlane/report.xml
 fastlane/Preview.html

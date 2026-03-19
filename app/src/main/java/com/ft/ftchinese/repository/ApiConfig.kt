@@ -81,6 +81,12 @@ data class ApiConfig(
     val paywall: String
         get() = "${baseUrl}/paywall"
 
+    val subscriptionCatalog: String
+        get() = "${baseUrl}/subscription/catalog"
+
+    val subscriptionSummary: String
+        get() = "${baseUrl}/subscription/summary"
+
     val wxOrder: String
         get() = "${baseUrl}/wxpay/app"
 
@@ -109,5 +115,4 @@ data class ApiConfig(
         return "${baseUrl}/apple/subs/$originalTxId"
     }
 }
-
 

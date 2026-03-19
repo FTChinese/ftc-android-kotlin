@@ -26,12 +26,13 @@ fun FtcPayScreen(
     cartItem: CartItemFtc,
     loading: Boolean,
     mode: ApiMode,
+    forcedPayMethod: PayMethod? = null,
     onClickPay: (PayMethod) -> Unit,
 ) {
     val context = LocalContext.current
 
-    val (selectOption, onOptionSelected) = remember {
-        mutableStateOf<PayMethod?>(null)
+    val (selectOption, onOptionSelected) = remember(forcedPayMethod) {
+        mutableStateOf(forcedPayMethod)
     }
 
     val forbidden = cartItem.intent.kind == IntentKind.Forbidden
@@ -64,11 +65,13 @@ fun FtcPayScreen(
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
 
-            PaymentMethodsGroup(
-                selected = selectOption,
-                forbidden = forbidden,
-                onSelect = onOptionSelected,
-            )
+            if (forcedPayMethod == null) {
+                PaymentMethodsGroup(
+                    selected = selectOption,
+                    forbidden = forbidden,
+                    onSelect = onOptionSelected,
+                )
+            }
         }
 
         PrimaryBlockButton(
@@ -78,7 +81,11 @@ fun FtcPayScreen(
                 }
             },
             enabled = (!loading && selectOption != null && !forbidden),
-            text = stringResource(id = R.string.check_out),
+            text = when (selectOption) {
+                PayMethod.ALIPAY -> "前往支付宝支付"
+                PayMethod.WXPAY -> "前往微信支付"
+                else -> stringResource(id = R.string.check_out)
+            },
         )
     }
 }
@@ -98,6 +105,7 @@ fun PreviewFtcPayBody() {
         ),
         mode = ApiMode.Debug,
         loading = true,
+        forcedPayMethod = null,
         onClickPay = {}
     )
 }

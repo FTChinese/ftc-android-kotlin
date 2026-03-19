@@ -131,6 +131,17 @@ android {
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.live")
 //            finalizedBy "sendReleaseEmail"
         }
+        // Release-signed build for local payment testing.
+        // Keeps the production signing identity required by app-to-app SDKs
+        // while remaining debuggable for local Node integration and log capture.
+        qa {
+            initWith(release)
+            signingConfig = signingConfigs.release
+            debuggable true
+            matchingFallbacks = ['release']
+            versionNameSuffix "-qa"
+            buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.live")
+        }
         debug {
             debuggable true
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.test")
@@ -375,4 +386,3 @@ afterEvaluate {
 //        task.finalizedBy("sendReleaseEmail")
 //    }
 //}
-

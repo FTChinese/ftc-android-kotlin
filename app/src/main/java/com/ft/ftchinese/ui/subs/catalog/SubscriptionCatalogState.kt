@@ -1,110 +1,48 @@
-package com.ft.ftchinese.ui.subs.paywall
+package com.ft.ftchinese.ui.subs.catalog
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalog
 import com.ft.ftchinese.repository.ApiConfig
-import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.components.BaseState
-import com.ft.ftchinese.ui.repo.PaywallRepo
+import com.ft.ftchinese.ui.repo.SubscriptionCatalogRepo
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-private const val TAG = "Paywall"
-
-class PaywallState(
+class SubscriptionCatalogState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     connState: State<ConnectionState>,
-    context: Context
+    context: Context,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
-
-    private val cache = FileStore(context)
 
     var refreshing by mutableStateOf(false)
         private set
 
-    var checkoutDataReady by mutableStateOf(false)
+    var catalog by mutableStateOf<SubscriptionCatalog?>(null)
         private set
 
-    var paywallData by mutableStateOf(defaultPaywall)
+    var loaded by mutableStateOf(false)
         private set
 
-    fun loadPaywall(
+    fun loadCatalog(
         api: ApiConfig,
+        userId: String?,
     ) {
         progress.value = true
         scope.launch {
-            val pw = PaywallRepo.fromFileCache(api.mode, cache)
-
-            var cacheFound = false
-            if (pw != null) {
-                Log.i(TAG, "Paywall data loaded from local cached file")
-                cacheFound = true
-                paywallData = pw
-                checkoutDataReady = true
-            }
-
-            // If paywall is not found in cache,
-            // indicate we are retrieving from server;
-            // otherwise silently update.
-            progress.value = !cacheFound
-
             if (!isConnected) {
                 progress.value = false
                 return@launch
             }
 
-            val result = PaywallRepo.fromServer(
-                api = api,
-                scope = scope,
-                cache = cache,
-            )
-            progress.value = false
-
-            when (result) {
-                is FetchResult.LocalizedError -> {
-                    if (!cacheFound) {
-                        showSnackBar(result.msgId)
-                    }
-                }
-                is FetchResult.TextError -> {
-                    if (!cacheFound) {
-                        showSnackBar(result.text)
-                    }
-                }
-                is FetchResult.Success -> {
-                    paywallData = result.data
-                    checkoutDataReady = true
-                }
-            }
-        }
-    }
-
-    fun refreshPaywall(
-        api: ApiConfig
-    ) {
-        if (!ensureConnected()) {
-            return
-        }
-
-        refreshing = true
-        scope.launch {
-            val result = PaywallRepo.fromServer(
-                api = api,
-                scope = scope,
-                cache = cache
-            )
-
-            refreshing = false
-            when (result) {
+            when (val result = SubscriptionCatalogRepo.fromServer(api, userId)) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
                 }
@@ -112,26 +50,53 @@ class PaywallState(
                     showSnackBar(result.text)
                 }
                 is FetchResult.Success -> {
-                    showRefreshed()
-                    paywallData = result.data
-                    checkoutDataReady = true
+                    catalog = result.data
+                    loaded = true
                 }
             }
+            progress.value = false
+        }
+    }
+
+    fun refreshCatalog(
+        api: ApiConfig,
+        userId: String?,
+    ) {
+        if (!ensureConnected()) {
+            return
+        }
+
+        refreshing = true
+        scope.launch {
+            when (val result = SubscriptionCatalogRepo.fromServer(api, userId)) {
+                is FetchResult.LocalizedError -> {
+                    showSnackBar(result.msgId)
+                }
+                is FetchResult.TextError -> {
+                    showSnackBar(result.text)
+                }
+                is FetchResult.Success -> {
+                    catalog = result.data
+                    loaded = true
+                    showRefreshed()
+                }
+            }
+            refreshing = false
         }
     }
 }
 
 @Composable
-fun rememberPaywallState(
+fun rememberSubscriptionCatalogState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     connState: State<ConnectionState> = connectivityState(),
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
 ) = remember(scaffoldState, connState) {
-    PaywallState(
+    SubscriptionCatalogState(
         scaffoldState = scaffoldState,
         scope = scope,
         connState = connState,
-        context = context,
+        context = context
     )
 }

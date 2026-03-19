@@ -48,6 +48,12 @@ class FtcPayState(
     var paymentIntent by mutableStateOf<OrderResult?>(null)
         private set
 
+    fun loadCatalogCheckoutItem(item: CartItemFtc) {
+        progress.value = true
+        cartItem = item
+        progress.value = false
+    }
+
     fun loadFtcCheckoutItem(
         priceId: String,
         membership: Membership

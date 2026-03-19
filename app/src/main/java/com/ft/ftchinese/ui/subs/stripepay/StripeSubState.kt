@@ -56,6 +56,12 @@ class StripeSubState(
         failure = null
     }
 
+    fun loadCatalogCheckoutItem(item: CartItemStripe) {
+        progress.value = true
+        cartItem = item
+        progress.value = false
+    }
+
     fun loadCheckoutItem(
         priceId: String,
         trialId: String?,

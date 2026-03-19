@@ -16,6 +16,7 @@ import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.ui.components.CreateCustomerDialog
 import com.ft.ftchinese.ui.components.ErrorDialog
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.subs.catalog.CatalogStripeCheckoutStore
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.stripe.android.PaymentConfiguration
@@ -56,12 +57,17 @@ fun StripeSubActivityScreen(
         if (priceId.isNullOrBlank()) {
             context.toast("Error: price id not provided!")
         } else {
-            paymentState.loadCheckoutItem(
-                priceId = priceId,
-                trialId = trialId,
-                couponId = couponId,
-                membership = account.membership
-            )
+            val catalogCheckout = CatalogStripeCheckoutStore.peek(priceId)
+            if (catalogCheckout != null) {
+                paymentState.loadCatalogCheckoutItem(catalogCheckout.cartItem)
+            } else {
+                paymentState.loadCheckoutItem(
+                    priceId = priceId,
+                    trialId = trialId,
+                    couponId = couponId,
+                    membership = account.membership
+                )
+            }
         }
     }
 

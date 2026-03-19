@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.subs.catalog.CatalogFtcCheckoutStore
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -25,6 +26,7 @@ fun FtcPayActivityScreen(
     payViewModel: FtcPayViewModel,
     scaffoldState: ScaffoldState,
     priceId: String?,
+    payMethod: PayMethod?,
     onAliPay: (AliPayIntent) -> Unit,
     onSuccess: () -> Unit,
 ) {
@@ -61,10 +63,15 @@ fun FtcPayActivityScreen(
     }
 
     LaunchedEffect(key1 = Unit) {
-        ftcPayState.loadFtcCheckoutItem(
-            priceId = priceId,
-            membership = account.membership
-        )
+        val catalogCheckout = CatalogFtcCheckoutStore.peek(priceId)
+        if (catalogCheckout != null) {
+            ftcPayState.loadCatalogCheckoutItem(catalogCheckout.cartItem)
+        } else {
+            ftcPayState.loadFtcCheckoutItem(
+                priceId = priceId,
+                membership = account.membership
+            )
+        }
     }
 
     // After order created
@@ -127,10 +134,10 @@ fun FtcPayActivityScreen(
                         item = item,
                     )
                 },
-                mode = apiConfig.mode
+                mode = apiConfig.mode,
+                forcedPayMethod = payMethod
             )
         }
     }
 }
-
 
