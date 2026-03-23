@@ -9,6 +9,7 @@ import com.ft.ftchinese.model.invoice.AddOn
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientBooleanSerializer
+import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -25,6 +26,7 @@ data class Membership(
     // ISO8601 format. Example: 2019-08-05
     @Serializable(with = DateAsStringSerializer::class)
     val expireDate: LocalDate? = null,
+    @Serializable(with = LenientPayMethodSerializer::class)
     val payMethod: PayMethod? = null,
     val stripeSubsId: String? = null,
     // If autoRenew is true, ignore expireDate.

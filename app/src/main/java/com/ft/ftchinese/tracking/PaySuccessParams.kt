@@ -19,7 +19,7 @@ data class PaySuccessParams(
                 edition = pi.price.edition,
                 currency = pi.price.currency,
                 amountPaid = pi.order.payableAmount,
-                payMethod = pi.order.payMethod,
+                payMethod = pi.order.payMethod ?: PayMethod.ALIPAY,
             )
         }
 

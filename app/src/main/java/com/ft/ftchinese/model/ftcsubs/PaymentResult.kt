@@ -2,6 +2,7 @@ package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
+import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
@@ -18,6 +19,7 @@ data class PaymentResult(
     val ftcOrderId: String,
     @Serializable(with = DateTimeAsStringSerializer::class)
     val paidAt: ZonedDateTime? = null, // ISO8601
+    @Serializable(with = LenientPayMethodSerializer::class)
     val payMethod: PayMethod? = null
 ) {
     fun isVerified(): Boolean {

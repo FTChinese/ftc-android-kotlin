@@ -3,6 +3,7 @@ package com.ft.ftchinese.model.invoice
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
+import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.encodeToString
@@ -25,6 +26,7 @@ data class Invoice(
     var orderId: String? = null,
     val orderKind: OrderKind? = null,
     val paidAmount: Double,
+    @Serializable(with = LenientPayMethodSerializer::class)
     val payMethod: PayMethod? = null,
     val priceId: String? = null,
     val stripeSubsId: String? = null,

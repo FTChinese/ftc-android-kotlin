@@ -3,9 +3,10 @@ package com.ft.ftchinese.model.subscriptioncatalog
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.serializer.DateAsStringSerializer
+import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import kotlinx.serialization.Serializable
 import org.threeten.bp.LocalDate
-import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 
 @Serializable
 data class SubscriptionCatalog(
@@ -115,6 +116,7 @@ data class SubscriptionCatalogSummary(
     val status: String = "none",
     val statusText: String = "",
     val tier: Tier? = null,
+    @Serializable(with = LenientPayMethodSerializer::class)
     val payMethod: PayMethod? = null,
     @Serializable(with = DateAsStringSerializer::class)
     val expireDate: LocalDate? = null,

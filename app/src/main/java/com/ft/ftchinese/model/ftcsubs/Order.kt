@@ -4,6 +4,7 @@ import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.serializer.DateAsStringSerializer
+import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -25,7 +26,8 @@ data class Order(
     val kind: OrderKind,
     val originalPrice: Double? = null,
     val payableAmount: Double,
-    val payMethod: PayMethod,
+    @Serializable(with = LenientPayMethodSerializer::class)
+    val payMethod: PayMethod?,
     val yearsCount: Int,
     val monthsCount: Int,
     val daysCount: Int,
