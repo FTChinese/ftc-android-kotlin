@@ -18,7 +18,6 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.primarySurface
@@ -148,8 +147,9 @@ private fun MembershipTierCard(
         Column(modifier = Modifier.padding(18.dp)) {
             Text(
                 text = plainText(product.name),
-                style = MaterialTheme.typography.h4,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp
             )
 
             val benefits = product.benefits.map(::plainText).filter { it.isNotBlank() }
@@ -214,61 +214,18 @@ private fun PlanCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = plainText(plan.title),
-                    style = MaterialTheme.typography.h6,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                when {
-                    primaryOption?.isActive == true -> {
-                        Surface(
-                            color = OColor.claret.copy(alpha = 0.12f),
-                            shape = RoundedCornerShape(999.dp)
-                        ) {
-                            Text(
-                                text = currentPlanLabel(preferredLanguage),
-                                color = OColor.claret,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    !primaryOption?.originalPrice.isNullOrBlank() -> {
-                        Surface(
-                            color = OColor.teal.copy(alpha = 0.14f),
-                            shape = RoundedCornerShape(999.dp)
-                        ) {
-                            Text(
-                                text = offerLabel(preferredLanguage),
-                                color = OColor.teal,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
             Text(
                 text = plainText(primaryOption?.displayPrice.orEmpty()),
-                style = MaterialTheme.typography.h4,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp
             )
 
             if (!primaryOption?.originalPrice.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = plainText(primaryOption?.originalPrice.orEmpty()),
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.body2,
                     color = OColors.black50Default,
                     textDecoration = TextDecoration.LineThrough,
                     maxLines = 1,
@@ -474,14 +431,6 @@ private fun paymentChoiceLabel(
     }
 }
 
-private fun offerLabel(preferredLanguage: String): String {
-    return if (preferredLanguage.startsWith("zh", ignoreCase = true)) {
-        "优惠价格"
-    } else {
-        "Special Offer"
-    }
-}
-
 private fun paymentChoiceHint(
     choice: PaymentChoice,
     preferredLanguage: String,
@@ -495,14 +444,6 @@ private fun paymentChoiceHint(
         PayMethod.STRIPE ->
             if (zh) "自动续订，订阅到期前 24 小时自动扣费" else "Auto-renews 24 hours before expiry"
         else -> ""
-    }
-}
-
-private fun currentPlanLabel(preferredLanguage: String): String {
-    return if (preferredLanguage.startsWith("zh", ignoreCase = true)) {
-        "当前方案"
-    } else {
-        "Current Plan"
     }
 }
 
