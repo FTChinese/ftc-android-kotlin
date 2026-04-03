@@ -278,6 +278,7 @@ class SessionManager private constructor(context: Context) {
     fun logout() {
         AccountCache.clear()
         SessionTokenStore.getInstance(appContext).clear()
+        PushRegistrationStore.getInstance(appContext).clearRegistrationReceipt()
         prefsOrNull()?.edit {
             clear()
         }

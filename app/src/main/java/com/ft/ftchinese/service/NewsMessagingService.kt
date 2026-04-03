@@ -12,6 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.R.string.news_notification_channel_id
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.enums.ArticleType
+import com.ft.ftchinese.repository.PushClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -45,7 +46,9 @@ class NewsMessagingService : FirebaseMessagingService() {
 
         Log.i(TAG, "onNewToken: $token")
 
-        sendRegistrationToServer(token)
+        // Push registration is now done through /api/push/register, not piggybacked
+        // onto auth payloads. Keep the FCM token separate from TokenManager's device id.
+        PushClient.handleNewFcmToken(token)
     }
 
 
@@ -124,9 +127,5 @@ class NewsMessagingService : FirebaseMessagingService() {
             .create(this)
             .addNextIntentWithParentStack(intent)
             .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-    }
-
-    private fun sendRegistrationToServer(token: String?) {
-        Log.i(TAG, "Sending new token to server: $token")
     }
 }

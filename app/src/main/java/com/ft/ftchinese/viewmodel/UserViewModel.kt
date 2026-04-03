@@ -9,6 +9,7 @@ import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.WxSession
+import com.ft.ftchinese.repository.PushClient
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
@@ -69,6 +70,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         accountLiveData.value = a
         session.saveAccount(a)
         syncFirebaseUserId(a)
+        PushClient.syncFcmRegistration()
     }
 
     fun saveMembership(m: Membership) {

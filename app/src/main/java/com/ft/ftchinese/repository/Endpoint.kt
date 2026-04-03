@@ -28,6 +28,7 @@ object Endpoint {
     val mobileVerificationCode = "${authMobileBase}/verification"
     val mobileInitialLink = "${authMobileBase}/link"
     val mobileSignUp = "${authMobileBase}/signup"
+    val pushRegister = "${baseUrl}/push/register"
 
     val passwordReset = "${baseUrl}/auth/password-reset"
     val passwordResetLetter = "${passwordReset}/letter"

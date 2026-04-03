@@ -1,6 +1,7 @@
 package com.ft.ftchinese
 
 import android.app.Application
+import com.ft.ftchinese.repository.PushClient
 
 class App : Application() {
 
@@ -12,5 +13,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        PushClient.syncFcmRegistration()
     }
 }
