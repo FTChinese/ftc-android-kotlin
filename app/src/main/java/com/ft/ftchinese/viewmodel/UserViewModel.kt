@@ -70,7 +70,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         accountLiveData.value = a
         session.saveAccount(a)
         syncFirebaseUserId(a)
-        PushClient.syncFcmRegistration()
+        PushClient.syncRegistration()
     }
 
     fun saveMembership(m: Membership) {

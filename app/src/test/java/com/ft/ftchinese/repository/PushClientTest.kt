@@ -8,32 +8,86 @@ import org.junit.Test
 class PushClientTest {
 
     @Test
-    fun doesNotRegisterWhenUserAndTokenAreUnchanged() {
-        val needsRegistration = PushClient.needsFcmRegistration(
+    fun doesNotRegisterWhenUserProviderAndPushIdAreUnchanged() {
+        val needsRegistration = PushClient.needsRegistration(
             currentUserId = "user-1",
-            currentToken = "token-1",
+            currentProvider = "fcm",
+            currentPushId = "token-1",
             lastUserId = "user-1",
-            lastToken = "token-1",
+            lastProvider = "fcm",
+            lastPushId = "token-1",
         )
 
         assertFalse(needsRegistration)
     }
 
     @Test
-    fun registersWhenUserChangesEvenIfTokenStaysTheSame() {
-        val needsRegistration = PushClient.needsFcmRegistration(
-            currentUserId = "user-2",
-            currentToken = "token-1",
+    fun registersWhenProviderChangesEvenIfPushIdStaysTheSame() {
+        val needsRegistration = PushClient.needsRegistration(
+            currentUserId = "user-1",
+            currentProvider = "vivo",
+            currentPushId = "token-1",
             lastUserId = "user-1",
-            lastToken = "token-1",
+            lastProvider = "fcm",
+            lastPushId = "token-1",
         )
 
         assertTrue(needsRegistration)
     }
 
     @Test
-    fun buildsFcmRegistrationPayloadForTheNewEndpoint() {
-        val request = PushClient.buildFcmRegistration(
+    fun registersWhenUserChangesEvenIfPushIdStaysTheSame() {
+        val needsRegistration = PushClient.needsRegistration(
+            currentUserId = "user-2",
+            currentProvider = "fcm",
+            currentPushId = "token-1",
+            lastUserId = "user-1",
+            lastProvider = "fcm",
+            lastPushId = "token-1",
+        )
+
+        assertTrue(needsRegistration)
+    }
+
+    @Test
+    fun prefersFcmWhenGooglePlayServicesAreAvailableEvenOnVivoDevices() {
+        val preferred = PushClient.resolvePreferredProvider(
+            gmsAvailable = true,
+            brand = "vivo",
+            manufacturer = "vivo",
+            vivoConfigured = true,
+        )
+
+        assertEquals("fcm", preferred)
+    }
+
+    @Test
+    fun prefersVivoWhenGooglePlayServicesAreUnavailableOnConfiguredVivoDevices() {
+        val preferred = PushClient.resolvePreferredProvider(
+            gmsAvailable = false,
+            brand = "vivo",
+            manufacturer = "vivo",
+            vivoConfigured = true,
+        )
+
+        assertEquals("vivo", preferred)
+    }
+
+    @Test
+    fun doesNotPreferVivoProviderWhenConfigIsMissing() {
+        val preferred = PushClient.shouldUseVivoProvider(
+            brand = "vivo",
+            manufacturer = "vivo",
+            vivoConfigured = false,
+        )
+
+        assertFalse(preferred)
+    }
+
+    @Test
+    fun buildsVivoRegistrationPayloadForTheNewEndpoint() {
+        val request = PushClient.buildRegistration(
+            provider = "vivo",
             pushId = "fcm-token",
             installationId = "device-id",
             appVersion = "6.8.46",
@@ -46,7 +100,7 @@ class PushClientTest {
         )
 
         assertEquals("android", request.platform)
-        assertEquals("fcm", request.provider)
+        assertEquals("vivo", request.provider)
         assertEquals("fcm-token", request.pushId)
         assertEquals("device-id", request.installationId)
         assertEquals("granted", request.notificationPermission)

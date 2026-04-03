@@ -22,6 +22,12 @@ apply plugin: 'com.google.gms.google-services'
 // https://medium.com/@abhi007tyagi/storing-api-keys-using-android-ndk-6abb0adcadad
 def props = new Properties()
 file("$rootDir/config.properties").withInputStream { props.load(it) }
+def propString = { String key, String defaultValue = "" ->
+    return props.getProperty(key, defaultValue).replace('"', '')
+}
+def vivoPushAppId = propString("vivo.push.appId")
+def vivoPushAppKey = propString("vivo.push.appKey")
+def vivoPushAppSecret = propString("vivo.push.appSecret")
 
 // Creates a variable called keystorePropertiesFile, and initializes it to the
 // keystore.properties file.
@@ -86,6 +92,13 @@ android {
 
         buildConfigField "String", "CONVERSION_DEV_TOKEN", props.getProperty("conversion.dev_token")
         buildConfigField "String", "CONVERSION_LINK_ID", props.getProperty("conversion.link_id")
+        buildConfigField "String", "VIVO_PUSH_APP_ID", "\"${vivoPushAppId}\""
+        buildConfigField "String", "VIVO_PUSH_APP_KEY", "\"${vivoPushAppKey}\""
+        buildConfigField "String", "VIVO_PUSH_APP_SECRET", "\"${vivoPushAppSecret}\""
+        manifestPlaceholders += [
+                vivoPushAppId : vivoPushAppId,
+                vivoPushAppKey: vivoPushAppKey
+        ]
 
         externalNativeBuild {
             cmake {
@@ -229,6 +242,7 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-analytics:18.0.3'
     implementation 'com.google.android.gms:play-services-base:18.2.0'
+    implementation 'com.umeng.umsdk:vivo-push:4.0.6.0'
 
     // Payment
     implementation(name: 'alipaysdk-15.8.03.210428205839', ext: 'aar')

@@ -37,6 +37,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <!-- Vivo push uses the same website/Play APK and is enabled at runtime on supported devices.
+             Empty placeholders are safe locally until the real vivo open-platform keys are configured. -->
+        <meta-data
+            android:name="com.vivo.push.api_key"
+            android:value="${vivoPushAppKey}" />
+        <meta-data
+            android:name="com.vivo.push.app_id"
+            android:value="${vivoPushAppId}" />
+
         <activity
             android:name=".ui.main.MyFtActivity"
             android:exported="false" />
@@ -174,6 +183,19 @@
                 android:name="com.google.firebase.messaging.default_notification_channel_id"
                 android:value="@string/news_notification_channel_id" />
         </service>
+
+        <receiver
+            android:name=".service.VivoPushMessageReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.vivo.pushclient.action.RECEIVE" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.vivo.push.sdk.service.CommandClientService"
+            android:permission="com.push.permission.UPSTAGESERVICE"
+            android:exported="true" />
     </application>
 
 </manifest>

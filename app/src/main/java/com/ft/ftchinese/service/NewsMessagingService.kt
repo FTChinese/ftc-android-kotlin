@@ -19,6 +19,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 private const val TAG = "NewsMessagingService"
+private const val LOG_PREFIX = "[FTCPush]"
 
 class NewsMessagingService : FirebaseMessagingService() {
     // Handle messages when app is in foreground.
@@ -44,7 +45,7 @@ class NewsMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        Log.i(TAG, "onNewToken: $token")
+        Log.i(TAG, "$LOG_PREFIX firebase_on_new_token token=${PushClient.summarizeSecret(token)}")
 
         // Push registration is now done through /api/push/register, not piggybacked
         // onto auth payloads. Keep the FCM token separate from TokenManager's device id.

@@ -4,8 +4,10 @@ import android.content.Context
 
 private const val PREF_NAME = "push_registration"
 private const val KEY_FCM_TOKEN = "fcm_token"
-private const val KEY_LAST_FCM_USER_ID = "last_fcm_user_id"
-private const val KEY_LAST_FCM_TOKEN = "last_fcm_token"
+private const val KEY_VIVO_PUSH_ID = "vivo_push_id"
+private const val KEY_LAST_USER_ID = "last_user_id"
+private const val KEY_LAST_PROVIDER = "last_provider"
+private const val KEY_LAST_PUSH_ID = "last_push_id"
 
 class PushRegistrationStore private constructor(context: Context) {
     private val prefs = context.applicationContext
@@ -19,25 +21,43 @@ class PushRegistrationStore private constructor(context: Context) {
         return prefs.getString(KEY_FCM_TOKEN, null)
     }
 
-    fun loadLastRegisteredUserId(): String? {
-        return prefs.getString(KEY_LAST_FCM_USER_ID, null)
+    fun saveVivoPushId(pushId: String) {
+        prefs.edit().putString(KEY_VIVO_PUSH_ID, pushId).apply()
     }
 
-    fun loadLastRegisteredFcmToken(): String? {
-        return prefs.getString(KEY_LAST_FCM_TOKEN, null)
+    fun loadVivoPushId(): String? {
+        return prefs.getString(KEY_VIVO_PUSH_ID, null)
+    }
+
+    fun loadLastRegisteredUserId(): String? {
+        return prefs.getString(KEY_LAST_USER_ID, null)
+    }
+
+    fun loadLastRegisteredProvider(): String? {
+        return prefs.getString(KEY_LAST_PROVIDER, null)
+    }
+
+    fun loadLastRegisteredPushId(): String? {
+        return prefs.getString(KEY_LAST_PUSH_ID, null)
     }
 
     fun markFcmRegistered(userId: String, token: String) {
+        markRegistered(provider = "fcm", userId = userId, pushId = token)
+    }
+
+    fun markRegistered(provider: String, userId: String, pushId: String) {
         prefs.edit()
-            .putString(KEY_LAST_FCM_USER_ID, userId)
-            .putString(KEY_LAST_FCM_TOKEN, token)
+            .putString(KEY_LAST_USER_ID, userId)
+            .putString(KEY_LAST_PROVIDER, provider)
+            .putString(KEY_LAST_PUSH_ID, pushId)
             .apply()
     }
 
     fun clearRegistrationReceipt() {
         prefs.edit()
-            .remove(KEY_LAST_FCM_USER_ID)
-            .remove(KEY_LAST_FCM_TOKEN)
+            .remove(KEY_LAST_USER_ID)
+            .remove(KEY_LAST_PROVIDER)
+            .remove(KEY_LAST_PUSH_ID)
             .apply()
     }
 
