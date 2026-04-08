@@ -1,6 +1,8 @@
 package com.ft.ftchinese.ui.main.terms
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,10 +19,13 @@ fun TermsScreen(
     content: @Composable() (BoxScope.() -> Unit)
 ) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background),
     ) {
         Box(
             modifier = Modifier
+                .statusBarsPadding()
                 .weight(1f)
                 .fillMaxWidth()
         ) {
@@ -30,6 +35,8 @@ fun TermsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(MaterialTheme.colors.background)
+                .navigationBarsPadding()
                 .padding(Dimens.dp16),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
