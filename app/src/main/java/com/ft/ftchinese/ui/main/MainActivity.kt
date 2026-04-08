@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.main
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -73,12 +74,18 @@ class MainActivity : ComponentActivity() {
             val channelName = getString(R.string.news_notification_channel_name)
             val channelDesc = getString(R.string.news_notification_channel_description)
 
+            // Channel importance is immutable after creation. Updating the channel id lets
+            // the system create a fresh high-importance channel for news push testing.
             val channel = NotificationChannel(
                     channelId,
                     channelName,
-                    NotificationManager.IMPORTANCE_DEFAULT
+                    NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = channelDesc
+                enableLights(true)
+                enableVibration(true)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
             }
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)

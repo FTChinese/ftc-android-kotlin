@@ -5,6 +5,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.ui.theme.Dimens
@@ -18,7 +19,9 @@ fun Toolbar(
     TopAppBar(
         title = {
             Text(
-                text = heading
+                text = heading,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         navigationIcon = {
@@ -48,7 +51,11 @@ fun CloseBar(
 ) {
     TopAppBar(
         title = {
-            Text(text = title)
+            Text(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         },
         navigationIcon = {
             IconButton(

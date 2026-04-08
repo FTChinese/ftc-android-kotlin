@@ -20,6 +20,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.content.WebpageMeta
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.ui.auth.ForcedLogoutHandler
 import com.ft.ftchinese.ui.auth.validateSessionOnLaunch
 import com.ft.ftchinese.ui.article.audio.AiAudioActivityScreen
@@ -36,6 +38,8 @@ import androidx.core.view.WindowCompat
 import com.ft.ftchinese.ui.theme.OColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.SideEffect
+import com.ft.ftchinese.ui.util.UriUtils
+import com.ft.ftchinese.ui.webpage.WebpageActivity
 
 /**
  * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
@@ -56,6 +60,7 @@ class ArticleActivity : ComponentActivity() {
         val teaser = intent
             .getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER)
             ?: return
+        val initialScreen = resolveInitialScreen(intent)
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         setContent {
@@ -70,6 +75,7 @@ class ArticleActivity : ComponentActivity() {
                     overridePendingTransition(0, 0)
                 },
                 initialId = NavStore.saveTeaser(teaser),
+                initialScreen = initialScreen,
             )
         }
 
@@ -84,6 +90,7 @@ class ArticleActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_ARTICLE_TEASER = "com.ft.ftchinese.ArticleTeaser"
+        private const val EXTRA_INITIAL_SCREEN = "com.ft.ftchinese.ArticleInitialScreen"
 
         @JvmStatic
         fun newIntent(context: Context?, teaser: Teaser?): Intent {
@@ -100,17 +107,44 @@ class ArticleActivity : ComponentActivity() {
          */
         @JvmStatic
         fun start(context: Context?, teaser: Teaser) {
+            if (context == null) {
+                return
+            }
+
+            radioPageMeta(teaser)?.let {
+                WebpageActivity.start(context, it)
+                return
+            }
+
             val intent = Intent(context, ArticleActivity::class.java).apply {
                 putExtra(EXTRA_ARTICLE_TEASER, teaser)
             }
 
-            context?.startActivity(intent)
+            context.startActivity(intent)
+        }
+
+        @JvmStatic
+        fun startAudioWithParentStack(context: Context, teaser: Teaser) {
+            val intent = Intent(context, ArticleActivity::class.java).apply {
+                putExtra(EXTRA_ARTICLE_TEASER, teaser)
+                putExtra(EXTRA_INITIAL_SCREEN, ArticleAppScreen.Audio.name)
+            }
+
+            TaskStackBuilder
+                .create(context)
+                .addNextIntentWithParentStack(intent)
+                .startActivities()
         }
 
         // When app is in background and user clicked notification message, open the activity with parent stack
         // so that back button works.
         @JvmStatic
         fun startWithParentStack(context: Context, channelItem: Teaser) {
+            radioPageMeta(channelItem)?.let {
+                WebpageActivity.startWithParentStack(context, it)
+                return
+            }
+
             val intent = Intent(context, ArticleActivity::class.java).apply {
                 putExtra(EXTRA_ARTICLE_TEASER, channelItem)
             }
@@ -120,6 +154,25 @@ class ArticleActivity : ComponentActivity() {
                 .addNextIntentWithParentStack(intent)
                 .startActivities()
         }
+
+        private fun resolveInitialScreen(intent: Intent): ArticleAppScreen {
+            val raw = intent.getStringExtra(EXTRA_INITIAL_SCREEN)
+            return ArticleAppScreen.values().firstOrNull { it.name == raw } ?: ArticleAppScreen.Story
+        }
+
+        private fun radioPageMeta(teaser: Teaser): WebpageMeta? {
+            if (teaser.type != ArticleType.Interactive || teaser.subType != Teaser.SUB_TYPE_RADIO) {
+                return null
+            }
+
+            val url = UriUtils.pushInteractiveUrl(teaser.id) ?: return null
+
+            return WebpageMeta(
+                title = teaser.title.ifBlank { "FT Audio" },
+                url = url,
+                useCloseButton = false,
+            )
+        }
     }
 }
 
@@ -128,6 +181,7 @@ private fun ArticleApp(
     userViewModel: UserViewModel,
     onExit: () -> Unit,
     initialId: String,
+    initialScreen: ArticleAppScreen,
 ) {
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
@@ -161,7 +215,7 @@ private fun ArticleApp(
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = "${ArticleAppScreen.Story.name}/{id}",
+                startDestination = "${initialScreen.name}/{id}",
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable(
@@ -232,6 +286,7 @@ private fun ArticleApp(
                     arguments = listOf(
                         navArgument("id") {
                             type = NavType.StringType
+                            defaultValue = initialId
                         }
                     )
                 ) { entry ->

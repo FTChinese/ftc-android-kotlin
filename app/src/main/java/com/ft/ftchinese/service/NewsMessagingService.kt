@@ -1,8 +1,6 @@
 package com.ft.ftchinese.service
 
 import android.Manifest
-import android.app.PendingIntent
-import android.app.TaskStackBuilder
 import android.content.pm.PackageManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -10,11 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.R
 import com.ft.ftchinese.R.string.news_notification_channel_id
-import com.ft.ftchinese.model.content.*
-import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.repository.PushClient
-import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -55,15 +49,39 @@ class NewsMessagingService : FirebaseMessagingService() {
 
     private fun handleNow(notification: RemoteMessage.Notification?, data: Map<String, String>?) {
         if (notification == null || data == null || data.isEmpty()) {
+            Log.i(TAG, "$LOG_PREFIX message_ignored reason=missing_notification_or_data")
             return
         }
 
-        val contentType = data["content_type"]
-        val contentId = data["content_id"] ?: return
-
-        val msgType = RemoteMessageType.fromString(contentType) ?: return
-
-        val intent = createIntent(msgType, contentId) ?: return
+        val route = runCatching {
+            PushNotificationRouter.routeFromData(
+                data = data,
+                fallbackTitle = notification.title,
+            )
+        }.getOrElse { error ->
+            Log.e(
+                TAG,
+                "$LOG_PREFIX message_ignored reason=push_route_exception message=${error.message} data=$data",
+                error
+            )
+            null
+        } ?: run {
+            Log.i(
+                TAG,
+                "$LOG_PREFIX message_ignored reason=unsupported_push_route data=$data"
+            )
+            return
+        }
+        val intent = runCatching {
+            PushNotificationRouter.createPendingIntent(this, route)
+        }.getOrElse { error ->
+            Log.e(
+                TAG,
+                "$LOG_PREFIX message_ignored reason=pending_intent_exception action=${route.action} targetId=${route.targetId} message=${error.message}",
+                error
+            )
+            null
+        } ?: return
 
         val builder = NotificationCompat.Builder(
                 applicationContext,
@@ -72,7 +90,8 @@ class NewsMessagingService : FirebaseMessagingService() {
                 .setContentTitle(notification.title)
                 .setStyle(NotificationCompat.BigTextStyle()
                         .bigText(notification.body))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setAutoCancel(true)
                 .setContentIntent(intent)
 
@@ -82,6 +101,10 @@ class NewsMessagingService : FirebaseMessagingService() {
                     Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
+                Log.w(
+                    TAG,
+                    "$LOG_PREFIX notification_display_skipped reason=missing_post_notifications_permission action=${route.action} targetId=${route.targetId}"
+                )
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -92,41 +115,10 @@ class NewsMessagingService : FirebaseMessagingService() {
                 return
             }
             notify(1, builder.build())
-        }
-    }
-
-    private fun createIntent(msgType: RemoteMessageType, contentId: String): PendingIntent? {
-        val contentType = msgType.toArticleType() ?: return null
-
-        val intent = when (msgType) {
-            RemoteMessageType.Story,
-            RemoteMessageType.Video,
-            RemoteMessageType.Photo,
-            RemoteMessageType.Interactive -> ArticleActivity.newIntent(
-                    baseContext,
-                    Teaser(
-                            id = contentId,
-                            type = ArticleType.fromString(contentType),
-                            title = ""
-                    )
-            )
-
-            RemoteMessageType.Tag,
-            RemoteMessageType.Channel -> ChannelActivity.newIntent(
-                    baseContext,
-                    ChannelSource(
-                            title = contentId,
-                            name = "${msgType}_$contentId",
-                        path = "",
-                        query = "",
-                            htmlType = HTML_TYPE_FRAGMENT
-                    )
+            Log.i(
+                TAG,
+                "$LOG_PREFIX notification_displayed action=${route.action} targetId=${route.targetId}"
             )
         }
-
-        return TaskStackBuilder
-            .create(this)
-            .addNextIntentWithParentStack(intent)
-            .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 }

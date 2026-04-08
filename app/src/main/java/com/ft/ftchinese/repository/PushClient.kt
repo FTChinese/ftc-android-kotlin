@@ -2,7 +2,6 @@ package com.ft.ftchinese.repository
 
 import android.os.Build
 import android.util.Log
-import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.App
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.fetch.Fetch
@@ -159,13 +158,16 @@ object PushClient {
         currentUserId: String,
         currentProvider: String,
         currentPushId: String,
+        currentNotificationPermission: String,
         lastUserId: String?,
         lastProvider: String?,
         lastPushId: String?,
+        lastNotificationPermission: String?,
     ): Boolean {
         return currentUserId != lastUserId
             || currentProvider != lastProvider
             || currentPushId != lastPushId
+            || currentNotificationPermission != lastNotificationPermission
     }
 
     internal fun shouldUseVivoProvider(
@@ -439,24 +441,32 @@ object PushClient {
         val lastUserId = store.loadLastRegisteredUserId()
         val lastProvider = store.loadLastRegisteredProvider()
         val lastPushId = store.loadLastRegisteredPushId()
+        val lastNotificationPermission = store.loadLastNotificationPermission()
+        val notificationStatus = NotificationSettingsHelper.readStatus(context)
+        val currentNotificationPermission = if (notificationStatus.enabled) {
+            NOTIFICATION_GRANTED
+        } else {
+            NOTIFICATION_DENIED
+        }
 
         if (!needsRegistration(
                 currentUserId = userId,
                 currentProvider = provider,
                 currentPushId = pushId,
+                currentNotificationPermission = currentNotificationPermission,
                 lastUserId = lastUserId,
                 lastProvider = lastProvider,
                 lastPushId = lastPushId,
+                lastNotificationPermission = lastNotificationPermission,
             )
         ) {
             logInfo(
                 "register_skip",
-                "reason=already_registered provider=$provider userId=${maskValue(userId)} pushId=${summarizeSecret(pushId)}"
+                "reason=already_registered provider=$provider userId=${maskValue(userId)} pushId=${summarizeSecret(pushId)} notificationPermission=$currentNotificationPermission"
             )
             return
         }
 
-        val notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
         val installationId = TokenManager.getInstance(context).getToken()
         val gmsAvailable = isGmsAvailable(context)
         val request = buildRegistration(
@@ -468,13 +478,13 @@ object PushClient {
             brand = Build.BRAND ?: "",
             model = Build.MODEL ?: "",
             osVersion = Build.VERSION.RELEASE ?: "",
-            notificationsEnabled = notificationsEnabled,
+            notificationsEnabled = notificationStatus.enabled,
             gmsAvailable = gmsAvailable,
         )
 
         logInfo(
             "register_request_start",
-            "provider=$provider userId=${maskValue(userId)} installationId=${maskValue(installationId)} pushId=${summarizeSecret(pushId)} notificationsEnabled=$notificationsEnabled gmsAvailable=$gmsAvailable"
+            "provider=$provider userId=${maskValue(userId)} installationId=${maskValue(installationId)} pushId=${summarizeSecret(pushId)} notificationsEnabled=${notificationStatus.enabled} appNotificationsEnabled=${notificationStatus.appNotificationsEnabled} channelEnabled=${notificationStatus.channelEnabled} permissionGranted=${notificationStatus.permissionGranted} gmsAvailable=$gmsAvailable"
         )
         scope.launch {
             runCatching {
@@ -487,10 +497,11 @@ object PushClient {
                     provider = provider,
                     userId = userId,
                     pushId = pushId,
+                    notificationPermission = currentNotificationPermission,
                 )
                 logInfo(
                     "register_request_success",
-                    "provider=$provider userId=${maskValue(userId)} installationId=${maskValue(installationId)} pushId=${summarizeSecret(pushId)}"
+                    "provider=$provider userId=${maskValue(userId)} installationId=${maskValue(installationId)} pushId=${summarizeSecret(pushId)} notificationPermission=$currentNotificationPermission"
                 )
             }.onFailure {
                 logWarn(

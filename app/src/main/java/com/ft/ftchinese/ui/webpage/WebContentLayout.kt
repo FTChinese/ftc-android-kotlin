@@ -4,12 +4,14 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.components.CloseBar
 import com.ft.ftchinese.ui.components.MenuOpenInBrowser
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.web.UrlHandler
 
 @Composable
@@ -18,6 +20,7 @@ fun WebContentLayout(
     url: String? = null,
     title: String = "",
     loading: Boolean = false,
+    useCloseButton: Boolean = true,
     onClose: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -26,22 +29,40 @@ fun WebContentLayout(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .systemBarsPadding()
             .then(modifier)
     ) {
-        CloseBar(
-            onClose = onClose,
-            title = title,
-            actions = {
-                if (url != null) {
-                    MenuOpenInBrowser {
-                        UrlHandler.openInCustomTabs(
-                            ctx = context,
-                            url = Uri.parse(url)
-                        )
+        if (useCloseButton) {
+            CloseBar(
+                onClose = onClose,
+                title = title,
+                actions = {
+                    if (url != null) {
+                        MenuOpenInBrowser {
+                            UrlHandler.openInCustomTabs(
+                                ctx = context,
+                                url = Uri.parse(url)
+                            )
+                        }
                     }
                 }
-            }
-        )
+            )
+        } else {
+            Toolbar(
+                heading = title,
+                onBack = onClose,
+                actions = {
+                    if (url != null) {
+                        MenuOpenInBrowser {
+                            UrlHandler.openInCustomTabs(
+                                ctx = context,
+                                url = Uri.parse(url)
+                            )
+                        }
+                    }
+                }
+            )
+        }
 
         ProgressLayout(
             modifier = Modifier

@@ -8,6 +8,7 @@ private const val KEY_VIVO_PUSH_ID = "vivo_push_id"
 private const val KEY_LAST_USER_ID = "last_user_id"
 private const val KEY_LAST_PROVIDER = "last_provider"
 private const val KEY_LAST_PUSH_ID = "last_push_id"
+private const val KEY_LAST_NOTIFICATION_PERMISSION = "last_notification_permission"
 
 class PushRegistrationStore private constructor(context: Context) {
     private val prefs = context.applicationContext
@@ -41,15 +42,30 @@ class PushRegistrationStore private constructor(context: Context) {
         return prefs.getString(KEY_LAST_PUSH_ID, null)
     }
 
-    fun markFcmRegistered(userId: String, token: String) {
-        markRegistered(provider = "fcm", userId = userId, pushId = token)
+    fun loadLastNotificationPermission(): String? {
+        return prefs.getString(KEY_LAST_NOTIFICATION_PERMISSION, null)
     }
 
-    fun markRegistered(provider: String, userId: String, pushId: String) {
+    fun markFcmRegistered(userId: String, token: String, notificationPermission: String) {
+        markRegistered(
+            provider = "fcm",
+            userId = userId,
+            pushId = token,
+            notificationPermission = notificationPermission,
+        )
+    }
+
+    fun markRegistered(
+        provider: String,
+        userId: String,
+        pushId: String,
+        notificationPermission: String,
+    ) {
         prefs.edit()
             .putString(KEY_LAST_USER_ID, userId)
             .putString(KEY_LAST_PROVIDER, provider)
             .putString(KEY_LAST_PUSH_ID, pushId)
+            .putString(KEY_LAST_NOTIFICATION_PERMISSION, notificationPermission)
             .apply()
     }
 
@@ -58,6 +74,7 @@ class PushRegistrationStore private constructor(context: Context) {
             .remove(KEY_LAST_USER_ID)
             .remove(KEY_LAST_PROVIDER)
             .remove(KEY_LAST_PUSH_ID)
+            .remove(KEY_LAST_NOTIFICATION_PERMISSION)
             .apply()
     }
 

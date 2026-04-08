@@ -103,6 +103,9 @@ fun MainApp(
     }
 
     ForcedLogoutHandler(userViewModel = userViewModel)
+    NotificationPermissionPromptOnLaunch(
+        isLoggedIn = account?.id?.isNotBlank() == true,
+    )
 
     OTheme {
         Scaffold(

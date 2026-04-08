@@ -130,6 +130,41 @@ object UriUtils {
         }
     }
 
+    fun teaserAudioPageUrl(teaser: Teaser, account: Account?): String? {
+        if (teaser.id.isBlank()) {
+            return null
+        }
+
+        if (teaser.type == ArticleType.Interactive && teaser.subType == Teaser.SUB_TYPE_RADIO) {
+            val builder = Uri.parse(discoverHost(account?.membership))
+                .buildUpon()
+                .appendPath(teaser.type.toString())
+                .appendPath(teaser.id)
+                .appendQueryParameter("bodyonly", "yes")
+                .appendQueryParameter("webview", "ftcapp")
+                .appendQueryParameter("exclusive", "")
+
+            return appendUtm(builder).build().toString()
+        }
+
+        return teaserUrl(teaser, account)
+    }
+
+    fun pushInteractiveUrl(id: String): String? {
+        if (id.isBlank()) {
+            return null
+        }
+
+        return Uri.parse(HostConfig.canonicalUrl)
+            .buildUpon()
+            .appendPath(ArticleType.Interactive.toString())
+            .appendPath(id)
+            .appendQueryParameter("webview", "ftcapp")
+            .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
+            .build()
+            .toString()
+    }
+
     fun articleCacheName(teaser: Teaser): String {
         return if (teaser.hasJsAPI) {
             "${teaser.type}_${teaser.id}_$scriptSuffix.json"

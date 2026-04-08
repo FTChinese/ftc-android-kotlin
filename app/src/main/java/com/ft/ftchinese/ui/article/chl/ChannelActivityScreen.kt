@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.enums.ArticleType
+import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberBaseUrl
@@ -70,7 +72,11 @@ fun ChannelActivityScreen(
                 Log.i(TAG, "Clicked a teaser item $teaser")
                 val t = teaser.withParentPerm(channelState.channelSource?.permission)
                 scope.launch(Dispatchers.Main) {
-                    onArticle(NavStore.saveTeaser(t))
+                    if (t.type == ArticleType.Interactive && t.subType == Teaser.SUB_TYPE_RADIO) {
+                        ArticleActivity.start(context, t)
+                    } else {
+                        onArticle(NavStore.saveTeaser(t))
+                    }
                 }
             }
 
@@ -110,7 +116,11 @@ fun ChannelActivityScreen(
 
             override fun onClickStory(teaser: Teaser) {
                 Log.i(TAG, "Clicked a story link $teaser")
-                onArticle(NavStore.saveTeaser(teaser))
+                if (teaser.type == ArticleType.Interactive && teaser.subType == Teaser.SUB_TYPE_RADIO) {
+                    ArticleActivity.start(context, teaser)
+                } else {
+                    onArticle(NavStore.saveTeaser(teaser))
+                }
             }
         }
     }

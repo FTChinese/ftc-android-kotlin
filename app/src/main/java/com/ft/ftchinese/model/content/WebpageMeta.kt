@@ -7,5 +7,6 @@ import kotlinx.parcelize.Parcelize
 data class WebpageMeta(
     val title: String,
     val url: String,
-    val showMenu: Boolean = false
+    val showMenu: Boolean = false,
+    val useCloseButton: Boolean = true,
 ) : Parcelable

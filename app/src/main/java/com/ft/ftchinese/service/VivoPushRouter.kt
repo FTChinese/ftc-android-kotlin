@@ -1,16 +1,12 @@
 package com.ft.ftchinese.service
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import com.ft.ftchinese.ui.main.SplashActivity
 import com.vivo.push.model.UPSNotificationMessage
 import com.vivo.push.model.UnvarnishedMessage
 
 private const val TAG = "VivoPushRouter"
 private const val LOG_PREFIX = "[FTCPush]"
-private const val EXTRA_MESSAGE_TYPE = "content_type"
-private const val EXTRA_CONTENT_ID = "content_id"
 
 object VivoPushRouter {
     fun handleNotificationClick(context: Context?, message: UPSNotificationMessage?) {
@@ -20,28 +16,18 @@ object VivoPushRouter {
         }
 
         val params = message.params ?: emptyMap()
-        val contentType = params[EXTRA_MESSAGE_TYPE]?.trim().orEmpty()
-        val contentId = params[EXTRA_CONTENT_ID]?.trim().orEmpty()
-
-        if (contentType.isBlank() || contentId.isBlank()) {
+        val route = PushNotificationRouter.routeFromData(
+            data = params,
+            fallbackTitle = message.title,
+        ) ?: run {
             Log.i(
                 TAG,
-                "$LOG_PREFIX vivo_notification_click_skip reason=missing_payload contentType=$contentType contentId=$contentId"
+                "$LOG_PREFIX vivo_notification_click_skip reason=unsupported_payload params=$params"
             )
             return
         }
 
-        val intent = Intent(context, SplashActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            putExtra(EXTRA_MESSAGE_TYPE, contentType)
-            putExtra(EXTRA_CONTENT_ID, contentId)
-        }
-
-        Log.i(
-            TAG,
-            "$LOG_PREFIX vivo_notification_click_route contentType=$contentType contentId=$contentId"
-        )
-        context.startActivity(intent)
+        PushNotificationRouter.start(context, route, "vivo_click")
     }
 
     fun logForegroundMessage(message: UPSNotificationMessage?) {

@@ -13,9 +13,11 @@ class PushClientTest {
             currentUserId = "user-1",
             currentProvider = "fcm",
             currentPushId = "token-1",
+            currentNotificationPermission = "granted",
             lastUserId = "user-1",
             lastProvider = "fcm",
             lastPushId = "token-1",
+            lastNotificationPermission = "granted",
         )
 
         assertFalse(needsRegistration)
@@ -27,9 +29,11 @@ class PushClientTest {
             currentUserId = "user-1",
             currentProvider = "vivo",
             currentPushId = "token-1",
+            currentNotificationPermission = "granted",
             lastUserId = "user-1",
             lastProvider = "fcm",
             lastPushId = "token-1",
+            lastNotificationPermission = "granted",
         )
 
         assertTrue(needsRegistration)
@@ -41,9 +45,27 @@ class PushClientTest {
             currentUserId = "user-2",
             currentProvider = "fcm",
             currentPushId = "token-1",
+            currentNotificationPermission = "granted",
             lastUserId = "user-1",
             lastProvider = "fcm",
             lastPushId = "token-1",
+            lastNotificationPermission = "granted",
+        )
+
+        assertTrue(needsRegistration)
+    }
+
+    @Test
+    fun registersWhenNotificationPermissionChangesEvenIfProviderAndPushIdStayTheSame() {
+        val needsRegistration = PushClient.needsRegistration(
+            currentUserId = "user-1",
+            currentProvider = "fcm",
+            currentPushId = "token-1",
+            currentNotificationPermission = "denied",
+            lastUserId = "user-1",
+            lastProvider = "fcm",
+            lastPushId = "token-1",
+            lastNotificationPermission = "granted",
         )
 
         assertTrue(needsRegistration)

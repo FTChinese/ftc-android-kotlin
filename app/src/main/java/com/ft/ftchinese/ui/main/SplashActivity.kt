@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
@@ -13,20 +14,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.*
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.model.content.RemoteMessageType
-import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.enums.ArticleType
+import com.ft.ftchinese.service.PushNotificationRouter
 import com.ft.ftchinese.service.SplashWorker
-import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.main.splash.SplashActivityScreen
 import com.ft.ftchinese.ui.main.terms.TermsActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
-
-private const val EXTRA_MESSAGE_TYPE = "content_type"
-private const val EXTRA_CONTENT_ID = "content_id"
 private const val TAG = "SplashActivity"
 
 class SplashActivity : AppCompatActivity() {
@@ -36,6 +28,12 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        workManager = WorkManager.getInstance(this)
+        if (handleNotificationIntent(intent, source = "onCreate")) {
+            finish()
+            return
+        }
+
         setContent {
             SplashApp(
                 onNext = this::exit,
@@ -44,72 +42,43 @@ class SplashActivity : AppCompatActivity() {
                 }
             )
         }
-
-        workManager = WorkManager.getInstance(this)
-        handleMessaging()
     }
 
-    private fun handleMessaging() {
-        // FCM delivers data to the `intent` as key-value pairs,
-        // including your custom data, when the app is in background.
-        // When app is in foreground, data will be delivered to
-        // NewsMessagingService.
-        //
-        // FCM standard keys:
-        // google.delivered_priority: high
-        // google.sent_time: 1565331193712
-        // google.ttl Value: 2419200
-        // from: It seems this is a fixed numeric id.
-        // google.message_id:
-        // collapse_key: com.ft.ftchinese
-        //
-        // Following are custom data fields
-        // contentType: story | video | photo | interactive
-        // contentId: 001084989
-        intent.extras?.let {
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (handleNotificationIntent(intent, source = "onNewIntent")) {
+            finish()
+        }
+    }
+
+    private fun handleNotificationIntent(launchIntent: Intent?, source: String): Boolean {
+        if (launchIntent == null) {
+            return false
+        }
+
+        launchIntent.extras?.let {
             for (key in it.keySet()) {
-                val value = intent.extras?.get(key)
-                Log.i(TAG, "$key: $value")
+                val value = launchIntent.extras?.get(key)
+                Log.i(TAG, "notification_intent[$source] $key: $value")
             }
         }
 
-        // Receive message in the background.
-        // Those data are attached in the Customer data section of FCM composer.
-        // They are key-value pairs.
-        // We use `contentType` as key for EXTRA_MESSAGE_TYPE
-        // and use `contentId` as key for article's id.
-        val msgTypeStr = intent.getStringExtra(EXTRA_MESSAGE_TYPE) ?: return
-        val msgType = RemoteMessageType.fromString(msgTypeStr) ?: return
-
-        val pageId = intent.getStringExtra(EXTRA_CONTENT_ID) ?: return
-
-        Log.i(TAG, "Message type: $msgType, content id: $pageId")
-
-        val contentType = msgType.toArticleType() ?: return
-        when (msgType) {
-            RemoteMessageType.Story,
-            RemoteMessageType.Video,
-            RemoteMessageType.Photo,
-            RemoteMessageType.Interactive -> {
-
-                ArticleActivity.startWithParentStack(this, Teaser(
-                    id = pageId,
-                    type = ArticleType.fromString(contentType),
-                    title = ""
-                ))
-            }
-
-            RemoteMessageType.Tag,
-            RemoteMessageType.Channel -> {
-                ChannelActivity.startWithParentStack(this, ChannelSource(
-                    title = pageId,
-                    name = "${msgType}_$pageId",
-                    path = "",
-                    query = "",
-                    htmlType = HTML_TYPE_FRAGMENT
-                ))
-            }
-
+        return runCatching {
+            val route = PushNotificationRouter.routeFromIntent(launchIntent) ?: return false
+            val useParentStack = launchIntent.getStringExtra(PushNotificationRouter.EXTRA_LAUNCH_MODE) !=
+                PushNotificationRouter.LAUNCH_MODE_DIRECT
+            PushNotificationRouter.start(
+                this,
+                route,
+                source,
+                useParentStack = useParentStack,
+            )
+            true
+        }.getOrElse { error ->
+            Log.e(TAG, "notification_intent[$source] failed message=${error.message}", error)
+            MainActivity.start(this)
+            true
         }
     }
 

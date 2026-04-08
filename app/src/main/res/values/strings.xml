@@ -70,7 +70,7 @@
     <string name="share_template">[FT中文网]%1$s - %2$s</string>
 
     <!--  Unique id for a channel  -->
-    <string name="news_notification_channel_id">fcm_news_channel</string>
+    <string name="news_notification_channel_id">fcm_news_channel_high_v2</string>
     <!--  User-visible name of this channel  -->
     <string name="news_notification_channel_name">新闻</string>
     <!--  This is optional  -->
@@ -479,16 +479,27 @@
     <!-- Settings -->
     <string name="pref_clear_history">清空阅读历史</string>
     <string name="fcm_pref">通知推送</string>
-    <string name="fcm_summary">接收或关闭通知推送</string>
+    <string name="fcm_summary">查看系统通知状态并检测推送连接</string>
     <string name="fcm_setting_title">推送设置</string>
 
-    <string name="channel_setting_news">设置通知推送</string>
-    <string name="fcm_check_guide">接收通知推送需要您的设备已经安装了Google Play服务并且能够访问Firebase Cloud Messaging服务，请打开通知推送并点击下方按钮检测是否满足条件</string>
-    <string name="fcm_start_checking">检测</string>
+    <string name="channel_setting_news">打开系统通知设置</string>
+    <string name="fcm_check_guide">通知状态的显示始终以系统真实设置为准。开启后，您可以及时收到重要新闻、关心的话题更新和精选内容提醒。首次开启时，应用只会请求一次系统权限；之后如需修改，请前往系统通知设置。下方检测按钮仅用于检查Google Play服务和Firebase Cloud Messaging连通性。</string>
+    <string name="fcm_start_checking">检测推送连接</string>
     <string name="play_service_available">Google Play服务可用</string>
     <string name="play_service_not_available">Google Play服务不可用，您可以前往应用商店下载</string>
     <string name="fcm_accessible">Firebase Cloud Messaging可以访问</string>
     <string name="fcm_inaccessible">无法访问Firebase Cloud Messaging</string>
+    <string name="notification_system_title">系统通知</string>
+    <string name="notification_status_enabled">系统通知已开启</string>
+    <string name="notification_status_disabled">系统通知未开启</string>
+    <string name="notification_summary_first_request">开启后可及时收到重要新闻和精选内容提醒</string>
+    <string name="notification_summary_open_settings">如需修改，请前往系统通知设置</string>
+    <string name="notification_summary_channel_disabled">新闻通知频道已关闭，请前往系统通知设置重新开启</string>
+    <string name="notification_system_setting_hint">Android不会由应用直接切换系统通知开关，返回后会按系统真实状态更新显示</string>
+    <string name="notification_permission_prompt_title">开启内容提醒</string>
+    <string name="notification_permission_prompt_body">开启通知后，您可以及时收到重要新闻、关心的话题更新和精选内容提醒。之后也可以随时在系统设置中关闭。</string>
+    <string name="notification_permission_prompt_confirm">去开启</string>
+    <string name="notification_permission_prompt_dismiss">稍后再说</string>
     <string name="pref_version_name">当前版本</string>
     <string name="pref_check_new_version">检查新版本</string>
     <string name="current_version">当前版本 %1$s</string>
