@@ -17,13 +17,14 @@ import kotlinx.coroutines.withContext
 object AccountRepo {
 
     fun loadFtcAccount(ftcId: String): Account? {
-        return Fetch()
+        val resp = Fetch()
             .get(Endpoint.ftcAccount)
             .noCache()
             .setApiKey()
             .setUserId(ftcId)
-            .endJson<Account>()
-            .body
+            .endJson<Account>(withRaw = true)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "loadFtcAccount")
+        return resp.body
     }
 
     suspend fun asyncLoadFtcAccount(ftcId: String): FetchResult<Account> {
@@ -57,13 +58,14 @@ object AccountRepo {
      * WxSession never actually exists.
      */
     private fun loadWxAccount(unionId: String): Account? {
-        return Fetch()
+        val resp = Fetch()
             .get(Endpoint.wxAccount)
             .setUnionId(unionId)
             .noCache()
             .setLegacyApiKey()
-            .endJson<Account>()
-            .body
+            .endJson<Account>(withRaw = true)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "loadWxAccount")
+        return resp.body
     }
 
     suspend fun asyncLoadWxAccount(unionId: String): FetchResult<Account> {

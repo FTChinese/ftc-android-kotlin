@@ -2,6 +2,7 @@ package com.ft.ftchinese.store
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.core.content.edit
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
@@ -278,7 +279,10 @@ class SessionManager private constructor(context: Context) {
     fun logout() {
         AccountCache.clear()
         SessionTokenStore.getInstance(appContext).clear()
+        WebAccessTokenStore.getInstance(appContext).clear()
+        WebViewAccessTokenCookieManager.clearAccessToken()
         PushRegistrationStore.getInstance(appContext).clearRegistrationReceipt()
+        Log.i("SessionManager", "Cleared sessionToken and web accessToken on logout")
         prefsOrNull()?.edit {
             clear()
         }

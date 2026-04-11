@@ -2,44 +2,15 @@ package com.ft.ftchinese.repository
 
 import android.util.Log
 import com.ft.ftchinese.R
-import com.ft.ftchinese.App
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.request.*
-import com.ft.ftchinese.store.SessionTokenStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 object AuthClient {
-
-    private fun persistSessionTokenFromRaw(raw: String?) {
-        if (raw.isNullOrBlank()) {
-            return
-        }
-        runCatching {
-            val root = marshaller.parseToJsonElement(raw).jsonObject
-            val token = root["session"]
-                ?.jsonObject
-                ?.get("sessionToken")
-                ?.jsonPrimitive
-                ?.contentOrNull
-                ?: root["sessionToken"]
-                    ?.jsonPrimitive
-                    ?.contentOrNull
-
-            if (!token.isNullOrBlank()) {
-                SessionTokenStore.getInstance(App.instance).save(token)
-            }
-        }.onFailure {
-            Log.w("AuthClient", "Failed to parse session token from auth response: ${it.message}")
-        }
-    }
 
     fun emailExists(email: String): Boolean {
         val resp = Fetch()
@@ -83,7 +54,7 @@ object AuthClient {
             .setClient()
             .sendJson(c)
             .endJson<Account>(withRaw = true)
-        persistSessionTokenFromRaw(resp.raw)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "emailLogin")
         return resp.body
     }
 
@@ -112,14 +83,15 @@ object AuthClient {
      * choose to create a new email account with mobile linked.
      */
     private fun emailSignUp(c: Credentials): Account? {
-        return Fetch()
+        val resp = Fetch()
             .post(Endpoint.emailSignUp)
             .noCache()
             .setApiKey()
             .setClient()
             .sendJson(c)
-            .endJson<Account>()
-            .body
+            .endJson<Account>(withRaw = true)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "emailSignUp")
+        return resp.body
     }
 
     suspend fun asyncEmailSignUp(c: Credentials): FetchResult<Account> {
@@ -176,7 +148,7 @@ object AuthClient {
             .setClient()
             .sendJson(params)
             .endJson<MobileEmailLinked>(withRaw = true)
-        persistSessionTokenFromRaw(resp.raw)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "verifySMSCode")
         return resp.body
     }
 
@@ -193,14 +165,15 @@ object AuthClient {
     }
 
     private fun mobileLinkExistingEmail(params: MobileLinkParams): Account? {
-        return Fetch()
+        val resp = Fetch()
             .post(Endpoint.mobileInitialLink)
             .noCache()
             .setApiKey()
             .setClient()
             .sendJson(params)
-            .endJson<Account>()
-            .body
+            .endJson<Account>(withRaw = true)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "mobileLinkExistingEmail")
+        return resp.body
     }
 
     suspend fun asyncMobileLinkEmail(params: MobileLinkParams): FetchResult<Account> {
@@ -224,14 +197,15 @@ object AuthClient {
      * Create a new account with email derived from phone number.
      */
     private fun mobileSignUp(params: MobileSignUpParams): Account? {
-        return Fetch()
+        val resp = Fetch()
             .post(Endpoint.mobileSignUp)
             .noCache()
             .setApiKey()
             .setClient()
             .sendJson(params)
-            .endJson<Account>()
-            .body
+            .endJson<Account>(withRaw = true)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "mobileSignUp")
+        return resp.body
     }
 
     suspend fun asyncMobileSignUp(params: MobileSignUpParams): FetchResult<Account> {
@@ -358,7 +332,7 @@ object AuthClient {
             .setClient()
             .sendJson(mapOf("token" to token))
             .endJson<Account>(withRaw = true)
-        persistSessionTokenFromRaw(resp.raw)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "ssoLogin")
         return resp.body
     }
 
@@ -384,15 +358,16 @@ object AuthClient {
      * info or refresh account data.
      */
     private fun wxLogin(params: WxAuthParams): WxSession? {
-        return Fetch().post(Endpoint.wxLogin)
+        val resp = Fetch().post(Endpoint.wxLogin)
             .setClient()
             .setAppId()
             .noCache()
             .setApiKey()
             .setTimeout(30)
             .sendJson(params)
-            .endJson<WxSession>()
-            .body
+            .endJson<WxSession>(withRaw = true)
+        AndroidAuthTokenPersister.persistFromRaw(resp.raw, "wxLogin")
+        return resp.body
     }
 
     suspend fun asyncWxLogin(params: WxAuthParams): FetchResult<WxSession> {

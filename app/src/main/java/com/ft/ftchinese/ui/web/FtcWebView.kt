@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
+import com.ft.ftchinese.store.WebViewAccessTokenCookieManager
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 
@@ -51,6 +52,7 @@ fun FtcWebView(
                 webView.settings.loadsImagesAutomatically = true
                 webView.settings.domStorageEnabled = true
                 webView.settings.databaseEnabled = true
+                WebViewAccessTokenCookieManager.syncAccessToken(webView)
                 webView.addJavascriptInterface(
                     JsInterface(jsListener),
                     JS_INTERFACE_NAME

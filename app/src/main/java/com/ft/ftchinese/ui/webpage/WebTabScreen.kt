@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.webpage
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -14,7 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
+import com.ft.ftchinese.repository.HostConfig
+import com.ft.ftchinese.store.WebViewAccessTokenCookieManager
 import com.ft.ftchinese.ui.web.FullscreenAccompanistChromeClient
+import com.ft.ftchinese.ui.web.JS_INTERFACE_NAME
+import com.ft.ftchinese.ui.web.JsInterface
+import com.ft.ftchinese.ui.web.rememberFtcJsEventListener
 import com.ft.ftchinese.ui.web.rememberFullscreenVideoState
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebContent
@@ -36,6 +42,7 @@ fun WebTabScreen(
     val hasClearedOneTimeHeaders = remember(url, requestHeaders) {
         mutableStateOf(requestHeaders.isEmpty())
     }
+    val jsListener = rememberFtcJsEventListener()
 
     val fullscreenState = rememberFullscreenVideoState()
 
@@ -81,6 +88,13 @@ fun WebTabScreen(
                     webView.settings.loadsImagesAutomatically = true
                     webView.settings.domStorageEnabled = true
                     webView.settings.databaseEnabled = true
+                    if (shouldPrepareFtWebViewAuth(url)) {
+                        WebViewAccessTokenCookieManager.syncAccessToken(webView)
+                        webView.addJavascriptInterface(
+                            JsInterface(jsListener),
+                            JS_INTERFACE_NAME
+                        )
+                    }
                 },
                 client = webClient,
                 chromeClient = chromeClient,
@@ -109,4 +123,9 @@ fun WebTabScreen(
             fullscreenState.release()
         }
     }
+}
+
+private fun shouldPrepareFtWebViewAuth(url: String): Boolean {
+    val host = Uri.parse(url).host ?: return false
+    return host == HostConfig.HOST_AI_CHAT || HostConfig.isInternalLink(host)
 }
