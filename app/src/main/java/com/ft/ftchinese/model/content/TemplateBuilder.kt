@@ -6,6 +6,7 @@ import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.tracking.AdParser
 import com.ft.ftchinese.tracking.AdPosition
 import com.ft.ftchinese.tracking.JSCodes
+import org.json.JSONObject
 
 private const val TAG = "StoryBuilder"
 
@@ -43,9 +44,29 @@ class TemplateBuilder(private val template: String) {
         if (account == null) {
             return this
         }
+        val userId = account.id.takeIf { it.isNotBlank() }
+        val userName = account.userName?.takeIf { it.isNotBlank() } ?: account.displayName.takeIf { it.isNotBlank() }
         ctx["<!-- AndroidUserInfo -->"] = """
 <script>
 var androidUserInfo = ${account.toJsonString()};
+(function() {
+    try {
+        var userId = ${jsQuoted(userId)};
+        var userName = ${jsQuoted(userName)};
+        if (!window.userId && userId) {
+            window.userId = userId;
+        }
+        if (!window.username && userName) {
+            window.username = userName;
+        }
+        if (!window.user_name && userName) {
+            window.user_name = userName;
+        }
+        if ((userId || userName) && document && document.documentElement) {
+            document.documentElement.classList.add('is-member');
+        }
+    } catch (ignore) {}
+})();
 </script>""".trimIndent()
 
         return this
@@ -151,9 +172,7 @@ var androidUserAddress = ${addr.toJsonString()}
         val canShowComments = story.teaser?.type?.let {
             it == ArticleType.Story || it == ArticleType.Premium || it == ArticleType.Interactive
         } ?: false
-        // TODO: - How do we pass user login info to Android user web view
-        val hasFiguredOutAndroidUsers = false
-        val commentsClass = if (canShowComments && language != Language.ENGLISH && hasFiguredOutAndroidUsers) "" else "hide"
+        val commentsClass = if (canShowComments && language != Language.ENGLISH) "" else "hide"
         ctx["{story-comments-container-class}"] = commentsClass
 
 
@@ -289,5 +308,13 @@ var androidUserAddress = ${addr.toJsonString()}
             }
         }
         return StoryHeaderStyle("", "", "")
+    }
+
+    private fun jsQuoted(value: String?): String {
+        return if (value == null) {
+            "''"
+        } else {
+            JSONObject.quote(value)
+        }
     }
 }

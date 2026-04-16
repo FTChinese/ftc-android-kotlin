@@ -34,6 +34,7 @@ object HostConfig {
 
     const val canonicalUrl = "${urlScheme}${HOST_FTC}"
     const val chatBootstrapUrl = "${urlScheme}${HOST_AI_CHAT}/chat/bootstrap?webview=ftcapp"
+    const val chatDirectUrl = "${urlScheme}${HOST_AI_CHAT}/powertranslate/chat.html"
 
     val simplifiedContentHosts = ContentHosts(
         premium = BuildConfig.BASE_URL_PREMIUM,
