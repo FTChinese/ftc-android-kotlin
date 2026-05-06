@@ -66,6 +66,9 @@ class Story (
 
     val id: String = "",
 
+    @SerialName("ftid")
+    val ftid: String = "",
+
     @SerialName("fileupdatetime")
     val createdAt: String,
 

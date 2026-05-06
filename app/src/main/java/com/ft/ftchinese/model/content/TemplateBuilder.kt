@@ -1,12 +1,15 @@
 package com.ft.ftchinese.model.content
 import android.util.Log
 import com.ft.ftchinese.model.enums.ArticleType
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.tracking.AdParser
 import com.ft.ftchinese.tracking.AdPosition
 import com.ft.ftchinese.tracking.JSCodes
+import com.ft.ftchinese.ui.util.UriUtils
 import org.json.JSONObject
+import java.util.Locale
 
 private const val TAG = "StoryBuilder"
 
@@ -20,9 +23,12 @@ class TemplateBuilder(private val template: String) {
     private val ctx: MutableMap<String, String> = HashMap()
     private var language: Language = Language.CHINESE
     private var shouldHideAd = false
+    private var currentStory: Story? = null
+    private var currentAccount: Account? = null
 
     init {
         ctx["{{googletagservices-js}}"] = JSCodes.googletagservices
+        ctx["<!--DiscussContentWithAI-->"] = ""
     }
 
     fun setLanguage(lang: Language): TemplateBuilder {
@@ -41,6 +47,7 @@ class TemplateBuilder(private val template: String) {
     }
 
     fun withUserInfo(account: Account?): TemplateBuilder {
+        currentAccount = account
         if (account == null) {
             return this
         }
@@ -85,6 +92,7 @@ var androidUserAddress = ${addr.toJsonString()}
         story: Story,
         showCustomHero: Boolean = false
     ): TemplateBuilder {
+        currentStory = story
         val (shouldHideAd, sponsorTitle) = story.shouldHideAd()
 
         var body = ""
@@ -174,6 +182,8 @@ var androidUserAddress = ${addr.toJsonString()}
         } ?: false
         val commentsClass = if (canShowComments && language != Language.ENGLISH) "" else "hide"
         ctx["{story-comments-container-class}"] = commentsClass
+        ctx["{quiz-language}"] = if (language == Language.ENGLISH) "en" else "zh-CN"
+        ctx["{preferred-language}"] = preferredLanguageTag()
 
 
 
@@ -256,6 +266,7 @@ var androidUserAddress = ${addr.toJsonString()}
     }
 
     fun render(): String {
+        ctx["<!--DiscussContentWithAI-->"] = buildDiscussWithAiButton()
 
         var result = template
 
@@ -315,6 +326,61 @@ var androidUserAddress = ${addr.toJsonString()}
             "''"
         } else {
             JSONObject.quote(value)
+        }
+    }
+
+    private fun preferredLanguageTag(): String {
+        return when (language) {
+            Language.ENGLISH -> "en"
+            else -> if (UriUtils.isTraditionalCn) "zh-TW" else "zh-CN"
+        }
+    }
+
+    private fun buildDiscussWithAiButton(): String {
+        val story = currentStory ?: return ""
+        val account = currentAccount ?: return ""
+        val ftid = story.ftid.takeIf { it.isNotBlank() } ?: return ""
+
+        // Match iOS behavior by checking effective premium/editor privilege
+        // instead of the raw VIP flag persisted on the account.
+        if (account.membership.webPrivilegeTier != Tier.PREMIUM) {
+            return ""
+        }
+
+        return """
+            <div id="ai-discuss-container"></div>
+            <script>
+                window.ftid = ${jsQuoted(ftid)};
+                window.languageCode = ${jsQuoted(outboundLanguageCode())};
+            </script>
+            <script async src="https://ftcoffer.herokuapp.com/powertranslate/scripts/show-ai-discuss-container.js"></script>
+        """.trimIndent()
+    }
+
+    private fun outboundLanguageCode(): String {
+        if (language == Language.ENGLISH) {
+            return "en"
+        }
+
+        val locale = Locale.getDefault()
+        val region = locale.country.uppercase(Locale.ROOT)
+        val localeTag = try {
+            locale.toLanguageTag()
+        } catch (_: Exception) {
+            ""
+        }
+
+        val useTraditional = UriUtils.isTraditionalCn ||
+            localeTag.contains("Hant", ignoreCase = true)
+
+        if (!useTraditional) {
+            return "zh-Hans-CN"
+        }
+
+        return when (region) {
+            "HK", "HKG" -> "zh-Hant-HK"
+            "MO", "MAC" -> "zh-Hant-MO"
+            else -> "zh-Hant-TW"
         }
     }
 }

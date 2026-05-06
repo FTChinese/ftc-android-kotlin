@@ -20,7 +20,7 @@ object FtcPayClient {
         val api = ApiConfig.ofSubs(account.isTest)
 
         return Fetch()
-            .setLegacyApiKey()
+            .setApiKey()
             .post(api.verifyOrder(orderId))
             .addHeaders(account.headers())
             .noCache()

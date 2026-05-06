@@ -320,7 +320,7 @@ class ArticlesState(
 
             htmlLoaded = renderStory(story, account)
 
-            onStoryLoaded(story, account)
+            onStoryLoaded(story)
         } else {
             Log.i(TAG, "Checking html file permission")
             updateAccess(teaser.permission(), account)
@@ -443,7 +443,6 @@ class ArticlesState(
 
     private suspend fun onStoryLoaded(
         story: Story,
-        account: Account?
     ) {
         audioFound = story.hasAudio(language)
         isBilingual = story.isBilingual
