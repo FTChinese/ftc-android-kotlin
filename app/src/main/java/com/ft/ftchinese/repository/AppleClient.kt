@@ -16,7 +16,8 @@ object AppleClient {
 
         val api = ApiConfig.ofSubs(account.isTest)
         return Fetch()
-            .setBearer(api.accessToken)
+            .setApiKey()
+            .setUserId(account.id)
             .patch(api.refreshIAP(origTxId))
             .noCache()
             .endJson<IAPSubsResult>()
