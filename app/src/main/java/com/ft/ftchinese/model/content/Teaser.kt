@@ -131,6 +131,7 @@ data class Teaser(
     val hasJsAPI: Boolean
         get() = type == ArticleType.Story ||
             type == ArticleType.Premium ||
+            type == ArticleType.Content ||
             (type == ArticleType.Interactive && subType == "bilingual")
 
 
@@ -139,6 +140,7 @@ data class Teaser(
             ArticleType.Story,
             ArticleType.Premium -> "/index.php/jsapi/get_story_more_info/${id}"
             ArticleType.Interactive -> "/index.php/jsapi/get_interactive_more_info/${id}"
+            ArticleType.Content -> "/api/content/${id}"
             else -> ""
         }
 
@@ -297,5 +299,4 @@ data class Teaser(
         const val DEFAULT_STORY_AD_CH_ID = "1200"
     }
 }
-
 

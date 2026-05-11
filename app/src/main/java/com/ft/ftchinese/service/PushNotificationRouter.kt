@@ -497,6 +497,12 @@ object PushNotificationRouter {
                 )
             }
 
+            ArticleType.Content -> PushPayload(
+                action = "content",
+                id = teaser.id,
+                title = title,
+            )
+
             ArticleType.Column -> null
         }
     }

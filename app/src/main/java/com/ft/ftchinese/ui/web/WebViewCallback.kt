@@ -84,7 +84,7 @@ sealed class WvUrlEvent {
                  */
                 "http", "https" -> when {
                     containWxMiniProgram(uri) -> ofWxMiniProgram(uri)
-                    HostConfig.isInternalLink(uri.host ?: "") -> ofInSiteLink(uri)
+                    HostConfig.isInternalLink(uri.host ?: "") || HostConfig.isTrustedAuthHost(uri.host) -> ofInSiteLink(uri)
                     HostConfig.isFtaLink(uri.host ?: "") -> ofFtaSubs(uri)
                     else -> External(uri)
                 }
@@ -221,7 +221,8 @@ sealed class WvUrlEvent {
                 // Links on home page under FT商学院
                 ArticleKind.photoNews,
                 // Links on home page under FT研究院
-                ArticleKind.interactive -> Article(teaserFromUri(uri))
+                ArticleKind.interactive,
+                ArticleKind.content -> Article(teaserFromUri(uri))
 
                 /**
                  * Load content in into ChannelActivity.

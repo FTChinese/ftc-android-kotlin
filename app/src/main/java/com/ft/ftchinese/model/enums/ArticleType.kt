@@ -18,6 +18,8 @@ enum class ArticleType(val symbol: String) : Parcelable {
     Gallery("photonews"),
     @SerialName("interactive")
     Interactive("interactive"),
+    @SerialName("content")
+    Content("content"),
     @SerialName("column")
     Column("column");
 
@@ -34,6 +36,7 @@ enum class ArticleType(val symbol: String) : Parcelable {
                 "video" -> Video
                 "photonews" -> Gallery
                 "interactive" -> Interactive
+                "content" -> Content
                 "column" -> Column
                 else -> Story
             }

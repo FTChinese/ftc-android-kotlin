@@ -25,6 +25,7 @@ fun WebpageScreen(
     ) {
         FtcWebView(
             wvState = webViewState,
+            initialUrl = pageMeta.url,
             onCreated = onWebViewCreated,
         )
     }

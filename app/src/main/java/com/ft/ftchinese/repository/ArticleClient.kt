@@ -47,10 +47,8 @@ object ArticleClient {
     }
 
     private fun attachAccessTokenCookie(fetch: Fetch, url: String) {
-        val host = Uri.parse(url).host ?: return
-        if (!HostConfig.isInternalLink(host) && host != HostConfig.HOST_AI_CHAT) {
-            return
-        }
+        val origin = HostConfig.trustedAuthOrigin(url) ?: return
+        val host = Uri.parse(url).host ?: origin
 
         val token = runCatching {
             WebAccessTokenStore.getInstance(App.instance).load()

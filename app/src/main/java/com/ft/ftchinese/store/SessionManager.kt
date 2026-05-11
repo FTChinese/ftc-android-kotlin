@@ -280,7 +280,7 @@ class SessionManager private constructor(context: Context) {
         AccountCache.clear()
         SessionTokenStore.getInstance(appContext).clear()
         WebAccessTokenStore.getInstance(appContext).clear()
-        WebViewAccessTokenCookieManager.clearAccessToken()
+        WebViewAccessTokenCookieManager.clearAccessToken(appContext)
         PushRegistrationStore.getInstance(appContext).clearRegistrationReceipt()
         Log.i("SessionManager", "Cleared sessionToken and web accessToken on logout")
         prefsOrNull()?.edit {

@@ -17,7 +17,7 @@ data class Bilingual(
 
 @Serializable
 data class StoryPic(
-    val smallbutton: String,
+    val smallbutton: String = "",
 )
 
 @Serializable
@@ -68,6 +68,8 @@ class Story (
 
     @SerialName("ftid")
     val ftid: String = "",
+
+    val hasPrivilege: Boolean = true,
 
     @SerialName("fileupdatetime")
     val createdAt: String,
@@ -121,6 +123,9 @@ class Story (
     @SerialName("accessright")
     val accessibleBy: String? = null,
 
+    @SerialName("access_tier")
+    val accessTier: Int = 0,
+
     @SerialName("last_publish_time")
     val publishedAt: String,
 
@@ -143,7 +148,17 @@ class Story (
     val whitelist: Int = 0,
 ) {
 
+    val isAiTranslation: Boolean
+        get() = tag
+            .split(",")
+            .any { it.trim().equals("AITranslation", ignoreCase = true) }
+
     fun requireMemberTier(): Tier? {
+        when (accessTier) {
+            1 -> return Tier.STANDARD
+            2 -> return Tier.PREMIUM
+        }
+
         return when (accessibleBy) {
             "0" -> null
             "1" -> Tier.STANDARD
@@ -155,6 +170,8 @@ class Story (
     val permission: Permission
         get() = when {
             whitelist == 1 -> Permission.FREE
+            accessTier == 1 -> Permission.STANDARD
+            accessTier == 2 -> Permission.PREMIUM
 //            accessibleBy == "1" -> Permission.STANDARD
 //            accessibleBy == "2" -> Permission.PREMIUM
             isSevenDaysOld() -> Permission.STANDARD

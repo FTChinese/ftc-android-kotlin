@@ -1,8 +1,10 @@
 package com.ft.ftchinese.repository
 
+import android.net.Uri
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
+import java.util.Locale
 
 data class ContentHosts(
     val premium: String,
@@ -67,6 +69,48 @@ object HostConfig {
         return internalHost.contains(host)
     }
 
+    val trustedAuthOrigins: Set<String> by lazy {
+        buildSet {
+            add(canonicalUrl)
+            add("${urlScheme}${HOST_AI_CHAT}")
+            addAll(configuredBuildConfigOrigins())
+        }
+    }
+
+    private val trustedAuthExactHosts: Set<String> by lazy {
+        trustedAuthOrigins.mapNotNull { parseHttpUri(it)?.host.normalizeHost() }.toSet()
+    }
+
+    private val trustedOwnedDomainSuffixes = setOf(
+        "ftchinese.com",
+        "chineseft.net",
+        "ftcn.net.cn",
+        "ftacademy.cn",
+        "ftcnvip.net",
+        "ftcnvip.com",
+        "ftmailbox.com",
+    )
+
+    fun isTrustedAuthHost(host: String?): Boolean {
+        val normalized = host.normalizeHost() ?: return false
+        if (trustedAuthExactHosts.contains(normalized)) {
+            return true
+        }
+
+        return trustedOwnedDomainSuffixes.any {
+            normalized == it || normalized.endsWith(".$it")
+        }
+    }
+
+    fun trustedAuthOrigin(url: String?): String? {
+        val uri = parseHttpUri(url) ?: return null
+        if (!isTrustedAuthHost(uri.host)) {
+            return null
+        }
+
+        return originFromUri(uri)
+    }
+
     fun isFtaLink(host: String): Boolean {
         return HOST_FTA == host
     }
@@ -96,4 +140,53 @@ object HostConfig {
 //        }
 //    }
 
+}
+
+private fun configuredBuildConfigOrigins(): Set<String> {
+    return BuildConfig::class.java.fields
+        .asSequence()
+        .filter { it.type == String::class.java && isTrustedBuildConfigUrlField(it.name) }
+        .mapNotNull { field ->
+            runCatching { field.get(null) as? String }.getOrNull()
+        }
+        .mapNotNull { originFromUri(parseHttpUri(it) ?: return@mapNotNull null) }
+        .toSet()
+}
+
+private fun isTrustedBuildConfigUrlField(name: String): Boolean {
+    val upper = name.uppercase(Locale.US)
+    return upper.startsWith("BASE_URL_")
+            || upper.startsWith("API_SUBS_")
+            || upper.startsWith("API_CONTENT_")
+}
+
+private fun parseHttpUri(url: String?): Uri? {
+    val value = url?.trim().orEmpty()
+    if (value.isBlank()) {
+        return null
+    }
+
+    val uri = runCatching { Uri.parse(value) }.getOrNull() ?: return null
+    val scheme = uri.scheme?.lowercase(Locale.US)
+    if (scheme != "http" && scheme != "https") {
+        return null
+    }
+    if (uri.host.normalizeHost() == null) {
+        return null
+    }
+
+    return uri
+}
+
+private fun originFromUri(uri: Uri): String? {
+    val scheme = uri.scheme?.lowercase(Locale.US) ?: return null
+    val host = uri.host.normalizeHost() ?: return null
+    val port = uri.port
+    val portSuffix = if (port > 0) ":$port" else ""
+    return "$scheme://$host$portSuffix"
+}
+
+private fun String?.normalizeHost(): String? {
+    val host = this?.trim()?.lowercase(Locale.US)?.trimEnd('.').orEmpty()
+    return host.ifBlank { null }
 }

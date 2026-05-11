@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
 import com.ft.ftchinese.store.WebViewAccessTokenCookieManager
+import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 
@@ -22,6 +23,7 @@ import com.google.accompanist.web.WebViewState
 fun FtcWebView(
     wvState: WebViewState,
     modifier: Modifier = Modifier,
+    initialUrl: String? = null,
     webClientCallback: WebViewCallback = rememberWebViewCallback(),
     jsListener: JsEventListener = rememberFtcJsEventListener(),
     onCreated: (WebView) -> Unit = {}
@@ -38,6 +40,7 @@ fun FtcWebView(
             callback = webClientCallback
         )
     }
+    val authUrl = initialUrl ?: (wvState.content as? WebContent.Url)?.url
 
     Box(
         modifier = modifier
@@ -53,6 +56,7 @@ fun FtcWebView(
                 webView.settings.domStorageEnabled = true
                 webView.settings.databaseEnabled = true
                 WebViewAccessTokenCookieManager.syncAccessToken(webView)
+                WebViewAccessTokenCookieManager.syncAccessTokenForUrl(webView, authUrl)
                 webView.addJavascriptInterface(
                     JsInterface(jsListener),
                     JS_INTERFACE_NAME

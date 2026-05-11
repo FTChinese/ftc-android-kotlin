@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.web
 
-import android.net.Uri
+import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.enums.ArticleType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -12,9 +12,7 @@ class TeaserFromUriTest {
 
     @Test
     fun parseInteractiveSubtypeFromQuery() {
-        val teaser = teaserFromUri(
-            Uri.parse("https://www.ftchinese.com/interactive/12345?subtype=bilingual&tier=premium")
-        )
+        val teaser = teaserFromUrl("https://www.ftchinese.com/interactive/12345?subtype=bilingual&tier=premium")
 
         assertEquals(ArticleType.Interactive, teaser.type)
         assertEquals("bilingual", teaser.subType)
@@ -23,9 +21,7 @@ class TeaserFromUriTest {
 
     @Test
     fun normalizeLegacyFtArticleSubtype() {
-        val teaser = teaserFromUri(
-            Uri.parse("https://www.ftchinese.com/interactive/12345?subtype=FTArticle")
-        )
+        val teaser = teaserFromUrl("https://www.ftchinese.com/interactive/12345?subtype=FTArticle")
 
         assertEquals("bilingual", teaser.subType)
         assertTrue(teaser.hasJsAPI)
@@ -33,9 +29,7 @@ class TeaserFromUriTest {
 
     @Test
     fun interactiveWithoutSubtypeKeepsHtmlFallback() {
-        val teaser = teaserFromUri(
-            Uri.parse("https://www.ftchinese.com/interactive/12345?tier=free")
-        )
+        val teaser = teaserFromUrl("https://www.ftchinese.com/interactive/12345?tier=free")
 
         assertNull(teaser.subType)
         assertFalse(teaser.hasJsAPI)
@@ -43,12 +37,31 @@ class TeaserFromUriTest {
 
     @Test
     fun ignoreSubtypeQueryForStoryLink() {
-        val teaser = teaserFromUri(
-            Uri.parse("https://www.ftchinese.com/story/12345?subtype=bilingual")
-        )
+        val teaser = teaserFromUrl("https://www.ftchinese.com/story/12345?subtype=bilingual")
 
         assertEquals(ArticleType.Story, teaser.type)
         assertNull(teaser.subType)
         assertTrue(teaser.hasJsAPI)
+    }
+
+    @Test
+    fun parseContentLinkAsNativeArticle() {
+        val id = "2b2a9375-829c-4b4a-af98-c5e1e963c493"
+        val teaser = teaserFromUrl("https://ai.chineseft.net/content/$id?tier=premium")
+
+        assertEquals(ArticleType.Content, teaser.type)
+        assertEquals(id, teaser.id)
+        assertTrue(teaser.hasJsAPI)
+        assertEquals("/api/content/$id", teaser.jsApiPath)
+    }
+
+    @Test
+    fun parseLanguageSuffixWithoutLosingContentId() {
+        val id = "2b2a9375-829c-4b4a-af98-c5e1e963c493"
+        val teaser = teaserFromUrl("https://ai.chineseft.net/content/$id/ce?tier=premium")
+
+        assertEquals(ArticleType.Content, teaser.type)
+        assertEquals(id, teaser.id)
+        assertEquals(Language.BILINGUAL, teaser.langVariant)
     }
 }

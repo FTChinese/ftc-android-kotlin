@@ -8,6 +8,7 @@ import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.enums.PurchaseAction
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.HostConfig
@@ -184,10 +185,29 @@ object UriUtils {
             if (source.isFragment) {
                 builder.appendQueryParameter("bodyonly", "yes")
             }
+            nativeHomeSubscription(source, account)?.let {
+                builder.appendQueryParameter("subscription", it)
+            }
             val url = appendUtm(builder).build().toString()
             appendUtm(builder).build().toString()
         } catch (e: Exception) {
             null
+        }
+    }
+
+    private fun nativeHomeSubscription(source: ChannelSource, account: Account?): String? {
+        if (!source.query.split("&").contains("pagetype=home")) {
+            return null
+        }
+
+        if (source.query.split("&").any { it.startsWith("subscription=") }) {
+            return null
+        }
+
+        return when (account?.membership?.webPrivilegeTier) {
+            Tier.PREMIUM -> "premium"
+            Tier.STANDARD -> "member"
+            else -> null
         }
     }
 

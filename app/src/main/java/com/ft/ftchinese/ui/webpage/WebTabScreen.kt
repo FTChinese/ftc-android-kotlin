@@ -1,7 +1,7 @@
 package com.ft.ftchinese.ui.webpage
 
 import android.graphics.Bitmap
-import android.net.Uri
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -50,6 +50,7 @@ fun WebTabScreen(
         object : AccompanistWebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+                WebViewAccessTokenCookieManager.syncAccessTokenForUrl(view, url)
 
                 // Keep auth headers for the initial bootstrap request only.
                 if (!hasClearedOneTimeHeaders.value && requestHeaders.isNotEmpty()) {
@@ -60,6 +61,14 @@ fun WebTabScreen(
             }
 
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+            }
+
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                WebViewAccessTokenCookieManager.syncAccessTokenForUrl(
+                    view,
+                    request?.url?.toString()
+                )
+                return super.shouldOverrideUrlLoading(view, request)
             }
         }
     }
@@ -90,6 +99,7 @@ fun WebTabScreen(
                     webView.settings.databaseEnabled = true
                     if (shouldPrepareFtWebViewAuth(url)) {
                         WebViewAccessTokenCookieManager.syncAccessToken(webView)
+                        WebViewAccessTokenCookieManager.syncAccessTokenForUrl(webView, url)
                         webView.addJavascriptInterface(
                             JsInterface(jsListener),
                             JS_INTERFACE_NAME
@@ -126,6 +136,5 @@ fun WebTabScreen(
 }
 
 private fun shouldPrepareFtWebViewAuth(url: String): Boolean {
-    val host = Uri.parse(url).host ?: return false
-    return host == HostConfig.HOST_AI_CHAT || HostConfig.isInternalLink(host)
+    return HostConfig.trustedAuthOrigin(url) != null
 }

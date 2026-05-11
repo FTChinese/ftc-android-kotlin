@@ -6,6 +6,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import com.ft.ftchinese.store.WebViewAccessTokenCookieManager
 import com.google.accompanist.web.AccompanistWebViewClient
 
 private const val TAG = "WebClient"
@@ -45,6 +46,7 @@ class FtcWebViewClient(
 
         Log.i(TAG, "shouldOverrideUrlLoading: $uri")
 
+        WebViewAccessTokenCookieManager.syncAccessTokenForUrl(view, uri.toString())
         callback.onOverrideUrlLoading(WvUrlEvent.fromUri(uri))
         return true
     }

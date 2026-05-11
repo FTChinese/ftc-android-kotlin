@@ -1,7 +1,10 @@
 package com.ft.ftchinese.model.content
 
 import com.ft.ftchinese.model.fetch.marshaller
+import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.reader.Permission
 import kotlinx.serialization.decodeFromString
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class StoryTest {
@@ -210,5 +213,40 @@ class StoryTest {
         val story = marshaller.decodeFromString<Story>(data)
 
         println(story)
+    }
+
+    @Test
+    fun parseContentApiAccessTier() {
+        val data = """
+            {
+              "id": "2b2a9375-829c-4b4a-af98-c5e1e963c493",
+              "ftid": "2b2a9375-829c-4b4a-af98-c5e1e963c493",
+              "fileupdatetime": "1778419399",
+              "cheadline": "测试标题",
+              "clongleadbody": "",
+              "cbody": "",
+              "eheadline": "",
+              "elongleadbody": "",
+              "ebody": "",
+              "cbyline_description": "",
+              "cbyline_status": "",
+              "tag": "高端专享",
+              "genre": "",
+              "topic": "",
+              "industry": "",
+              "area": "",
+              "accessright": "0",
+              "access_tier": 2,
+              "last_publish_time": "1778419399",
+              "story_pic": {},
+              "whitelist": 0
+            }
+        """.trimIndent()
+
+        val story = marshaller.decodeFromString<Story>(data)
+
+        assertEquals(Tier.PREMIUM, story.requireMemberTier())
+        assertEquals(Permission.PREMIUM, story.permission)
+        assertEquals("", story.cover.smallbutton)
     }
 }
