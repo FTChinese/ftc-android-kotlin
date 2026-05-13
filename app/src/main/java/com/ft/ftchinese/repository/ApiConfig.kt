@@ -3,31 +3,22 @@ package com.ft.ftchinese.repository
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.ApiMode
 
-//private const val devIP = "http://192.168.1.20"
-private const val devIP = "http://192.168.1.67"
-//private const val devIP = "http://192.168.1.131"
-//private const val devIP = "https://www.ftcn.net.cn/api"
+private const val useLocalBackend = false
 
-//private const val devPort = "8206"
-private const val devPort = "3000"
+// Flip useLocalBackend only when the Node backend is running locally.
+private const val localBackendHost = "http://192.168.1.67"
+private const val localBackendPort = "3000"
+
 data class ApiConfig(
     val baseUrl: String,
     val accessToken: String,
     val mode: ApiMode,
 ) {
     companion object {
-        private const val flavorWx = "wechat"
-        private const val flavorStripe = "stripe"
+        private val shouldUseLocalBackend = useLocalBackend && BuildConfig.BUILD_TYPE == "debug"
 
-        // Used for development.
-        private val debugApi = ApiConfig(
-            // MARK: - We don't have the server side source code, just use live server for local debug
-//            baseUrl = BuildConfig.API_SUBS_LIVE,
-//            accessToken = BuildConfig.ACCESS_TOKEN_LIVE,
-//            mode = ApiMode.Live
-
-
-            baseUrl = "$devIP:${devPort}/api",
+        private val localBackendApi = ApiConfig(
+            baseUrl = "$localBackendHost:${localBackendPort}/api",
             accessToken = BuildConfig.ACCESS_TOKEN_TEST,
             mode = ApiMode.Debug
         )
@@ -46,8 +37,8 @@ data class ApiConfig(
             mode = ApiMode.Live
         )
 
-        val ofAuth = if (BuildConfig.DEBUG || BuildConfig.FLAVOR == flavorWx) {
-            debugApi
+        val ofAuth = if (shouldUseLocalBackend) {
+            localBackendApi
         } else {
             releaseLiveApi
         }
@@ -55,17 +46,8 @@ data class ApiConfig(
         @JvmStatic
         fun ofSubs(isTest: Boolean): ApiConfig {
             return when {
-                // For Build Variants wechatRelease,
-                // use local ip so that we could debug requests.
-                BuildConfig.FLAVOR == flavorWx  -> {
-                    debugApi
-                }
-                BuildConfig.FLAVOR == flavorStripe && BuildConfig.DEBUG && isTest -> {
-                    releaseSandboxApi
-                }
-                // Debug environment always uses debug api.
-                BuildConfig.DEBUG -> {
-                    debugApi
+                shouldUseLocalBackend -> {
+                    localBackendApi
                 }
                 // Distinguish between sandbox/live API in release app
                 isTest -> {
@@ -115,4 +97,3 @@ data class ApiConfig(
         return "${baseUrl}/apple/subs/$originalTxId"
     }
 }
-

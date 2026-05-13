@@ -84,7 +84,7 @@ fun WxInfoActivityScreen(
                 setReAuth(false)
             },
             onConfirm = {
-                launchWxLogin(wxApi)
+                launchWxLogin(wxApi, context)
                 setReAuth(false)
             }
         )
@@ -132,4 +132,3 @@ fun WxInfoActivityScreen(
         }
     }
 }
-

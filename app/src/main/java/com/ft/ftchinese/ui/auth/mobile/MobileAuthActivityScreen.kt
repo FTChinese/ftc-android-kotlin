@@ -1,21 +1,32 @@
 package com.ft.ftchinese.ui.auth.mobile
 
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Text
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.launchWxLogin
 import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.ui.components.rememberWxApi
 import com.ft.ftchinese.viewmodel.UserViewModel
+import com.ft.ftchinese.wxapi.WxLoginDiagnostic
 
 @Composable
 fun MobileAuthActivityScreen(
@@ -23,7 +34,6 @@ fun MobileAuthActivityScreen(
     scaffoldState: ScaffoldState,
     onLinkEmail: (String) -> Unit, // Pass mobile number to next screen.
     onEmailLogin: () -> Unit,
-    onFinish: () -> Unit,
     onSuccess: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -37,8 +47,44 @@ fun MobileAuthActivityScreen(
     val authState = rememberMobileAuthState(
         scaffoldState = scaffoldState
     )
+    val wxDiagnostic = remember {
+        mutableStateOf<String?>(null)
+    }
+    val wxDiagnosticHandler = remember {
+        Handler(Looper.getMainLooper())
+    }
 
     val timerState = rememberTimerState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    fun scheduleWxDiagnosticCheck() {
+        wxDiagnosticHandler.removeCallbacksAndMessages(null)
+
+        val message = WxLoginDiagnostic.consumePendingIssue(context)
+        if (message != null) {
+            wxDiagnostic.value = message
+            return
+        }
+
+        if (WxLoginDiagnostic.hasActiveRequest(context)) {
+            wxDiagnosticHandler.postDelayed({
+                wxDiagnostic.value = WxLoginDiagnostic.consumePendingIssue(context)
+            }, WX_DIAGNOSTIC_DELAY_MS)
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                scheduleWxDiagnosticCheck()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            wxDiagnosticHandler.removeCallbacksAndMessages(null)
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     LaunchedEffect(key1 = authState.codeSent) {
         if (authState.codeSent && !timerState.isRunning) {
@@ -65,6 +111,30 @@ fun MobileAuthActivityScreen(
                         mobile = authState.mobileNotSet,
                         deviceToken = tokenStore.getToken()
                     )
+                )
+            }
+        )
+    }
+
+    wxDiagnostic.value?.let { message ->
+        AlertDialog(
+            onDismissRequest = {
+                WxLoginDiagnostic.clear(context)
+                wxDiagnostic.value = null
+            },
+            title = {
+                Text("微信登录诊断")
+            },
+            text = {
+                Text(message)
+            },
+            confirmButton = {
+                PlainTextButton(
+                    onClick = {
+                        WxLoginDiagnostic.clear(context)
+                        wxDiagnostic.value = null
+                    },
+                    text = "知道了"
                 )
             }
         )
@@ -97,8 +167,8 @@ fun MobileAuthActivityScreen(
                 LoginAlternatives(
                     onClickEmail = onEmailLogin,
                     onClickWechat = {
-                        launchWxLogin(wxApi)
-                        onFinish()
+                        launchWxLogin(wxApi, context)
+                        scheduleWxDiagnosticCheck()
                     }
                 )
             }
@@ -106,3 +176,4 @@ fun MobileAuthActivityScreen(
     }
 }
 
+private const val WX_DIAGNOSTIC_DELAY_MS = 1500L

@@ -22,6 +22,8 @@ import com.ft.ftchinese.ui.web.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.web.JsInterface
 import com.ft.ftchinese.ui.web.rememberFtcJsEventListener
 import com.ft.ftchinese.ui.web.rememberFullscreenVideoState
+import com.ft.ftchinese.ui.web.rememberWebViewCallback
+import com.ft.ftchinese.ui.web.routeWebViewBridgeLink
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
@@ -43,6 +45,7 @@ fun WebTabScreen(
         mutableStateOf(requestHeaders.isEmpty())
     }
     val jsListener = rememberFtcJsEventListener()
+    val webViewCallback = rememberWebViewCallback()
 
     val fullscreenState = rememberFullscreenVideoState()
 
@@ -101,7 +104,16 @@ fun WebTabScreen(
                         WebViewAccessTokenCookieManager.syncAccessToken(webView)
                         WebViewAccessTokenCookieManager.syncAccessTokenForUrl(webView, url)
                         webView.addJavascriptInterface(
-                            JsInterface(jsListener),
+                            JsInterface(
+                                listener = jsListener,
+                                onLink = { link ->
+                                    routeWebViewBridgeLink(
+                                        webView = webView,
+                                        callback = webViewCallback,
+                                        url = link,
+                                    )
+                                },
+                            ),
                             JS_INTERFACE_NAME
                         )
                     }

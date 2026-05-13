@@ -14,7 +14,8 @@ import kotlinx.serialization.decodeFromString
 private const val TAG = "JsInterface"
 
 class JsInterface(
-    private val listener: JsEventListener
+    private val listener: JsEventListener,
+    private val onLink: (String) -> Boolean,
 ) {
 
     private var teasers: List<Teaser> = listOf()
@@ -32,6 +33,13 @@ class JsInterface(
     @JavascriptInterface
     fun wvAlert(msg: String) {
         listener.onAlert(msg)
+    }
+
+    @JavascriptInterface
+    fun link(url: String?): Boolean {
+        val value = url ?: return false
+        Log.i(TAG, "JS link: $value")
+        return onLink(value)
     }
 
     /**
@@ -131,4 +139,3 @@ class JsInterface(
         listener.onFollowTopic(marshaller.decodeFromString(message))
     }
 }
-

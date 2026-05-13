@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.article
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -39,12 +40,15 @@ import com.ft.ftchinese.ui.theme.OColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.SideEffect
 import com.ft.ftchinese.ui.util.UriUtils
+import com.ft.ftchinese.ui.web.TeaserNavigationGuard
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 
 /**
  * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
  * properly generated for CoordinatorLayout.
  */
+private const val TAG = "ArticleActivity"
+
 class ArticleActivity : ComponentActivity() {
     private lateinit var userViewModel: UserViewModel
 
@@ -111,6 +115,11 @@ class ArticleActivity : ComponentActivity() {
                 return
             }
 
+            if (!TeaserNavigationGuard.acceptActivityStart(teaser)) {
+                Log.i(TAG, "Duplicate ArticleActivity start ignored: $teaser")
+                return
+            }
+
             radioPageMeta(teaser)?.let {
                 WebpageActivity.start(context, it)
                 return
@@ -140,6 +149,11 @@ class ArticleActivity : ComponentActivity() {
         // so that back button works.
         @JvmStatic
         fun startWithParentStack(context: Context, channelItem: Teaser) {
+            if (!TeaserNavigationGuard.acceptActivityStart(channelItem)) {
+                Log.i(TAG, "Duplicate ArticleActivity parent-stack start ignored: $channelItem")
+                return
+            }
+
             radioPageMeta(channelItem)?.let {
                 WebpageActivity.startWithParentStack(context, it)
                 return

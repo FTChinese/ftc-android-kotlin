@@ -47,6 +47,11 @@ open class FtcJsEventListener(
     // has access control.
     @MainThread
     override fun onClickTeaser(teaser: Teaser) {
+        if (!TeaserNavigationGuard.accept(teaser)) {
+            Log.i(TAG, "Duplicate teaser navigation ignored: $teaser")
+            return
+        }
+
         Log.i(TAG, "onClickTeaser: $teaser")
         ArticleActivity.start(
             context,

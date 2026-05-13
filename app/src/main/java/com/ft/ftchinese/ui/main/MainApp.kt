@@ -86,7 +86,7 @@ fun MainApp(
             body = stringResource(id = R.string.wx_session_expired),
             onDismiss = { setWxReAuth(false) },
             onConfirm = {
-                launchWxLogin(ShareUtils.createWxApi(context))
+                launchWxLogin(ShareUtils.createWxApi(context), context)
                 setWxReAuth(false)
             }
         )

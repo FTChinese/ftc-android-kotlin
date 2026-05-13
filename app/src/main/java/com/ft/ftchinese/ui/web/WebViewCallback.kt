@@ -330,6 +330,15 @@ open class WebViewCallback(
         }
     }
 
+    fun onOverrideUrlLoading(url: String): Boolean {
+        if (url.isBlank()) {
+            return false
+        }
+
+        onOverrideUrlLoading(WvUrlEvent.fromUri(Uri.parse(url)))
+        return true
+    }
+
     // When pagination link in a channel page is clicked
     open fun onPagination(paging: Paging) {
         Log.i(TAG, "Pagination: $paging")
@@ -361,6 +370,11 @@ open class WebViewCallback(
     }
 
     open fun onClickStory(teaser: Teaser) {
+        if (!TeaserNavigationGuard.accept(teaser)) {
+            Log.i(TAG, "Duplicate story navigation ignored: $teaser")
+            return
+        }
+
         ArticleActivity.start(
             context,
             teaser.withParentPerm(channelSource?.permission)

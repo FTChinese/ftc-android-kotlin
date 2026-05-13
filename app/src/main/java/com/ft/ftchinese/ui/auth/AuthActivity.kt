@@ -17,9 +17,14 @@ import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -85,6 +90,29 @@ fun AuthApp(
 ) {
     val scaffold = rememberScaffoldState()
     val userViewModel: UserViewModel = viewModel()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    fun finishIfAccountAlreadyLoaded() {
+        if (userViewModel.reloadAccount() != null) {
+            onLoginSuccess()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        finishIfAccountAlreadyLoaded()
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                finishIfAccountAlreadyLoaded()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     OTheme {
         val navController = rememberNavController()
@@ -146,7 +174,6 @@ fun AuthApp(
                                 navController,
                             )
                         },
-                        onFinish = onExit,
                         // Login success. Destroy the activity.
                         onSuccess = onLoginSuccess
                     )

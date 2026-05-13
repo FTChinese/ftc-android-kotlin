@@ -31,6 +31,7 @@ import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberBaseUrl
 import com.ft.ftchinese.ui.web.FtcJsEventListener
 import com.ft.ftchinese.ui.web.FtcWebView
+import com.ft.ftchinese.ui.web.TeaserNavigationGuard
 import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
@@ -71,6 +72,11 @@ fun ChannelActivityScreen(
             override fun onClickTeaser(teaser: Teaser) {
                 Log.i(TAG, "Clicked a teaser item $teaser")
                 val t = teaser.withParentPerm(channelState.channelSource?.permission)
+                if (!TeaserNavigationGuard.accept(t)) {
+                    Log.i(TAG, "Duplicate teaser item navigation ignored: $t")
+                    return
+                }
+
                 scope.launch(Dispatchers.Main) {
                     if (t.type == ArticleType.Interactive && t.subType == Teaser.SUB_TYPE_RADIO) {
                         ArticleActivity.start(context, t)
@@ -116,6 +122,11 @@ fun ChannelActivityScreen(
 
             override fun onClickStory(teaser: Teaser) {
                 Log.i(TAG, "Clicked a story link $teaser")
+                if (!TeaserNavigationGuard.accept(teaser)) {
+                    Log.i(TAG, "Duplicate story link navigation ignored: $teaser")
+                    return
+                }
+
                 if (teaser.type == ArticleType.Interactive && teaser.subType == Teaser.SUB_TYPE_RADIO) {
                     ArticleActivity.start(context, teaser)
                 } else {

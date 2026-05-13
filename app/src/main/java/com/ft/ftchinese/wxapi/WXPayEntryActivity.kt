@@ -3,6 +3,8 @@ package com.ft.ftchinese.wxapi
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.LiveData
@@ -35,6 +38,7 @@ import com.ft.ftchinese.ui.subs.contact.BuyerInfoActivityScreen
 import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
+import com.ft.ftchinese.wxapi.shared.WxRespProgress
 import com.ft.ftchinese.wxapi.wxpay.WxPayActivityScreen
 import com.ft.ftchinese.wxapi.wxpay.WxPayStatus
 import com.tencent.mm.opensdk.constants.ConstantsAPI
@@ -58,6 +62,9 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
     private var payIntentStore: PayIntentStore? = null
     private var tracker: StatsTracker? = null
     private var api: IWXAPI? = null
+    private var forwardedAuthCallback = false
+    private val wxDiagnosticLiveData = MutableLiveData<String?>()
+    private val handler = Handler(Looper.getMainLooper())
 
     private val statusLiveData: MutableLiveData<WxPayStatus> by lazy {
         MutableLiveData<WxPayStatus>()
@@ -66,6 +73,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WxLoginDiagnostic.recordEntry(this, TAG, "onCreate", intent)
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
 
@@ -74,11 +82,21 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
 
         tracker = StatsTracker.getInstance(this)
 
-        api?.handleIntent(intent, this)
+        try {
+            api?.handleIntent(intent, this)
+            scheduleDiagnosticCheck()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to handle wechat pay intent in onCreate", e)
+            wxDiagnosticLiveData.value = e.message ?: "Failed to handle wechat callback intent"
+        }
+        if (forwardedAuthCallback) {
+            return
+        }
 
         setContent {
             WxPayApp(
                 uiStatusLiveData = statusLiveData,
+                wxDiagnosticLiveData = wxDiagnosticLiveData,
                 onExit = this::onClickDone
             )
         }
@@ -100,8 +118,15 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
      */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        WxLoginDiagnostic.recordEntry(this, TAG, "onNewIntent", intent)
         setIntent(intent)
-        api?.handleIntent(intent, this)
+        try {
+            api?.handleIntent(intent, this)
+            scheduleDiagnosticCheck()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to handle wechat pay intent in onNewIntent", e)
+            wxDiagnosticLiveData.value = e.message ?: "Failed to handle wechat callback intent"
+        }
     }
 
     // Reference https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5
@@ -115,6 +140,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
      *  No this is crap. Use the result of client and schedule a background task to verify against server.
      */
     override fun onResp(resp: BaseResp?) {
+        WxLoginDiagnostic.recordResp(this, TAG, resp)
         Log.i(TAG, "onPayFinish: type=${resp?.type}, errCode=${resp?.errCode}, errStr=${resp?.errStr}")
 
         val pi = payIntentStore?.load()
@@ -146,6 +172,12 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
                         statusLiveData.value = WxPayStatus.Canceled
                     }
                 }
+            }
+            ConstantsAPI.COMMAND_SENDAUTH -> {
+                Log.w(TAG, "Received wx auth callback in pay entry; forwarding to auth entry")
+                forwardedAuthCallback = true
+                WXEntryActivity.startFromWxCallback(this, intent)
+                finish()
             }
             else -> {
                 statusLiveData.value = WxPayStatus.Error("Unsupported wx sdk usage")
@@ -201,6 +233,11 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
 
     }
 
+    override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
+        super.onDestroy()
+    }
+
     // Force back button to startForResult MembershipActivity so that use feels he is returning to previous MembershipActivity while actually the old instance already killed.
     // This hacking is used to refresh user data.
     // On iOS you do not need to handle it since there's no back button.
@@ -209,8 +246,18 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
         onClickDone()
     }
 
+    private fun scheduleDiagnosticCheck() {
+        handler.postDelayed({
+            if (statusLiveData.value == null && WxLoginDiagnostic.hasActiveRequest(this)) {
+                wxDiagnosticLiveData.value = WxLoginDiagnostic.consumePendingIssue(this)
+            }
+        }, DIAGNOSTIC_DELAY_MS)
+    }
+
     companion object {
         private const val EXTRA_TEST = "extra_test"
+        private const val DIAGNOSTIC_DELAY_MS = 1500L
+
         @JvmStatic
         fun start(context: Context, isTest: Boolean = false) {
             context.startActivity(Intent(
@@ -220,12 +267,25 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler {
                 putExtra(EXTRA_TEST, isTest)
             })
         }
+
+        @JvmStatic
+        fun startFromWxCallback(context: Context, wxIntent: Intent?) {
+            context.startActivity(Intent(
+                context,
+                WXPayEntryActivity::class.java
+            ).apply {
+                wxIntent?.extras?.let { putExtras(it) }
+                action = wxIntent?.action
+                data = wxIntent?.data
+            })
+        }
     }
 }
 
 @Composable
 fun WxPayApp(
     uiStatusLiveData: LiveData<WxPayStatus>,
+    wxDiagnosticLiveData: LiveData<String?>,
     onExit: () -> Unit
 ) {
     val scaffold = rememberScaffoldState()
@@ -268,15 +328,25 @@ fun WxPayApp(
                 composable(
                     route = PayAppScreen.PayResponse.name
                 ) {
-                    WxPayActivityScreen(
-                        uiStatusLiveData = uiStatusLiveData,
-                        onFailure = onExit,
-                        onSuccess = {
-                            navigateToInvoice(
-                                navController
-                            )
-                        }
-                    )
+                    val diagnostic = wxDiagnosticLiveData.observeAsState()
+
+                    if (diagnostic.value != null) {
+                        WxRespProgress(
+                            title = "微信登录诊断",
+                            subTitle = diagnostic.value.orEmpty(),
+                            onClickButton = onExit
+                        )
+                    } else {
+                        WxPayActivityScreen(
+                            uiStatusLiveData = uiStatusLiveData,
+                            onFailure = onExit,
+                            onSuccess = {
+                                navigateToInvoice(
+                                    navController
+                                )
+                            }
+                        )
+                    }
                 }
 
                 composable(

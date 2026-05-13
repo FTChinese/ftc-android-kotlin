@@ -58,7 +58,16 @@ fun FtcWebView(
                 WebViewAccessTokenCookieManager.syncAccessToken(webView)
                 WebViewAccessTokenCookieManager.syncAccessTokenForUrl(webView, authUrl)
                 webView.addJavascriptInterface(
-                    JsInterface(jsListener),
+                    JsInterface(
+                        listener = jsListener,
+                        onLink = { url ->
+                            routeWebViewBridgeLink(
+                                webView = webView,
+                                callback = webClientCallback,
+                                url = url,
+                            )
+                        },
+                    ),
                     JS_INTERFACE_NAME
                 )
                 onCreated(webView)

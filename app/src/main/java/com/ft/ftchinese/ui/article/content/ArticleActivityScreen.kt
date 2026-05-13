@@ -57,6 +57,7 @@ import com.ft.ftchinese.ui.util.ShareUtils
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.web.FtcJsEventListener
 import com.ft.ftchinese.ui.web.FtcWebView
+import com.ft.ftchinese.ui.web.TeaserNavigationGuard
 import com.ft.ftchinese.ui.web.WebViewCallback
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
@@ -65,6 +66,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
+
+private const val TAG = "ArticleActivityScreen"
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -144,6 +147,11 @@ fun ArticleActivityScreen(
     val jsCallback = remember {
         object : FtcJsEventListener(context) {
             override fun onClickTeaser(teaser: Teaser) {
+                if (!TeaserNavigationGuard.accept(teaser)) {
+                    Log.i(TAG, "Duplicate linked teaser navigation ignored: $teaser")
+                    return
+                }
+
                 scope.launch(Dispatchers.Main) {
                     // Open linked article in a new activity so returning keeps current article WebView state.
                     ArticleActivity.start(context, teaser)
@@ -165,6 +173,11 @@ fun ArticleActivityScreen(
             }
 
             override fun onClickStory(teaser: Teaser) {
+                if (!TeaserNavigationGuard.accept(teaser)) {
+                    Log.i(TAG, "Duplicate linked story navigation ignored: $teaser")
+                    return
+                }
+
                 // Keep current article instance untouched so back returns to previous scroll position.
                 ArticleActivity.start(context, teaser)
             }
