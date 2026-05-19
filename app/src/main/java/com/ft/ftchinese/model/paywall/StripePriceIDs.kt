@@ -31,16 +31,20 @@ data class StripePriceIDs(
                     null
                 }
 
+                val intent = CheckoutIntent.ofStripe(
+                    source = m,
+                    target = pwItem.price
+                )
+
                 items.add(
                     CartItemStripe(
-                        intent = CheckoutIntent.ofStripe(
-                            source = m,
-                            target = pwItem.price,
-                            hasCoupon = coupon != null
-                        ),
+                        intent = intent,
                         recurring = pwItem.price,
                         trial = trialPrice,
-                        coupon = coupon
+                        coupon = coupon.takeUnless {
+                            intent.kind == IntentKind.Downgrade ||
+                                intent.kind == IntentKind.CancelScheduledChange
+                        }
                     )
                 )
             }

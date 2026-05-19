@@ -16,6 +16,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.StripeSubStatus
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.formatLocalDate
+import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.stripesubs.StripeCoupon
 import com.ft.ftchinese.model.stripesubs.StripeSubs
 import com.ft.ftchinese.ui.components.Heading3
@@ -30,16 +31,26 @@ import org.threeten.bp.ZonedDateTime
 @Composable
 fun StripeSubsDetails(
     subs: StripeSubs,
-    coupon: StripeCoupon?
+    coupon: StripeCoupon?,
+    intentKind: IntentKind,
+    targetTier: Tier,
 ) {
     val context = LocalContext.current
+    val isDowngrade = intentKind == IntentKind.Downgrade
+    val isCancelScheduledChange = intentKind == IntentKind.CancelScheduledChange
 
     Column(
         modifier = Modifier
             .padding(top = Dimens.dp16)
     ) {
         Heading3(
-            text = "订阅成功",
+            text = if (isDowngrade) {
+                "降级已安排"
+            } else if (isCancelScheduledChange) {
+                "已保留当前方案"
+            } else {
+                "订阅成功"
+            },
             textAlign = TextAlign.Center,
         )
 
@@ -56,6 +67,12 @@ fun StripeSubsDetails(
             lead = "订阅方案",
             tail = FormatHelper.getTier(context, subs.tier)
         )
+        if (isDowngrade) {
+            ListItemTwoCol(
+                lead = "下次续订方案",
+                tail = FormatHelper.getTier(context, targetTier)
+            )
+        }
         ListItemTwoCol(
             lead = "订阅状态",
             tail = subs.status?.let {
@@ -72,7 +89,13 @@ fun StripeSubsDetails(
         )
 
         Text(
-            text = "本次订阅时间结束后自动续订",
+            text = if (isDowngrade) {
+                "当前高端会员权益保留到结束时间，下次续订起自动切换为标准会员"
+            } else if (isCancelScheduledChange) {
+                "已取消下次续订降级安排，当前方案将在本周期结束后继续自动续订"
+            } else {
+                "本次订阅时间结束后自动续订"
+            },
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body2,
@@ -106,6 +129,8 @@ fun PreviewSubsDetails() {
             priceId = "attached-price-id",
             startUtc = ZonedDateTime.now(),
             endUtc = ZonedDateTime.now().plusDays(7)
-        )
+        ),
+        intentKind = IntentKind.Create,
+        targetTier = Tier.STANDARD,
     )
 }

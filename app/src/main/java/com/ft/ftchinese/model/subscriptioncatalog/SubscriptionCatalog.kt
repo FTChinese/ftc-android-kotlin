@@ -1,10 +1,13 @@
 package com.ft.ftchinese.model.subscriptioncatalog
 
+import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
+import com.ft.ftchinese.model.stripesubs.StripePendingChange
 import kotlinx.serialization.Serializable
 import org.threeten.bp.LocalDate
 
@@ -51,10 +54,15 @@ data class SubscriptionCatalog(
                     it.price.tier to it.price.periodCount.toCycle().name.lowercase()
                 },
                 valueTransform = {
+                    val couponAmountOff = it.applicableCoupon()?.amountOff ?: 0
                     SubscriptionCheckout(
                         stripePriceId = it.price.id,
                         stripeTrialPriceId = "",
                         stripeCouponId = it.applicableCoupon()?.id.orEmpty(),
+                        stripeCurrency = it.price.currency,
+                        stripeUnitAmount = it.price.unitAmount,
+                        stripePayableAmount = (it.price.unitAmount - couponAmountOff).coerceAtLeast(0),
+                        stripeCouponAmountOff = couponAmountOff,
                         ftcPriceId = ""
                     )
                 }
@@ -94,7 +102,27 @@ data class SubscriptionCatalog(
                                                         stripeCheckout.stripeCouponId
                                                     } else {
                                                         option.checkout.stripeCouponId
-                                                    }
+                                                    },
+                                                    stripeCurrency = if (option.checkout.stripeCurrency.isBlank()) {
+                                                        stripeCheckout.stripeCurrency
+                                                    } else {
+                                                        option.checkout.stripeCurrency
+                                                    },
+                                                    stripeUnitAmount = if (option.checkout.stripeUnitAmount <= 0) {
+                                                        stripeCheckout.stripeUnitAmount
+                                                    } else {
+                                                        option.checkout.stripeUnitAmount
+                                                    },
+                                                    stripePayableAmount = if (option.checkout.stripePayableAmount <= 0) {
+                                                        stripeCheckout.stripePayableAmount
+                                                    } else {
+                                                        option.checkout.stripePayableAmount
+                                                    },
+                                                    stripeCouponAmountOff = if (option.checkout.stripeCouponAmountOff <= 0) {
+                                                        stripeCheckout.stripeCouponAmountOff
+                                                    } else {
+                                                        option.checkout.stripeCouponAmountOff
+                                                    },
                                                 )
                                             )
                                         }
@@ -122,7 +150,71 @@ data class SubscriptionCatalogSummary(
     val expireDate: LocalDate? = null,
     val billingCycle: String? = null,
     val autoRenew: Boolean = false,
-)
+    val stripePriceId: String = "",
+    val stripeCurrency: String = "",
+    val pendingStripeChange: StripePendingChange? = null,
+) {
+    fun checkoutMembership(fallback: Membership): Membership {
+        val normalizedStatus = status.lowercase()
+        val cycle = Cycle.fromString(billingCycle?.lowercase()) ?: fallback.cycle
+
+        if (normalizedStatus == "none") {
+            return Membership()
+        }
+
+        if (normalizedStatus == "expired") {
+            return fallback.copy(
+                tier = tier,
+                cycle = cycle,
+                expireDate = expireDate,
+                payMethod = null,
+                stripeSubsId = null,
+                autoRenew = false,
+                status = null,
+                appleSubsId = null,
+                b2bLicenceId = null,
+                pendingStripeChange = null,
+            )
+        }
+
+        if (normalizedStatus != "active") {
+            return fallback
+        }
+
+        return fallback.copy(
+            tier = tier,
+            cycle = cycle,
+            expireDate = expireDate,
+            payMethod = payMethod,
+            stripeSubsId = if (payMethod == PayMethod.STRIPE) {
+                fallback.stripeSubsId
+            } else {
+                null
+            },
+            autoRenew = autoRenew,
+            status = if (payMethod == PayMethod.STRIPE) {
+                fallback.status
+            } else {
+                null
+            },
+            pendingStripeChange = if (payMethod == PayMethod.STRIPE) {
+                pendingStripeChange ?: fallback.pendingStripeChange
+            } else {
+                null
+            },
+            appleSubsId = if (payMethod == PayMethod.APPLE) {
+                fallback.appleSubsId
+            } else {
+                null
+            },
+            b2bLicenceId = if (payMethod == PayMethod.B2B) {
+                fallback.b2bLicenceId
+            } else {
+                null
+            },
+        )
+    }
+}
 
 @Serializable
 data class SubscriptionCatalogHero(
@@ -171,5 +263,9 @@ data class SubscriptionCheckout(
     val stripePriceId: String = "",
     val stripeTrialPriceId: String = "",
     val stripeCouponId: String = "",
+    val stripeCurrency: String = "",
+    val stripeUnitAmount: Int = 0,
+    val stripePayableAmount: Int = 0,
+    val stripeCouponAmountOff: Int = 0,
     val ftcPriceId: String = "",
 )

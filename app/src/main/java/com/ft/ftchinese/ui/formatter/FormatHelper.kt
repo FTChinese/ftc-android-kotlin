@@ -75,6 +75,7 @@ fun formatStripeSubsBtn(ctx: Context, kind: IntentKind): String {
         IntentKind.SwitchInterval -> ctx.getString(R.string.stripe_switch_cycle)
         IntentKind.Upgrade -> ctx.getString(R.string.stripe_upgrade)
         IntentKind.Downgrade -> ctx.getString(R.string.stripe_downgrade)
+        IntentKind.CancelScheduledChange -> ctx.getString(R.string.stripe_keep_current_plan)
         IntentKind.ApplyCoupon -> ctx.getString(R.string.redeem_coupon)
         else -> ctx.getString(R.string.subs_create)
     }

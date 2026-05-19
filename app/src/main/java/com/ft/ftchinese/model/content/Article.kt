@@ -602,6 +602,77 @@ class Story (
         }
     }
 
+    private fun normalizeBilingualReference(value: String): String {
+        return value
+            .replace('\u00A0', ' ')
+            .replace(Regex("[‘’]"), "'")
+            .replace(Regex("[“”]"), "\"")
+            .replace(Regex("[‐‑‒–—]"), "-")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .lowercase(Locale.ROOT)
+    }
+
+    private fun normalizeLooseBilingualReference(value: String): String {
+        return normalizeBilingualReference(value)
+            .replace("&", "and")
+            .replace(Regex("[^a-z0-9]"), "")
+    }
+
+    private fun isBilingualAcronymReference(value: String): Boolean {
+        val compact = value.replace(Regex("[^A-Za-z0-9]"), "")
+        val letters = value.replace(Regex("[^A-Za-z]"), "")
+        return compact.length in 2..10 &&
+                compact.any { it.isLetter() } &&
+                letters.isNotEmpty() &&
+                letters == letters.uppercase(Locale.ROOT)
+    }
+
+    private fun shouldHideBilingualReference(reference: String, englishText: String): Boolean {
+        val value = reference.trim()
+        if (!Regex("[A-Za-z]").containsMatchIn(value) || Regex("[\\u3400-\\u9FFF\\uF900-\\uFAFF]").containsMatchIn(value)) {
+            return false
+        }
+        if (isBilingualAcronymReference(value)) {
+            return true
+        }
+        val normalizedReference = normalizeBilingualReference(value)
+        val normalizedEnglish = normalizeBilingualReference(englishText)
+        if (normalizedReference.length >= 4 && normalizedEnglish.contains(normalizedReference)) {
+            return true
+        }
+        val looseReference = normalizeLooseBilingualReference(value)
+        val looseEnglish = normalizeLooseBilingualReference(englishText)
+        return looseReference.length >= 4 && looseEnglish.contains(looseReference)
+    }
+
+    private fun cleanBilingualTextReferences(text: String, englishText: String): String {
+        return Regex("""[\s\u00A0]*[（(]([^()（）]{1,80})[）)]""").replace(text) { match ->
+            val reference = match.groupValues[1]
+            if (shouldHideBilingualReference(reference, englishText)) "" else match.value
+        }
+    }
+
+    private fun cleanBilingualChineseHtml(html: String, englishText: String): String {
+        val tagPattern = Regex("""<[^>]*>""")
+        val result = StringBuilder()
+        var lastIndex = 0
+
+        tagPattern.findAll(html).forEach { match ->
+            if (match.range.first > lastIndex) {
+                result.append(cleanBilingualTextReferences(html.substring(lastIndex, match.range.first), englishText))
+            }
+            result.append(match.value)
+            lastIndex = match.range.last + 1
+        }
+
+        if (lastIndex < html.length) {
+            result.append(cleanBilingualTextReferences(html.substring(lastIndex), englishText))
+        }
+
+        return result.toString()
+    }
+
     private fun splitCnBody(): List<String> {
         return bodyCN.split("\r\n").let {
             if (it.size > 1) {
@@ -640,7 +711,7 @@ class Story (
 
         while (cIndex < cLen && eIndex < eLen) {
             bi.add(Bilingual(
-                cn = cnArray[cIndex],
+                cn = cleanBilingualChineseHtml(cnArray[cIndex], enArray[eIndex]),
                 en = enArray[eIndex]),
             )
             cIndex++

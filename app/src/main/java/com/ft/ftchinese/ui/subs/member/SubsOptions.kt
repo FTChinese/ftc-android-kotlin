@@ -2,20 +2,22 @@ package com.ft.ftchinese.ui.subs.member
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.subs.StripeAutoRenewUiState
 import com.ft.ftchinese.ui.components.ClickableRow
-import com.ft.ftchinese.ui.components.IconCancel
-import com.ft.ftchinese.ui.components.IconRedo
 import com.ft.ftchinese.ui.components.IconRightArrow
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OColors
 
 enum class SubsOptionRow {
     GoToPaywall,
@@ -25,9 +27,9 @@ enum class SubsOptionRow {
 
 @Composable
 fun SubsOptions(
-    cancelStripe: Boolean,
-    reactivateStripe: Boolean,
-    onClickRow: (SubsOptionRow) -> Unit
+    stripeAutoRenewUiState: StripeAutoRenewUiState?,
+    onStripeAutoRenewChange: (Boolean) -> Unit,
+    onClickRow: (SubsOptionRow) -> Unit,
 ) {
 
     Card {
@@ -45,40 +47,39 @@ fun SubsOptions(
                 },
                 contentPadding = PaddingValues(Dimens.dp8)
             ) {
-                Text(text = "购买订阅或更改自动续订")
+                Text(
+                    text = if (stripeAutoRenewUiState == null) {
+                        "购买订阅"
+                    } else {
+                        "购买订阅或更改方案"
+                    }
+                )
             }
 
-
-            if (reactivateStripe) {
+            stripeAutoRenewUiState?.let { autoRenew ->
                 Divider(startIndent = Dimens.dp8)
-
-                ClickableRow(
-                    onClick = {
-                        onClickRow(SubsOptionRow.ReactivateStripe)
-                    },
-                    contentPadding = PaddingValues(Dimens.dp8),
-                    endIcon = {
-                        IconRedo()
-                    }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Dimens.dp8),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(text = stringResource(id = R.string.stripe_reactivate_auto_renew))
-                }
-            }
-
-            if (cancelStripe) {
-                Divider(startIndent = Dimens.dp8)
-                ClickableRow(
-                    onClick = {
-                        onClickRow(SubsOptionRow.CancelStripe)
-                    },
-                    contentPadding = PaddingValues(Dimens.dp8),
-                    endIcon = {
-                        IconCancel()
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = autoRenew.title)
+                        Text(
+                            text = autoRenew.status,
+                            color = OColors.black50Default,
+                        )
+                        Text(
+                            text = autoRenew.detail,
+                            color = OColors.black50Default,
+                        )
                     }
-                ) {
-                    Text(text = stringResource(id = R.string.stripe_cancel))
+                    Switch(
+                        checked = autoRenew.checked,
+                        onCheckedChange = onStripeAutoRenewChange,
+                    )
                 }
-
             }
         }
     }
@@ -88,8 +89,15 @@ fun SubsOptions(
 @Composable
 fun PreviewSubsOptions() {
     SubsOptions(
-        cancelStripe = true,
-        reactivateStripe = false,
+        stripeAutoRenewUiState = StripeAutoRenewUiState(
+            visible = true,
+            checked = true,
+            title = "信用卡/借记卡自动续订",
+            status = "已开启 · 下次续订：高端会员",
+            detail = "当前高端会员权益有效至2027-05-15，到期后将继续自动续订。",
+            offConfirmation = "",
+        ),
+        onStripeAutoRenewChange = {},
         onClickRow = {}
     )
 }

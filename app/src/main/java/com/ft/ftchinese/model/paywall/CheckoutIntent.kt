@@ -81,26 +81,21 @@ data class CheckoutIntent(
                 }
 
                 PayMethod.STRIPE -> if (source.tier == target.tier) {
-                    autoRenewAddOn
-                } else {
-                    when (target.tier) {
-                        // Standard -> onetime premium
-                        Tier.PREMIUM -> CheckoutIntent(
-                            kind = IntentKind.Forbidden,
-                            message = "信用卡/借记卡标准版订阅不能使用支付宝/微信购买升级到高端版，请继续使用信用卡/借记卡支付升级"
-                        )
-                        Tier.STANDARD -> autoRenewAddOn
-                    }
-                }
-
-                PayMethod.APPLE -> if (source.tier == Tier.STANDARD && target.tier == Tier.PREMIUM) {
                     CheckoutIntent(
                         kind = IntentKind.Forbidden,
-                        message = "当前标准会员会员来自苹果内购，升级高端会员需要在您的苹果设备上，使用原有苹果账号登录后，在FT中文网APP内操作"
+                        message = "当前为信用卡/借记卡自动续订，不能使用支付宝/微信重复购买同级别会员"
                     )
                 } else {
-                    autoRenewAddOn
+                    CheckoutIntent(
+                        kind = IntentKind.Forbidden,
+                        message = "当前为信用卡/借记卡自动续订，请继续使用信用卡/借记卡管理升级或降级"
+                    )
                 }
+
+                PayMethod.APPLE -> CheckoutIntent(
+                    kind = IntentKind.Forbidden,
+                    message = "当前订阅来自苹果内购，请在苹果设备上管理订阅"
+                )
 
                 PayMethod.B2B -> if (source.tier == Tier.STANDARD && target.tier == Tier.PREMIUM) {
                     CheckoutIntent(
@@ -119,7 +114,6 @@ data class CheckoutIntent(
         fun ofStripe(
             source: Membership,
             target: StripePrice,
-            hasCoupon: Boolean,
         ): CheckoutIntent {
             if (source.vip) {
                 return vip
@@ -137,18 +131,20 @@ data class CheckoutIntent(
                 )
 
                 PayMethod.STRIPE -> if (source.tier == target.tier) {
-                    if (source.cycle == target.periodCount.toCycle()) {
-                        if (hasCoupon) {
-                            CheckoutIntent(
-                                kind = IntentKind.ApplyCoupon,
-                                message = "优惠券将从下一次付款的发票总额中扣除，一个付款周期内仅可使用一次优惠券"
-                            )
-                        } else {
-                            CheckoutIntent(
-                                kind = IntentKind.Forbidden,
-                                message = "自动续订不能重复订阅"
-                            )
-                        }
+                    val pendingChange = source.pendingStripeChange
+                    if (pendingChange?.isDowngrade == true && !pendingChange.targets(target.tier)) {
+                        CheckoutIntent(
+                            kind = IntentKind.CancelScheduledChange,
+                            message = "当前仍保留${target.tier.label()}权益；取消已安排的降级后，下次续订将继续按${target.tier.label()}扣款"
+                        )
+                    } else if (source.cycle == target.periodCount.toCycle()) {
+                        // Campaign coupons are applied when creating or changing a
+                        // Stripe plan. The catalog should not let an active same-tier
+                        // auto-renewal look like a second purchase path.
+                        CheckoutIntent(
+                            kind = IntentKind.Forbidden,
+                            message = "自动续订不能重复订阅"
+                        )
                     } else {
                         CheckoutIntent(
                             kind = IntentKind.SwitchInterval,
@@ -156,15 +152,28 @@ data class CheckoutIntent(
                         )
                     }
                 } else {
+                    if (source.pendingStripeChange?.targets(target.tier) == true) {
+                        return CheckoutIntent(
+                            kind = IntentKind.Forbidden,
+                            message = "已安排下次续订起切换为${target.tier.label()}"
+                        )
+                    }
                     when (target.tier) {
                         Tier.PREMIUM -> CheckoutIntent(
                             kind = IntentKind.Upgrade,
                             message = "升级高端会员，信用卡/借记卡自动续订将调整您的扣款额度"
                         )
-                        Tier.STANDARD -> CheckoutIntent(
-                            kind = IntentKind.Downgrade,
-                            message = "降级为标准版会员，信用卡/借记卡自动续订将调整您的扣款额度"
-                        )
+                        Tier.STANDARD -> if (source.autoRenew) {
+                            CheckoutIntent(
+                                kind = IntentKind.Downgrade,
+                                message = "当前高端会员权益保留到本周期结束，下次续订起切换为标准会员"
+                            )
+                        } else {
+                            CheckoutIntent(
+                                kind = IntentKind.Forbidden,
+                                message = "自动续订已关闭，到期后不再续订；如需下周期切换方案，请先开启自动续订"
+                            )
+                        }
                     }
                 }
 
@@ -181,5 +190,13 @@ data class CheckoutIntent(
                 else -> intentUnknown
             }
         }
+    }
+}
+
+private fun Tier?.label(): String {
+    return when (this) {
+        Tier.STANDARD -> "标准会员"
+        Tier.PREMIUM -> "高端会员"
+        null -> "当前会员"
     }
 }

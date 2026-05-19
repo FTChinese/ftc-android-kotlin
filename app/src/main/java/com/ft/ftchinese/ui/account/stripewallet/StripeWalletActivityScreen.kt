@@ -108,8 +108,10 @@ fun StripeWalletActivityScreen(
     }
 
     // Upon initial loading, fetch user's default payment method.
-    LaunchedEffect(key1 = Unit) {
-        walletState.loadDefaultPaymentMethod(account)
+    LaunchedEffect(key1 = account.stripeId) {
+        if (!account.stripeId.isNullOrBlank()) {
+            walletState.loadDefaultPaymentMethod(account)
+        }
     }
 
     ProgressLayout(

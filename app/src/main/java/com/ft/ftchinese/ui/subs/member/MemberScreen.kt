@@ -24,6 +24,7 @@ import org.threeten.bp.LocalDate
 @Composable
 fun MemberScreen(
     member: Membership,
+    onStripeAutoRenewChange: (Boolean) -> Unit,
     onSubsOption: (SubsOptionRow) -> Unit,
 ) {
     val context = LocalContext.current
@@ -31,6 +32,7 @@ fun MemberScreen(
         ctx = context,
         m = member
     )
+    val optionVisibility = member.subsOptionVisibility()
 
     Column(
         modifier = Modifier
@@ -52,8 +54,8 @@ fun MemberScreen(
         Spacer(modifier = Modifier.height(Dimens.dp8))
 
         SubsOptions(
-            cancelStripe = member.canCancelStripe,
-            reactivateStripe = status.reactivateStripe,
+            stripeAutoRenewUiState = optionVisibility.stripeAutoRenewUiState,
+            onStripeAutoRenewChange = onStripeAutoRenewChange,
             onClickRow = onSubsOption
         )
 
@@ -74,10 +76,7 @@ fun PreviewMemberScreen() {
             payMethod = PayMethod.ALIPAY,
             standardAddOn = 30,
             premiumAddOn = 20,
-        )
+        ),
+        onStripeAutoRenewChange = {}
     ) {}
 }
-
-
-
-

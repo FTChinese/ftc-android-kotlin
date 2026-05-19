@@ -284,6 +284,36 @@ object StripeClient {
         }
     }
 
+    private fun listCustomerPaymentMethods(
+        account: Account
+    ): HttpResp<List<StripePaymentMethod>> {
+        val customerId = account.stripeId ?: throw Exception("Not a stripe customer")
+        val api = ApiConfig.ofSubs(account.isTest)
+
+        return Fetch()
+            .setLegacyApiKey()
+            .get(api.stripeCustomerPaymentMethods(customerId))
+            .setUserId(account.id)
+            .noCache()
+            .endJson()
+    }
+
+    suspend fun asyncListCustomerPaymentMethods(
+        account: Account
+    ): FetchResult<List<StripePaymentMethod>> {
+        return try {
+            val resp = withContext(Dispatchers.IO) {
+                listCustomerPaymentMethods(account)
+            }
+
+            FetchResult.Success(resp.body ?: listOf())
+        } catch (e: APIError) {
+            FetchResult.fromApi(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
     private fun loadCouponApplied(api: ApiConfig, ftcId: String, subsId: String): CouponApplied? {
         return Fetch()
             .setLegacyApiKey()
@@ -461,6 +491,39 @@ object StripeClient {
             } else {
                 FetchResult.Success(result)
             }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
+    private fun previewUpdateSubs(account: Account, params: SubParams): StripeInvoicePreview? {
+        val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
+
+        val api = ApiConfig.ofSubs(account.isTest)
+
+        return Fetch()
+            .setLegacyApiKey()
+            .post("${api.stripeSubs}/$subsId/preview-update")
+            .setUserId(account.id)
+            .noCache()
+            .sendJson(params)
+            .endJson<StripeInvoicePreview>()
+            .body
+    }
+
+    suspend fun asyncPreviewUpdateSubs(account: Account, params: SubParams): FetchResult<StripeInvoicePreview> {
+        return try {
+            val result = withContext(Dispatchers.IO) {
+                previewUpdateSubs(account, params)
+            }
+
+            if (result == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(result)
+            }
+        } catch (e: APIError) {
+            FetchResult.fromApi(e)
         } catch (e: Exception) {
             FetchResult.fromException(e)
         }

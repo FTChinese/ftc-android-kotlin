@@ -1,6 +1,8 @@
 package com.ft.ftchinese.model.fetch
 
 import com.ft.ftchinese.R
+import kotlinx.serialization.SerializationException
+import java.io.IOException
 
 /**
  * A generic class that holds a value with its loading status.
@@ -76,8 +78,15 @@ sealed class FetchResult<out T : Any> {
                 is IllegalStateException -> {
                     LocalizedError(R.string.api_empty_url)
                 }
+                is IOException,
+                is SerializationException -> {
+                    loadingFailed
+                }
                 else -> {
-                    TextError(e.message ?: "")
+                    e.message
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let(::TextError)
+                        ?: unknownError
                 }
             }
         }

@@ -92,6 +92,10 @@ fun MemberActivityScreen(
 
     if (showDialog) {
         CancelStripeDialog(
+            bodyText = account.membership
+                .subsOptionVisibility()
+                .stripeAutoRenewUiState
+                ?.offConfirmation,
             onConfirm = {
                 memberState.cancelStripe(account)
                 setShowDialog(false)
@@ -112,7 +116,14 @@ fun MemberActivityScreen(
         modifier = modifier.pullRefresh(pullRefreshState)
     ) {
         MemberScreen(
-            member = account.membership
+            member = account.membership,
+            onStripeAutoRenewChange = { enabled ->
+                if (enabled) {
+                    memberState.reactivateStripe(account)
+                } else {
+                    setShowDialog(true)
+                }
+            }
         ) {
             when (it) {
                 SubsOptionRow.GoToPaywall -> {

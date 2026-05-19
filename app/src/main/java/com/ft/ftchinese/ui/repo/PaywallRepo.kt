@@ -35,17 +35,21 @@ object PaywallRepo {
             pwItem.coupons.find { it.id == id }
         }
 
+        val intent = CheckoutIntent.ofStripe(
+            source = m,
+            target = pwItem.price
+        )
+
         return CartItemStripe(
-            intent = CheckoutIntent.ofStripe(
-                source = m,
-                target = pwItem.price,
-                hasCoupon = coupon != null
-            ),
+            intent = intent,
             recurring = pwItem.price,
             trial = trialId?.let { id ->
                 stripeItems[id]?.price
             },
-            coupon = coupon
+            coupon = coupon.takeUnless {
+                intent.kind == IntentKind.Downgrade ||
+                    intent.kind == IntentKind.CancelScheduledChange
+            }
         )
     }
 

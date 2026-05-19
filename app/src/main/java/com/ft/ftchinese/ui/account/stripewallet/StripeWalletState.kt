@@ -98,16 +98,38 @@ open class StripeWalletState(
                 account
             )
 
-            progress.value = false
             when (result) {
                 is FetchResult.LocalizedError -> {
-//                    showSnackBar(result.msgId)
+                    loadSavedPaymentMethods(account)
                 }
                 is FetchResult.TextError -> {
-//                    showSnackBar(result.text)
+                    loadSavedPaymentMethods(account)
                 }
                 is FetchResult.Success -> {
-                     defaultPaymentMethod = result.data
+                    defaultPaymentMethod = result.data
+                }
+            }
+            progress.value = false
+        }
+    }
+
+    private suspend fun loadSavedPaymentMethods(account: Account) {
+        val result = StripeClient.asyncListCustomerPaymentMethods(account)
+        when (result) {
+            is FetchResult.LocalizedError -> {
+                // The checkout flow can still use Stripe's payment sheet when no
+                // default card is available or the newer list endpoint is absent.
+            }
+            is FetchResult.TextError -> {
+                // Keep this silent; a missing saved-card list should not block users
+                // from opening Stripe's own selector.
+            }
+            is FetchResult.Success -> {
+                if (defaultPaymentMethod == null &&
+                    paymentMethodSelected == null &&
+                    result.data.size == 1
+                ) {
+                    paymentMethodSelected = result.data.first()
                 }
             }
         }

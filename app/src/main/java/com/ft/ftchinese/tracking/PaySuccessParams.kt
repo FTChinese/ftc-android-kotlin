@@ -4,7 +4,6 @@ import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.model.paywall.convertCent
 
 data class PaySuccessParams(
     val edition: Edition,
@@ -28,11 +27,7 @@ data class PaySuccessParams(
             return PaySuccessParams(
                 edition = item.recurring.edition,
                 currency = item.recurring.currency,
-                amountPaid = if (item.trial != null) {
-                    convertCent(item.trial.unitAmount)
-                } else {
-                    convertCent(item.recurring.unitAmount)
-                },
+                amountPaid = item.payableAmount(),
                 payMethod = PayMethod.STRIPE,
             )
         }

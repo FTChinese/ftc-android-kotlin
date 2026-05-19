@@ -120,9 +120,11 @@ fun StripeSubActivityScreen(
         }
     }
 
-    // Load default payment method upon ui initialization.
-    LaunchedEffect(key1 = Unit) {
-        paymentState.loadDefaultPaymentMethod(account)
+    // Load default payment method, falling back to a single saved card if present.
+    LaunchedEffect(key1 = account.stripeId) {
+        if (!account.stripeId.isNullOrBlank()) {
+            paymentState.loadDefaultPaymentMethod(account)
+        }
     }
 
     // If there's coupon, check whether user have already used any coupon
@@ -141,6 +143,12 @@ fun StripeSubActivityScreen(
                 ftcId = account.id,
                 subsId = it,
             )
+        }
+    }
+
+    LaunchedEffect(key1 = paymentState.cartItem) {
+        paymentState.cartItem?.let {
+            paymentState.previewSubscriptionUpdate(account, it)
         }
     }
 
@@ -180,8 +188,15 @@ fun StripeSubActivityScreen(
                 paymentMethod = paymentState.paymentMethodInUse.value?.current,
                 subs = paymentState.subsResult?.subs,
                 couponApplied = paymentState.couponApplied,
+                invoicePreview = paymentState.invoicePreview,
+                invoicePreviewError = paymentState.invoicePreviewError,
                 onPaymentMethod = {
                       paymentState.showPaymentSheet(account)
+                },
+                onRetryInvoicePreview = {
+                    paymentState.cartItem?.let { cartItem ->
+                        paymentState.previewSubscriptionUpdate(account, cartItem)
+                    }
                 },
                 onSubscribe = {
                     paymentState.subscribe(account, it)

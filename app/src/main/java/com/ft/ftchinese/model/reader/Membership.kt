@@ -10,6 +10,7 @@ import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientBooleanSerializer
 import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
+import com.ft.ftchinese.model.stripesubs.StripePendingChange
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -37,6 +38,7 @@ data class Membership(
     val b2bLicenceId: String? = null,
     val standardAddOn: Long = 0,
     val premiumAddOn: Long = 0,
+    val pendingStripeChange: StripePendingChange? = null,
     val vip: Boolean = false,
 ) : Parcelable {
 
@@ -71,6 +73,7 @@ data class Membership(
             b2bLicenceId = b2bLicenceId,
             standardAddOn = standardAddOn,
             premiumAddOn = premiumAddOn,
+            pendingStripeChange = pendingStripeChange,
             vip = vip
         )
     }
@@ -96,6 +99,7 @@ data class Membership(
             b2bLicenceId = null,
             standardAddOn = if (hasPremiumAddOn) standardAddOn else 0,
             premiumAddOn = 0,
+            pendingStripeChange = null,
             vip = vip
         )
     }
@@ -125,6 +129,7 @@ data class Membership(
             b2bLicenceId = null,
             standardAddOn = standardAddOn,
             premiumAddOn = premiumAddOn,
+            pendingStripeChange = null,
             vip = vip,
         )
     }
@@ -142,6 +147,7 @@ data class Membership(
             b2bLicenceId = b2bLicenceId,
             standardAddOn = standardAddOn + addOn.standardAddOn,
             premiumAddOn = premiumAddOn + addOn.premiumAddOn,
+            pendingStripeChange = pendingStripeChange,
             vip = vip,
         )
     }

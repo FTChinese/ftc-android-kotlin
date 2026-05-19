@@ -119,6 +119,13 @@
         <activity android:name=".ui.wxlink.WxLinkEmailActivity" />
         <activity android:name=".ui.subs.MemberActivity" />
 
+        <activity
+            android:name="com.stripe.android.paymentsheet.PaymentSheetActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.stripe.android.paymentsheet.PaymentOptionsActivity"
+            android:windowSoftInputMode="adjustResize" />
+
 
 
 

@@ -9,5 +9,6 @@ enum class IntentKind {
     AddOn,
     OneTimeToAutoRenew,
     SwitchInterval,
+    CancelScheduledChange,
     ApplyCoupon; // Redeem a coupon for an existing stripe subscription.
 }

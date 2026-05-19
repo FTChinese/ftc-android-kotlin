@@ -9,6 +9,7 @@ import com.ft.ftchinese.R
 
 @Composable
 fun CancelStripeDialog(
+    bodyText: String? = null,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -36,7 +37,7 @@ fun CancelStripeDialog(
             Text(text = stringResource(id = R.string.title_cancel_auto_renew))
         },
         text = {
-            Text(text = stringResource(id = R.string.body_cancel_auto_renew))
+            Text(text = bodyText ?: stringResource(id = R.string.body_cancel_auto_renew))
         }
     )
 }

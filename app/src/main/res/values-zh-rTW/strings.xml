@@ -313,6 +313,7 @@
     <string name="stripe_switch_cycle">更改訂閱週期</string>
     <string name="stripe_upgrade">轉為高階會員</string>
     <string name="stripe_downgrade">轉為標準會員</string>
+    <string name="stripe_keep_current_plan">保留目前方案</string>
     <string name="title_coupon">優惠券</string>
     <string name="redeem_period">領取期限 %1$s ~ %2$s</string>
     <string name="coupon_enjoyed">您已經於 %1$s 使用過一次優惠券，一個付款週期內只能使用一次優惠券。</string>
@@ -372,13 +373,14 @@
     <string name="stripe_setting">信用卡/借記卡設定</string>
     <string name="stripe_cancel">取消自動續訂</string>
     <string name="stripe_reactivate_auto_renew">開啟自動續訂</string>
+    <string name="stripe_auto_renew">信用卡/借記卡自動續訂</string>
     <string name="stripe_retrieve_customer">查詢支付賬號&#8230;</string>
     <string name="card_brand_last4">%1$s (尾號%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="payment_method">支付方式</string>
     <string name="stripe_init">設定信用卡/借記卡支付</string>
     <string name="stripe_default_bank_brand">我的銀行卡</string>
-    <string name="add_or_select_payment_method">新增或選擇預設支付方式</string>
+    <string name="add_or_select_payment_method">選擇或新增信用卡/借記卡</string>
     <string name="set_default_payment_method">設為預設支付方式</string>
     <string name="stripe_customer_not_found">支付賬號不存在，請檢查賬號或者重新登入</string>
 
@@ -388,6 +390,7 @@
     <string name="stripe_refreshing">更新信用卡/借記卡訂閱資訊&#8230;</string>
     <string name="stripe_refresh_success">信用卡/借記卡訂閱已更新</string>
     <string name="stripe_refresh_failed">無法更新信用卡/借記卡訂閱資訊</string>
+    <string name="stripe_invoice_preview_failed">無法計算本次升級扣款，請檢查網路後重試</string>
 
     <string name="title_requires_action">需要驗證</string>
     <string name="stripe_requires_action">信用卡/借記卡支付尚未完成，您的髮卡行需要進行安全驗證，點選確認開始驗證</string>

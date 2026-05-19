@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -22,6 +25,7 @@ import com.ft.ftchinese.ui.components.CheckoutMessage
 import com.ft.ftchinese.ui.components.Mode
 import com.ft.ftchinese.ui.components.PrimaryBlockButton
 import com.ft.ftchinese.ui.form.AutoRenewAgreement
+import com.ft.ftchinese.ui.formatter.formatMoneyParts
 import com.ft.ftchinese.ui.formatter.formatStripeSubsBtn
 import com.ft.ftchinese.ui.subs.product.PriceCard
 import com.ft.ftchinese.ui.subs.product.PriceCardParams
@@ -35,8 +39,11 @@ fun StripePayScreen(
     mode: ApiMode,
     paymentMethod: StripePaymentMethod?,
     couponApplied: CouponApplied?,
+    invoicePreview: StripeInvoicePreview?,
+    invoicePreviewError: String?,
     subs: StripeSubs?,
     onPaymentMethod: () -> Unit,
+    onRetryInvoicePreview: () -> Unit,
     onSubscribe: () -> Unit,
     onDone: () -> Unit,
 ) {
@@ -45,9 +52,16 @@ fun StripePayScreen(
 
     val forbidden = cartItem.isForbidden
     val isApplyCoupon = cartItem.isApplyCoupon
+    val requiresPaymentMethod = cartItem.requiresPaymentMethod
     val couponEnjoyed = isApplyCoupon && couponApplied != null
+    val previewRequired = cartItem.intent.kind == IntentKind.Upgrade
+    val invoicePreviewReady = !previewRequired || invoicePreview != null
 
-    val enabled = !loading && (paymentMethod != null) && !forbidden && !couponEnjoyed
+    val enabled = !loading &&
+        (!requiresPaymentMethod || paymentMethod != null) &&
+        !forbidden &&
+        !couponEnjoyed &&
+        invoicePreviewReady
 
     Column(
         modifier = Modifier
@@ -75,6 +89,15 @@ fun StripePayScreen(
 
             CheckoutMessage(text = cartItem.intent.message)
 
+            if (cartItem.intent.kind == IntentKind.Upgrade) {
+                Spacer(modifier = Modifier.height(Dimens.dp8))
+                UpgradeInvoicePreview(
+                    invoicePreview = invoicePreview,
+                    invoicePreviewError = invoicePreviewError,
+                    onRetry = onRetryInvoicePreview,
+                )
+            }
+
             cartItem.coupon?.let {
                 Spacer(modifier = Modifier.height(Dimens.dp8))
                 CouponApplicable(
@@ -83,18 +106,22 @@ fun StripePayScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(Dimens.dp8))
-            PaymentMethodSelector(
-                card = paymentMethod?.card,
-                clickable = !loading,
-                onClick = onPaymentMethod
-            )
+            if (requiresPaymentMethod) {
+                Spacer(modifier = Modifier.height(Dimens.dp8))
+                PaymentMethodSelector(
+                    card = paymentMethod?.card,
+                    clickable = !loading,
+                    onClick = onPaymentMethod
+                )
+            }
 
             subs?.let {
                 Spacer(modifier = Modifier.height(Dimens.dp8))
                 StripeSubsDetails(
                     subs = it,
-                    coupon = cartItem.coupon
+                    coupon = cartItem.coupon,
+                    intentKind = cartItem.intent.kind,
+                    targetTier = cartItem.recurring.tier,
                 )
             }
 
@@ -111,12 +138,61 @@ fun StripePayScreen(
                 ),
             )
 
-            AutoRenewAgreement()
+            if (requiresPaymentMethod) {
+                AutoRenewAgreement()
+            }
         } else {
             PrimaryBlockButton(
                 onClick = onDone,
                 text = stringResource(id = R.string.btn_done)
             )
+        }
+    }
+}
+
+@Composable
+private fun UpgradeInvoicePreview(
+    invoicePreview: StripeInvoicePreview?,
+    invoicePreviewError: String?,
+    onRetry: () -> Unit,
+) {
+    val context = LocalContext.current
+    Card(
+        elevation = Dimens.dp4
+    ) {
+        Column(
+            modifier = Modifier.padding(Dimens.dp16)
+        ) {
+            Text(
+                text = "预计本次升级扣款",
+                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colors.onSurface,
+            )
+            Spacer(modifier = Modifier.height(Dimens.dp8))
+            Text(
+                text = when {
+                    invoicePreviewError != null -> "暂时无法计算"
+                    invoicePreview != null -> formatMoneyParts(context, invoicePreview.amountDueMoney())
+                    else -> "正在计算"
+                },
+                style = MaterialTheme.typography.h5,
+                color = if (invoicePreviewError != null) {
+                    MaterialTheme.colors.error
+                } else {
+                    MaterialTheme.colors.primary
+                },
+            )
+            Text(
+                text = invoicePreviewError
+                    ?: "最终金额以 Stripe 实际扣款为准",
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.64f),
+            )
+            if (invoicePreviewError != null) {
+                TextButton(onClick = onRetry) {
+                    Text(text = stringResource(id = R.string.btn_retry))
+                }
+            }
         }
     }
 }
@@ -158,8 +234,11 @@ fun PreviewStripePayScreen() {
         paymentMethod = null,
         subs = null,
         couponApplied = null,
+        invoicePreview = null,
+        invoicePreviewError = null,
         loading = false,
         onPaymentMethod = {  },
+        onRetryInvoicePreview = {},
         onSubscribe = {},
         onDone = {},
         mode = ApiMode.Sandbox,

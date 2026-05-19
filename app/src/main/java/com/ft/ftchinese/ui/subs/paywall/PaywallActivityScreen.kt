@@ -17,13 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.repository.ApiConfig
+import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.AuthActivity
+import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.subs.catalog.CatalogFtcCheckout
 import com.ft.ftchinese.ui.subs.catalog.CatalogFtcCheckoutStore
 import com.ft.ftchinese.ui.subs.catalog.CatalogStripeCheckout
@@ -32,11 +36,14 @@ import com.ft.ftchinese.ui.subs.catalog.SubscriptionCatalogScreen
 import com.ft.ftchinese.ui.subs.catalog.buildCatalogStripeCartItem
 import com.ft.ftchinese.ui.subs.catalog.buildCatalogFtcCartItem
 import com.ft.ftchinese.ui.subs.catalog.rememberSubscriptionCatalogState
+import com.ft.ftchinese.ui.subs.member.CancelStripeDialog
+import com.ft.ftchinese.ui.subs.stripeAutoRenewUiState
 import com.ft.ftchinese.ui.util.AccountAction
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -67,10 +74,15 @@ fun PaywallActivityScreen(
     val (openDialog, setOpenDialog) = remember {
         mutableStateOf(false)
     }
+    val (showAutoRenewOffDialog, setShowAutoRenewOffDialog) = remember {
+        mutableStateOf(false)
+    }
 
     val catalogState = rememberSubscriptionCatalogState(
         scaffoldState = scaffoldState
     )
+    val scope = rememberCoroutineScope()
+    var directStripeUpdating by remember { mutableStateOf(false) }
 
     // Launcher if user is not logged in.
     val launcher = rememberLauncherForActivityResult(
@@ -120,6 +132,72 @@ fun PaywallActivityScreen(
             ?.reOrderProducts(premiumOnTop)
     }
 
+    val checkoutMembership = remember(account?.membership, catalogData?.summary) {
+        account?.membership?.let { membership ->
+            catalogData?.summary?.checkoutMembership(membership) ?: membership
+        }
+    }
+
+    fun updateStripeAutoRenew(enabled: Boolean) {
+        val currentAccount = account ?: return
+        directStripeUpdating = true
+        scope.launch {
+            try {
+                val result = if (enabled) {
+                    StripeClient.asyncReactiveSub(currentAccount)
+                } else {
+                    StripeClient.asyncCancelSub(currentAccount)
+                }
+
+                when (result) {
+                    is FetchResult.Success -> {
+                        userViewModel.saveStripeSubs(result.data)
+                        catalogState.refreshCatalog(
+                            api = apiConfig,
+                            userId = currentAccount.id
+                        )
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            if (enabled) {
+                                "已开启自动续订"
+                            } else {
+                                "已关闭自动续订"
+                            }
+                        )
+                    }
+                    is FetchResult.LocalizedError -> {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            context.getString(result.msgId)
+                        )
+                    }
+                    is FetchResult.TextError -> {
+                        scaffoldState.snackbarHostState.showSnackbar(result.text)
+                    }
+                }
+            } catch (e: Exception) {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    e.localizedMessage ?: "自动续订设置更新失败"
+                )
+            } finally {
+                directStripeUpdating = false
+            }
+        }
+    }
+
+    if (showAutoRenewOffDialog) {
+        CancelStripeDialog(
+            bodyText = checkoutMembership
+                ?.stripeAutoRenewUiState(catalogData?.preferredLanguage ?: "zh")
+                ?.offConfirmation,
+            onConfirm = {
+                setShowAutoRenewOffDialog(false)
+                updateStripeAutoRenew(false)
+            },
+            onDismiss = {
+                setShowAutoRenewOffDialog(false)
+            }
+        )
+    }
+
     val refreshing = catalogState.refreshing
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
@@ -130,6 +208,10 @@ fun PaywallActivityScreen(
             )
         },
     )
+    ProgressLayout(
+        loading = directStripeUpdating,
+        modifier = Modifier.fillMaxSize()
+    ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -137,7 +219,8 @@ fun PaywallActivityScreen(
     ) {
         if (catalogData != null) {
             SubscriptionCatalogScreen(
-                catalog = catalogData!!,
+                catalog = catalogData,
+                membership = checkoutMembership,
                 isLoggedIn = isLoggedIn,
                 onLoginRequest = {
                     AuthActivity.launch(launcher, context)
@@ -146,7 +229,7 @@ fun PaywallActivityScreen(
                     if (!userViewModel.isLoggedIn) {
                         AuthActivity.launch(launcher, context)
                     } else {
-                        val membership = account?.membership ?: return@SubscriptionCatalogScreen
+                        val membership = checkoutMembership ?: return@SubscriptionCatalogScreen
                         val cartItem = buildCatalogFtcCartItem(
                             membership = membership,
                             product = product,
@@ -174,8 +257,9 @@ fun PaywallActivityScreen(
                     } else if (userViewModel.isWxOnly) {
                         setOpenDialog(true)
                     } else {
-                        val membership = account?.membership ?: return@SubscriptionCatalogScreen
-                        val product = catalogData!!.products
+                        val currentAccount = account ?: return@SubscriptionCatalogScreen
+                        val membership = checkoutMembership ?: return@SubscriptionCatalogScreen
+                        val product = catalogData.products
                             .firstOrNull { product ->
                                 product.plans.any { plan ->
                                     plan.options.any { option ->
@@ -201,6 +285,46 @@ fun PaywallActivityScreen(
                             )
 
                             if (cartItem != null) {
+                                if (cartItem.isDirectSubscriptionUpdate) {
+                                    directStripeUpdating = true
+                                    scope.launch {
+                                        try {
+                                            val result = StripeClient.asyncUpdateSubs(
+                                                account = currentAccount,
+                                                params = cartItem.subsParams(payMethod = null)
+                                            )
+
+                                            when (result) {
+                                                is FetchResult.Success -> {
+                                                    userViewModel.saveStripeSubs(result.data)
+                                                    catalogState.refreshCatalog(
+                                                        api = apiConfig,
+                                                        userId = currentAccount.id
+                                                    )
+                                                    scaffoldState.snackbarHostState.showSnackbar(
+                                                        directStripeSuccessMessage(cartItem)
+                                                    )
+                                                }
+                                                is FetchResult.LocalizedError -> {
+                                                    scaffoldState.snackbarHostState.showSnackbar(
+                                                        context.getString(result.msgId)
+                                                    )
+                                                }
+                                                is FetchResult.TextError -> {
+                                                    scaffoldState.snackbarHostState.showSnackbar(result.text)
+                                                }
+                                            }
+                                        } catch (e: Exception) {
+                                            scaffoldState.snackbarHostState.showSnackbar(
+                                                e.localizedMessage ?: "订阅设置更新失败"
+                                            )
+                                        } finally {
+                                            directStripeUpdating = false
+                                        }
+                                    }
+                                    return@SubscriptionCatalogScreen
+                                }
+
                                 CatalogStripeCheckoutStore.save(
                                     CatalogStripeCheckout(
                                         priceId = priceId,
@@ -212,6 +336,13 @@ fun PaywallActivityScreen(
 
                         onStripePayByIds(priceId, trialId, couponId)
                     }
+                },
+                onStripeAutoRenewChange = { enabled ->
+                    if (enabled) {
+                        updateStripeAutoRenew(true)
+                    } else {
+                        setShowAutoRenewOffDialog(true)
+                    }
                 }
             )
         }
@@ -220,5 +351,16 @@ fun PaywallActivityScreen(
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter)
         )
+    }
+    }
+}
+
+private fun directStripeSuccessMessage(item: CartItemStripe): String {
+    return when (item.intent.kind) {
+        IntentKind.Downgrade ->
+            "已安排下次续订起转为标准会员"
+        IntentKind.CancelScheduledChange ->
+            "已取消降级安排，将保留当前方案自动续订"
+        else -> "订阅设置已更新"
     }
 }

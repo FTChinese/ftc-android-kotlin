@@ -32,4 +32,5 @@ data class StripeSubs(
     val status: StripeSubStatus? = null,
     val ftcUserId: String? = null,
     val paymentIntent: PaymentIntent? = null,
+    val pendingChange: StripePendingChange? = null,
 )

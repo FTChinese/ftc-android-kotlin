@@ -8,12 +8,14 @@ import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CheckoutIntent
+import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalogOption
 import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalogPlan
 import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalogProduct
 import com.ft.ftchinese.model.stripesubs.StripeCoupon
 import com.ft.ftchinese.model.stripesubs.StripePrice
+import kotlin.math.roundToInt
 
 fun buildCatalogFtcCartItem(
     membership: Membership,
@@ -26,7 +28,8 @@ fun buildCatalogFtcCartItem(
     val lookupKey = option.checkout.ftcPriceId.ifBlank { return null }
     val displayAmount = parseMoneyAmount(option.displayPrice) ?: return null
     val originalAmount = parseMoneyAmount(option.originalPrice)
-    val currency = detectCurrency(option.displayPrice, option.originalPrice)
+    val currency = option.checkout.stripeCurrency
+        .ifBlank { detectCurrency(option.displayPrice, option.originalPrice) }
 
     val price = Price(
         id = lookupKey,
@@ -88,7 +91,20 @@ fun buildCatalogStripeCartItem(
     val priceId = option.checkout.stripePriceId.ifBlank { return null }
     val displayAmount = parseMoneyAmount(option.displayPrice) ?: return null
     val originalAmount = parseMoneyAmount(option.originalPrice)
-    val currency = detectCurrency(option.displayPrice, option.originalPrice)
+    val currency = option.checkout.stripeCurrency
+        .ifBlank { detectCurrency(option.displayPrice, option.originalPrice) }
+    val fallbackUnitAmount = toMinorUnits(originalAmount ?: displayAmount)
+    val fallbackPayableAmount = toMinorUnits(displayAmount)
+    val exactUnitAmount = option.checkout.stripeUnitAmount.takeIf { it > 0 }
+    val exactPayableAmount = option.checkout.stripePayableAmount.takeIf { it > 0 }
+    val exactCouponAmountOff = option.checkout.stripeCouponAmountOff.takeIf { it > 0 }
+    val stripeUnitAmount = exactUnitAmount ?: fallbackUnitAmount
+    val couponAmountOff = exactCouponAmountOff
+        ?: exactPayableAmount
+            ?.let { (stripeUnitAmount - it).coerceAtLeast(0) }
+        ?: (stripeUnitAmount - fallbackPayableAmount).coerceAtLeast(0)
+    val hasCoupon = option.checkout.stripeCouponId.isNotBlank()
+        && couponAmountOff > 0
 
     val recurring = StripePrice(
         id = priceId,
@@ -100,17 +116,13 @@ fun buildCatalogStripeCartItem(
         productId = product.id.ifBlank { "${tier.symbol}-${cycle.symbol}" },
         periodCount = YearMonthDay.of(cycle),
         tier = tier,
-        unitAmount = (displayAmount * 100).toInt(),
+        unitAmount = stripeUnitAmount,
     )
 
-    val coupon = if (
-        option.checkout.stripeCouponId.isNotBlank()
-        && originalAmount != null
-        && originalAmount > displayAmount
-    ) {
+    val coupon = if (hasCoupon) {
         StripeCoupon(
             id = option.checkout.stripeCouponId,
-            amountOff = ((originalAmount - displayAmount) * 100).toInt(),
+            amountOff = couponAmountOff,
             currency = currency,
             redeemBy = 0,
             priceId = recurring.id,
@@ -118,16 +130,19 @@ fun buildCatalogStripeCartItem(
     } else {
         null
     }
+    val intent = CheckoutIntent.ofStripe(
+        source = membership,
+        target = recurring
+    )
 
     return CartItemStripe(
-        intent = CheckoutIntent.ofStripe(
-            source = membership,
-            target = recurring,
-            hasCoupon = coupon != null
-        ),
+        intent = intent,
         recurring = recurring,
         trial = null,
-        coupon = coupon,
+        coupon = coupon.takeUnless {
+            intent.kind == IntentKind.Downgrade ||
+                intent.kind == IntentKind.CancelScheduledChange
+        },
     )
 }
 
@@ -137,9 +152,15 @@ private fun sanitizeText(value: String?): String {
         return ""
     }
 
-    return HtmlCompat
-        .fromHtml(normalized, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        .toString()
+    val parsed = try {
+        HtmlCompat
+            .fromHtml(normalized, HtmlCompat.FROM_HTML_MODE_LEGACY)
+            .toString()
+    } catch (_: NullPointerException) {
+        normalized
+    }
+
+    return parsed
         .replace('\u00A0', ' ')
         .replace(Regex("\\s+"), " ")
         .trim()
@@ -160,9 +181,23 @@ private fun parseMoneyAmount(value: String?): Double? {
     return match.toDoubleOrNull()
 }
 
+private fun toMinorUnits(amount: Double): Int {
+    return (amount * 100).roundToInt()
+}
+
 private fun detectCurrency(vararg candidates: String?): String {
     val joined = candidates.joinToString(" ")
+    val normalized = joined.uppercase()
     return when {
+        normalized.contains("TWD") || normalized.contains("NT$") || normalized.contains("NTD") -> "twd"
+        normalized.contains("HKD") || normalized.contains("HK$") -> "hkd"
+        normalized.contains("GBP") || joined.contains("£") -> "gbp"
+        normalized.contains("EUR") || joined.contains("€") -> "eur"
+        normalized.contains("USD") || normalized.contains("US$") -> "usd"
+        normalized.contains("CNY") ||
+            normalized.contains("RMB") ||
+            joined.contains("¥") ||
+            joined.contains("￥") -> "cny"
         joined.contains("£") -> "gbp"
         joined.contains("$") -> "usd"
         else -> "cny"

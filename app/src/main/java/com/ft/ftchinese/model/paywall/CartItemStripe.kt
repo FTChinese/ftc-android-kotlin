@@ -15,8 +15,18 @@ data class CartItemStripe(
     val isApplyCoupon: Boolean
         get() = intent.kind == IntentKind.ApplyCoupon
 
+    val isDowngrade: Boolean
+        get() = intent.kind == IntentKind.Downgrade
+
+    val isDirectSubscriptionUpdate: Boolean
+        get() = intent.kind == IntentKind.Downgrade ||
+            intent.kind == IntentKind.CancelScheduledChange
+
     val isForbidden: Boolean
         get() = intent.kind == IntentKind.Forbidden
+
+    val requiresPaymentMethod: Boolean
+        get() = !isDirectSubscriptionUpdate
 
     fun recurPrice(): PriceParts {
         return PriceParts(
@@ -28,14 +38,33 @@ data class CartItemStripe(
         )
     }
 
+    fun payableAmountInMinorUnits(): Int {
+        if (trial != null) {
+            return trial.unitAmount
+        }
+
+        if (coupon != null) {
+            return (recurring.unitAmount - coupon.amountOff).coerceAtLeast(0)
+        }
+
+        return recurring.unitAmount
+    }
+
+    fun payableAmount(): Double {
+        return convertCent(payableAmountInMinorUnits())
+    }
+
     fun subsParams(
         payMethod: StripePaymentMethod?,
+        prorationDate: Long? = null,
     ): SubParams {
         return SubParams(
             priceId = recurring.id,
             introductoryPriceId = trial?.id,
-            coupon = coupon?.id,
-            defaultPaymentMethod = payMethod?.id,
+            coupon = if (isDirectSubscriptionUpdate) null else coupon?.id,
+            defaultPaymentMethod = if (isDirectSubscriptionUpdate) null else payMethod?.id,
+            currency = recurring.currency.takeIf { it.isNotBlank() },
+            prorationDate = prorationDate,
         )
     }
 }

@@ -3,10 +3,10 @@ package com.ft.ftchinese.repository
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.ApiMode
 
-private const val useLocalBackend = false
+private const val useLocalBackend = true
 
 // Flip useLocalBackend only when the Node backend is running locally.
-private const val localBackendHost = "http://192.168.1.67"
+private const val localBackendHost = "http://192.168.1.84"
 private const val localBackendPort = "3000"
 
 data class ApiConfig(
@@ -92,6 +92,10 @@ data class ApiConfig(
 
     val stripePaymentMethod
         get() = "${stripeBase}/payment-methods"
+
+    fun stripeCustomerPaymentMethods(customerId: String): String {
+        return "${stripeCustomers}/$customerId/payment-methods"
+    }
 
     fun refreshIAP(originalTxId: String): String {
         return "${baseUrl}/apple/subs/$originalTxId"
