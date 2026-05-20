@@ -24,8 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.enums.ArticleType
-import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberBaseUrl
@@ -78,11 +76,7 @@ fun ChannelActivityScreen(
                 }
 
                 scope.launch(Dispatchers.Main) {
-                    if (t.type == ArticleType.Interactive && t.subType == Teaser.SUB_TYPE_RADIO) {
-                        ArticleActivity.start(context, t)
-                    } else {
-                        onArticle(NavStore.saveTeaser(t))
-                    }
+                    onArticle(NavStore.saveTeaser(t))
                 }
             }
 
@@ -127,11 +121,7 @@ fun ChannelActivityScreen(
                     return
                 }
 
-                if (teaser.type == ArticleType.Interactive && teaser.subType == Teaser.SUB_TYPE_RADIO) {
-                    ArticleActivity.start(context, teaser)
-                } else {
-                    onArticle(NavStore.saveTeaser(teaser))
-                }
+                onArticle(NavStore.saveTeaser(teaser))
             }
         }
     }

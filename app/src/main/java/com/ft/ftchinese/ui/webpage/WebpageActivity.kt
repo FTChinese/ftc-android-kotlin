@@ -15,22 +15,10 @@ import com.ft.ftchinese.model.content.WebpageMeta
 import com.ft.ftchinese.ui.main.MainActivity
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.web.stopHtmlMedia
 
 private const val TAG = "WebpageActivity"
 private const val LOG_PREFIX = "[FTCPush]"
-private const val STOP_MEDIA_JS = """
-    (function() {
-        try {
-            var media = document.querySelectorAll('audio,video');
-            for (var i = 0; i < media.length; i++) {
-                try {
-                    media[i].pause();
-                    media[i].currentTime = 0;
-                } catch (e) {}
-            }
-        } catch (e) {}
-    })();
-"""
 
 class WebpageActivity : ComponentActivity() {
     private var activeWebView: WebView? = null
@@ -80,15 +68,9 @@ class WebpageActivity : ComponentActivity() {
     private fun stopActiveWebMedia() {
         activeWebView?.let { webView ->
             Log.i(TAG, "$LOG_PREFIX webpage_stop_media")
-            runCatching { webView.evaluateJavascript(STOP_MEDIA_JS, null) }
-            runCatching { webView.onPause() }
-            runCatching { webView.pauseTimers() }
-            runCatching { webView.stopLoading() }
-            runCatching { webView.loadUrl("about:blank") }
+            webView.stopHtmlMedia(clearPage = true)
         }
     }
-
-
 
     companion object {
         private const val EXTRA_WEB_META = "extra_webpage_meta"

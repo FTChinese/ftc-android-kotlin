@@ -141,11 +141,7 @@ object PushNotificationRouter {
         runCatching {
             when (route) {
                 is PushRoute.Article -> {
-                    if (route.teaser.type == ArticleType.Interactive &&
-                        route.teaser.subType == Teaser.SUB_TYPE_RADIO
-                    ) {
-                        ArticleActivity.start(context, route.teaser)
-                    } else if (useParentStack) {
+                    if (useParentStack) {
                         ArticleActivity.startWithParentStack(context, route.teaser)
                     } else {
                         ArticleActivity.start(context, route.teaser)

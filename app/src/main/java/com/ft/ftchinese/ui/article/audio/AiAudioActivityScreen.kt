@@ -50,6 +50,9 @@ fun AiAudioActivityScreen(
     val audioPageUrl = remember(teaser, accountState.value) {
         UriUtils.teaserAudioPageUrl(teaser, accountState.value)
     }
+    val contentBaseUrl = remember(accountState.value) {
+        UriUtils.discoverHost(accountState.value?.membership)
+    }
 
     if (directAudioUrl.isNullOrBlank() && audioPageUrl.isNullOrBlank()) {
         context.toast("Missing required url")
@@ -74,7 +77,7 @@ fun AiAudioActivityScreen(
                 title = title,
                 audioUrl = directAudioUrl!!,
             ),
-            baseUrl = "https://www.ftchinese.com"
+            baseUrl = contentBaseUrl
         )
     }
 

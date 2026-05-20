@@ -13,6 +13,8 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.repository.currentFlavor
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.Date
 import java.util.Locale
 
@@ -31,9 +33,12 @@ object UriUtils {
         .setScript("hant")
         .build()
 
-    private val locale = ConfigurationCompat
-        .getLocales(Resources.getSystem().configuration)
-        .get(0)
+    private val locale: Locale?
+        get() = runCatching {
+            ConfigurationCompat
+                .getLocales(Resources.getSystem().configuration)
+                .get(0)
+        }.getOrNull() ?: Locale.getDefault()
 
     /**
      * See https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
@@ -76,27 +81,12 @@ object UriUtils {
             return null
         }
 
-        val builder = Uri.parse(discoverHost(account?.membership))
-            .buildUpon()
-
-        // Otherwise use webpage.
-        builder
-            .appendPath(teaser.type.toString())
-            .appendPath(teaser.id)
-
-
-        teaser.langVariant.aiAudioPathSuffix().let {
-            builder.appendPath(it)
-        }
-
-        builder.appendQueryParameter("webview", "ftcapp")
+        val queryParams = mutableListOf("webview" to "ftcapp")
 
         when (teaser.type) {
             ArticleType.Interactive -> {
-
-                builder
-                    .appendQueryParameter("001", "")
-                    .appendQueryParameter("exclusive", "")
+                queryParams += "001" to ""
+                queryParams += "exclusive" to ""
 
                 when (teaser.subType) {
                     Teaser.SUB_TYPE_RADIO,
@@ -104,23 +94,33 @@ object UriUtils {
                     Teaser.SUB_TYPE_MBAGYM -> {
                     }
 
-                    else -> builder
-                        .appendQueryParameter("hideheader", "yes")
-                        .appendQueryParameter("ad", "no")
-                        .appendQueryParameter("inNavigation", "yes")
-                        .appendQueryParameter("for", "audio")
-                        .appendQueryParameter("enableScript", "yes")
-                        .appendQueryParameter("timestamp", "${Date().time}")
+                    else -> {
+                        queryParams += "hideheader" to "yes"
+                        queryParams += "ad" to "no"
+                        queryParams += "inNavigation" to "yes"
+                        queryParams += "for" to "audio"
+                        queryParams += "enableScript" to "yes"
+                        queryParams += "timestamp" to "${Date().time}"
+                    }
                 }
             }
 
-            ArticleType.Video -> builder
-                .appendQueryParameter("004", "")
+            ArticleType.Video -> {
+                queryParams += "004" to ""
+            }
 
             else -> {}
         }
 
-        return appendUtm(builder).build().toString()
+        return buildUrl(
+            base = discoverHost(account?.membership),
+            pathSegments = listOf(
+                teaser.type.toString(),
+                teaser.id,
+                teaser.langVariant.aiAudioPathSuffix(),
+            ),
+            queryParams = queryParams,
+        )
     }
 
     fun teaserUrl(teaser: Teaser, account: Account?): String? {
@@ -137,33 +137,18 @@ object UriUtils {
         }
 
         if (teaser.type == ArticleType.Interactive && teaser.subType == Teaser.SUB_TYPE_RADIO) {
-            val builder = Uri.parse(discoverHost(account?.membership))
-                .buildUpon()
-                .appendPath(teaser.type.toString())
-                .appendPath(teaser.id)
-                .appendQueryParameter("bodyonly", "yes")
-                .appendQueryParameter("webview", "ftcapp")
-                .appendQueryParameter("exclusive", "")
-
-            return appendUtm(builder).build().toString()
+            return buildUrl(
+                base = discoverHost(account?.membership),
+                pathSegments = listOf(teaser.type.toString(), teaser.id),
+                queryParams = listOf(
+                    "bodyonly" to "yes",
+                    "webview" to "ftcapp",
+                    "exclusive" to "",
+                ),
+            )
         }
 
         return teaserUrl(teaser, account)
-    }
-
-    fun pushInteractiveUrl(id: String): String? {
-        if (id.isBlank()) {
-            return null
-        }
-
-        return Uri.parse(HostConfig.canonicalUrl)
-            .buildUpon()
-            .appendPath(ArticleType.Interactive.toString())
-            .appendPath(id)
-            .appendQueryParameter("webview", "ftcapp")
-            .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
-            .build()
-            .toString()
     }
 
     fun articleCacheName(teaser: Teaser): String {
@@ -188,7 +173,6 @@ object UriUtils {
             nativeHomeSubscription(source, account)?.let {
                 builder.appendQueryParameter("subscription", it)
             }
-            val url = appendUtm(builder).build().toString()
             appendUtm(builder).build().toString()
         } catch (e: Exception) {
             null
@@ -225,6 +209,48 @@ object UriUtils {
             .appendQueryParameter("utm_medium", "androidmarket")
             .appendQueryParameter("utm_campaign", currentFlavor)
             .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
+    }
+
+    private fun buildUrl(
+        base: String,
+        pathSegments: List<String>,
+        queryParams: List<Pair<String, String>>,
+    ): String {
+        val path = pathSegments
+            .filter { it.isNotBlank() }
+            .joinToString(separator = "/") { encodeUrlComponent(it) }
+
+        val query = (queryParams + utmQueryParams())
+            .joinToString(separator = "&") { (key, value) ->
+                "${encodeUrlComponent(key)}=${encodeUrlComponent(value)}"
+            }
+
+        return buildString {
+            append(base.trimEnd('/'))
+            if (path.isNotBlank()) {
+                append("/")
+                append(path)
+            }
+            if (query.isNotBlank()) {
+                append("?")
+                append(query)
+            }
+        }
+    }
+
+    private fun utmQueryParams(): List<Pair<String, String>> {
+        return listOf(
+            "utm_source" to "marketing",
+            "utm_medium" to "androidmarket",
+            "utm_campaign" to currentFlavor,
+            "android" to BuildConfig.VERSION_CODE.toString(10),
+        )
+    }
+
+    private fun encodeUrlComponent(value: String): String {
+        return URLEncoder
+            .encode(value, StandardCharsets.UTF_8.toString())
+            .replace("+", "%20")
     }
 
     // membership: premium|standard|standardmonthly
