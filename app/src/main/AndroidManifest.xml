@@ -157,9 +157,15 @@
             android:name=".ui.settings.SettingsActivity"
             android:exported="true"
             android:parentActivityName=".ui.main.MainActivity">
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="www.ftchinese.com"
+                    android:path="/CheckVersion/"
                     android:scheme="https" />
             </intent-filter>
         </activity>
