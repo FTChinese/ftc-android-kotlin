@@ -219,8 +219,8 @@ fun IconChatBot(
     tint: Color = Color.Unspecified
 ) {
     Icon(
-        painter = painterResource(id = R.drawable.ic_chatbot_ai),
-        contentDescription = "Chat bot",
+        painter = painterResource(id = R.drawable.ic_chatftc_sparkles_24),
+        contentDescription = "ChatFTC",
         tint = tint
     )
 }
