@@ -342,7 +342,7 @@ fun WxPayApp(
 
                     if (diagnostic.value != null) {
                         WxRespProgress(
-                            title = "微信登录诊断",
+                            title = "微信登录未完成",
                             subTitle = diagnostic.value.orEmpty(),
                             onClickButton = onExit
                         )

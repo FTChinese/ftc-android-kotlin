@@ -2,12 +2,7 @@ package com.ft.ftchinese.wxapi
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import com.ft.ftchinese.BuildConfig
 import com.tencent.mm.opensdk.modelbase.BaseResp
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.UUID
 
 object WxLoginDiagnostic {
@@ -109,49 +104,17 @@ object WxLoginDiagnostic {
         }
 
         prefs.edit().putBoolean(KEY_SHOWN, true).apply()
-        return buildPendingMessage(context)
+        return buildPendingMessage()
     }
 
-    private fun buildPendingMessage(context: Context): String {
-        val prefs = prefs(context)
-        val launchedAt = prefs.getLong(KEY_LAUNCHED_AT, 0L)
-        val ageSec = ((System.currentTimeMillis() - launchedAt).coerceAtLeast(0L) / 1000.0)
-        val entryActivity = prefs.getString(KEY_ENTRY_ACTIVITY, "").orEmpty()
-        val entryEvent = prefs.getString(KEY_ENTRY_EVENT, "").orEmpty()
-        val commandType = prefs.getInt(KEY_COMMAND_TYPE, -1)
-        val entryLine = if (entryActivity.isBlank()) {
-            "entry=none"
-        } else {
-            "entry=$entryActivity/$entryEvent command=$commandType"
-        }
-
+    private fun buildPendingMessage(): String {
         return buildString {
-            appendLine("微信登录已发起，但 App 没有收到微信授权回调。")
+            appendLine("微信授权已发起，但当前设备没有把授权结果返回给 FT中文网 App。")
             appendLine()
-            appendLine("request=${prefs.getString(KEY_REQUEST_ID, "")}")
-            appendLine("kind=${prefs.getString(KEY_KIND, "")}")
-            appendLine("sendReq=${prefs.getBoolean(KEY_SENT, false)}")
-            appendLine("age=${String.format(Locale.US, "%.1f", ageSec)}s")
-            appendLine(entryLine)
-            appendLine("state=${prefs.getString(KEY_STATE, "")}")
-            appendLine("appId=${BuildConfig.WX_SUBS_APPID}")
-            appendLine("package=${context.packageName}")
-            appendLine("version=${BuildConfig.VERSION_NAME} ${BuildConfig.FLAVOR}/${BuildConfig.BUILD_TYPE}")
-            appendLine("device=${Build.MANUFACTURER}/${Build.BRAND}/${Build.MODEL} sdk=${Build.VERSION.SDK_INT}")
-            appendLine("time=${formatTime(launchedAt)}")
-            appendLine()
-            appendLine("请确认是否使用微信分身、应用双开或工作空间微信。")
+            append("部分安卓系统、应用分身/双开、工作空间或非应用市场安装环境，可能会拦截微信授权回调，导致微信登录无法完成。您可以尝试关闭分身/双开，或改用手机号、邮箱登录。")
         }
     }
 
     private fun prefs(context: Context) =
         context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-    private fun formatTime(timeMs: Long): String {
-        if (timeMs <= 0L) {
-            return ""
-        }
-
-        return SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date(timeMs))
-    }
 }

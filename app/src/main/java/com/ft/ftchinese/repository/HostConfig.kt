@@ -18,7 +18,7 @@ data class ContentHosts(
             return b2b
         }
 
-        return when (membership?.tier) {
+        return when (membership?.webPrivilegeTier) {
             Tier.STANDARD -> standard
             Tier.PREMIUM -> premium
             else -> free
@@ -29,14 +29,11 @@ data class ContentHosts(
 object HostConfig {
 
     const val HOST_FTC = "www.ftchinese.com"
-    const val HOST_AI_CHAT = "ai.chineseft.net"
     private const val HOST_FTA = "www.ftacademy.cn"
 
     private const val urlScheme = "https://"
 
     const val canonicalUrl = "${urlScheme}${HOST_FTC}"
-    const val chatBootstrapUrl = "${urlScheme}${HOST_AI_CHAT}/chat/bootstrap?webview=ftcapp"
-    const val chatDirectUrl = "${urlScheme}${HOST_AI_CHAT}/powertranslate/chat.html"
 
     val simplifiedContentHosts = ContentHosts(
         premium = BuildConfig.BASE_URL_PREMIUM,
@@ -72,7 +69,6 @@ object HostConfig {
     val trustedAuthOrigins: Set<String> by lazy {
         buildSet {
             add(canonicalUrl)
-            add("${urlScheme}${HOST_AI_CHAT}")
             addAll(configuredBuildConfigOrigins())
         }
     }

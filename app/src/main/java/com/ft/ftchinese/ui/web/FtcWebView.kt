@@ -32,6 +32,7 @@ fun FtcWebView(
     initialUrl: String? = null,
     webClientCallback: WebViewCallback = rememberWebViewCallback(),
     jsListener: JsEventListener = rememberFtcJsEventListener(),
+    captureBackPresses: Boolean = false,
     onCreated: (AndroidWebView) -> Unit = {}
 ) {
 
@@ -57,7 +58,7 @@ fun FtcWebView(
         WebView(
             state = wvState,
             modifier = Modifier.fillMaxSize(),
-            captureBackPresses = false,
+            captureBackPresses = captureBackPresses,
             onCreated = { webView ->
                 activeWebView = webView
                 webView.settings.javaScriptEnabled = true

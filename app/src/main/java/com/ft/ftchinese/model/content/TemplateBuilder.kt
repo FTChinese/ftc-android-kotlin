@@ -12,6 +12,14 @@ import org.json.JSONObject
 import java.util.Locale
 
 private const val TAG = "StoryBuilder"
+private val duplicateNativeListMainScript = Regex(
+    """<script\b[^>]*\bsrc\s*=\s*["'][^"']*/powertranslate/scripts/+main\.js(?:\?[^"']*)?["'][^>]*>\s*</script>""",
+    setOf(RegexOption.IGNORE_CASE)
+)
+
+private fun sanitizeNativeListContent(html: String): String {
+    return duplicateNativeListMainScript.replace(html, "")
+}
 
 internal fun aiTranslationDisclaimerHtml(
     story: Story,
@@ -310,7 +318,7 @@ var androidUserAddress = ${addr.toJsonString()}
     }
 
     fun withChannel(content: String): TemplateBuilder {
-        ctx["{list-content}"] = content
+        ctx["{list-content}"] = sanitizeNativeListContent(content)
         return this
     }
 

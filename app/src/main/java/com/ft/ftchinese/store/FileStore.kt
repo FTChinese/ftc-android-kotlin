@@ -235,8 +235,11 @@ class FileStore (private val context: Context) {
         return readRaw("gym.html", R.raw.gym)
     }
 
+    fun readChatTemplate(): String {
+        return readRaw("chat.html", R.raw.chat)
+    }
+
     fun readTestHtml(): String {
         return readRaw("test.html", R.raw.test)
     }
 }
-

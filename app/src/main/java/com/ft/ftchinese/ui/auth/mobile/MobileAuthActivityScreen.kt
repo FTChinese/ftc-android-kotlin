@@ -123,7 +123,7 @@ fun MobileAuthActivityScreen(
                 wxDiagnostic.value = null
             },
             title = {
-                Text("微信登录诊断")
+                Text("微信登录未完成")
             },
             text = {
                 Text(message)

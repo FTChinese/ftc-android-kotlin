@@ -50,7 +50,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
     private fun prepareNextRound(schedule: Schedule): Result {
         Log.i(TAG, "Prepare next round of splash")
         val ad = schedule
-            .findToday(userSession.loadAccount()?.membership?.tier)
+            .findToday(userSession.loadAccount()?.membership?.webPrivilegeTier)
             .pickRandom() ?: return Result.failure()
 
         Log.i(TAG, "Selected splash for next round: $ad")
