@@ -100,7 +100,7 @@ class SplashActivity : AppCompatActivity() {
             )
 
         workManager.getWorkInfoByIdLiveData(splashWork.id).observe(this) {
-            Log.i(TAG, "splashWork status ${it.state}")
+            Log.i(TAG, "splashWork status ${it?.state}")
         }
     }
 

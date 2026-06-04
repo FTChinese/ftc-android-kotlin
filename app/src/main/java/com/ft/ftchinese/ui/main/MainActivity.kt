@@ -106,7 +106,7 @@ class MainActivity : ComponentActivity() {
         workManager.enqueueUniqueWork("verifySubscription", ExistingWorkPolicy.REPLACE, verifyWork)
 
         workManager.getWorkInfoByIdLiveData(verifyWork.id).observe(this) { workInfo ->
-            Log.i(TAG, "verifyWork state ${workInfo.state}")
+            Log.i(TAG, "verifyWork state ${workInfo?.state}")
         }
 
         val upgradeWork = OneTimeWorkRequestBuilder<LatestReleaseWorker>()

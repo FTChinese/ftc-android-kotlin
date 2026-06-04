@@ -78,7 +78,7 @@ fun ArticleActivityScreen(
     onScreenshot: (id: String) -> Unit,
     onAudio: (id: String) -> Unit,
     onArticle: (id: String) -> Unit,
-    onChannel: (id: String) -> Unit,
+    onChannel: (source: ChannelSource) -> Unit,
     onBack: () -> Unit,
 ) {
 
@@ -160,7 +160,7 @@ fun ArticleActivityScreen(
 
             override fun onClickChannel(source: ChannelSource) {
                 scope.launch(Dispatchers.Main) {
-                    onChannel(NavStore.saveChannel(source))
+                    onChannel(source)
                 }
             }
         }
@@ -169,7 +169,7 @@ fun ArticleActivityScreen(
     val wvCallback = remember(userViewModel.account) {
         object : WebViewCallback(context) {
             override fun onClickChannel(source: ChannelSource) {
-                onChannel(NavStore.saveChannel(source))
+                onChannel(source)
             }
 
             override fun onClickStory(teaser: Teaser) {

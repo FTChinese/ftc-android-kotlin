@@ -248,7 +248,7 @@ fun ChannelApp(
                             navigate(
                                 navController = navController,
                                 screen = ArticleAppScreen.Channel,
-                                it,
+                                id = NavStore.saveChannel(it),
                             )
                         },
                         onArticle = {

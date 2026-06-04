@@ -36,6 +36,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.core.view.WindowCompat
 import com.ft.ftchinese.ui.theme.OColor
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.SideEffect
 import com.ft.ftchinese.ui.web.TeaserNavigationGuard
 
@@ -171,6 +172,7 @@ private fun ArticleApp(
 ) {
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
+    val context = LocalContext.current
     val backstackEntry = navController.currentBackStackEntryAsState()
     val currentScreen = ArticleAppScreen.fromRoute(
         backstackEntry.value?.destination?.route
@@ -239,11 +241,7 @@ private fun ArticleApp(
                             )
                         },
                         onChannel = {
-                            navigate(
-                                navController = navController,
-                                screen = ArticleAppScreen.Channel,
-                                id = it,
-                            )
+                            ChannelActivity.start(context, it)
                         }
                     ) {
                         val ok = navController.popBackStack()

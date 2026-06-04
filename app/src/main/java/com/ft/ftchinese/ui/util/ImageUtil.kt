@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.util
 
 import android.content.ContentResolver
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -28,25 +28,20 @@ object ImageUtil {
     ): Boolean {
         return contentResolver.openOutputStream(to, "w")
             ?.use {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, it)
+                val ok = bitmap.compress(Bitmap.CompressFormat.JPEG, 50, it)
 
                 it.flush()
 
                 bitmap.recycle()
-                true
+                ok
             }
             ?: false
     }
 
-    // See https://ngengesenior.medium.com/pick-image-from-gallery-in-jetpack-compose-5fa0d0a8ddaf
-    // https://developer.android.com/reference/android/provider/MediaStore.Images.Media
-    // https://developer.android.com/reference/android/graphics/ImageDecoder#createSource(android.content.ContentResolver,%20android.net.Uri)
-    fun loadAsBitmap(cr: ContentResolver, uri: Uri): Bitmap {
-        return if (Build.VERSION.SDK_INT < 28) {
-            MediaStore.Images.Media.getBitmap(cr, uri)
-        } else {
-            val source = ImageDecoder.createSource(cr, uri)
-            ImageDecoder.decodeBitmap(source)
+    // Decode from the content stream to avoid ImageDecoder failures on some MediaStore URIs.
+    fun loadAsBitmap(cr: ContentResolver, uri: Uri): Bitmap? {
+        return cr.openInputStream(uri)?.use {
+            BitmapFactory.decodeStream(it)
         }
     }
 

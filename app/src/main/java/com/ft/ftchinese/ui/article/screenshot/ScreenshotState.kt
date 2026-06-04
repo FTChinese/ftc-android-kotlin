@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.article.screenshot
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.article.NavStore
@@ -11,6 +12,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+private const val TAG = "ScreenshotState"
 
 class ScreenshotState(
     private val scope: CoroutineScope,
@@ -31,13 +34,24 @@ class ScreenshotState(
         }
 
         scope.launch {
-            bitmap = withContext(Dispatchers.IO) {
-                ImageUtil.loadAsBitmap(
-                    context.contentResolver,
-                    shotMeta.imageUri
-                )
+            val loaded = withContext(Dispatchers.IO) {
+                try {
+                    ImageUtil.loadAsBitmap(
+                        context.contentResolver,
+                        shotMeta.imageUri
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load screenshot image ${shotMeta.imageUri}", e)
+                    null
+                }
             }
 
+            if (loaded == null) {
+                context.toast("图片加载失败")
+                return@launch
+            }
+
+            bitmap = loaded
             meta = shotMeta
         }
     }
