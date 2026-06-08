@@ -1,8 +1,8 @@
 package com.ft.ftchinese.ui.webpage
 
 import android.graphics.Bitmap
+import android.util.Log
 import android.webkit.WebResourceRequest
-import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.store.WebViewAccessTokenCookieManager
@@ -24,10 +25,14 @@ import com.ft.ftchinese.ui.web.rememberFtcJsEventListener
 import com.ft.ftchinese.ui.web.rememberFullscreenVideoState
 import com.ft.ftchinese.ui.web.rememberWebViewCallback
 import com.ft.ftchinese.ui.web.routeWebViewBridgeLink
+import com.ft.ftchinese.ui.web.WebViewUnavailable
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewState
+import android.webkit.WebView as AndroidWebView
+
+private const val TAG = "WebTabScreen"
 
 @Composable
 fun WebTabScreen(
@@ -37,6 +42,7 @@ fun WebTabScreen(
     requestHeaders: Map<String, String> = emptyMap(),
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
     val wvState = rememberWebViewState(
         url = url,
         additionalHttpHeaders = requestHeaders
@@ -49,9 +55,18 @@ fun WebTabScreen(
 
     val fullscreenState = rememberFullscreenVideoState()
 
+    val safeWebView = remember(context) {
+        try {
+            AndroidWebView(context)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create native WebView", e)
+            null
+        }
+    }
+
     val webClient = remember(url, requestHeaders) {
         object : AccompanistWebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+            override fun onPageStarted(view: AndroidWebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 WebViewAccessTokenCookieManager.syncAccessTokenForUrl(view, url)
 
@@ -63,10 +78,10 @@ fun WebTabScreen(
                 }
             }
 
-            override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+            override fun doUpdateVisitedHistory(view: AndroidWebView?, url: String?, isReload: Boolean) {
             }
 
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+            override fun shouldOverrideUrlLoading(view: AndroidWebView?, request: WebResourceRequest?): Boolean {
                 WebViewAccessTokenCookieManager.syncAccessTokenForUrl(
                     view,
                     request?.url?.toString()
@@ -91,36 +106,44 @@ fun WebTabScreen(
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
-            WebView(
-                state = wvState,
-                modifier = Modifier.fillMaxSize(),
-                captureBackPresses = true,
-                onCreated = { webView ->
-                    webView.settings.javaScriptEnabled = true
-                    webView.settings.loadsImagesAutomatically = true
-                    webView.settings.domStorageEnabled = true
-                    webView.settings.databaseEnabled = true
-                    if (shouldPrepareFtWebViewAuth(url)) {
-                        WebViewAccessTokenCookieManager.syncAccessToken(webView)
-                        WebViewAccessTokenCookieManager.syncAccessTokenForUrl(webView, url)
-                        webView.addJavascriptInterface(
-                            JsInterface(
-                                listener = jsListener,
-                                onLink = { link ->
-                                    routeWebViewBridgeLink(
-                                        webView = webView,
-                                        callback = webViewCallback,
-                                        url = link,
-                                    )
-                                },
-                            ),
-                            JS_INTERFACE_NAME
-                        )
-                    }
-                },
-                client = webClient,
-                chromeClient = chromeClient,
-            )
+            val nativeWebView = safeWebView
+            if (nativeWebView == null) {
+                WebViewUnavailable(
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                WebView(
+                    state = wvState,
+                    modifier = Modifier.fillMaxSize(),
+                    captureBackPresses = true,
+                    factory = { nativeWebView },
+                    onCreated = { createdWebView ->
+                        createdWebView.settings.javaScriptEnabled = true
+                        createdWebView.settings.loadsImagesAutomatically = true
+                        createdWebView.settings.domStorageEnabled = true
+                        createdWebView.settings.databaseEnabled = true
+                        if (shouldPrepareFtWebViewAuth(url)) {
+                            WebViewAccessTokenCookieManager.syncAccessToken(createdWebView)
+                            WebViewAccessTokenCookieManager.syncAccessTokenForUrl(createdWebView, url)
+                            createdWebView.addJavascriptInterface(
+                                JsInterface(
+                                    listener = jsListener,
+                                    onLink = { link ->
+                                        routeWebViewBridgeLink(
+                                            webView = createdWebView,
+                                            callback = webViewCallback,
+                                            url = link,
+                                        )
+                                    },
+                                ),
+                                JS_INTERFACE_NAME
+                            )
+                        }
+                    },
+                    client = webClient,
+                    chromeClient = chromeClient,
+                )
+            }
 
             fullscreenState.customView?.let { customView ->
                 AndroidView(
