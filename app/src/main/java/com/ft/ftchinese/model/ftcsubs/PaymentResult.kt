@@ -3,6 +3,7 @@ package com.ft.ftchinese.model.ftcsubs
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
@@ -17,6 +18,10 @@ data class PaymentResult(
     val totalFee: Int,
     val transactionId: String,
     val ftcOrderId: String,
+    val merchantOrderId: String? = null,
+    val outTradeNo: String? = null,
+    @SerialName("out_trade_no")
+    val legacyOutTradeNo: String? = null,
     @Serializable(with = DateTimeAsStringSerializer::class)
     val paidAt: ZonedDateTime? = null, // ISO8601
     @Serializable(with = LenientPayMethodSerializer::class)
@@ -26,4 +31,3 @@ data class PaymentResult(
         return arrayOf("TRADE_SUCCESS", "SUCCESS").contains(paymentState)
     }
 }
-

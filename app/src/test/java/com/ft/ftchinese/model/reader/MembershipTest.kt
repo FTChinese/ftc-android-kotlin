@@ -393,4 +393,40 @@ class MembershipTest {
         }
         println(details)
     }
+
+    @Test fun normalizeExpiredMembershipUsesPremiumAddOnBeforeStandardAddOn() {
+        val expiredDate = LocalDate.now().minusDays(1)
+        val normalized = Membership(
+            tier = Tier.STANDARD,
+            cycle = Cycle.YEAR,
+            expireDate = expiredDate,
+            payMethod = PayMethod.WXPAY,
+            autoRenew = false,
+            standardAddOn = 30,
+            premiumAddOn = 366
+        ).normalize()
+
+        assertEquals(Tier.PREMIUM, normalized.tier)
+        assertEquals(expiredDate.plusDays(366), normalized.expireDate)
+        assertEquals(30L, normalized.standardAddOn)
+        assertEquals(0L, normalized.premiumAddOn)
+    }
+
+    @Test fun normalizeExpiredMembershipUsesStandardAddOnWhenNoPremiumAddOn() {
+        val expiredDate = LocalDate.now().minusDays(1)
+        val normalized = Membership(
+            tier = Tier.PREMIUM,
+            cycle = Cycle.YEAR,
+            expireDate = expiredDate,
+            payMethod = PayMethod.WXPAY,
+            autoRenew = false,
+            standardAddOn = 30,
+            premiumAddOn = 0
+        ).normalize()
+
+        assertEquals(Tier.STANDARD, normalized.tier)
+        assertEquals(expiredDate.plusDays(30), normalized.expireDate)
+        assertEquals(0L, normalized.standardAddOn)
+        assertEquals(0L, normalized.premiumAddOn)
+    }
 }

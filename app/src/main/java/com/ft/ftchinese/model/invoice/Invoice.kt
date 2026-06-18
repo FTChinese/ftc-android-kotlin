@@ -4,6 +4,7 @@ import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.encodeToString
@@ -24,6 +25,10 @@ data class Invoice(
     @Transient
     val currency: String = "cny",
     var orderId: String? = null,
+    val merchantOrderId: String? = null,
+    val outTradeNo: String? = null,
+    @SerialName("out_trade_no")
+    val legacyOutTradeNo: String? = null,
     val orderKind: OrderKind? = null,
     val paidAmount: Double,
     @Serializable(with = LenientPayMethodSerializer::class)
@@ -52,6 +57,12 @@ data class Invoice(
             months = months,
             days = days,
         )
+
+    val displayMerchantOrderId: String?
+        get() = merchantOrderId ?: outTradeNo ?: legacyOutTradeNo
+
+    val displayOrderId: String
+        get() = displayMerchantOrderId ?: orderId ?: ""
 
     fun withOrderId(id: String): Invoice {
         orderId = id

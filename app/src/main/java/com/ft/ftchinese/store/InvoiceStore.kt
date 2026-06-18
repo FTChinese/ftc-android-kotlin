@@ -155,6 +155,8 @@ class InvoiceStore private constructor(ctx: Context) {
             totalFee = 0,
             transactionId = "",
             ftcOrderId = order.id,
+            merchantOrderId = order.displayMerchantOrderId,
+            outTradeNo = order.outTradeNo ?: order.legacyOutTradeNo,
             paidAt = null,
             payMethod = null,
         )

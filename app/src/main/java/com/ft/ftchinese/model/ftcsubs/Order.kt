@@ -6,6 +6,7 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -20,6 +21,10 @@ import org.threeten.bp.ZonedDateTime
 @Serializable
 data class Order(
     val id: String,
+    val merchantOrderId: String? = null,
+    val outTradeNo: String? = null,
+    @SerialName("out_trade_no")
+    val legacyOutTradeNo: String? = null,
     val ftcId: String? = null,
     val unionId: String? = null,
     val tier: Tier,
@@ -52,6 +57,9 @@ data class Order(
             months = monthsCount,
             days = daysCount
         )
+
+    val displayMerchantOrderId: String?
+        get() = merchantOrderId ?: outTradeNo ?: legacyOutTradeNo
 
     // Checks if an order has confirmedAt field set.
     fun isConfirmed(): Boolean {

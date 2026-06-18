@@ -87,8 +87,8 @@ data class Membership(
             },
             cycle = cycle,
             expireDate = when {
-                hasPremiumAddOn -> expireDate?.plusDays(standardAddOn)
-                hasStandardAddOn -> expireDate?.plusDays(premiumAddOn)
+                hasPremiumAddOn -> expireDate?.plusDays(premiumAddOn)
+                hasStandardAddOn -> expireDate?.plusDays(standardAddOn)
                 else -> expireDate
             },
             payMethod = PayMethod.ALIPAY, // WECHAT also works. It doesn't matter.
