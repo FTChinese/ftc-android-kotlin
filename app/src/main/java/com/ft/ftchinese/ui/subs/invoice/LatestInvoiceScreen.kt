@@ -95,10 +95,12 @@ private fun InvoiceTable(
 }
 
 private fun invoiceRow(ctx: Context, inv: Invoice): List<Pair<String, String>> {
+    val merchantOrderId = inv.displayMerchantOrderId
+
     return listOf(
         Pair(
-            "订单号",
-            inv.orderId ?: "",
+            if (merchantOrderId.isNullOrBlank()) "订单号" else "商户订单号",
+            inv.displayOrderId,
         ),
         Pair(
             "订阅方案",

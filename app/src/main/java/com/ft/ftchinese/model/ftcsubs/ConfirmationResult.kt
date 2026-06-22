@@ -56,6 +56,8 @@ data class ConfirmationParams(
             } else null,
             appleTxId = null,
             orderId = order.id,
+            merchantOrderId = order.displayMerchantOrderId,
+            outTradeNo = order.outTradeNo ?: order.legacyOutTradeNo,
             orderKind = order.kind,
             paidAmount = order.payableAmount,
             payMethod = order.payMethod,
