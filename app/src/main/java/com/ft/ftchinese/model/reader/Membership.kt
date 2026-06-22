@@ -87,8 +87,8 @@ data class Membership(
             },
             cycle = cycle,
             expireDate = when {
-                hasPremiumAddOn -> expireDate?.plusDays(standardAddOn)
-                hasStandardAddOn -> expireDate?.plusDays(premiumAddOn)
+                hasPremiumAddOn -> expireDate?.plusDays(premiumAddOn)
+                hasStandardAddOn -> expireDate?.plusDays(standardAddOn)
                 else -> expireDate
             },
             payMethod = PayMethod.ALIPAY, // WECHAT also works. It doesn't matter.
@@ -324,6 +324,16 @@ data class Membership(
     val hasPremiumAddOn: Boolean
         get() = premiumAddOn > 0
 
+    val currentTierAddOnDays: Long
+        get() = when (tier) {
+            Tier.PREMIUM -> premiumAddOn
+            Tier.STANDARD -> if (premiumAddOn > 0) 0 else standardAddOn
+            else -> 0
+        }
+
+    val hasCurrentTierAddOn: Boolean
+        get() = currentTierAddOnDays > 0
+
     // Tests whether subscription time has moved to add-ons.
     // Usually you call this method without calling normalize method;
     // otherwise it won't reflect user's actual membership state.
@@ -362,6 +372,24 @@ data class Membership(
         }
 
         return expireDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+    }
+
+    fun currentTierEntitlementExpireDate(): LocalDate? {
+        if (vip || expireDate == null) {
+            return expireDate
+        }
+
+        return expireDate.plusDays(currentTierAddOnDays)
+    }
+
+    fun localizeCurrentTierEntitlementExpireDate(ctx: Context? = null): String {
+        if (vip) {
+            return ctx?.getString(R.string.member_long_term) ?: "长期有效"
+        }
+
+        return currentTierEntitlementExpireDate()
+            ?.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            ?: ""
     }
 
     /**

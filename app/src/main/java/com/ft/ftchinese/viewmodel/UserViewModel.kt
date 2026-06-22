@@ -11,6 +11,7 @@ import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.repository.PushClient
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
+import com.ft.ftchinese.service.SavedContentSyncWorker
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.stripe.android.CustomerSession
@@ -49,6 +50,9 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
     init {
         accountLiveData.value = session.loadAccount(raw = true)
         syncFirebaseUserId(accountLiveData.value)
+        accountLiveData.value?.let {
+            SavedContentSyncWorker.enqueue(getApplication())
+        }
     }
 
     val isLoggedIn: Boolean
@@ -71,6 +75,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         session.saveAccount(a)
         syncFirebaseUserId(a)
         PushClient.syncRegistration()
+        SavedContentSyncWorker.enqueue(getApplication())
     }
 
     fun saveMembership(m: Membership) {

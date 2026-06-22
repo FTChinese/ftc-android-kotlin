@@ -9,6 +9,7 @@ import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.Following
+import com.ft.ftchinese.repository.SavedContentSync
 import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
@@ -25,6 +26,7 @@ class MyArticleState(
     context: Context
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
+    private val appContext = context.applicationContext
     private val topicsStore = FollowedTopics.getInstance(context)
     private val db = ArticleDb.getInstance(context)
 
@@ -50,6 +52,7 @@ class MyArticleState(
     fun loadAllStarred() {
         progress.value = true
         scope.launch {
+            SavedContentSync.sync(appContext)
             allStarred = withContext(Dispatchers.IO) {
                 db.starredDao().loadAll()
             }

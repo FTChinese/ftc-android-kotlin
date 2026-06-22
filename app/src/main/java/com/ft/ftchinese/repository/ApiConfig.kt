@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.enums.ApiMode
 private const val useLocalBackend = true
 
 // Flip useLocalBackend only when the Node backend is running locally.
-private const val localBackendHost = "http://192.168.1.57"
+private const val localBackendHost = "http://192.168.1.54"
 private const val localBackendPort = "3000"
 
 data class ApiConfig(

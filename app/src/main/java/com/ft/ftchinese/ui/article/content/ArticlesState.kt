@@ -23,9 +23,12 @@ import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.ArticleClient
+import com.ft.ftchinese.service.SavedContentSyncWorker
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.store.FollowedTopics
+import com.ft.ftchinese.store.SavedContentSyncStore
 import com.ft.ftchinese.store.SettingStore
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.article.NavStore
 import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
@@ -49,10 +52,13 @@ class ArticlesState(
     private val isLight: Boolean,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
+    private val appContext = context.applicationContext
     private val cache = FileStore(context)
     private val db = ArticleDb.getInstance(context)
     // TODO: follow/unfollow topics in state rather in JS interface
     private val topicStore = FollowedTopics.getInstance(context)
+    private val sessionManager = SessionManager.getInstance(context)
+    private val savedContentSyncStore = SavedContentSyncStore.getInstance(context)
     private val contentResolver = context.contentResolver
     private val tracker = StatsTracker.getInstance(context)
     private val settings = SettingStore.getInstance(context)
@@ -501,19 +507,29 @@ class ArticlesState(
         }
 
         scope.launch {
+            val account = sessionManager.loadAccount(raw = true)
+            val starredArticle = read.toStarred()
+
             val starred = withContext(Dispatchers.IO) {
-                // Unstar
                 if (star) {
-                    db.starredDao().insertOne(read.toStarred())
+                    db.starredDao().insertOne(starredArticle)
+                    account?.id?.let {
+                        savedContentSyncStore.markLocalSave(it, starredArticle)
+                    }
                     true
                 } else {
-                    // Star
                     db.starredDao().delete(read.id, read.type)
+                    account?.id?.let {
+                        savedContentSyncStore.markLocalUnsave(it, read.id, read.type)
+                    }
                     false
                 }
             }
 
             bookmarked = starred
+            account?.let {
+                SavedContentSyncWorker.enqueue(appContext)
+            }
 
             if (starred) {
                 showSnackBar(R.string.alert_starred)

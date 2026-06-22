@@ -36,7 +36,8 @@ fun Membership.stripeAutoRenewUiState(preferredLanguage: String = "zh"): StripeA
         )
     }
 
-    val expiry = localizeExpireDate()
+    val expiry = localizeCurrentTierEntitlementExpireDate()
+    val hasSameTierAddOn = this.hasCurrentTierAddOn
     val currentTier = tier?.label(zh).orEmpty()
     val pendingDowngrade = autoRenew && pendingStripeChange?.isDowngrade == true
     val nextTier = if (pendingDowngrade) {
@@ -63,12 +64,16 @@ fun Membership.stripeAutoRenewUiState(preferredLanguage: String = "zh"): StripeA
     val detail = when {
         zh && pendingDowngrade && currentTier.isNotBlank() && nextTier.isNotBlank() ->
             "当前${currentTier}权益保留至$expiry，下个计费周期起按${nextTier}自动续订。"
+        zh && autoRenew && hasSameTierAddOn && currentTier.isNotBlank() ->
+            "当前${currentTier}权益至少有效至$expiry，到期后将继续自动续订。"
         zh && autoRenew && currentTier.isNotBlank() ->
             "当前${currentTier}权益有效至$expiry，到期后将继续自动续订。"
         zh ->
             "当前权益保留至$expiry，到期后不再续订。"
         pendingDowngrade && currentTier.isNotBlank() && nextTier.isNotBlank() ->
             "Your $currentTier access remains until $expiry. The next billing cycle renews as $nextTier."
+        autoRenew && hasSameTierAddOn && currentTier.isNotBlank() ->
+            "Your $currentTier access is valid at least until $expiry and will auto-renew."
         autoRenew && currentTier.isNotBlank() ->
             "Your $currentTier access is valid until $expiry and will auto-renew."
         else ->

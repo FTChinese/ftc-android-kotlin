@@ -50,7 +50,7 @@ fun SubsStatusCard(
                 )
                 Spacer(modifier = Modifier.height(Dimens.dp8))
                 SubHeading2(
-                    text = "以下订阅时间将在现有订阅服务到期后使用",
+                    text = "以下订阅时间将在现有订阅周期结束后使用；同等级订阅已计入上方权益日期",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     color = OColor.black60

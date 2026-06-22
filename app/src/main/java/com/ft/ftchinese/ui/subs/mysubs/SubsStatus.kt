@@ -43,13 +43,14 @@ data class SubsStatus(
                 return SubsStatus(
                     productName = ctx.getString(R.string.tier_vip),
                     details = listOf(
-                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx))
+                        FormatSubs.rowExpiration(ctx, m.localizeCurrentTierEntitlementExpireDate(ctx))
                     ),
                     addOns = listOf(),
                 )
             }
 
             val productTitle = FormatHelper.getTier(ctx, m.tier)
+            val entitlementExpireDate = m.localizeCurrentTierEntitlementExpireDate(ctx)
 
             // List addon
             val addOns = m.addOns.map {
@@ -73,7 +74,7 @@ data class SubsStatus(
                     SubsStatus(
                         reminder = expirationReminder(),
                         productName = productTitle,
-                        details = listOf(FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx))),
+                        details = listOf(FormatSubs.rowExpiration(ctx, entitlementExpireDate)),
                         addOns = addOns,
                     )
                 }
@@ -105,7 +106,7 @@ data class SubsStatus(
                             productName = productTitle,
                             details = listOf(
                                 FormatSubs.rowSubsSource(ctx, m.payMethod),
-                                FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx)),
+                                FormatSubs.rowExpiration(ctx, entitlementExpireDate),
                                 FormatSubs.rowAutoRenewOff(ctx),
                             ),
                             reactivateStripe = m.payMethod == PayMethod.STRIPE && !expired,
@@ -118,7 +119,7 @@ data class SubsStatus(
                     productName = productTitle,
                     details = listOf(
                         FormatSubs.rowSubsSource(ctx, m.payMethod),
-                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx))
+                        FormatSubs.rowExpiration(ctx, entitlementExpireDate)
                     ),
                     addOns = addOns,
                 )
@@ -128,7 +129,7 @@ data class SubsStatus(
                         reminder = expirationReminder() ?: "订阅方式缺失",
                         productName = productTitle,
                         details = if (hasExpiration) {
-                            listOf(FormatSubs.rowExpiration(ctx, m.localizeExpireDate(ctx)))
+                            listOf(FormatSubs.rowExpiration(ctx, entitlementExpireDate))
                         } else {
                             listOf()
                         },

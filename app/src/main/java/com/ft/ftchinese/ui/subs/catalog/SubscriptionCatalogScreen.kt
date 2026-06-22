@@ -489,7 +489,7 @@ private fun CurrentTierBadge(
     preferredLanguage: String,
 ) {
     val zh = preferredLanguage.startsWith("zh", ignoreCase = true)
-    val expire = membership.localizeExpireDate().ifBlank { "" }
+    val expire = membership.localizeCurrentTierEntitlementExpireDate().ifBlank { "" }
     val label = when {
         zh && expire.isNotBlank() -> "✓ 当前 · $expire"
         zh -> "✓ 当前"

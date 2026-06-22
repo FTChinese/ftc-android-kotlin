@@ -406,7 +406,7 @@
     <string name="tier_standard">標準會員</string>
     <string name="tier_premium">高階會員</string>
     <string name="tier_vip">超級會員</string>
-    <string name="label_expiration_date">到期時間</string>
+    <string name="label_expiration_date">權益有效至</string>
     <string name="label_next_renew_date">下次扣費日期</string>
     <string name="label_renew_cycle">續費週期</string>
     <string name="auto_renew_on">開啟</string>
