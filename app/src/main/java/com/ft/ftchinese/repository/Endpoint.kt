@@ -54,9 +54,11 @@ object Endpoint {
     val wxLink = "${wxAccount}/link"
     val wxUnlink = "${wxAccount}/unlink"
 
-    val saveContent = "${baseUrl}/save_content"
+    fun saveContent(baseUrl: String): String {
+        return "${baseUrl.trimEnd('/')}/save_content"
+    }
 
-    fun savedContentList(userId: String): String {
-        return "${baseUrl}/users/favlistapiPaginated/$userId"
+    fun savedContentList(baseUrl: String, userId: String): String {
+        return "${baseUrl.trimEnd('/')}/users/favlistapiPaginated/$userId"
     }
 }

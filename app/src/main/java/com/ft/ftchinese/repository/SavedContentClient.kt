@@ -1,6 +1,7 @@
 package com.ft.ftchinese.repository
 
 import android.content.Context
+import android.util.Log
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.fetch.APIError
@@ -12,6 +13,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+private const val TAG = "SavedContentClient"
 private const val SAVED_CONTENT_PAGE_LIMIT = 1000
 
 @Serializable
@@ -107,45 +109,60 @@ object SavedContentClient {
         return savedContentKey(article.id, article.type)
     }
 
-    suspend fun asyncFetchAll(context: Context, userId: String): FetchResult<List<SavedContentItem>> {
+    suspend fun asyncFetchAll(
+        context: Context,
+        userId: String,
+        baseUrls: List<String>,
+    ): FetchResult<List<SavedContentItem>> {
         return withAccessToken(context) { token ->
-            val items = mutableListOf<SavedContentItem>()
-            var offset = 0
-            var total = Int.MAX_VALUE
+            tryBaseUrls(baseUrls) { baseUrl ->
+                val items = mutableListOf<SavedContentItem>()
+                var offset = 0
+                var total = Int.MAX_VALUE
 
-            while (offset < total) {
-                val response = withContext(Dispatchers.IO) {
-                    Fetch()
-                        .get(Endpoint.savedContentList(userId))
-                        .setBearer(token)
-                        .addQuery("offset", offset.toString())
-                        .addQuery("limit", SAVED_CONTENT_PAGE_LIMIT.toString())
-                        .noCache()
-                        .endJson<SavedContentListResponse>()
-                        .body
-                } ?: return@withAccessToken FetchResult.loadingFailed
+                while (offset < total) {
+                    val response = withContext(Dispatchers.IO) {
+                        Fetch()
+                            .get(Endpoint.savedContentList(baseUrl, userId))
+                            .setBearer(token)
+                            .addQuery("offset", offset.toString())
+                            .addQuery("limit", SAVED_CONTENT_PAGE_LIMIT.toString())
+                            .noCache()
+                            .endJson<SavedContentListResponse>()
+                            .body
+                    } ?: return@tryBaseUrls FetchResult.loadingFailed
 
-                items.addAll(response.current)
-                total = response.stats.total
-                offset += response.stats.limit.coerceAtLeast(1)
+                    items.addAll(response.current)
+                    total = response.stats.total
+                    offset += response.stats.limit.coerceAtLeast(1)
+                }
+
+                FetchResult.Success(items)
             }
-
-            FetchResult.Success(items)
         }
     }
 
-    suspend fun asyncSave(context: Context, key: String): FetchResult<Boolean> {
-        return asyncUpdate(context, key, "save")
+    suspend fun asyncSave(
+        context: Context,
+        key: String,
+        baseUrls: List<String>,
+    ): FetchResult<Boolean> {
+        return asyncUpdate(context, key, "save", baseUrls)
     }
 
-    suspend fun asyncUnsave(context: Context, key: String): FetchResult<Boolean> {
-        return asyncUpdate(context, key, "unsave")
+    suspend fun asyncUnsave(
+        context: Context,
+        key: String,
+        baseUrls: List<String>,
+    ): FetchResult<Boolean> {
+        return asyncUpdate(context, key, "unsave", baseUrls)
     }
 
     private suspend fun asyncUpdate(
         context: Context,
         key: String,
         action: String,
+        baseUrls: List<String>,
     ): FetchResult<Boolean> {
         val parsed = SavedContentKey.parse(key) ?: return FetchResult.unknownError
         if (!isSyncableCloudType(parsed.type)) {
@@ -153,22 +170,62 @@ object SavedContentClient {
         }
 
         return withAccessToken(context) { token ->
-            withContext(Dispatchers.IO) {
-                Fetch()
-                    .post(Endpoint.saveContent)
-                    .setBearer(token)
-                    .sendJson(
-                        SavedContentAction(
-                            id = parsed.id,
-                            type = parsed.type,
-                            action = action,
+            tryBaseUrls(baseUrls) { baseUrl ->
+                withContext(Dispatchers.IO) {
+                    Fetch()
+                        .post(Endpoint.saveContent(baseUrl))
+                        .setBearer(token)
+                        .sendJson(
+                            SavedContentAction(
+                                id = parsed.id,
+                                type = parsed.type,
+                                action = action,
+                            )
                         )
-                    )
-                    .endJson<Map<String, String>>()
+                        .endJson<Map<String, String>>()
+                }
+
+                FetchResult.Success(true)
+            }
+        }
+    }
+
+    private suspend fun <T : Any> tryBaseUrls(
+        baseUrls: List<String>,
+        block: suspend (String) -> FetchResult<T>,
+    ): FetchResult<T> {
+        var lastError: FetchResult<Nothing>? = null
+
+        for (baseUrl in normalizeBaseUrls(baseUrls)) {
+            val result = try {
+                block(baseUrl)
+            } catch (e: APIError) {
+                FetchResult.fromApi(e)
+            } catch (e: Exception) {
+                FetchResult.fromException(e)
             }
 
-            FetchResult.Success(true)
+            when (result) {
+                is FetchResult.Success -> return result
+                is FetchResult.LocalizedError -> {
+                    lastError = result
+                    Log.w(TAG, "Saved content sync failed at $baseUrl: $result")
+                }
+                is FetchResult.TextError -> {
+                    lastError = result
+                    Log.w(TAG, "Saved content sync failed at $baseUrl: ${result.text}")
+                }
+            }
         }
+
+        return lastError ?: FetchResult.loadingFailed
+    }
+
+    private fun normalizeBaseUrls(baseUrls: List<String>): List<String> {
+        return baseUrls
+            .map { it.trim().trimEnd('/') }
+            .filter { it.isNotBlank() }
+            .distinct()
     }
 
     private suspend fun <T : Any> withAccessToken(

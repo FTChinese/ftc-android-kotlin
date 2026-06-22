@@ -10,6 +10,7 @@ import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.repository.SavedContentSync
+import com.ft.ftchinese.repository.SavedContentSyncResult
 import com.ft.ftchinese.store.FollowedTopics
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
@@ -36,6 +37,9 @@ class MyArticleState(
     var allStarred by mutableStateOf<List<StarredArticle>>(listOf())
         private set
 
+    var refreshingStarred by mutableStateOf(false)
+        private set
+
     var topicsFollowed by mutableStateOf<List<Following>>(listOf())
         private set
 
@@ -49,14 +53,38 @@ class MyArticleState(
         }
     }
 
-    fun loadAllStarred() {
-        progress.value = true
+    fun loadAllStarred(showResult: Boolean = false) {
+        if (refreshingStarred) {
+            return
+        }
+
+        refreshingStarred = true
+        progress.value = allStarred.isEmpty()
         scope.launch {
-            SavedContentSync.sync(appContext)
-            allStarred = withContext(Dispatchers.IO) {
-                db.starredDao().loadAll()
+            try {
+                val result = SavedContentSync.sync(appContext)
+                allStarred = withContext(Dispatchers.IO) {
+                    db.starredDao().loadAll()
+                }
+                if (showResult) {
+                    when (result) {
+                        is SavedContentSyncResult.Synced -> showRefreshed()
+                        is SavedContentSyncResult.Skipped -> {}
+                        is SavedContentSyncResult.Failed -> showSyncError(result)
+                    }
+                }
+            } finally {
+                progress.value = false
+                refreshingStarred = false
             }
-            progress.value = false
+        }
+    }
+
+    private fun showSyncError(result: SavedContentSyncResult.Failed) {
+        when (val error = result.error) {
+            is com.ft.ftchinese.model.fetch.FetchResult.LocalizedError -> showSnackBar(error.msgId)
+            is com.ft.ftchinese.model.fetch.FetchResult.TextError -> showSnackBar(error.text)
+            is com.ft.ftchinese.model.fetch.FetchResult.Success -> {}
         }
     }
 

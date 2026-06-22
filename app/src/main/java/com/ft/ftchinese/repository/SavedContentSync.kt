@@ -1,8 +1,11 @@
 package com.ft.ftchinese.repository
 
 import android.content.Context
+import android.util.Base64
+import android.util.Log
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SavedContentSyncStore
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.WebAccessTokenStore
@@ -10,6 +13,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+
+private const val TAG = "SavedContentSync"
+private const val ACCESS_TOKEN_REFRESH_SKEW_SECONDS = 5 * 60L
 
 sealed class SavedContentSyncResult {
     data class Synced(
@@ -34,13 +41,16 @@ object SavedContentSync {
     }
 
     private suspend fun syncLocked(context: Context): SavedContentSyncResult {
-        val account = SessionManager.getInstance(context).loadAccount(raw = true)
+        val sessionManager = SessionManager.getInstance(context)
+        val account = sessionManager.loadAccount(raw = true)
             ?: return SavedContentSyncResult.Skipped("not_logged_in")
         val userId = account.id.takeIf { it.isNotBlank() }
             ?: return SavedContentSyncResult.Skipped("missing_user_id")
+        refreshAccessTokenIfNeeded(context, sessionManager, account)
         if (WebAccessTokenStore.getInstance(context).load().isNullOrBlank()) {
             return SavedContentSyncResult.Skipped("missing_access_token")
         }
+        val baseUrls = savedContentBaseUrls()
 
         val db = ArticleDb.getInstance(context)
         val store = SavedContentSyncStore.getInstance(context)
@@ -56,7 +66,7 @@ object SavedContentSync {
         val pendingSaves = store.pendingSaveKeys(userId)
         val pendingUnsaves = store.pendingUnsaveKeys(userId)
 
-        val cloudItems = when (val result = SavedContentClient.asyncFetchAll(context, userId)) {
+        val cloudItems = when (val result = SavedContentClient.asyncFetchAll(context, userId, baseUrls)) {
             is FetchResult.Success -> result.data
             is FetchResult.LocalizedError -> return SavedContentSyncResult.Failed(result)
             is FetchResult.TextError -> return SavedContentSyncResult.Failed(result)
@@ -69,7 +79,7 @@ object SavedContentSync {
 
         var unsavedRemote = 0
         for (key in pendingUnsaves) {
-            when (val result = SavedContentClient.asyncUnsave(context, key)) {
+            when (val result = SavedContentClient.asyncUnsave(context, key, baseUrls)) {
                 is FetchResult.Success -> {
                     cloudKeys.remove(key)
                     unsavedRemote += 1
@@ -90,7 +100,7 @@ object SavedContentSync {
 
         var savedRemote = 0
         for (key in saveKeys) {
-            when (val result = SavedContentClient.asyncSave(context, key)) {
+            when (val result = SavedContentClient.asyncSave(context, key, baseUrls)) {
                 is FetchResult.Success -> {
                     cloudKeys.add(key)
                     savedRemote += 1
@@ -143,5 +153,56 @@ object SavedContentSync {
             deletedLocal = deletedLocal,
             finalCount = finalKeys.size,
         )
+    }
+
+    private fun refreshAccessTokenIfNeeded(
+        context: Context,
+        sessionManager: SessionManager,
+        account: Account,
+    ): Account {
+        val token = WebAccessTokenStore.getInstance(context).load()
+        if (!token.isNullOrBlank() && !isJwtExpiringSoon(token)) {
+            return account
+        }
+
+        return runCatching {
+            AccountRepo.refresh(account)?.also {
+                sessionManager.saveAccount(it)
+            }
+        }.onSuccess {
+            Log.i(TAG, "Refreshed account before saved content sync")
+        }.onFailure {
+            Log.w(TAG, "Failed to refresh account before saved content sync", it)
+        }.getOrNull() ?: account
+    }
+
+    private fun savedContentBaseUrls(): List<String> {
+        return listOf(
+            rootFromApiBase(ApiConfig.ofAuth.baseUrl),
+        )
+            .map { it.trim().trimEnd('/') }
+            .filter { it.isNotBlank() }
+            .distinct()
+    }
+
+    private fun rootFromApiBase(baseUrl: String): String {
+        return baseUrl
+            .trimEnd('/')
+            .replace(Regex("/api(?:/(?:v\\d+|sandbox))?$"), "")
+    }
+
+    private fun isJwtExpiringSoon(token: String): Boolean {
+        val json = decodeJwtPayload(token) ?: return false
+        val expiresAt = json.optLong("exp", 0L)
+        return expiresAt > 0L &&
+                expiresAt <= System.currentTimeMillis() / 1000L + ACCESS_TOKEN_REFRESH_SKEW_SECONDS
+    }
+
+    private fun decodeJwtPayload(token: String): JSONObject? {
+        val payload = token.split('.').getOrNull(1) ?: return null
+        return runCatching {
+            val decoded = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+            JSONObject(String(decoded, Charsets.UTF_8))
+        }.getOrNull()
     }
 }
