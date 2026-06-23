@@ -8,7 +8,18 @@ import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import com.ft.ftchinese.model.stripesubs.StripePendingChange
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import org.threeten.bp.LocalDate
 
 @Serializable
@@ -229,10 +240,79 @@ data class SubscriptionCatalogProduct(
     val tier: Tier? = null,
     val name: String = "",
     val note: String = "",
+    @Serializable(with = BenefitTextListSerializer::class)
     val benefits: List<String> = emptyList(),
     val statusText: String = "",
     val plans: List<SubscriptionCatalogPlan> = emptyList(),
 )
+
+object BenefitTextListSerializer : KSerializer<List<String>> {
+    private val delegate = ListSerializer(String.serializer())
+
+    override val descriptor = delegate.descriptor
+
+    override fun serialize(encoder: Encoder, value: List<String>) {
+        delegate.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): List<String> {
+        if (decoder !is JsonDecoder) {
+            return delegate.deserialize(decoder)
+        }
+
+        val element = decoder.decodeJsonElement()
+        if (element !is JsonArray) {
+            return emptyList()
+        }
+
+        return element.mapNotNull { benefit ->
+            benefitText(benefit)
+                ?.takeIf { it.isNotBlank() }
+        }
+    }
+
+    private fun benefitText(element: JsonElement): String? {
+        if (element is JsonPrimitive) {
+            return element.contentOrNull
+        }
+
+        if (element !is JsonObject) {
+            return null
+        }
+
+        val text = element.stringValue("text")
+        if (!text.isNullOrBlank()) {
+            return text
+        }
+
+        val title = element.stringValue("title")
+            ?: linkedTitle(element)
+        val description = element.stringValue("description")
+        val separator = element.stringValue("titleSeparator")
+            ?: "："
+
+        return when {
+            title.isNullOrBlank() -> description
+            description.isNullOrBlank() -> title
+            else -> "$title$separator$description"
+        }
+    }
+
+    private fun linkedTitle(element: JsonObject): String? {
+        return listOf(
+            element.stringValue("titleBefore"),
+            element.stringValue("titleLinkText"),
+            element.stringValue("titleAfter")
+        )
+            .filterNot { it.isNullOrBlank() }
+            .joinToString("")
+            .ifBlank { null }
+    }
+
+    private fun JsonObject.stringValue(key: String): String? {
+        return (this[key] as? JsonPrimitive)?.contentOrNull
+    }
+}
 
 @Serializable
 data class SubscriptionCatalogPlan(
