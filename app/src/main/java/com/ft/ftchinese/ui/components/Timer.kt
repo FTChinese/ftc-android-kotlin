@@ -5,6 +5,8 @@ import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
 import kotlinx.coroutines.*
 
+const val MOBILE_SMS_CODE_TOTAL_TIME_SECONDS = 15L * 60L
+
 class TimerState(
     private val totalTime: Long,
     private val scope: CoroutineScope,
@@ -22,7 +24,7 @@ class TimerState(
         if (!isRunning) {
             initialText
         } else {
-            "${currentTime}s"
+            formatRemainingTime(currentTime)
         }
     }
 
@@ -42,6 +44,16 @@ class TimerState(
     fun stop() {
         job?.cancel()
     }
+}
+
+private fun formatRemainingTime(seconds: Long): String {
+    if (seconds < 60) {
+        return "${seconds}s"
+    }
+
+    val minutes = seconds / 60
+    val remainingSeconds = seconds % 60
+    return "${minutes}:${remainingSeconds.toString().padStart(2, '0')}"
 }
 
 @Composable

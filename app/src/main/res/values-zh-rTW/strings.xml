@@ -21,6 +21,7 @@
     <string name="mobile_phone">手機號</string>
     <string name="mobile_invalid">請填寫正確的手機號碼</string>
     <string name="mobile_mainland_only">僅限中國大陸地區手機號碼</string>
+    <string name="mobile_sms_delay_notice">短信可能需要較長時間送達。驗證碼15分鐘內有效，請耐心等待，避免重複獲取。</string>
     <string name="mobile_verification_code">驗證碼</string>
     <string name="mobile_request_code">獲取驗證碼</string>
     <string name="mobile_code_counter">重新獲取%1$ds</string>
@@ -197,10 +198,10 @@
 
     <!--  Set/Update mobile  -->
     <string name="mobile_conflict">該手機號已經存在</string>
-    <string name="mobile_code_not_found">驗證碼不存在或已過期</string>
+    <string name="mobile_code_not_found">驗證碼不存在或已過期。請使用15分鐘內收到的最新驗證碼。</string>
     <string name="mobile_code_invalid">驗證碼無效</string>
     <string name="mobile_already_exists">該手機號已被使用</string>
-    <string name="sms_code_sent">驗證碼已傳送</string>
+    <string name="sms_code_sent">驗證碼已傳送，可能需要幾分鐘送達。15分鐘內有效，請耐心等待。</string>
 
     <!--  Stripe Customer setting  -->
     <string name="title_create_stripe_customer">開通信用卡/借記卡支付</string>

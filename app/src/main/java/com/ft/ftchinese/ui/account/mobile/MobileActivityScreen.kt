@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import com.ft.ftchinese.model.request.SMSCodeParams
+import com.ft.ftchinese.ui.components.MOBILE_SMS_CODE_TOTAL_TIME_SECONDS
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -26,7 +27,7 @@ fun MobileActivityScreen(
         scaffoldState = scaffoldState
     )
 
-    val timerState = rememberTimerState()
+    val timerState = rememberTimerState(totalTime = MOBILE_SMS_CODE_TOTAL_TIME_SECONDS)
 
     if (account == null) {
         return

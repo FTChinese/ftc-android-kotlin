@@ -20,6 +20,7 @@ import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileSignUpParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.ui.components.MOBILE_SMS_CODE_TOTAL_TIME_SECONDS
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.PlainTextButton
 import com.ft.ftchinese.ui.components.launchWxLogin
@@ -54,7 +55,7 @@ fun MobileAuthActivityScreen(
         Handler(Looper.getMainLooper())
     }
 
-    val timerState = rememberTimerState()
+    val timerState = rememberTimerState(totalTime = MOBILE_SMS_CODE_TOTAL_TIME_SECONDS)
     val lifecycleOwner = LocalLifecycleOwner.current
 
     fun scheduleWxDiagnosticCheck() {

@@ -39,6 +39,7 @@ fun FtcWebView(
     webClientCallback: WebViewCallback = rememberWebViewCallback(),
     jsListener: JsEventListener = rememberFtcJsEventListener(),
     captureBackPresses: Boolean = false,
+    pauseMediaOnLifecyclePause: Boolean = true,
     onCreated: (AndroidWebView) -> Unit = {}
 ) {
 
@@ -126,14 +127,18 @@ fun FtcWebView(
         fullscreenState.hide()
     }
 
-    DisposableEffect(lifecycleOwner, activeWebView) {
+    DisposableEffect(lifecycleOwner, activeWebView, pauseMediaOnLifecyclePause) {
         val webView = activeWebView
         if (webView == null) {
             onDispose {}
         } else {
             val observer = LifecycleEventObserver { _, event ->
                 when (event) {
-                    Lifecycle.Event.ON_PAUSE -> webView.pauseHtmlMedia()
+                    Lifecycle.Event.ON_PAUSE -> {
+                        if (pauseMediaOnLifecyclePause) {
+                            webView.pauseHtmlMedia()
+                        }
+                    }
                     Lifecycle.Event.ON_RESUME -> runCatching { webView.onResume() }
                     Lifecycle.Event.ON_DESTROY -> webView.stopHtmlMedia(clearPage = true)
                     else -> {}

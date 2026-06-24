@@ -58,6 +58,7 @@ fun MobileForm(
             keyboardType = KeyboardType.Number,
         )
         BodyText2(text = stringResource(id = R.string.mobile_mainland_only))
+        BodyText2(text = stringResource(id = R.string.mobile_sms_delay_notice))
 
         Spacer(modifier = Modifier.height(Dimens.dp8))
 

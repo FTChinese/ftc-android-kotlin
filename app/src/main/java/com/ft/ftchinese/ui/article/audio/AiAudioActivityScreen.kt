@@ -61,24 +61,24 @@ fun AiAudioActivityScreen(
 
     val title = teaser.title.ifBlank { "FT Audio" }
 
-    val webViewState = if (!audioPageUrl.isNullOrBlank()) {
+    val webViewState = if (!directAudioUrl.isNullOrBlank()) {
         Log.i(
             TAG,
-            "$LOG_PREFIX audio_screen mode=page_audio title=$title url=$audioPageUrl"
-        )
-        rememberWebViewState(url = audioPageUrl)
-    } else {
-        Log.i(
-            TAG,
-            "$LOG_PREFIX audio_screen mode=direct_audio_fallback title=$title url=${directAudioUrl?.take(48)}"
+            "$LOG_PREFIX audio_screen mode=direct_audio title=$title url=${directAudioUrl.take(48)}"
         )
         rememberWebViewStateWithHTMLData(
             data = buildInlineAudioHtml(
                 title = title,
-                audioUrl = directAudioUrl!!,
+                audioUrl = directAudioUrl,
             ),
             baseUrl = contentBaseUrl
         )
+    } else {
+        Log.i(
+            TAG,
+            "$LOG_PREFIX audio_screen mode=page_audio_fallback title=$title url=$audioPageUrl"
+        )
+        rememberWebViewState(url = audioPageUrl!!)
     }
 
     ProgressLayout(
@@ -87,6 +87,10 @@ fun AiAudioActivityScreen(
     ) {
         FtcWebView(
             wvState = webViewState,
+            pauseMediaOnLifecyclePause = false,
+            onCreated = {
+                it.settings.mediaPlaybackRequiresUserGesture = false
+            },
         )
     }
 
