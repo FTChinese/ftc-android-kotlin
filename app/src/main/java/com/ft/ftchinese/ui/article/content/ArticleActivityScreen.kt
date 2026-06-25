@@ -352,6 +352,7 @@ fun ArticleActivityScreen(
                     wvState = wvState,
                     webClientCallback = wvCallback,
                     jsListener = jsCallback,
+                    pauseMediaOnLifecyclePause = false,
                     modifier = Modifier.fillMaxSize()
                 ) {
                     articleState.onWebViewCreated(it)
