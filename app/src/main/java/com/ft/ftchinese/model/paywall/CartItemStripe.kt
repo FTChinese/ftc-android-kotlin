@@ -57,6 +57,8 @@ data class CartItemStripe(
     fun subsParams(
         payMethod: StripePaymentMethod?,
         prorationDate: Long? = null,
+        ccode: String? = null,
+        from: String? = null,
     ): SubParams {
         return SubParams(
             priceId = recurring.id,
@@ -64,6 +66,8 @@ data class CartItemStripe(
             coupon = if (isDirectSubscriptionUpdate) null else coupon?.id,
             defaultPaymentMethod = if (isDirectSubscriptionUpdate) null else payMethod?.id,
             currency = recurring.currency.takeIf { it.isNotBlank() },
+            ccode = ccode,
+            from = from,
             prorationDate = prorationDate,
         )
     }

@@ -14,6 +14,8 @@ data class SubParams(
     val defaultPaymentMethod: String?,
     val currency: String? = null,
     val coupon: String? = null,
+    val ccode: String? = null,
+    val from: String? = null,
     val idempotency: String? = null,
     val prorationDate: Long? = null,
 ) {

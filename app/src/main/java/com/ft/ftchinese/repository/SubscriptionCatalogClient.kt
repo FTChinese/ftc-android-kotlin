@@ -1,5 +1,6 @@
 package com.ft.ftchinese.repository
 
+import android.net.Uri
 import android.util.Log
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
@@ -20,9 +21,23 @@ object SubscriptionCatalogClient {
         }
     }
 
+    private fun catalogUrl(api: ApiConfig, ccode: String?): String {
+        if (ccode.isNullOrBlank()) {
+            return api.subscriptionCatalog
+        }
+
+        return Uri.parse(api.subscriptionCatalog)
+            .buildUpon()
+            .appendQueryParameter("ccode", ccode)
+            .appendQueryParameter("from", "android")
+            .build()
+            .toString()
+    }
+
     fun retrieve(
         api: ApiConfig,
         userId: String?,
+        ccode: String? = null,
     ): HttpResp<SubscriptionCatalog> {
         return Fetch()
             .setApiKey()
@@ -33,17 +48,18 @@ object SubscriptionCatalogClient {
                     setUserId(userId)
                 }
             }
-            .get(api.subscriptionCatalog)
+            .get(catalogUrl(api, ccode))
             .endJson()
     }
 
     suspend fun asyncRetrieve(
         api: ApiConfig,
         userId: String?,
+        ccode: String? = null,
     ): FetchResult<SubscriptionCatalog> {
         return try {
             val response = withContext(Dispatchers.IO) {
-                retrieve(api, userId)
+                retrieve(api, userId, ccode)
             }
 
             if (response.body == null) {

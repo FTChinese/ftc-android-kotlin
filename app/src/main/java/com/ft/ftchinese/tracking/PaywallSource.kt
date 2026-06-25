@@ -20,6 +20,15 @@ data class PaywallSource(
 object PaywallTracker {
     var from: PaywallSource? = null
 
+    fun campaignCcode(): String? {
+        val source = from ?: return null
+        if (source.type != "promotion") {
+            return null
+        }
+
+        return source.id.takeIf { it.isNotBlank() }
+    }
+
     fun fromArticle(item: Teaser?) {
         if (item == null) {
             from = null

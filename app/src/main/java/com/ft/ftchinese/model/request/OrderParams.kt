@@ -6,4 +6,6 @@ import kotlinx.serialization.Serializable
 data class OrderParams(
     val priceId: String,
     val discountId: String?,
+    val ccode: String? = null,
+    val from: String? = null,
 )

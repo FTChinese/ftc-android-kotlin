@@ -9,7 +9,8 @@ object SubscriptionCatalogRepo {
     suspend fun fromServer(
         api: ApiConfig,
         userId: String?,
+        ccode: String? = null,
     ): FetchResult<SubscriptionCatalog> {
-        return SubscriptionCatalogClient.asyncRetrieve(api, userId)
+        return SubscriptionCatalogClient.asyncRetrieve(api, userId, ccode)
     }
 }

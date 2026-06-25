@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalog
 import com.ft.ftchinese.repository.ApiConfig
+import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.repo.SubscriptionCatalogRepo
 import com.ft.ftchinese.ui.util.ConnectionState
@@ -42,7 +43,7 @@ class SubscriptionCatalogState(
                 return@launch
             }
 
-            when (val result = SubscriptionCatalogRepo.fromServer(api, userId)) {
+            when (val result = SubscriptionCatalogRepo.fromServer(api, userId, PaywallTracker.campaignCcode())) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
                 }
@@ -68,7 +69,7 @@ class SubscriptionCatalogState(
 
         refreshing = true
         scope.launch {
-            when (val result = SubscriptionCatalogRepo.fromServer(api, userId)) {
+            when (val result = SubscriptionCatalogRepo.fromServer(api, userId, PaywallTracker.campaignCcode())) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
                 }

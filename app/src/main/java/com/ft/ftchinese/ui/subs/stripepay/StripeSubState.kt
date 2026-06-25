@@ -19,6 +19,7 @@ import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.tracking.BeginCheckoutParams
 import com.ft.ftchinese.tracking.PaySuccessParams
+import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.account.stripewallet.StripeWalletState
 import com.ft.ftchinese.ui.repo.PaywallRepo
@@ -64,6 +65,10 @@ class StripeSubState(
 
     var failure by mutableStateOf<FailureStatus?>(null)
         private set
+
+    private fun campaignFrom(ccode: String?): String? {
+        return ccode?.let { "android" }
+    }
 
     fun clearFailureState() {
         failure = null
@@ -231,8 +236,11 @@ class StripeSubState(
 
     private fun createSub(account: Account, item: CartItemStripe) {
         progress.value = true
+        val ccode = PaywallTracker.campaignCcode()
         val params = item.subsParams(
             paymentMethodSelected,
+            ccode = ccode,
+            from = campaignFrom(ccode),
         )
 
         scope.launch {
@@ -280,11 +288,14 @@ class StripeSubState(
 
     private fun updateSub(account: Account, item: CartItemStripe) {
         progress.value = true
+        val ccode = PaywallTracker.campaignCcode()
         val params = item.subsParams(
             payMethod = paymentMethodSelected,
             prorationDate = invoicePreview?.prorationDate?.takeIf {
                 item.intent.kind == IntentKind.Upgrade && it > 0
             },
+            ccode = ccode,
+            from = campaignFrom(ccode),
         )
 
         scope.launch {

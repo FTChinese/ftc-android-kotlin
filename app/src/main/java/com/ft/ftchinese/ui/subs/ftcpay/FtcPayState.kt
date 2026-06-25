@@ -19,6 +19,7 @@ import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.tracking.BeginCheckoutParams
 import com.ft.ftchinese.tracking.PaySuccessParams
+import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
@@ -71,9 +72,12 @@ class FtcPayState(
             return
         }
 
+        val ccode = PaywallTracker.campaignCcode()
         val params = OrderParams(
             priceId = item.price.id,
-            discountId = item.discount?.id
+            discountId = item.discount?.id,
+            ccode = ccode,
+            from = ccode?.let { "android" }
         )
 
         scope.launch(Dispatchers.IO) {
