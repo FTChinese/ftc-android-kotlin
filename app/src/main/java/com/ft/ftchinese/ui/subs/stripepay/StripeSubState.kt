@@ -14,6 +14,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.CouponApplied
 import com.ft.ftchinese.model.stripesubs.StripeInvoicePreview
+import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.StripeClient
@@ -68,6 +69,10 @@ class StripeSubState(
 
     private fun campaignFrom(ccode: String?): String? {
         return ccode?.let { "android" }
+    }
+
+    private fun effectivePaymentMethod(): StripePaymentMethod? {
+        return paymentMethodInUse.value?.current
     }
 
     fun clearFailureState() {
@@ -178,7 +183,7 @@ class StripeSubState(
             val result = StripeClient.asyncPreviewUpdateSubs(
                 account = account,
                 params = item.subsParams(
-                    payMethod = paymentMethodSelected,
+                    payMethod = effectivePaymentMethod(),
                 ),
             )
 
@@ -238,7 +243,7 @@ class StripeSubState(
         progress.value = true
         val ccode = PaywallTracker.campaignCcode()
         val params = item.subsParams(
-            paymentMethodSelected,
+            effectivePaymentMethod(),
             ccode = ccode,
             from = campaignFrom(ccode),
         )
@@ -290,7 +295,7 @@ class StripeSubState(
         progress.value = true
         val ccode = PaywallTracker.campaignCcode()
         val params = item.subsParams(
-            payMethod = paymentMethodSelected,
+            payMethod = effectivePaymentMethod(),
             prorationDate = invoicePreview?.prorationDate?.takeIf {
                 item.intent.kind == IntentKind.Upgrade && it > 0
             },

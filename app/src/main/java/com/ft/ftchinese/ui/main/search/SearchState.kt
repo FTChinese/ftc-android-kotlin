@@ -11,6 +11,7 @@ import com.ft.ftchinese.database.KeywordEntry
 import com.ft.ftchinese.database.SearchDb
 import com.ft.ftchinese.database.sqlQueryVacuum
 import com.ft.ftchinese.model.content.TemplateBuilder
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.isKeywordForbidden
 import com.ft.ftchinese.store.FileStore
 import com.ft.ftchinese.ui.util.ConnectionState
@@ -111,7 +112,7 @@ class SearchState(
      * show it after user clicked search. The show/hide will also
      * trick Compose to reload page. See SearchScreen.kt documentation.
      */
-    fun onSearch(kw: String) {
+    fun onSearch(kw: String, account: Account?) {
         noResult = false
         if (isKeywordForbidden(kw)) {
             noResult = true
@@ -123,6 +124,7 @@ class SearchState(
         scope.launch {
             val template = cache.readSearchTemplate()
                 htmlLoaded = TemplateBuilder(template)
+                .withUserInfo(account)
                 .withSearch(kw)
                 .withTheme(isLight)
                 .render()

@@ -51,7 +51,7 @@ fun SearchActivityScreen(
         onClickHistory = {
             barState.onValueChange(it)
             barState.clearFocus()
-            searchState.onSearch(it)
+            searchState.onSearch(it, accountState.value)
         },
         searchBar = {
             SearchBar(
@@ -62,7 +62,7 @@ fun SearchActivityScreen(
                 },
                 onSubmit = {
                     barState.clearFocus()
-                    searchState.onSearch(barState.keyword)
+                    searchState.onSearch(barState.keyword, accountState.value)
                 }
             )
         }

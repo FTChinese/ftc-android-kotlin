@@ -108,7 +108,8 @@ object HostConfig {
     }
 
     fun isFtaLink(host: String): Boolean {
-        return HOST_FTA == host
+        val normalized = host.normalizeHost() ?: return false
+        return normalized == HOST_FTA || normalized == "ftacademy.cn"
     }
 
 //    private fun getLanguageTag(): String {

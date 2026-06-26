@@ -84,14 +84,22 @@ sealed class WvUrlEvent {
                  */
                 "http", "https" -> when {
                     containWxMiniProgram(uri) -> ofWxMiniProgram(uri)
-                    HostConfig.isInternalLink(uri.host ?: "") || HostConfig.isTrustedAuthHost(uri.host) -> ofInSiteLink(uri)
+                    isFtContentLink(uri) -> Article(teaserFromUri(uri))
                     HostConfig.isFtaLink(uri.host ?: "") -> ofFtaSubs(uri)
+                    HostConfig.isInternalLink(uri.host ?: "") || HostConfig.isTrustedAuthHost(uri.host) -> ofInSiteLink(uri)
                     else -> External(uri)
                 }
                 // For unknown schemes, simply returns true to prevent
                 // crash caused by loading unknown content.
                 else -> External(uri)
             }
+        }
+
+        private fun isFtContentLink(uri: Uri): Boolean {
+            val host = uri.host ?: return false
+            val isFtHost = host.equals("www.ft.com", ignoreCase = true) ||
+                host.equals("ft.com", ignoreCase = true)
+            return isFtHost && uri.pathSegments.firstOrNull() == ArticleKind.content
         }
 
         @JvmStatic
@@ -113,7 +121,8 @@ sealed class WvUrlEvent {
          * http://www.ftacademy.cn/subscription.html?ccode=ftchomepromobox
          */
         private fun ofFtaSubs(uri: Uri): WvUrlEvent {
-            if (uri.lastPathSegment != "subscription.html") {
+            val path = uri.lastPathSegment ?: ""
+            if (path != "subscription.html" && path != "subscription") {
                 return UnknownInSite(uri)
             }
 
