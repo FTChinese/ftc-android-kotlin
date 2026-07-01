@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 data class CatalogFtcCheckout(
     val priceId: String,
     val cartItem: CartItemFtc,
-    val payMethod: PayMethod,
+    val payMethod: PayMethod?,
 )
 
 object CatalogFtcCheckoutStore {

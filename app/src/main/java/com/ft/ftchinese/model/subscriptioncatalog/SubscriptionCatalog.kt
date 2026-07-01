@@ -348,4 +348,8 @@ data class SubscriptionCheckout(
     val stripePayableAmount: Int = 0,
     val stripeCouponAmountOff: Int = 0,
     val ftcPriceId: String = "",
+    val ftcDiscountId: String = "",
+    val ftcUnitAmount: Int = 0,
+    val ftcPayableAmount: Int = 0,
+    val ftcDiscountAmountOff: Int = 0,
 )

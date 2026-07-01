@@ -26,6 +26,9 @@ import com.ft.ftchinese.ui.web.rememberFullscreenVideoState
 import com.ft.ftchinese.ui.web.rememberWebViewCallback
 import com.ft.ftchinese.ui.web.routeWebViewBridgeLink
 import com.ft.ftchinese.ui.web.WebViewUnavailable
+import com.ft.ftchinese.ui.web.WvUrlEvent
+import com.ft.ftchinese.ui.web.WEB_PURCHASE_FLOW_TAG
+import com.ft.ftchinese.ui.web.debugWebUrl
 import com.google.accompanist.web.AccompanistWebViewClient
 import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
@@ -64,7 +67,7 @@ fun WebTabScreen(
         }
     }
 
-    val webClient = remember(url, requestHeaders) {
+    val webClient = remember(url, requestHeaders, webViewCallback) {
         object : AccompanistWebViewClient() {
             override fun onPageStarted(view: AndroidWebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
@@ -82,11 +85,19 @@ fun WebTabScreen(
             }
 
             override fun shouldOverrideUrlLoading(view: AndroidWebView?, request: WebResourceRequest?): Boolean {
+                val uri = request?.url ?: return super.shouldOverrideUrlLoading(view, request)
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "should_override component=WebTabScreen " +
+                        "mainFrame=${request.isForMainFrame} method=${request.method} " +
+                        "url=${debugWebUrl(uri)}"
+                )
                 WebViewAccessTokenCookieManager.syncAccessTokenForUrl(
                     view,
-                    request?.url?.toString()
+                    uri.toString()
                 )
-                return super.shouldOverrideUrlLoading(view, request)
+                webViewCallback.onOverrideUrlLoading(WvUrlEvent.fromUri(uri))
+                return true
             }
         }
     }

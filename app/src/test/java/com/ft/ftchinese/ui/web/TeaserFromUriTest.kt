@@ -3,7 +3,9 @@ package com.ft.ftchinese.ui.web
 import android.net.Uri
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.enums.ArticleType
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.ui.subs.SubscriptionEntryIntent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -124,6 +126,151 @@ class TeaserFromUriTest {
         assertEquals(ccode, PaywallTracker.campaignCcode())
 
         PaywallTracker.from = null
+    }
+
+    @Test
+    fun routeSubscribeSchemeAsNativePaywallIntent() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("subscribe://premium/1498?ccode=android_native_ccode&offer=premium_retention_offer")
+        )
+
+        assertTrue(event is WvUrlEvent.Subscribe)
+        val subscribe = event as WvUrlEvent.Subscribe
+        assertEquals(Tier.PREMIUM, subscribe.tier)
+        assertEquals("android_native_ccode", subscribe.ccode)
+        assertEquals("premium_retention_offer", subscribe.offerHint)
+        assertEquals("1498", subscribe.priceHint)
+        assertEquals("subscribe", subscribe.sourceScheme)
+    }
+
+    @Test
+    fun rejectUnsafeSubscribeCampaignCode() {
+        PaywallTracker.from = null
+
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("subscribe://standard/258?ccode=%3Cscript%3E&offer=standard_safe_offer")
+        )
+
+        assertTrue(event is WvUrlEvent.Subscribe)
+        val subscribe = event as WvUrlEvent.Subscribe
+        assertEquals(Tier.STANDARD, subscribe.tier)
+        assertNull(subscribe.ccode)
+        assertEquals("standard_safe_offer", subscribe.offerHint)
+        assertNull(SubscriptionEntryIntent(ccode = subscribe.ccode).campaignCcode())
+    }
+
+    @Test
+    fun routeWebSubscriptionLinkAsNativePaywallIntent() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.ftchinese.com/subscription.html?from=ft_full_price&ccode=olivertest012&tap=standard#no_universal_links")
+        )
+
+        assertTrue(event is WvUrlEvent.Subscribe)
+        val subscribe = event as WvUrlEvent.Subscribe
+        assertEquals(Tier.STANDARD, subscribe.tier)
+        assertEquals("olivertest012", subscribe.ccode)
+        assertEquals("ft_full_price", subscribe.from)
+        assertNull(subscribe.offerHint)
+        assertNull(subscribe.priceHint)
+        assertEquals("web-subscription", subscribe.sourceScheme)
+    }
+
+    @Test
+    fun routePremiumWebSubscriptionLinkAsNativePaywallIntent() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.ftchinese.com/subscription.html?from=ft_renewal&ccode=renewal_ccode&tap=premium#no_universal_links")
+        )
+
+        assertTrue(event is WvUrlEvent.Subscribe)
+        val subscribe = event as WvUrlEvent.Subscribe
+        assertEquals(Tier.PREMIUM, subscribe.tier)
+        assertEquals("renewal_ccode", subscribe.ccode)
+        assertEquals("ft_renewal", subscribe.from)
+        assertEquals("web-subscription", subscribe.sourceScheme)
+    }
+
+    @Test
+    fun routeRelativeWebSubscriptionLinkAsNativePaywallIntent() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("/subscription.html?from=ft_discount&ccode=relative_ccode&tap=premium#no_universal_links")
+        )
+
+        assertTrue(event is WvUrlEvent.Subscribe)
+        val subscribe = event as WvUrlEvent.Subscribe
+        assertEquals(Tier.PREMIUM, subscribe.tier)
+        assertEquals("relative_ccode", subscribe.ccode)
+        assertEquals("ft_discount", subscribe.from)
+    }
+
+    @Test
+    fun ignoreWebSubscriptionPriceParam() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.ftchinese.com/subscription.html?price=1&from=ft_discount&ccode=price_ignored&tap=premium")
+        )
+
+        assertTrue(event is WvUrlEvent.Subscribe)
+        val subscribe = event as WvUrlEvent.Subscribe
+        assertEquals(Tier.PREMIUM, subscribe.tier)
+        assertEquals("ft_discount", subscribe.from)
+        assertNull(subscribe.priceHint)
+    }
+
+    @Test
+    fun routeCorpPageInsideAppWithWebviewParam() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.ftchinese.com/m/corp/service.html?ad=no")
+        )
+
+        assertTrue(event is WvUrlEvent.CorpPage)
+        val corpPage = event as WvUrlEvent.CorpPage
+        assertEquals("/m/corp/service.html", corpPage.uri.path)
+        assertEquals("no", corpPage.uri.getQueryParameter("ad"))
+        assertEquals("ftcapp", corpPage.uri.getQueryParameter("webview"))
+    }
+
+    @Test
+    fun routeCorpPreviewAsMarketingChannel() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.ftchinese.com/m/corp/preview.html?pageid=events&webview=ftcapp")
+        )
+
+        assertTrue(event is WvUrlEvent.Channel)
+        val channel = event as WvUrlEvent.Channel
+        assertEquals("/m/corp/preview.html", channel.source.path)
+        assertEquals("pageid=events&webview=ftcapp", channel.source.query)
+    }
+
+    @Test
+    fun routeFtcVicCorpPreviewAsMarketingChannel() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.ftcvic.com/m/corp/preview.html?ccode=olivertest012&pageid=2026Junsub&to=all")
+        )
+
+        assertTrue(event is WvUrlEvent.Channel)
+        val channel = event as WvUrlEvent.Channel
+        assertEquals("/m/corp/preview.html", channel.source.path)
+        assertEquals("ccode=olivertest012&pageid=2026Junsub&to=all", channel.source.query)
+    }
+
+    @Test
+    fun routeDynamicCampaignDomainCorpPreviewAsMarketingChannel() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://campaign-domain.example/m/corp/preview.html?pageid=dynamic2026&ccode=dynamic_ccode")
+        )
+
+        assertTrue(event is WvUrlEvent.Channel)
+        val channel = event as WvUrlEvent.Channel
+        assertEquals("/m/corp/preview.html", channel.source.path)
+        assertEquals("pageid=dynamic2026&ccode=dynamic_ccode", channel.source.query)
+    }
+
+    @Test
+    fun doNotTreatExternalCorpPathAsInternal() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://example.com/m/corp/service.html")
+        )
+
+        assertTrue(event is WvUrlEvent.External)
     }
 
     @Test

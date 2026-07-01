@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.subs.catalog
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalog
@@ -53,11 +56,14 @@ import com.ft.ftchinese.ui.subs.stripeAutoRenewUiState
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OColors
 
+private const val PURCHASE_FLOW_TAG = "FTCPurchaseFlow"
+
 @Composable
 fun SubscriptionCatalogScreen(
     catalog: SubscriptionCatalog,
     membership: Membership?,
     isLoggedIn: Boolean,
+    autoOpenPaymentDialogTier: Tier? = null,
     onLoginRequest: () -> Unit,
     onFtcCheckout: (
         product: SubscriptionCatalogProduct,
@@ -75,6 +81,31 @@ fun SubscriptionCatalogScreen(
         membership = checkoutMembership,
         preferredLanguage = preferredLanguage,
     )
+    var autoOpenAttempted by remember(autoOpenPaymentDialogTier) {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(
+        autoOpenPaymentDialogTier,
+        catalog,
+        checkoutMembership,
+        preferredLanguage,
+        displayPreference,
+    ) {
+        val tier = autoOpenPaymentDialogTier ?: return@LaunchedEffect
+        if (autoOpenAttempted) {
+            return@LaunchedEffect
+        }
+        autoOpenAttempted = true
+
+        pendingSelection = findAutoPaymentSelection(
+            catalog = catalog,
+            membership = checkoutMembership,
+            preferredLanguage = preferredLanguage,
+            displayPreference = displayPreference,
+            tier = tier,
+        )
+    }
 
     if (pendingSelection != null) {
         PaymentMethodDialog(
@@ -960,6 +991,57 @@ private fun com.ft.ftchinese.model.enums.Tier.label(): String {
         "standard" -> "标准会员"
         "premium" -> "高端会员"
         else -> name
+    }
+}
+
+private fun findAutoPaymentSelection(
+    catalog: SubscriptionCatalog,
+    membership: Membership,
+    preferredLanguage: String,
+    displayPreference: CatalogDisplayPreference,
+    tier: Tier,
+): PendingSelection? {
+    val products = catalog.products.filter { product ->
+        product.tier == tier
+    }
+
+    for (product in products) {
+        val plans = product.plans.sortedBy(::autoPaymentPlanOrder)
+        for (plan in plans) {
+            val choices = paymentChoicesForPlan(
+                product = product,
+                plan = plan,
+                membership = membership,
+                preferredLanguage = preferredLanguage,
+                displayPreference = displayPreference,
+            ).filter { it.enabled }
+
+            if (choices.isNotEmpty()) {
+                Log.i(
+                    PURCHASE_FLOW_TAG,
+                    "auto_payment_dialog open tier=${product.tier?.symbol.orEmpty()} " +
+                        "cycle=${plan.cycle} choices=${choices.joinToString(",") { choice ->
+                            "${choice.kind}:${choice.payMethod}"
+                        }}"
+                )
+                return PendingSelection(product, plan)
+            }
+        }
+    }
+
+    Log.i(
+        PURCHASE_FLOW_TAG,
+        "auto_payment_dialog no_match tier=${tier.symbol} productCount=${catalog.products.size}"
+    )
+    return null
+}
+
+private fun autoPaymentPlanOrder(plan: SubscriptionCatalogPlan): Int {
+    val normalized = plan.cycle.lowercase()
+    return when {
+        Cycle.fromString(normalized) == Cycle.YEAR || normalized.contains("year") -> 0
+        Cycle.fromString(normalized) == Cycle.MONTH || normalized.contains("month") -> 1
+        else -> 2
     }
 }
 

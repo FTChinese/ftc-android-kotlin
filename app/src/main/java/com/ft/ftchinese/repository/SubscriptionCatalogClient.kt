@@ -2,6 +2,7 @@ package com.ft.ftchinese.repository
 
 import android.net.Uri
 import android.util.Log
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.HttpResp
@@ -12,6 +13,7 @@ import java.util.Locale
 
 object SubscriptionCatalogClient {
     private const val TAG = "SubscriptionCatalog"
+    private const val PURCHASE_FLOW_TAG = "FTCPurchaseFlow"
 
     private fun preferredLanguageTag(): String {
         return try {
@@ -21,24 +23,52 @@ object SubscriptionCatalogClient {
         }
     }
 
-    private fun catalogUrl(api: ApiConfig, ccode: String?): String {
-        if (ccode.isNullOrBlank()) {
+    private fun catalogUrl(
+        api: ApiConfig,
+        ccode: String?,
+        tier: Tier?,
+        offerHint: String?,
+        discountFrom: String?,
+    ): String {
+        if (ccode.isNullOrBlank() && tier == null && offerHint.isNullOrBlank() && discountFrom.isNullOrBlank()) {
             return api.subscriptionCatalog
         }
 
-        return Uri.parse(api.subscriptionCatalog)
+        val builder = Uri.parse(api.subscriptionCatalog)
             .buildUpon()
-            .appendQueryParameter("ccode", ccode)
-            .appendQueryParameter("from", "android")
-            .build()
-            .toString()
+            .appendQueryParameter("source", "android")
+
+        if (!ccode.isNullOrBlank()) {
+            builder.appendQueryParameter("ccode", ccode)
+        }
+        if (tier != null) {
+            builder.appendQueryParameter("tier", tier.symbol)
+        }
+        if (!offerHint.isNullOrBlank()) {
+            builder.appendQueryParameter("offer", offerHint)
+        }
+        if (!discountFrom.isNullOrBlank()) {
+            builder.appendQueryParameter("from", discountFrom)
+        }
+
+        return builder.build().toString()
     }
 
     fun retrieve(
         api: ApiConfig,
         userId: String?,
         ccode: String? = null,
+        tier: Tier? = null,
+        offerHint: String? = null,
+        discountFrom: String? = null,
     ): HttpResp<SubscriptionCatalog> {
+        val url = catalogUrl(api, ccode, tier, offerHint, discountFrom)
+        Log.i(
+            PURCHASE_FLOW_TAG,
+            "catalog_request hasUser=${!userId.isNullOrBlank()} " +
+                "tier=${tier?.symbol.orEmpty()} ccode=${ccode.orEmpty()} " +
+                "offer=${offerHint.orEmpty()} from=${discountFrom.orEmpty()} url=$url"
+        )
         return Fetch()
             .setApiKey()
             .addHeader("Accept-Language", preferredLanguageTag())
@@ -48,7 +78,7 @@ object SubscriptionCatalogClient {
                     setUserId(userId)
                 }
             }
-            .get(catalogUrl(api, ccode))
+            .get(url)
             .endJson()
     }
 
@@ -56,10 +86,20 @@ object SubscriptionCatalogClient {
         api: ApiConfig,
         userId: String?,
         ccode: String? = null,
+        tier: Tier? = null,
+        offerHint: String? = null,
+        discountFrom: String? = null,
     ): FetchResult<SubscriptionCatalog> {
         return try {
             val response = withContext(Dispatchers.IO) {
-                retrieve(api, userId, ccode)
+                retrieve(
+                    api = api,
+                    userId = userId,
+                    ccode = ccode,
+                    tier = tier,
+                    offerHint = offerHint,
+                    discountFrom = discountFrom,
+                )
             }
 
             if (response.body == null) {

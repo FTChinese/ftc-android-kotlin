@@ -11,6 +11,7 @@ import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.repo.SubscriptionCatalogRepo
+import com.ft.ftchinese.ui.subs.SubscriptionEntryIntent
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +36,7 @@ class SubscriptionCatalogState(
     fun loadCatalog(
         api: ApiConfig,
         userId: String?,
+        entry: SubscriptionEntryIntent? = null,
     ) {
         progress.value = true
         scope.launch {
@@ -43,7 +45,14 @@ class SubscriptionCatalogState(
                 return@launch
             }
 
-            when (val result = SubscriptionCatalogRepo.fromServer(api, userId, PaywallTracker.campaignCcode())) {
+            when (val result = SubscriptionCatalogRepo.fromServer(
+                api = api,
+                userId = userId,
+                ccode = if (entry == null) PaywallTracker.campaignCcode() else entry.campaignCcode(),
+                tier = entry?.tier,
+                offerHint = entry?.offerHint,
+                discountFrom = entry?.from,
+            )) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
                 }
@@ -62,6 +71,7 @@ class SubscriptionCatalogState(
     fun refreshCatalog(
         api: ApiConfig,
         userId: String?,
+        entry: SubscriptionEntryIntent? = null,
     ) {
         if (!ensureConnected()) {
             return
@@ -69,7 +79,14 @@ class SubscriptionCatalogState(
 
         refreshing = true
         scope.launch {
-            when (val result = SubscriptionCatalogRepo.fromServer(api, userId, PaywallTracker.campaignCcode())) {
+            when (val result = SubscriptionCatalogRepo.fromServer(
+                api = api,
+                userId = userId,
+                ccode = if (entry == null) PaywallTracker.campaignCcode() else entry.campaignCcode(),
+                tier = entry?.tier,
+                offerHint = entry?.offerHint,
+                discountFrom = entry?.from,
+            )) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
                 }

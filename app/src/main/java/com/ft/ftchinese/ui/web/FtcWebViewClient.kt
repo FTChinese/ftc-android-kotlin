@@ -45,6 +45,12 @@ class FtcWebViewClient(
         val uri = request?.url ?: return super.shouldOverrideUrlLoading(view, request)
 
         Log.i(TAG, "shouldOverrideUrlLoading: $uri")
+        Log.i(
+            WEB_PURCHASE_FLOW_TAG,
+            "should_override component=FtcWebViewClient " +
+                "mainFrame=${request.isForMainFrame} method=${request.method} " +
+                "url=${debugWebUrl(uri)}"
+        )
 
         WebViewAccessTokenCookieManager.syncAccessTokenForUrl(view, uri.toString())
         callback.onOverrideUrlLoading(WvUrlEvent.fromUri(uri))

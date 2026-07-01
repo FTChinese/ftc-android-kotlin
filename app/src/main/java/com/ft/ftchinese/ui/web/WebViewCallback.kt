@@ -13,6 +13,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.content.WebpageMeta
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.request.WxMiniParams
 import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.tracking.GAAction
@@ -24,17 +25,106 @@ import com.ft.ftchinese.ui.article.ChannelActivity
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.ui.subs.SubsActivity
+import com.ft.ftchinese.ui.subs.SubscriptionEntryIntent
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import java.util.Locale
 
 private const val TAG = "WebClient"
+const val WEB_PURCHASE_FLOW_TAG = "FTCPurchaseFlow"
 private const val keyWxMiniId = "wxminiprogramid"
 private const val keyWxMiniPath = "wxminiprogrampath"
+private val safeCampaignValue = Regex("^[A-Za-z0-9._:-]{1,128}$")
+private val safeOfferValue = Regex("^[A-Za-z0-9._:-]{1,128}$")
+private val safePriceHintValue = Regex("^[0-9]+(?:\\.[0-9]{1,2})?$")
+private val sensitiveQueryKeys = setOf(
+    "access_token",
+    "token",
+    "password",
+    "code",
+    "openid",
+    "unionid",
+)
+
+fun debugWebUrl(uri: Uri?): String {
+    if (uri == null) {
+        return ""
+    }
+
+    return runCatching {
+        val queryNames = uri.queryParameterNames
+        if (queryNames.isEmpty()) {
+            return@runCatching uri.toString()
+        }
+
+        val builder = uri.buildUpon().clearQuery()
+        queryNames.sorted().forEach { key ->
+            val values = uri.getQueryParameters(key)
+            if (values.isEmpty()) {
+                builder.appendQueryParameter(key, "")
+            } else {
+                values.forEach { value ->
+                    builder.appendQueryParameter(
+                        key,
+                        if (sensitiveQueryKeys.contains(key.lowercase(Locale.US))) {
+                            "<redacted>"
+                        } else {
+                            value.orEmpty().take(256)
+                        }
+                    )
+                }
+            }
+        }
+
+        builder.build().toString()
+    }.getOrElse {
+        uri.toString()
+    }
+}
+
+fun debugWebUrl(url: String?): String {
+    if (url.isNullOrBlank()) {
+        return ""
+    }
+
+    return runCatching {
+        debugWebUrl(Uri.parse(url))
+    }.getOrElse {
+        url.take(2048)
+    }
+}
 
 fun containWxMiniProgram(url: Uri): Boolean {
     return !url.getQueryParameter(keyWxMiniId).isNullOrBlank()
+}
+
+fun sanitizedCampaignValue(value: String?): String? {
+    val trimmed = value?.trim().orEmpty()
+    if (trimmed.isBlank() || trimmed.length > 128) {
+        return null
+    }
+
+    return trimmed.takeIf { safeCampaignValue.matches(it) }
+}
+
+private fun sanitizedOfferValue(value: String?): String? {
+    val trimmed = value?.trim().orEmpty()
+    if (trimmed.isBlank() || trimmed.length > 128) {
+        return null
+    }
+
+    return trimmed.takeIf { safeOfferValue.matches(it) }
+}
+
+private fun sanitizedPriceHintValue(value: String?): String? {
+    val trimmed = value?.trim().orEmpty()
+    if (trimmed.isBlank() || trimmed.length > 32) {
+        return null
+    }
+
+    return trimmed.takeIf { safePriceHintValue.matches(it) }
 }
 
 sealed class WvUrlEvent {
@@ -48,11 +138,21 @@ sealed class WvUrlEvent {
     data class Article(val teaser: Teaser) : WvUrlEvent()
     data class Channel(val source: ChannelSource) : WvUrlEvent()
     data class Pagination(val paging: Paging) : WvUrlEvent()
+    data class CorpPage(val uri: Uri) : WvUrlEvent()
     // Open in WebpageActivity
     data class UnknownInSite(val uri: Uri): WvUrlEvent()
 
     // Go to SubsActivity
     object FtaSubs : WvUrlEvent()
+    data class Subscribe(
+        val uri: Uri,
+        val tier: Tier?,
+        val ccode: String?,
+        val from: String?,
+        val offerHint: String?,
+        val priceHint: String?,
+        val sourceScheme: String,
+    ) : WvUrlEvent()
 
     // Open in custom tabs
     data class External(val uri: Uri) : WvUrlEvent()
@@ -60,7 +160,7 @@ sealed class WvUrlEvent {
     companion object {
         @JvmStatic
         fun fromUri(uri: Uri): WvUrlEvent {
-            return when (uri.scheme) {
+            val event = when (uri.scheme?.lowercase(Locale.US)) {
                 // 通过邮件反馈 link: mailto:ftchinese.feedback@gmail.com?subject=Feedback
                 "mailto" -> MailTo(uri)
 
@@ -76,6 +176,7 @@ sealed class WvUrlEvent {
                         UnknownInSite(uri.buildUpon().scheme("https").build())
                     }
                 }
+                "subscribe" -> ofSubscribe(uri)
                 /**
                  * If the clicked webUrl is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
                  * and fetch JSON from server and concatenate it with a html bundle into the package `raw/story.html`,
@@ -85,14 +186,35 @@ sealed class WvUrlEvent {
                 "http", "https" -> when {
                     containWxMiniProgram(uri) -> ofWxMiniProgram(uri)
                     isFtContentLink(uri) -> Article(teaserFromUri(uri))
+                    isWebSubscriptionEntry(uri) -> ofWebSubscription(uri)
                     HostConfig.isFtaLink(uri.host ?: "") -> ofFtaSubs(uri)
+                    isCorpPreview(uri) -> {
+                        Log.i(
+                            WEB_PURCHASE_FLOW_TAG,
+                            "match_campaign_corp_preview host=${uri.host.orEmpty()} " +
+                                "url=${debugWebUrl(uri)}"
+                        )
+                        ofInSiteLink(uri)
+                    }
                     HostConfig.isInternalLink(uri.host ?: "") || HostConfig.isTrustedAuthHost(uri.host) -> ofInSiteLink(uri)
                     else -> External(uri)
                 }
                 // For unknown schemes, simply returns true to prevent
                 // crash caused by loading unknown content.
+                null, "" -> when {
+                    isWebSubscriptionEntry(uri) -> ofWebSubscription(uri)
+                    else -> External(uri)
+                }
                 else -> External(uri)
             }
+
+            Log.i(
+                WEB_PURCHASE_FLOW_TAG,
+                "classify route=${event.debugRouteName()} " +
+                    "scheme=${uri.scheme.orEmpty()} host=${uri.host.orEmpty()} " +
+                    "path=${uri.path.orEmpty()} url=${debugWebUrl(uri)}"
+            )
+            return event
         }
 
         private fun isFtContentLink(uri: Uri): Boolean {
@@ -100,6 +222,59 @@ sealed class WvUrlEvent {
             val isFtHost = host.equals("www.ft.com", ignoreCase = true) ||
                 host.equals("ft.com", ignoreCase = true)
             return isFtHost && uri.pathSegments.firstOrNull() == ArticleKind.content
+        }
+
+        private fun ofSubscribe(uri: Uri): WvUrlEvent {
+            val tier = Tier.fromString(uri.host?.lowercase(Locale.US))
+            val ccode = sanitizedCampaignValue(uri.getQueryParameter("ccode"))
+            val from = sanitizedCampaignValue(uri.getQueryParameter("from"))
+            val offerHint = sanitizedOfferValue(uri.getQueryParameter("offer"))
+            val priceHint = sanitizedPriceHintValue(uri.lastPathSegment)
+
+            Log.i(
+                WEB_PURCHASE_FLOW_TAG,
+                "parse_subscribe tier=${tier?.symbol.orEmpty()} " +
+                    "ccode=${ccode.orEmpty()} from=${from.orEmpty()} " +
+                    "offer=${offerHint.orEmpty()} priceHint=${priceHint.orEmpty()} " +
+                    "url=${debugWebUrl(uri)}"
+            )
+
+            return Subscribe(
+                uri = uri,
+                tier = tier,
+                ccode = ccode,
+                from = from,
+                offerHint = offerHint,
+                priceHint = priceHint,
+                sourceScheme = uri.scheme?.lowercase(Locale.US) ?: "subscribe"
+            )
+        }
+
+        private fun ofWebSubscription(uri: Uri): WvUrlEvent {
+            val rawTap = uri.getQueryParameter("tap")
+            val tier = tierFromSubscriptionTap(rawTap)
+            val ccode = sanitizedCampaignValue(uri.getQueryParameter("ccode"))
+            val from = sanitizedCampaignValue(uri.getQueryParameter("from"))
+            val offerHint = sanitizedOfferValue(uri.getQueryParameter("offer"))
+            val hasIgnoredPrice = !uri.getQueryParameter("price").isNullOrBlank()
+
+            Log.i(
+                WEB_PURCHASE_FLOW_TAG,
+                "parse_web_subscription tier=${tier?.symbol.orEmpty()} " +
+                    "tap=${rawTap.orEmpty()} ccode=${ccode.orEmpty()} " +
+                    "from=${from.orEmpty()} offer=${offerHint.orEmpty()} " +
+                    "ignoredPriceParam=$hasIgnoredPrice url=${debugWebUrl(uri)}"
+            )
+
+            return Subscribe(
+                uri = uri,
+                tier = tier,
+                ccode = ccode,
+                from = from,
+                offerHint = offerHint,
+                priceHint = null,
+                sourceScheme = "web-subscription"
+            )
         }
 
         @JvmStatic
@@ -126,7 +301,7 @@ sealed class WvUrlEvent {
                 return UnknownInSite(uri)
             }
 
-            val ccode = uri.getQueryParameter("ccode")
+            val ccode = sanitizedCampaignValue(uri.getQueryParameter("ccode"))
             if (ccode == null) {
                 PaywallTracker.from = null
             } else {
@@ -147,6 +322,12 @@ sealed class WvUrlEvent {
         private fun ofInSiteLink(uri: Uri): WvUrlEvent {
 
             val pathSegments = uri.pathSegments
+
+            Log.i(
+                WEB_PURCHASE_FLOW_TAG,
+                "parse_insite host=${uri.host.orEmpty()} path=${uri.path.orEmpty()} " +
+                    "segments=$pathSegments url=${debugWebUrl(uri)}"
+            )
 
             Log.i(TAG, "Pagination Debug: Handle in-site link. uri: $uri")
 
@@ -195,6 +376,24 @@ sealed class WvUrlEvent {
             }
 
 
+
+            if (isCorpPreview(uri)) {
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "match_corp_preview route=Channel url=${debugWebUrl(uri)}"
+                )
+                return Channel(marketingChannelFromUri(uri))
+            }
+
+            if (isCorpPage(uri)) {
+                val corpUri = withWebviewParam(uri)
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "match_corp_page route=CorpPage input=${debugWebUrl(uri)} " +
+                        "output=${debugWebUrl(corpUri)}"
+                )
+                return CorpPage(corpUri)
+            }
 
             // In case no path segments
             if (pathSegments.size == 0) {
@@ -267,6 +466,96 @@ sealed class WvUrlEvent {
                 else -> UnknownInSite(uri)
             }
         }
+
+        private fun isCorpPreview(uri: Uri): Boolean {
+            return uri.path == "/m/corp/preview.html" &&
+                !uri.getQueryParameter("pageid").isNullOrBlank()
+        }
+
+        private fun isCorpPage(uri: Uri): Boolean {
+            val pathSegments = uri.pathSegments
+            return pathSegments.size == 3 &&
+                pathSegments[0] == "m" &&
+                pathSegments[1] == "corp" &&
+                pathSegments[2].endsWith(".html")
+        }
+
+        private fun isWebSubscriptionEntry(uri: Uri): Boolean {
+            if (!isSubscriptionPath(uri)) {
+                return false
+            }
+
+            /*
+             * ftcoffer currently renders Android campaign CTAs as relative web
+             * links such as:
+             * /subscription.html?from=ft_discount&ccode=...&tap=premium#no_universal_links
+             *
+             * The query tells us only how to enter the native paywall: tier
+             * comes from tap, attribution comes from ccode, and discount lookup
+             * comes from from/offer. Price is intentionally ignored here because
+             * the native checkout must use server-authoritative catalog/payment
+             * data instead of trusting a mutable URL parameter.
+             */
+            return tierFromSubscriptionTap(uri.getQueryParameter("tap")) != null
+        }
+
+        private fun isSubscriptionPath(uri: Uri): Boolean {
+            val path = uri.path?.trimEnd('/')?.lowercase(Locale.US) ?: return false
+            return path == "/subscription.html" || path == "/subscription"
+        }
+
+        private fun tierFromSubscriptionTap(tap: String?): Tier? {
+            return when (tap?.trim()?.lowercase(Locale.US)) {
+                "premium" -> Tier.PREMIUM
+                "standard",
+                "member",
+                "monthly",
+                "standardmonthly" -> Tier.STANDARD
+                else -> null
+            }
+        }
+
+        private fun withWebviewParam(uri: Uri): Uri {
+            if (!uri.getQueryParameter("webview").isNullOrBlank()) {
+                return uri
+            }
+
+            return uri.buildUpon()
+                .appendQueryParameter("webview", "ftcapp")
+                .build()
+        }
+    }
+}
+
+fun WvUrlEvent.debugRouteName(): String {
+    return when (this) {
+        is WvUrlEvent.MailTo -> "MailTo"
+        is WvUrlEvent.Login -> "Login"
+        is WvUrlEvent.WxMiniProgram -> "WxMiniProgram"
+        is WvUrlEvent.Article -> "Article"
+        is WvUrlEvent.Channel -> "Channel"
+        is WvUrlEvent.Pagination -> "Pagination"
+        is WvUrlEvent.CorpPage -> "CorpPage"
+        is WvUrlEvent.UnknownInSite -> "UnknownInSite"
+        is WvUrlEvent.FtaSubs -> "FtaSubs"
+        is WvUrlEvent.Subscribe -> "Subscribe"
+        is WvUrlEvent.External -> "External"
+    }
+}
+
+private fun WvUrlEvent.debugRouteDetail(): String {
+    return when (this) {
+        is WvUrlEvent.CorpPage -> "url=${debugWebUrl(uri)}"
+        is WvUrlEvent.UnknownInSite -> "url=${debugWebUrl(uri)}"
+        is WvUrlEvent.External -> "url=${debugWebUrl(uri)}"
+        is WvUrlEvent.Subscribe -> "tier=${tier?.symbol.orEmpty()} " +
+            "ccode=${ccode.orEmpty()} from=${from.orEmpty()} " +
+            "offer=${offerHint.orEmpty()} priceHint=${priceHint.orEmpty()} " +
+            "sourceScheme=$sourceScheme url=${debugWebUrl(uri)}"
+        is WvUrlEvent.Channel -> "source=${source.path}?${source.query}"
+        is WvUrlEvent.Article -> "teaser=${teaser.type}/${teaser.id}"
+        is WvUrlEvent.Pagination -> "key=${paging.key} page=${paging.page}"
+        else -> ""
     }
 }
 
@@ -290,6 +579,10 @@ open class WebViewCallback(
 //    open fun openGraphEvaluated(openGraph: OpenGraphMeta) {}
 
     fun onOverrideUrlLoading(event: WvUrlEvent) {
+        Log.i(
+            WEB_PURCHASE_FLOW_TAG,
+            "dispatch route=${event.debugRouteName()} ${event.debugRouteDetail()}"
+        )
         when (event) {
             is WvUrlEvent.MailTo -> {
                 val ok = IntentsUtil.sendEmail(
@@ -318,7 +611,24 @@ open class WebViewCallback(
             is WvUrlEvent.Pagination -> {
                 onPagination(event.paging)
             }
+            is WvUrlEvent.CorpPage -> {
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "open_corp_webpage url=${debugWebUrl(event.uri)}"
+                )
+                WebpageActivity.start(
+                    context,
+                    WebpageMeta(
+                        title = "",
+                        url = event.uri.toString()
+                    )
+                )
+            }
             is WvUrlEvent.UnknownInSite -> {
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "open_unknown_insite_webpage url=${debugWebUrl(event.uri)}"
+                )
                 WebpageActivity.start(
                     context,
                     WebpageMeta(
@@ -328,9 +638,37 @@ open class WebViewCallback(
                 )
             }
             is WvUrlEvent.FtaSubs -> {
+                Log.i(WEB_PURCHASE_FLOW_TAG, "open_fta_subs")
                 SubsActivity.start(context)
             }
+            is WvUrlEvent.Subscribe -> {
+                val entry = SubscriptionEntryIntent(
+                    tier = event.tier,
+                    ccode = event.ccode,
+                    from = event.from,
+                    offerHint = event.offerHint,
+                    priceHint = event.priceHint,
+                    sourceUri = event.uri.toString().take(2048),
+                    sourceScheme = event.sourceScheme,
+                )
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "open_subs_activity tier=${entry.tier?.symbol.orEmpty()} " +
+                        "premiumFirst=${entry.premiumFirst} ccode=${entry.ccode.orEmpty()} " +
+                        "from=${entry.from.orEmpty()} offer=${entry.offerHint.orEmpty()} " +
+                        "priceHint=${entry.priceHint.orEmpty()}"
+                )
+                SubsActivity.start(
+                    context = context,
+                    premiumFirst = entry.premiumFirst,
+                    entry = entry,
+                )
+            }
             is WvUrlEvent.External -> {
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "open_external_custom_tabs url=${debugWebUrl(event.uri)}"
+                )
                 launchCustomTabs(
                     context,
                     event.uri
@@ -341,9 +679,11 @@ open class WebViewCallback(
 
     fun onOverrideUrlLoading(url: String): Boolean {
         if (url.isBlank()) {
+            Log.i(WEB_PURCHASE_FLOW_TAG, "dispatch_string ignored_blank_url")
             return false
         }
 
+        Log.i(WEB_PURCHASE_FLOW_TAG, "dispatch_string url=${debugWebUrl(url)}")
         onOverrideUrlLoading(WvUrlEvent.fromUri(Uri.parse(url)))
         return true
     }

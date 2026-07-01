@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.subs.paywall
 
 import android.app.Activity
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -22,9 +23,11 @@ import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalogOption
+import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalogPlan
+import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalogProduct
 import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.auth.AuthActivity
 import com.ft.ftchinese.ui.components.ProgressLayout
@@ -36,6 +39,7 @@ import com.ft.ftchinese.ui.subs.catalog.SubscriptionCatalogScreen
 import com.ft.ftchinese.ui.subs.catalog.buildCatalogStripeCartItem
 import com.ft.ftchinese.ui.subs.catalog.buildCatalogFtcCartItem
 import com.ft.ftchinese.ui.subs.catalog.rememberSubscriptionCatalogState
+import com.ft.ftchinese.ui.subs.SubscriptionEntryIntent
 import com.ft.ftchinese.ui.subs.member.CancelStripeDialog
 import com.ft.ftchinese.ui.subs.stripeAutoRenewUiState
 import com.ft.ftchinese.ui.util.AccountAction
@@ -45,12 +49,15 @@ import com.ft.ftchinese.ui.wxlink.launchWxLinkEmailActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
+private const val PURCHASE_FLOW_TAG = "FTCPurchaseFlow"
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PaywallActivityScreen(
     userViewModel: UserViewModel = viewModel(),
     scaffoldState: ScaffoldState,
     premiumOnTop: Boolean,
+    subscriptionEntry: SubscriptionEntryIntent? = null,
     onFtcPay: (item: CartItemFtc) -> Unit,
     onStripePay: (item: CartItemStripe) -> Unit,
     onFtcPayById: (priceId: String, payMethod: PayMethod?) -> Unit,
@@ -106,10 +113,11 @@ fun PaywallActivityScreen(
     // Load the new Node-backed catalog first. Do not eagerly load the
     // legacy paywall because it depends on older endpoints that may still
     // require MySQL-only infrastructure.
-    LaunchedEffect(apiConfig.baseUrl, account?.id) {
+    LaunchedEffect(apiConfig.baseUrl, account?.id, subscriptionEntry) {
         catalogState.loadCatalog(
             api = apiConfig,
-            userId = account?.id
+            userId = account?.id,
+            entry = subscriptionEntry,
         )
 
         tracker.displayPaywall()
@@ -138,6 +146,177 @@ fun PaywallActivityScreen(
         }
     }
 
+    fun startFtcCatalogCheckout(
+        product: SubscriptionCatalogProduct,
+        plan: SubscriptionCatalogPlan,
+        option: SubscriptionCatalogOption,
+        payMethod: PayMethod?,
+        origin: String,
+    ) {
+        if (!userViewModel.isLoggedIn) {
+            Log.i(PURCHASE_FLOW_TAG, "catalog_checkout_$origin blocked=not_logged_in")
+            AuthActivity.launch(launcher, context)
+            return
+        }
+
+        val membership = checkoutMembership ?: run {
+            Log.i(PURCHASE_FLOW_TAG, "catalog_checkout_$origin blocked=missing_membership")
+            return
+        }
+
+        val cartItem = buildCatalogFtcCartItem(
+            membership = membership,
+            product = product,
+            plan = plan,
+            option = option
+        ) ?: run {
+            Log.i(
+                PURCHASE_FLOW_TAG,
+                "catalog_checkout_$origin blocked=cart_build_failed " +
+                    "tier=${product.tier?.symbol.orEmpty()} cycle=${plan.cycle} " +
+                    "kind=${option.kind} ftcPriceId=${option.checkout.ftcPriceId}"
+            )
+            context.toast("Error building checkout item")
+            return
+        }
+
+        CatalogFtcCheckoutStore.save(
+            CatalogFtcCheckout(
+                priceId = option.checkout.ftcPriceId,
+                cartItem = cartItem,
+                payMethod = payMethod
+            )
+        )
+
+        Log.i(
+            PURCHASE_FLOW_TAG,
+            "catalog_checkout_$origin open_ftc_pay " +
+                "tier=${product.tier?.symbol.orEmpty()} cycle=${plan.cycle} " +
+                "payMethod=$payMethod ftcPriceId=${option.checkout.ftcPriceId}"
+        )
+        onFtcPayById(option.checkout.ftcPriceId, payMethod)
+    }
+
+    fun startStripeCatalogCheckout(
+        priceId: String,
+        trialId: String?,
+        couponId: String?,
+        origin: String,
+    ) {
+        if (!userViewModel.isLoggedIn) {
+            Log.i(PURCHASE_FLOW_TAG, "catalog_checkout_$origin blocked=not_logged_in")
+            AuthActivity.launch(launcher, context)
+            return
+        }
+
+        if (userViewModel.isWxOnly) {
+            Log.i(PURCHASE_FLOW_TAG, "catalog_checkout_$origin blocked=wx_only_account")
+            setOpenDialog(true)
+            return
+        }
+
+        val currentAccount = account ?: run {
+            Log.i(PURCHASE_FLOW_TAG, "catalog_checkout_$origin blocked=missing_account")
+            return
+        }
+        val membership = checkoutMembership ?: run {
+            Log.i(PURCHASE_FLOW_TAG, "catalog_checkout_$origin blocked=missing_membership")
+            return
+        }
+        val data = catalogData ?: run {
+            Log.i(PURCHASE_FLOW_TAG, "catalog_checkout_$origin blocked=missing_catalog")
+            return
+        }
+
+        val product = data.products
+            .firstOrNull { product ->
+                product.plans.any { plan ->
+                    plan.options.any { option ->
+                        option.checkout.stripePriceId == priceId
+                    }
+                }
+            }
+        val plan = product?.plans?.firstOrNull { plan ->
+            plan.options.any { option ->
+                option.checkout.stripePriceId == priceId
+            }
+        }
+        val option = plan?.options?.firstOrNull { option ->
+            option.checkout.stripePriceId == priceId
+        }
+
+        if (product != null && plan != null && option != null) {
+            val cartItem = buildCatalogStripeCartItem(
+                membership = membership,
+                product = product,
+                plan = plan,
+                option = option
+            )
+
+            if (cartItem != null) {
+                if (cartItem.isDirectSubscriptionUpdate) {
+                    Log.i(
+                        PURCHASE_FLOW_TAG,
+                        "catalog_checkout_$origin stripe_direct_update " +
+                            "priceId=$priceId intent=${cartItem.intent.kind}"
+                    )
+                    directStripeUpdating = true
+                    scope.launch {
+                        try {
+                            val result = StripeClient.asyncUpdateSubs(
+                                account = currentAccount,
+                                params = cartItem.subsParams(payMethod = null)
+                            )
+
+                            when (result) {
+                                is FetchResult.Success -> {
+                                    userViewModel.saveStripeSubs(result.data)
+                                    catalogState.refreshCatalog(
+                                        api = apiConfig,
+                                        userId = currentAccount.id,
+                                        entry = subscriptionEntry,
+                                    )
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        directStripeSuccessMessage(cartItem)
+                                    )
+                                }
+                                is FetchResult.LocalizedError -> {
+                                    scaffoldState.snackbarHostState.showSnackbar(
+                                        context.getString(result.msgId)
+                                    )
+                                }
+                                is FetchResult.TextError -> {
+                                    scaffoldState.snackbarHostState.showSnackbar(result.text)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            scaffoldState.snackbarHostState.showSnackbar(
+                                e.localizedMessage ?: "订阅设置更新失败"
+                            )
+                        } finally {
+                            directStripeUpdating = false
+                        }
+                    }
+                    return
+                }
+
+                CatalogStripeCheckoutStore.save(
+                    CatalogStripeCheckout(
+                        priceId = priceId,
+                        cartItem = cartItem
+                    )
+                )
+            }
+        }
+
+        Log.i(
+            PURCHASE_FLOW_TAG,
+            "catalog_checkout_$origin open_stripe_pay priceId=$priceId " +
+                "trialId=${trialId.orEmpty()} couponId=${couponId.orEmpty()}"
+        )
+        onStripePayByIds(priceId, trialId, couponId)
+    }
+
     fun updateStripeAutoRenew(enabled: Boolean) {
         val currentAccount = account ?: return
         directStripeUpdating = true
@@ -154,7 +333,8 @@ fun PaywallActivityScreen(
                         userViewModel.saveStripeSubs(result.data)
                         catalogState.refreshCatalog(
                             api = apiConfig,
-                            userId = currentAccount.id
+                            userId = currentAccount.id,
+                            entry = subscriptionEntry,
                         )
                         scaffoldState.snackbarHostState.showSnackbar(
                             if (enabled) {
@@ -204,7 +384,8 @@ fun PaywallActivityScreen(
         onRefresh = {
             catalogState.refreshCatalog(
                 api = apiConfig,
-                userId = account?.id
+                userId = account?.id,
+                entry = subscriptionEntry,
             )
         },
     )
@@ -222,120 +403,26 @@ fun PaywallActivityScreen(
                 catalog = catalogData,
                 membership = checkoutMembership,
                 isLoggedIn = isLoggedIn,
+                autoOpenPaymentDialogTier = subscriptionEntry?.tier,
                 onLoginRequest = {
                     AuthActivity.launch(launcher, context)
                 },
                 onFtcCheckout = { product, plan, option, payMethod ->
-                    if (!userViewModel.isLoggedIn) {
-                        AuthActivity.launch(launcher, context)
-                    } else {
-                        val membership = checkoutMembership ?: return@SubscriptionCatalogScreen
-                        val cartItem = buildCatalogFtcCartItem(
-                            membership = membership,
-                            product = product,
-                            plan = plan,
-                            option = option
-                        ) ?: run {
-                            context.toast("Error building checkout item")
-                            return@SubscriptionCatalogScreen
-                        }
-
-                        CatalogFtcCheckoutStore.save(
-                            CatalogFtcCheckout(
-                                priceId = option.checkout.ftcPriceId,
-                                cartItem = cartItem,
-                                payMethod = payMethod
-                            )
-                        )
-
-                        onFtcPayById(option.checkout.ftcPriceId, payMethod)
-                    }
+                    startFtcCatalogCheckout(
+                        product = product,
+                        plan = plan,
+                        option = option,
+                        payMethod = payMethod,
+                        origin = "manual",
+                    )
                 },
                 onStripeCheckout = { priceId, trialId, couponId ->
-                    if (!userViewModel.isLoggedIn) {
-                        AuthActivity.launch(launcher, context)
-                    } else if (userViewModel.isWxOnly) {
-                        setOpenDialog(true)
-                    } else {
-                        val currentAccount = account ?: return@SubscriptionCatalogScreen
-                        val membership = checkoutMembership ?: return@SubscriptionCatalogScreen
-                        val product = catalogData.products
-                            .firstOrNull { product ->
-                                product.plans.any { plan ->
-                                    plan.options.any { option ->
-                                        option.checkout.stripePriceId == priceId
-                                    }
-                                }
-                            }
-                        val plan = product?.plans?.firstOrNull { plan ->
-                            plan.options.any { option ->
-                                option.checkout.stripePriceId == priceId
-                            }
-                        }
-                        val option = plan?.options?.firstOrNull { option ->
-                            option.checkout.stripePriceId == priceId
-                        }
-
-                        if (product != null && plan != null && option != null) {
-                            val cartItem = buildCatalogStripeCartItem(
-                                membership = membership,
-                                product = product,
-                                plan = plan,
-                                option = option
-                            )
-
-                            if (cartItem != null) {
-                                if (cartItem.isDirectSubscriptionUpdate) {
-                                    directStripeUpdating = true
-                                    scope.launch {
-                                        try {
-                                            val result = StripeClient.asyncUpdateSubs(
-                                                account = currentAccount,
-                                                params = cartItem.subsParams(payMethod = null)
-                                            )
-
-                                            when (result) {
-                                                is FetchResult.Success -> {
-                                                    userViewModel.saveStripeSubs(result.data)
-                                                    catalogState.refreshCatalog(
-                                                        api = apiConfig,
-                                                        userId = currentAccount.id
-                                                    )
-                                                    scaffoldState.snackbarHostState.showSnackbar(
-                                                        directStripeSuccessMessage(cartItem)
-                                                    )
-                                                }
-                                                is FetchResult.LocalizedError -> {
-                                                    scaffoldState.snackbarHostState.showSnackbar(
-                                                        context.getString(result.msgId)
-                                                    )
-                                                }
-                                                is FetchResult.TextError -> {
-                                                    scaffoldState.snackbarHostState.showSnackbar(result.text)
-                                                }
-                                            }
-                                        } catch (e: Exception) {
-                                            scaffoldState.snackbarHostState.showSnackbar(
-                                                e.localizedMessage ?: "订阅设置更新失败"
-                                            )
-                                        } finally {
-                                            directStripeUpdating = false
-                                        }
-                                    }
-                                    return@SubscriptionCatalogScreen
-                                }
-
-                                CatalogStripeCheckoutStore.save(
-                                    CatalogStripeCheckout(
-                                        priceId = priceId,
-                                        cartItem = cartItem
-                                    )
-                                )
-                            }
-                        }
-
-                        onStripePayByIds(priceId, trialId, couponId)
-                    }
+                    startStripeCatalogCheckout(
+                        priceId = priceId,
+                        trialId = trialId,
+                        couponId = couponId,
+                        origin = "manual",
+                    )
                 },
                 onStripeAutoRenewChange = { enabled ->
                     if (enabled) {

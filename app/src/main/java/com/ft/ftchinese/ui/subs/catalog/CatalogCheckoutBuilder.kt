@@ -26,8 +26,20 @@ fun buildCatalogFtcCartItem(
     val tier = product.tier ?: return null
     val cycle = Cycle.fromString(plan.cycle.lowercase()) ?: return null
     val lookupKey = option.checkout.ftcPriceId.ifBlank { return null }
-    val displayAmount = parseMoneyAmount(option.displayPrice) ?: return null
-    val originalAmount = parseMoneyAmount(option.originalPrice)
+    val serverUnitAmount = option.checkout.ftcUnitAmount
+        .takeIf { it > 0 }
+        ?.let { it / 100.0 }
+    val serverPayableAmount = option.checkout.ftcPayableAmount
+        .takeIf { it > 0 }
+        ?.let { it / 100.0 }
+    val serverDiscountAmountOff = option.checkout.ftcDiscountAmountOff
+        .takeIf { it > 0 }
+        ?.let { it / 100.0 }
+    val displayAmount = serverPayableAmount
+        ?: parseMoneyAmount(option.displayPrice)
+        ?: return null
+    val originalAmount = serverUnitAmount
+        ?: parseMoneyAmount(option.originalPrice)
     val currency = option.checkout.stripeCurrency
         .ifBlank { detectCurrency(option.displayPrice, option.originalPrice) }
 
@@ -52,16 +64,21 @@ fun buildCatalogFtcCartItem(
         offers = emptyList(),
     )
 
-    val discount = if (originalAmount != null && originalAmount > displayAmount) {
+    val discountAmountOff = serverDiscountAmountOff
+        ?: originalAmount?.let { it - displayAmount }
+    val discountId = option.checkout.ftcDiscountId.ifBlank {
+        "${lookupKey}_display_discount"
+    }
+    val discount = if (originalAmount != null && discountAmountOff != null && discountAmountOff > 0.0) {
         Discount(
-            id = "${lookupKey}_display_discount",
+            id = discountId,
             currency = currency,
             description = null,
             kind = null,
             startUtc = null,
             endUtc = null,
             overridePeriod = YearMonthDay.zero(),
-            priceOff = originalAmount - displayAmount,
+            priceOff = discountAmountOff,
             percent = null,
             priceId = lookupKey,
             recurring = false,

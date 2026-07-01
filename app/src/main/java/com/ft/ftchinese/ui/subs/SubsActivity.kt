@@ -52,6 +52,8 @@ import com.ft.ftchinese.ui.theme.OColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.SideEffect
 
+private const val PURCHASE_FLOW_TAG = "FTCPurchaseFlow"
+
 class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
     private lateinit var userViewModel: UserViewModel
@@ -70,7 +72,23 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
         ftcPayViewModel = ViewModelProvider(this)[FtcPayViewModel::class.java]
 
-        val premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
+        val subscriptionEntry = intent.getParcelableExtra<SubscriptionEntryIntent>(
+            EXTRA_SUBSCRIPTION_ENTRY
+        )
+        Log.i(
+            PURCHASE_FLOW_TAG,
+            "subs_activity_on_create hasEntry=${subscriptionEntry != null} " +
+                "tier=${subscriptionEntry?.tier?.symbol.orEmpty()} " +
+                "ccode=${subscriptionEntry?.ccode.orEmpty()} " +
+                "from=${subscriptionEntry?.from.orEmpty()} " +
+                "offer=${subscriptionEntry?.offerHint.orEmpty()} " +
+                "priceHint=${subscriptionEntry?.priceHint.orEmpty()} " +
+                "sourceScheme=${subscriptionEntry?.sourceScheme.orEmpty()}"
+        )
+        trackSubscriptionEntry(subscriptionEntry)
+
+        val premiumFirst = subscriptionEntry?.premiumFirst
+            ?: intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
         setContent {
             val navColor = OColor.wheat.toArgb()
@@ -81,6 +99,7 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 userViewModel = userViewModel,
                 payViewModel = ftcPayViewModel,
                 premiumOnTop = premiumFirst,
+                subscriptionEntry = subscriptionEntry,
                 onAliPay = this::launchAliPay,
                 onExit = {
                     finish()
@@ -129,12 +148,20 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
 
         private const val TAG = "SubsActivity"
         private const val EXTRA_PREMIUM_FIRST = "extra_premium_first"
+        private const val EXTRA_SUBSCRIPTION_ENTRY = "extra_subscription_entry"
 
         @JvmStatic
-        fun start(context: Context?, premiumFirst: Boolean = false) {
+        fun start(
+            context: Context?,
+            premiumFirst: Boolean = false,
+            entry: SubscriptionEntryIntent? = null,
+        ) {
             context?.startActivity(
                 Intent(context, SubsActivity::class.java).apply {
                     putExtra(EXTRA_PREMIUM_FIRST, premiumFirst)
+                    if (entry != null) {
+                        putExtra(EXTRA_SUBSCRIPTION_ENTRY, entry)
+                    }
                 }
             )
         }
@@ -143,11 +170,15 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
         fun launch(
             launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
             context: Context,
-            premiumFirst: Boolean = false
+            premiumFirst: Boolean = false,
+            entry: SubscriptionEntryIntent? = null,
         ) {
             launcher.launch(
                 Intent(context, SubsActivity::class.java).apply {
                     putExtra(EXTRA_PREMIUM_FIRST, premiumFirst)
+                    if (entry != null) {
+                        putExtra(EXTRA_SUBSCRIPTION_ENTRY, entry)
+                    }
                 }
             )
         }
@@ -159,6 +190,7 @@ fun SubsApp(
     userViewModel: UserViewModel,
     payViewModel: FtcPayViewModel,
     premiumOnTop: Boolean,
+    subscriptionEntry: SubscriptionEntryIntent?,
     onAliPay: (AliPayIntent) -> Unit,
     onExit: () -> Unit,
     onPaid: () -> Unit,
@@ -216,6 +248,7 @@ fun SubsApp(
                         userViewModel = userViewModel,
                         scaffoldState = scaffoldState,
                         premiumOnTop = premiumOnTop,
+                        subscriptionEntry = subscriptionEntry,
                         onFtcPay =  { item: CartItemFtc ->
                             navigateToFtcPay(
                                 navController = navController,
