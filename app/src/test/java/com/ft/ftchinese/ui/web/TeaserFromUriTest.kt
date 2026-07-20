@@ -94,6 +94,26 @@ class TeaserFromUriTest {
 
         assertTrue(event is WvUrlEvent.FtaSubs)
         assertEquals(ccode, PaywallTracker.campaignCcode())
+        val ftaSubs = event as WvUrlEvent.FtaSubs
+        assertEquals(ccode, ftaSubs.ccode)
+        assertNull(ftaSubs.from)
+
+        PaywallTracker.from = null
+    }
+
+    @Test
+    fun preserveFtaSubscriptionDiscountSource() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse(
+                "https://www.ftacademy.cn/subscription.html" +
+                    "?ccode=olivertest010&from=android_api_test_2026"
+            )
+        )
+
+        assertTrue(event is WvUrlEvent.FtaSubs)
+        val ftaSubs = event as WvUrlEvent.FtaSubs
+        assertEquals("olivertest010", ftaSubs.ccode)
+        assertEquals("android_api_test_2026", ftaSubs.from)
 
         PaywallTracker.from = null
     }
@@ -238,6 +258,24 @@ class TeaserFromUriTest {
         val channel = event as WvUrlEvent.Channel
         assertEquals("/m/corp/preview.html", channel.source.path)
         assertEquals("pageid=events&webview=ftcapp", channel.source.query)
+    }
+
+    @Test
+    fun routeSafeModeLoginAsNativeLogin() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.ftchinese.com/login/safe_mode?next=%2Fstory%2F001110189")
+        )
+
+        assertTrue(event is WvUrlEvent.Login)
+    }
+
+    @Test
+    fun routeLoginAsNativeLoginOnTrustedAuthDomain() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse("https://www.chineseft.net/login")
+        )
+
+        assertTrue(event is WvUrlEvent.Login)
     }
 
     @Test

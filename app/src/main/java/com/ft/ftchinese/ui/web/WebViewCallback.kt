@@ -118,6 +118,15 @@ private fun sanitizedOfferValue(value: String?): String? {
     return trimmed.takeIf { safeOfferValue.matches(it) }
 }
 
+private fun isNativeLoginEntry(uri: Uri): Boolean {
+    if (!HostConfig.isTrustedAuthHost(uri.host)) {
+        return false
+    }
+
+    val normalizedPath = uri.path?.trimEnd('/')?.lowercase(Locale.US) ?: return false
+    return normalizedPath == "/login" || normalizedPath == "/login/safe_mode"
+}
+
 private fun sanitizedPriceHintValue(value: String?): String? {
     val trimmed = value?.trim().orEmpty()
     if (trimmed.isBlank() || trimmed.length > 32) {
@@ -142,8 +151,12 @@ sealed class WvUrlEvent {
     // Open in WebpageActivity
     data class UnknownInSite(val uri: Uri): WvUrlEvent()
 
-    // Go to SubsActivity
-    object FtaSubs : WvUrlEvent()
+    // Go to SubsActivity while preserving campaign attribution and discount source.
+    data class FtaSubs(
+        val uri: Uri,
+        val ccode: String?,
+        val from: String?,
+    ) : WvUrlEvent()
     data class Subscribe(
         val uri: Uri,
         val tier: Tier?,
@@ -315,11 +328,32 @@ sealed class WvUrlEvent {
                 )
             }
 
-            return FtaSubs
+            val from = sanitizedCampaignValue(uri.getQueryParameter("from"))
+            Log.i(
+                WEB_PURCHASE_FLOW_TAG,
+                "parse_fta_subscription ccode=${ccode.orEmpty()} " +
+                    "from=${from.orEmpty()} url=${debugWebUrl(uri)}"
+            )
+
+            return FtaSubs(
+                uri = uri,
+                ccode = ccode,
+                from = from,
+            )
         }
 
         @JvmStatic
         private fun ofInSiteLink(uri: Uri): WvUrlEvent {
+            /*
+             * Safe-mode blocks can redirect WebViews to /login or
+             * /login/safe_mode with window.location.replace(), so this must be
+             * handled at the navigation classification layer rather than only on
+             * explicit taps. Keep the current page in the back stack and launch
+             * native auth instead of showing the web login form.
+             */
+            if (isNativeLoginEntry(uri)) {
+                return Login
+            }
 
             val pathSegments = uri.pathSegments
 
@@ -638,8 +672,26 @@ open class WebViewCallback(
                 )
             }
             is WvUrlEvent.FtaSubs -> {
-                Log.i(WEB_PURCHASE_FLOW_TAG, "open_fta_subs")
-                SubsActivity.start(context)
+                val entry = SubscriptionEntryIntent(
+                    // FTA subscription pages expose all plans; do not infer a tier or price.
+                    tier = null,
+                    ccode = event.ccode,
+                    from = event.from,
+                    sourceUri = event.uri.toString().take(2048),
+                    sourceScheme = "fta-subscription",
+                )
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "open_fta_subs_entry ccode=${entry.ccode.orEmpty()} " +
+                        "from=${entry.from.orEmpty()} " +
+                        "priceHint=${entry.priceHint.orEmpty()} " +
+                        "sourceUri=${debugWebUrl(event.uri)}"
+                )
+                SubsActivity.start(
+                    context = context,
+                    premiumFirst = false,
+                    entry = entry,
+                )
             }
             is WvUrlEvent.Subscribe -> {
                 val entry = SubscriptionEntryIntent(
