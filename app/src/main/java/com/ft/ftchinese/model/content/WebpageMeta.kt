@@ -9,4 +9,7 @@ data class WebpageMeta(
     val url: String,
     val showMenu: Boolean = false,
     val useCloseButton: Boolean = true,
+    // Non-null only for a GAM campaign wrapper that must be resolved in-app.
+    val campaignCode: String? = null,
+    val campaignSourceUrl: String? = null,
 ) : Parcelable

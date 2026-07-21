@@ -46,7 +46,13 @@ private val sensitiveQueryKeys = setOf(
     "code",
     "openid",
     "unionid",
+    // GAM click identifiers can be very long and should not be copied from logs.
+    "xai",
+    "sai",
+    "sig",
+    "fbs_aeid",
 )
+private val gamLandingParameterNames = setOf("adurl", "url")
 
 fun debugWebUrl(uri: Uri?): String {
     if (uri == null) {
@@ -170,6 +176,13 @@ sealed class WvUrlEvent {
     // Open in custom tabs
     data class External(val uri: Uri) : WvUrlEvent()
 
+    /** A GAM click wrapper with the market team's explicit in-app marker. */
+    data class CampaignAd(
+        val uri: Uri,
+        val landingUri: Uri?,
+        val ccode: String,
+    ) : WvUrlEvent()
+
     companion object {
         @JvmStatic
         fun fromUri(uri: Uri): WvUrlEvent {
@@ -198,6 +211,7 @@ sealed class WvUrlEvent {
                  */
                 "http", "https" -> when {
                     containWxMiniProgram(uri) -> ofWxMiniProgram(uri)
+                    isGamCampaignLink(uri) -> ofGamCampaignLink(uri)
                     isFtContentLink(uri) -> Article(teaserFromUri(uri))
                     isWebSubscriptionEntry(uri) -> ofWebSubscription(uri)
                     HostConfig.isFtaLink(uri.host ?: "") -> ofFtaSubs(uri)
@@ -235,6 +249,59 @@ sealed class WvUrlEvent {
             val isFtHost = host.equals("www.ft.com", ignoreCase = true) ||
                 host.equals("ft.com", ignoreCase = true)
             return isFtHost && uri.pathSegments.firstOrNull() == ArticleKind.content
+        }
+
+        private fun isGamCampaignLink(uri: Uri): Boolean {
+            val host = uri.host?.lowercase(Locale.US) ?: return false
+            val isDoubleClickHost = host == "doubleclick.net" || host.endsWith(".doubleclick.net")
+            if (!isDoubleClickHost) {
+                return false
+            }
+
+            val hasLandingParameter = uri.queryParameterNames.any {
+                gamLandingParameterNames.contains(it.lowercase(Locale.US))
+            }
+            val looksLikeClickPath = uri.path.orEmpty().lowercase(Locale.US).contains("click")
+            return hasLandingParameter || looksLikeClickPath
+        }
+
+        private fun ofGamCampaignLink(uri: Uri): WvUrlEvent {
+            val landingUri = gamLandingParameterNames
+                .asSequence()
+                .mapNotNull { key -> uri.getQueryParameter(key) }
+                .mapNotNull { value ->
+                    runCatching {
+                        Uri.parse(value).takeIf { parsed ->
+                            parsed.scheme.equals("http", ignoreCase = true) ||
+                                parsed.scheme.equals("https", ignoreCase = true)
+                        }
+                    }.getOrNull()
+                }
+                .firstOrNull()
+            val landingCcode = landingUri?.getQueryParameter("ccode")
+            val ccode = sanitizedCampaignValue(uri.getQueryParameter("ccode"))
+                ?: sanitizedCampaignValue(landingCcode)
+
+            if (ccode == null) {
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "gam_campaign_external_without_ccode host=${uri.host.orEmpty()} " +
+                        "url=${debugWebUrl(uri)}"
+                )
+                return External(uri)
+            }
+
+            Log.i(
+                WEB_PURCHASE_FLOW_TAG,
+                "gam_campaign_detected host=${uri.host.orEmpty()} " +
+                    "ccode=$ccode landing=${debugWebUrl(landingUri)} " +
+                    "tracking=webview"
+            )
+            return CampaignAd(
+                uri = uri,
+                landingUri = landingUri,
+                ccode = ccode,
+            )
         }
 
         private fun ofSubscribe(uri: Uri): WvUrlEvent {
@@ -574,6 +641,7 @@ fun WvUrlEvent.debugRouteName(): String {
         is WvUrlEvent.FtaSubs -> "FtaSubs"
         is WvUrlEvent.Subscribe -> "Subscribe"
         is WvUrlEvent.External -> "External"
+        is WvUrlEvent.CampaignAd -> "CampaignAd"
     }
 }
 
@@ -582,6 +650,8 @@ private fun WvUrlEvent.debugRouteDetail(): String {
         is WvUrlEvent.CorpPage -> "url=${debugWebUrl(uri)}"
         is WvUrlEvent.UnknownInSite -> "url=${debugWebUrl(uri)}"
         is WvUrlEvent.External -> "url=${debugWebUrl(uri)}"
+        is WvUrlEvent.CampaignAd -> "ccode=$ccode landing=${debugWebUrl(landingUri)} " +
+            "source=${debugWebUrl(uri)}"
         is WvUrlEvent.Subscribe -> "tier=${tier?.symbol.orEmpty()} " +
             "ccode=${ccode.orEmpty()} from=${from.orEmpty()} " +
             "offer=${offerHint.orEmpty()} priceHint=${priceHint.orEmpty()} " +
@@ -612,7 +682,7 @@ open class WebViewCallback(
      */
 //    open fun openGraphEvaluated(openGraph: OpenGraphMeta) {}
 
-    fun onOverrideUrlLoading(event: WvUrlEvent) {
+    open fun onOverrideUrlLoading(event: WvUrlEvent) {
         Log.i(
             WEB_PURCHASE_FLOW_TAG,
             "dispatch route=${event.debugRouteName()} ${event.debugRouteDetail()}"
@@ -691,6 +761,22 @@ open class WebViewCallback(
                     context = context,
                     premiumFirst = false,
                     entry = entry,
+                )
+            }
+            is WvUrlEvent.CampaignAd -> {
+                Log.i(
+                    WEB_PURCHASE_FLOW_TAG,
+                    "open_gam_campaign_webview ccode=${event.ccode} " +
+                        "landing=${debugWebUrl(event.landingUri)}"
+                )
+                WebpageActivity.start(
+                    context,
+                    WebpageMeta(
+                        title = "",
+                        url = event.uri.toString(),
+                        campaignCode = event.ccode,
+                        campaignSourceUrl = event.uri.toString(),
+                    )
                 )
             }
             is WvUrlEvent.Subscribe -> {
@@ -784,6 +870,76 @@ open class WebViewCallback(
 
     open fun onLogin() {
         context.startActivity(AuthActivity.newIntent(context))
+    }
+}
+
+/**
+ * Keeps a GAM click wrapper in WebView long enough to record the click, then
+ * hands known FTChinese landing routes back to the normal native dispatcher.
+ */
+class CampaignWebViewCallback(
+    context: Context,
+    private val sourceUrl: String,
+    private val campaignCode: String?,
+    private val onResolved: () -> Unit,
+) : WebViewCallback(context) {
+
+    private var resolved = false
+
+    override fun onOverrideUrlLoading(event: WvUrlEvent) {
+        val route = campaignRoute(event)
+        if (route != null) {
+            resolve(route)
+        } else {
+            super.onOverrideUrlLoading(event)
+        }
+    }
+
+    fun onCampaignPageStarted(view: WebView?, url: String?) {
+        if (resolved || url.isNullOrBlank() || url == sourceUrl) {
+            return
+        }
+
+        val uri = Uri.parse(url)
+        val host = uri.host?.lowercase(Locale.US).orEmpty()
+        if (host == "doubleclick.net" || host.endsWith(".doubleclick.net")) {
+            return
+        }
+
+        val route = campaignRoute(WvUrlEvent.fromUri(uri)) ?: return
+
+        resolve(route, view)
+    }
+
+    private fun campaignRoute(event: WvUrlEvent): WvUrlEvent? {
+        return when (event) {
+            is WvUrlEvent.FtaSubs -> event.copy(
+                ccode = event.ccode ?: sanitizedCampaignValue(campaignCode)
+            )
+            is WvUrlEvent.Subscribe -> event.copy(
+                ccode = event.ccode ?: sanitizedCampaignValue(campaignCode)
+            )
+            is WvUrlEvent.Article,
+            is WvUrlEvent.Channel,
+            is WvUrlEvent.CorpPage -> event
+            else -> null
+        }
+    }
+
+    private fun resolve(route: WvUrlEvent, view: WebView? = null) {
+        if (resolved) {
+            return
+        }
+        resolved = true
+        view?.stopLoading()
+        Log.i(
+            WEB_PURCHASE_FLOW_TAG,
+            "gam_campaign_landing route=${route.debugRouteName()} " +
+                "ccode=${sanitizedCampaignValue(campaignCode).orEmpty()} " +
+                "source=${debugWebUrl(sourceUrl)}"
+        )
+        super.onOverrideUrlLoading(route)
+        onResolved()
     }
 }
 

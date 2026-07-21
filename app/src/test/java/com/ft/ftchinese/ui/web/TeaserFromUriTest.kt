@@ -119,6 +119,36 @@ class TeaserFromUriTest {
     }
 
     @Test
+    fun routeGamCampaignSubscriptionByNestedAdUrl() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse(
+                "https://adclick.g.doubleclick.net/pcs/click" +
+                    "?ccode=gam_outer_ccode" +
+                    "&adurl=https%3A%2F%2Fwww.ftacademy.cn%2Fsubscription.html" +
+                    "%3Fccode%3Dgam_landing_ccode"
+            )
+        )
+
+        assertTrue(event is WvUrlEvent.CampaignAd)
+        val campaign = event as WvUrlEvent.CampaignAd
+        assertEquals("gam_landing_ccode", campaign.ccode)
+        assertEquals("www.ftacademy.cn", campaign.landingUri?.host)
+        assertEquals("/subscription.html", campaign.landingUri?.path)
+    }
+
+    @Test
+    fun gamLinkWithoutCcodeRemainsExternal() {
+        val event = WvUrlEvent.fromUri(
+            Uri.parse(
+                "https://adclick.g.doubleclick.net/pcs/click" +
+                    "?adurl=https%3A%2F%2Fwww.ftacademy.cn%2Fsubscription.html"
+            )
+        )
+
+        assertTrue(event is WvUrlEvent.External)
+    }
+
+    @Test
     fun routeBareFtaSubscriptionLinkAsNativePaywallAndTrackCcode() {
         val ccode = "android_native_bare_host_test"
         PaywallTracker.from = null

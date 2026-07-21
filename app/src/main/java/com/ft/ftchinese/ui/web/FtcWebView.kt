@@ -40,6 +40,7 @@ fun FtcWebView(
     jsListener: JsEventListener = rememberFtcJsEventListener(),
     captureBackPresses: Boolean = false,
     pauseMediaOnLifecyclePause: Boolean = true,
+    onPageStarted: (AndroidWebView?, String?) -> Unit = { _, _ -> },
     onCreated: (AndroidWebView) -> Unit = {}
 ) {
 
@@ -62,7 +63,8 @@ fun FtcWebView(
 
     val webClient = remember(webClientCallback) {
         FtcWebViewClient(
-            callback = webClientCallback
+            callback = webClientCallback,
+            onPageStartedCallback = onPageStarted,
         )
     }
     val authUrl = initialUrl ?: (wvState.content as? WebContent.Url)?.url

@@ -8,6 +8,7 @@ import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.TaskStackBuilder
 import androidx.core.view.WindowCompat
@@ -16,6 +17,7 @@ import com.ft.ftchinese.ui.main.MainActivity
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.web.stopHtmlMedia
+import com.ft.ftchinese.ui.web.CampaignWebViewCallback
 
 private const val TAG = "WebpageActivity"
 private const val LOG_PREFIX = "[FTCPush]"
@@ -41,8 +43,25 @@ class WebpageActivity : ComponentActivity() {
                         window.navigationBarColor = navColor
                     }
                     OTheme {
+                        val campaignCallback = remember(
+                            it.campaignSourceUrl,
+                            it.campaignCode,
+                        ) {
+                            it.campaignSourceUrl?.let { sourceUrl ->
+                                CampaignWebViewCallback(
+                                    context = this@WebpageActivity,
+                                    sourceUrl = sourceUrl,
+                                    campaignCode = it.campaignCode,
+                                    onResolved = { finish() },
+                                )
+                            }
+                        }
                         WebpageScreen(
                             pageMeta = it,
+                            webViewCallback = campaignCallback,
+                            onPageStarted = campaignCallback?.let { callback ->
+                                { view, url -> callback.onCampaignPageStarted(view, url) }
+                            } ?: { _, _ -> },
                             onWebViewCreated = { webView ->
                                 activeWebView = webView
                             },

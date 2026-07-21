@@ -13,6 +13,7 @@ private const val TAG = "WebClient"
 
 class FtcWebViewClient(
     private val callback: WebViewCallback,
+    private val onPageStartedCallback: (WebView?, String?) -> Unit = { _, _ -> },
 ) : AccompanistWebViewClient() {
 
     var pageStarted: Boolean = false
@@ -25,6 +26,7 @@ class FtcWebViewClient(
         super.onPageStarted(view, url, favicon)
         pageStarted = true
         callback.onPageStarted(view, url)
+        onPageStartedCallback(view, url)
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
