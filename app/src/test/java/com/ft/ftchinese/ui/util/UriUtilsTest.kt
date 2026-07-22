@@ -37,6 +37,23 @@ class UriUtilsTest {
         assertFalse(url.contains("www.ftchinese.com"))
     }
 
+    @Test
+    fun contentAudioTeaserUsesProtectedAudioRoute() {
+        val url = UriUtils.teaserAudioPageUrl(
+            teaser = Teaser(
+                id = "716d0651-6f1f-4215-9d98-96a5047539cd",
+                title = "测试文章",
+                type = ArticleType.Content,
+                langVariant = com.ft.ftchinese.model.content.Language.ENGLISH,
+            ),
+            account = standardAccount()
+        )
+
+        assertTrue(url!!.contains("/content/audio/en/716d0651-6f1f-4215-9d98-96a5047539cd"))
+        assertTrue(url.contains("webview=ftcapp"))
+        assertTrue(url.contains("for=audio"))
+    }
+
     private fun dailyWordTeaser(): Teaser {
         return Teaser(
             id = "257134",

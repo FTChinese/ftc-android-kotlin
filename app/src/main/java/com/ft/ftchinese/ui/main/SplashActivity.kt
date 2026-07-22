@@ -140,7 +140,7 @@ fun SplashApp(
                             navController
                                 .navigate(Screens.Terms.name)
                         },
-                        onNext = onNext
+                        onNext = onNext,
                     )
                 }
 

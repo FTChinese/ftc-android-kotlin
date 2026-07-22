@@ -249,4 +249,44 @@ class StoryTest {
         assertEquals(Permission.PREMIUM, story.permission)
         assertEquals("", story.cover.smallbutton)
     }
+
+    @Test
+    fun aiAudioTeaserUsesDirectAudioUrlWhenInteractiveIdIsMissing() {
+        val data = """
+            {
+              "id": "716d0651-6f1f-4215-9d98-96a5047539cd",
+              "ftid": "716d0651-6f1f-4215-9d98-96a5047539cd",
+              "fileupdatetime": "1778419399",
+              "cheadline": "测试标题",
+              "clongleadbody": "",
+              "cbody": "",
+              "eheadline": "Test title",
+              "elongleadbody": "",
+              "ebody": "",
+              "cbyline_description": "",
+              "cbyline_status": "",
+              "cauthor": "",
+              "eauthor": "",
+              "ebyline_status": "",
+              "tag": "AITranslation",
+              "genre": "",
+              "topic": "",
+              "industry": "",
+              "area": "",
+              "last_publish_time": "1778419399",
+              "story_pic": {},
+              "story_audio": {
+                "ai_audio_e": "https://audio.example/en.mp3",
+                "ai_audio_c": "https://audio.example/cn.mp3"
+              }
+            }
+        """.trimIndent()
+
+        val story = marshaller.decodeFromString<Story>(data)
+        val teaser = story.aiAudioTeaser(Language.ENGLISH)
+
+        assertEquals("https://audio.example/en.mp3", teaser?.audioUrl)
+        assertEquals("716d0651-6f1f-4215-9d98-96a5047539cd", teaser?.id)
+        assertEquals(ArticleType.Content, teaser?.type)
+    }
 }

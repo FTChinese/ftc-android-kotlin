@@ -18,7 +18,7 @@ import com.google.accompanist.web.rememberWebViewState
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
 private const val TAG = "AiAudioScreen"
-private const val LOG_PREFIX = "[FTCPush]"
+private const val LOG_PREFIX = "FT_AUDIO"
 
 @Composable
 fun AiAudioActivityScreen(
@@ -55,13 +55,23 @@ fun AiAudioActivityScreen(
     }
 
     if (directAudioUrl.isNullOrBlank() && audioPageUrl.isNullOrBlank()) {
+        Log.w(
+            TAG,
+            "$LOG_PREFIX missing_url teaser_id=${teaser.id} has_audio_url=${!teaser.audioUrl.isNullOrBlank()} has_radio_url=${!teaser.radioUrl.isNullOrBlank()}"
+        )
         context.toast("Missing required url")
         return
     }
 
     val title = teaser.title.ifBlank { "FT Audio" }
 
-    val webViewState = if (!directAudioUrl.isNullOrBlank()) {
+    val webViewState = if (!audioPageUrl.isNullOrBlank()) {
+        Log.i(
+            TAG,
+            "$LOG_PREFIX audio_screen mode=audio_page title=$title url=${audioPageUrl.take(96)}"
+        )
+        rememberWebViewState(url = audioPageUrl)
+    } else if (!directAudioUrl.isNullOrBlank()) {
         Log.i(
             TAG,
             "$LOG_PREFIX audio_screen mode=direct_audio title=$title url=${directAudioUrl.take(48)}"

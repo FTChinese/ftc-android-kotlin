@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.main.splash
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +9,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.ui.util.ShareUtils
+import com.ft.ftchinese.ui.web.WEB_PURCHASE_FLOW_TAG
+import com.ft.ftchinese.ui.web.WvUrlEvent
+import com.ft.ftchinese.ui.web.debugRouteName
+import com.ft.ftchinese.ui.web.debugWebUrl
+import com.ft.ftchinese.ui.web.launchCustomTabs
+import com.ft.ftchinese.ui.web.rememberWebViewCallback
 import com.ft.ftchinese.ui.webpage.WebTabScreen
 
 /**
@@ -25,6 +32,7 @@ fun SplashActivityScreen(
     val agreement = remember {
         ServiceAcceptance.getInstance(context)
     }
+    val webViewCallback = rememberWebViewCallback(context = context)
 
     val splashState = rememberSplashState()
 
@@ -76,8 +84,58 @@ fun SplashActivityScreen(
                         onAgreement()
                     }
                 } else {
-                    splashState.trackAdClicked()
-                    setAdLink(url)
+                    val event = WvUrlEvent.fromUri(uri)
+                    val campaignCode = when (event) {
+                        is WvUrlEvent.FtaSubs -> event.ccode
+                        is WvUrlEvent.Subscribe -> event.ccode
+                        else -> uri.getQueryParameter("ccode")
+                    }
+                    val isDirectNativeCampaign = campaignCode.isNullOrBlank().not() && when (event) {
+                        is WvUrlEvent.FtaSubs,
+                        is WvUrlEvent.Subscribe,
+                        is WvUrlEvent.Channel,
+                        is WvUrlEvent.CorpPage,
+                        is WvUrlEvent.Article -> true
+                        else -> false
+                    }
+
+                    when {
+                        // GAM wrappers must load in WebView first so their click is recorded.
+                        event is WvUrlEvent.CampaignAd -> {
+                            splashState.trackAdClicked()
+                            Log.i(
+                                WEB_PURCHASE_FLOW_TAG,
+                                "splash_ad_campaign_wrapper url=${debugWebUrl(uri)}"
+                            )
+                            setAdLink(url)
+                        }
+                        isDirectNativeCampaign || event is WvUrlEvent.Subscribe -> {
+                            splashState.trackAdClicked()
+                            Log.i(
+                                WEB_PURCHASE_FLOW_TAG,
+                                "splash_ad_native route=${event.debugRouteName()} " +
+                                    "ccode=${campaignCode.orEmpty()}"
+                            )
+                            // Put MainActivity underneath first, then place the native
+                            // destination on top. Reversing this order would cover the
+                            // subscription page with the home page.
+                            onNext()
+                            webViewCallback.onOverrideUrlLoading(event)
+                        }
+                        else -> {
+                            splashState.trackAdClicked()
+                            Log.i(
+                                WEB_PURCHASE_FLOW_TAG,
+                                "splash_ad_external url=${debugWebUrl(uri)}"
+                            )
+                            launchCustomTabs(context, uri)
+                            if (agreement.isAccepted()) {
+                                onNext()
+                            } else {
+                                onAgreement()
+                            }
+                        }
+                    }
                 }
             }
         )

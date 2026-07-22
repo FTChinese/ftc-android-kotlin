@@ -136,6 +136,24 @@ object UriUtils {
             return null
         }
 
+        if (teaser.type == ArticleType.Content) {
+            return buildUrl(
+                base = discoverHost(account?.membership),
+                pathSegments = listOf(
+                    "content",
+                    "audio",
+                    teaser.langVariant.aiAudioPathSuffix(),
+                    teaser.id,
+                ),
+                queryParams = listOf(
+                    "webview" to "ftcapp",
+                    "for" to "audio",
+                    "enableScript" to "yes",
+                    "timestamp" to "${Date().time}",
+                ),
+            )
+        }
+
         if (teaser.type == ArticleType.Interactive && teaser.subType == Teaser.SUB_TYPE_RADIO) {
             return buildUrl(
                 base = discoverHost(account?.membership),

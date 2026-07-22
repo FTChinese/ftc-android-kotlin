@@ -209,12 +209,19 @@ class Story (
     }
 
     fun aiAudioTeaser(lang: Language): Teaser? {
-        aiAudios ?: return null
+        val audio = aiAudios ?: return null
+        val audioUrl = when (lang) {
+            Language.CHINESE -> audio.chinese
+            Language.ENGLISH, Language.BILINGUAL -> audio.english
+        }.takeIf { it.isNotBlank() }
+        val usesInteractivePage = audio.interactiveId.isNotBlank()
+        val teaserId = if (usesInteractivePage) audio.interactiveId else ftid
         return Teaser(
-            id = aiAudios.interactiveId,
-            type = ArticleType.Interactive,
+            id = teaserId,
+            type = if (usesInteractivePage) ArticleType.Interactive else ArticleType.Content,
             subType = null,
             title = titleCN,
+            audioUrl = audioUrl,
             langVariant = lang
         )
     }
