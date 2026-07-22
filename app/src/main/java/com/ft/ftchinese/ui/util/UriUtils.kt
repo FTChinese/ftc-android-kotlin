@@ -136,6 +136,8 @@ object UriUtils {
             return null
         }
 
+        val audioPageId = teaser.audioId?.trim()?.takeIf { it.isNotBlank() } ?: teaser.id
+
         if (teaser.type == ArticleType.Content) {
             return buildUrl(
                 base = discoverHost(account?.membership),
@@ -162,6 +164,27 @@ object UriUtils {
                     "bodyonly" to "yes",
                     "webview" to "ftcapp",
                     "exclusive" to "",
+                ),
+            )
+        }
+
+        if (teaser.type == ArticleType.Interactive) {
+            return buildUrl(
+                base = discoverHost(account?.membership),
+                pathSegments = listOf(
+                    teaser.type.toString(),
+                    audioPageId,
+                    teaser.langVariant.aiAudioPathSuffix(),
+                ),
+                queryParams = listOf(
+                    "001" to "",
+                    "exclusive" to "",
+                    "hideheader" to "yes",
+                    "ad" to "no",
+                    "inNavigation" to "yes",
+                    "for" to "audio",
+                    "enableScript" to "yes",
+                    "timestamp" to "${Date().time}",
                 ),
             )
         }

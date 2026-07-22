@@ -82,6 +82,8 @@ data class Teaser(
     var title: String,
     @SerialName("eaudio")
     val audioUrl: String? = null,
+    @SerialName("audio_id")
+    val audioId: String? = null,
     @SerialName("shortlead")
     val radioUrl: String? = null, // this is a webUrl of mp3 for subType radio.
     @SerialName("timeStamp")
@@ -116,6 +118,7 @@ data class Teaser(
             subType = subType,
             title = title,
             audioUrl = audioUrl,
+            audioId = audioId,
             radioUrl = radioUrl,
             publishedAt = publishedAt,
             tag = tag,
@@ -181,6 +184,7 @@ data class Teaser(
             subType = subType,
             title = title,
             audioUrl = audioUrl,
+            audioId = audioId,
             radioUrl = radioUrl,
             publishedAt = publishedAt,
             tag = tag,
@@ -204,6 +208,7 @@ data class Teaser(
             subType = subType,
             title = title,
             audioUrl = audioUrl,
+            audioId = audioId,
             radioUrl = radioUrl,
             publishedAt = publishedAt,
             tag = tag,
@@ -299,4 +304,3 @@ data class Teaser(
         const val DEFAULT_STORY_AD_CH_ID = "1200"
     }
 }
-
