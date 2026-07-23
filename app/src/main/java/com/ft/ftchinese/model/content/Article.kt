@@ -222,6 +222,7 @@ class Story (
             subType = null,
             title = titleCN,
             audioUrl = audioUrl,
+            audioId = audio.interactiveId.takeIf { usesInteractivePage },
             langVariant = lang
         )
     }
