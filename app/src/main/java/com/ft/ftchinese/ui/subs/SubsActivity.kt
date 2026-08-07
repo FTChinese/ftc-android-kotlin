@@ -39,6 +39,7 @@ import com.ft.ftchinese.ui.subs.ftcpay.FtcPayViewModel
 import com.ft.ftchinese.ui.subs.invoice.LatestInvoiceActivityScreen
 import com.ft.ftchinese.ui.subs.paywall.PaywallActivityScreen
 import com.ft.ftchinese.ui.subs.stripepay.StripeSubActivityScreen
+import com.ft.ftchinese.ui.main.MainActivity
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -107,7 +108,15 @@ class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
                 onPaid = {
                     setResult(Activity.RESULT_OK, IntentsUtil.accountRefreshed)
                     finish()
-                }
+                },
+                onComplete = {
+                    setResult(Activity.RESULT_OK, IntentsUtil.accountRefreshed)
+                    startActivity(
+                        Intent(this, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        }
+                    )
+                },
             )
         }
     }
@@ -194,6 +203,7 @@ fun SubsApp(
     onAliPay: (AliPayIntent) -> Unit,
     onExit: () -> Unit,
     onPaid: () -> Unit,
+    onComplete: () -> Unit,
 ) {
 
     val scaffoldState = rememberScaffoldState()
@@ -275,7 +285,8 @@ fun SubsApp(
                                 trialId = trialId,
                                 couponId = couponId
                             )
-                        }
+                        },
+                        onComplete = onComplete,
                     )
                 }
 

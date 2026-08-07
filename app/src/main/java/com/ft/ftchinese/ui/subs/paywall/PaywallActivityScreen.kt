@@ -62,6 +62,7 @@ fun PaywallActivityScreen(
     onStripePay: (item: CartItemStripe) -> Unit,
     onFtcPayById: (priceId: String, payMethod: PayMethod?) -> Unit,
     onStripePayByIds: (priceId: String, trialId: String?, couponId: String?) -> Unit,
+    onComplete: () -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -430,7 +431,8 @@ fun PaywallActivityScreen(
                     } else {
                         setShowAutoRenewOffDialog(true)
                     }
-                }
+                },
+                onComplete = onComplete,
             )
         }
         PullRefreshIndicator(

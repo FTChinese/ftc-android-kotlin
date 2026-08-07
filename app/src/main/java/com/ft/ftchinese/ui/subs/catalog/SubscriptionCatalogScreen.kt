@@ -73,6 +73,7 @@ fun SubscriptionCatalogScreen(
     ) -> Unit,
     onStripeCheckout: (priceId: String, trialId: String?, couponId: String?) -> Unit,
     onStripeAutoRenewChange: (Boolean) -> Unit,
+    onComplete: () -> Unit,
 ) {
     var pendingSelection by remember { mutableStateOf<PendingSelection?>(null) }
     val preferredLanguage = catalog.preferredLanguage
@@ -161,6 +162,18 @@ fun SubscriptionCatalogScreen(
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        if (checkoutMembership.isActiveMember()) {
+            PrimaryBlockButton(
+                onClick = onComplete,
+                text = if (preferredLanguage.startsWith("zh", ignoreCase = true)) {
+                    "返回首页"
+                } else {
+                    "Back to Home"
+                }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         val autoRenewUiState = checkoutMembership.stripeAutoRenewUiState(preferredLanguage)
