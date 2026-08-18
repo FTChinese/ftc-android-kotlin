@@ -317,11 +317,25 @@ var androidUserAddress = ${addr.toJsonString()}
             result = result.replace(key, value)
         }
 
+        result = injectPreferredLanguage(result)
+
         return JSCodes.getCleanHTML(
             JSCodes.getInlineVideo(
                 AdParser.updateAdCode(result, this.shouldHideAd)
             )
         )
+    }
+
+    private fun injectPreferredLanguage(html: String): String {
+        val script = "<script>window.preferredLanguage = ${JSONObject.quote(preferredLanguageTag())};</script>"
+        val headStart = html.indexOf("<head", ignoreCase = true)
+        if (headStart >= 0) {
+            val headEnd = html.indexOf('>', headStart)
+            if (headEnd >= 0) {
+                return html.substring(0, headEnd + 1) + script + html.substring(headEnd + 1)
+            }
+        }
+        return script + html
     }
 
     fun withChannel(content: String): TemplateBuilder {
