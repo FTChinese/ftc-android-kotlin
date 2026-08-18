@@ -37,6 +37,8 @@ import com.ft.ftchinese.ui.util.*
 import com.ft.ftchinese.model.content.JsSnippets
 import com.ft.ftchinese.model.settings.AppLanguage
 import com.ft.ftchinese.store.AppLanguageManager
+import com.ft.ftchinese.text.ChineseContentConverter
+import com.ft.ftchinese.text.ChineseDictionaryManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,6 +67,7 @@ class ArticlesState(
     private val contentResolver = context.contentResolver
     private val tracker = StatsTracker.getInstance(context)
     private val settings = SettingStore.getInstance(context)
+    private val chineseDictionaries = ChineseDictionaryManager.getInstance(context)
 
     // Trigger language bar change.
     var language by mutableStateOf(Language.CHINESE)
@@ -308,10 +311,16 @@ class ArticlesState(
         // Update current teaser.
         currentTeaser = teaser
 
+        val localizedContent = ChineseContentConverter.convert(
+            content = content,
+            language = appLanguage,
+            dictionaries = chineseDictionaries,
+        )
+
         if (teaser.hasJsAPI) {
             val story = loadValidStory(
                 teaser = teaser,
-                content = content,
+                content = localizedContent,
                 account = account
             ) ?: return
             // Use the language user selected last time..
@@ -334,7 +343,7 @@ class ArticlesState(
             Log.i(TAG, "Checking html file permission")
             updateAccess(teaser.permission(), account)
 
-            htmlLoaded = content
+            htmlLoaded = localizedContent
 
             addReadingHistory(ReadArticle.fromTeaser(teaser))
 

@@ -22,6 +22,8 @@ import com.ft.ftchinese.ui.components.sendChannelReadLen
 import com.ft.ftchinese.ui.util.UriUtils
 import com.ft.ftchinese.model.settings.AppLanguage
 import com.ft.ftchinese.store.AppLanguageManager
+import com.ft.ftchinese.text.ChineseContentConverter
+import com.ft.ftchinese.text.ChineseDictionaryManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,6 +47,7 @@ class ChannelState(
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
     private val cache = FileStore(context)
     private val startTime = Date().time / 1000
+    private val chineseDictionaries = ChineseDictionaryManager.getInstance(context)
 
     var refreshing by mutableStateOf(false)
         private set
@@ -190,10 +193,15 @@ class ChannelState(
         isFragment: Boolean,
         account: Account?
     ) {
+        val localizedContent = ChineseContentConverter.convert(
+            content = content,
+            language = appLanguage,
+            dictionaries = chineseDictionaries,
+        )
         htmlLoaded = if (isFragment) {
-            render(content, account)
+            render(localizedContent, account)
         } else {
-            content
+            localizedContent
         }
     }
 

@@ -25,7 +25,8 @@ object UriUtils {
         get() = AppLanguageManager.current(App.instance) != AppLanguage.ZH_CN
 
     private val scriptSuffix: String
-        get() = if (isTraditionalCn) "tc" else "sc"
+        // v2 separates client-converted caches from the old server-converted caches.
+        get() = if (isTraditionalCn) "tc-v2" else "sc-v2"
 
     fun discoverHost(m: Membership?): String {
         val language = AppLanguageManager.current(App.instance)
