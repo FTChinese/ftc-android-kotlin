@@ -89,13 +89,6 @@ fun StripePayScreen(
 
             CheckoutMessage(text = cartItem.intent.message)
 
-            Spacer(modifier = Modifier.height(Dimens.dp8))
-            Text(
-                text = "通过信用卡/借记卡（Stripe）购买并完成付款，相关款项由 Stripe 收取，我站并非该笔款项的收款纳税义务人，无法提供发票等信息。",
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.64f),
-            )
-
             if (cartItem.intent.kind == IntentKind.Upgrade) {
                 Spacer(modifier = Modifier.height(Dimens.dp8))
                 UpgradeInvoicePreview(
@@ -121,6 +114,13 @@ fun StripePayScreen(
                     onClick = onPaymentMethod
                 )
             }
+
+            Spacer(modifier = Modifier.height(Dimens.dp8))
+            Text(
+                text = "通过信用卡/借记卡（Stripe）购买并完成付款，相关款项由 Stripe 收取，我站并非该笔款项的收款纳税义务人，无法提供发票等信息。",
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.onSurface.copy(alpha = 0.64f),
+            )
 
             subs?.let {
                 Spacer(modifier = Modifier.height(Dimens.dp8))
