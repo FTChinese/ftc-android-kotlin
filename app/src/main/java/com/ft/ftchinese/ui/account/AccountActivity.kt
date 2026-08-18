@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -51,7 +51,7 @@ import androidx.compose.runtime.SideEffect
  * If user logged in with wechat account and it is not bound to an FTC account, show WxAccountFragment;
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
-class AccountActivity : ComponentActivity() {
+class AccountActivity : AppCompatActivity() {
 
     private lateinit var userViewModel: UserViewModel
 

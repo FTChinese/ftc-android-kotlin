@@ -14,6 +14,7 @@ object SubscriptionCatalogRepo {
         tier: Tier? = null,
         offerHint: String? = null,
         discountFrom: String? = null,
+        languageTag: String = "zh-CN",
     ): FetchResult<SubscriptionCatalog> {
         return SubscriptionCatalogClient.asyncRetrieve(
             api = api,
@@ -22,6 +23,7 @@ object SubscriptionCatalogRepo {
             tier = tier,
             offerHint = offerHint,
             discountFrom = discountFrom,
+            languageTag = languageTag,
         )
     }
 }

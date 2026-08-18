@@ -8,6 +8,7 @@ import com.ft.ftchinese.model.enums.ApiMode
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.ui.util.UriUtils
+import com.ft.ftchinese.model.settings.AppLanguage
 import com.jakewharton.byteunits.BinaryByteUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -203,24 +204,33 @@ class FileStore (private val context: Context) {
         }
     }
 
-    fun readChannelTemplate(): String {
-        if (UriUtils.isTraditionalCn) {
+    fun readChannelTemplate(language: AppLanguage = AppLanguageManager.current(context)): String {
+        if (BuildConfig.DEBUG) {
+            Log.i("debug_app_language", "template kind=channel language=${language.serverTag} file=${if (language == AppLanguage.ZH_CN) "list.html" else "list_big5.html"}")
+        }
+        if (language != AppLanguage.ZH_CN) {
             return readRaw("list_big5.html", R.raw.list_big5)
         }
 
         return readRaw("list.html", R.raw.list)
     }
 
-    fun readStoryTemplate(): String {
-        if (UriUtils.isTraditionalCn) {
+    fun readStoryTemplate(language: AppLanguage = AppLanguageManager.current(context)): String {
+        if (BuildConfig.DEBUG) {
+            Log.i("debug_app_language", "template kind=story language=${language.serverTag} file=${if (language == AppLanguage.ZH_CN) "story.html" else "story_big5.html"}")
+        }
+        if (language != AppLanguage.ZH_CN) {
             return readRaw("story_big5.html", R.raw.story_big5)
         }
 
         return readRaw("story.html", R.raw.story)
     }
 
-    fun readSearchTemplate(): String {
-        if (UriUtils.isTraditionalCn) {
+    fun readSearchTemplate(language: AppLanguage = AppLanguageManager.current(context)): String {
+        if (BuildConfig.DEBUG) {
+            Log.i("debug_app_language", "template kind=search language=${language.serverTag} file=${if (language == AppLanguage.ZH_CN) "search.html" else "search_big5.html"}")
+        }
+        if (language != AppLanguage.ZH_CN) {
             return readRaw("search_big5.html", R.raw.search_big5)
         }
 

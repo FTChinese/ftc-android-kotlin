@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.webkit.WebView
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
@@ -22,7 +22,7 @@ import com.ft.ftchinese.ui.web.CampaignWebViewCallback
 private const val TAG = "WebpageActivity"
 private const val LOG_PREFIX = "[FTCPush]"
 
-class WebpageActivity : ComponentActivity() {
+class WebpageActivity : AppCompatActivity() {
     private var activeWebView: WebView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

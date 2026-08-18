@@ -7,9 +7,10 @@ import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.tracking.AdParser
 import com.ft.ftchinese.tracking.AdPosition
 import com.ft.ftchinese.tracking.JSCodes
-import com.ft.ftchinese.ui.util.UriUtils
+import com.ft.ftchinese.App
+import com.ft.ftchinese.model.settings.AppLanguage
+import com.ft.ftchinese.store.AppLanguageManager
 import org.json.JSONObject
-import java.util.Locale
 
 private const val TAG = "StoryBuilder"
 private val duplicateNativeListMainScript = Regex(
@@ -48,6 +49,7 @@ class TemplateBuilder(private val template: String) {
 
     private val ctx: MutableMap<String, String> = HashMap()
     private var language: Language = Language.CHINESE
+    private var appLanguage: AppLanguage = AppLanguageManager.current(App.instance)
     private var shouldHideAd = false
     private var currentStory: Story? = null
     private var currentAccount: Account? = null
@@ -59,6 +61,11 @@ class TemplateBuilder(private val template: String) {
 
     fun setLanguage(lang: Language): TemplateBuilder {
         this.language = lang
+        return this
+    }
+
+    fun setAppLanguage(value: AppLanguage): TemplateBuilder {
+        appLanguage = value
         return this
     }
 
@@ -368,7 +375,7 @@ var androidUserAddress = ${addr.toJsonString()}
     private fun preferredLanguageTag(): String {
         return when (language) {
             Language.ENGLISH -> "en"
-            else -> if (UriUtils.isTraditionalCn) "zh-TW" else "zh-CN"
+            else -> appLanguage.serverTag
         }
     }
 
@@ -376,7 +383,7 @@ var androidUserAddress = ${addr.toJsonString()}
         return aiTranslationDisclaimerHtml(
             story = story,
             language = language,
-            isTraditionalCn = UriUtils.isTraditionalCn
+            isTraditionalCn = appLanguage != AppLanguage.ZH_CN
         )
     }
 
@@ -406,25 +413,6 @@ var androidUserAddress = ${addr.toJsonString()}
             return "en"
         }
 
-        val locale = Locale.getDefault()
-        val region = locale.country.uppercase(Locale.ROOT)
-        val localeTag = try {
-            locale.toLanguageTag()
-        } catch (_: Exception) {
-            ""
-        }
-
-        val useTraditional = UriUtils.isTraditionalCn ||
-            localeTag.contains("Hant", ignoreCase = true)
-
-        if (!useTraditional) {
-            return "zh-Hans-CN"
-        }
-
-        return when (region) {
-            "HK", "HKG" -> "zh-Hant-HK"
-            "MO", "MAC" -> "zh-Hant-MO"
-            else -> "zh-Hant-TW"
-        }
+        return appLanguage.resourceTag
     }
 }

@@ -16,6 +16,7 @@ import com.ft.ftchinese.ui.components.BodyText2
 import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.IconRightArrow
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.model.settings.AppLanguage
 
 data class SettingRow(
     val id: SettingScreen,
@@ -29,13 +30,20 @@ data class SettingRow(
         fun build(
             resources: Resources,
             cacheSize: String,
-            readCount: String
+            readCount: String,
+            appLanguage: AppLanguage = AppLanguage.ZH_CN,
         ): List<SettingRow> {
             return listOf(
                 SettingRow(
                     id = SettingScreen.FontSize,
                     summary = null,
                     iconId = R.drawable.baseline_format_size_black_24,
+                    disclosure = true,
+                ),
+                SettingRow(
+                    id = SettingScreen.Language,
+                    summary = resources.getString(appLanguage.labelId),
+                    iconId = R.drawable.ic_settings_black_24dp,
                     disclosure = true,
                 ),
                 SettingRow(

@@ -6,7 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -55,7 +55,7 @@ import androidx.compose.runtime.SideEffect
 
 private const val PURCHASE_FLOW_TAG = "FTCPurchaseFlow"
 
-class SubsActivity : ComponentActivity(), CoroutineScope by MainScope() {
+class SubsActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
     private lateinit var userViewModel: UserViewModel
     private lateinit var ftcPayViewModel: FtcPayViewModel

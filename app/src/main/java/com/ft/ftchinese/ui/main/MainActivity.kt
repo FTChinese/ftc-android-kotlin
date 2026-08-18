@@ -9,7 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.WebView
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
@@ -30,7 +30,7 @@ import androidx.compose.material.MaterialTheme
 import com.ft.ftchinese.ui.theme.OColor
 
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var conversionViewModel: ConversionViewModel
     private lateinit var userViewModel: UserViewModel

@@ -20,6 +20,8 @@ import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.components.sendChannelReadLen
 import com.ft.ftchinese.ui.util.UriUtils
+import com.ft.ftchinese.model.settings.AppLanguage
+import com.ft.ftchinese.store.AppLanguageManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +41,7 @@ class ChannelState(
     connState: State<ConnectionState>,
     context: Context,
     private val isLight: Boolean,
+    private val appLanguage: AppLanguage,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
     private val cache = FileStore(context)
     private val startTime = Date().time / 1000
@@ -255,7 +258,7 @@ class ChannelState(
         account: Account?
     ): String {
         val template = withContext(Dispatchers.IO) {
-            cache.readChannelTemplate()
+            cache.readChannelTemplate(appLanguage)
         }
         val js = JsBuilder()
             .withLockerIcon(account?.membership?.webPrivilegeTier)
@@ -266,6 +269,7 @@ class ChannelState(
                 .withChannel(content)
                 .withUserInfo(account)
                 .withTheme(isLight = isLight)
+                .setAppLanguage(appLanguage)
                 .withJs(js)
                 .render()
         }
@@ -294,12 +298,14 @@ fun rememberChannelState(
     scope: CoroutineScope = rememberCoroutineScope(),
     context: Context = LocalContext.current,
     isLight: Boolean = MaterialTheme.colors.isLight,
-) = remember(scaffoldState, connState, isLight) {
+    appLanguage: AppLanguage = AppLanguageManager.current(context),
+) = remember(scaffoldState, connState, isLight, appLanguage) {
     ChannelState(
         scaffoldState = scaffoldState,
         scope = scope,
         connState = connState,
         context = context,
         isLight = isLight,
+        appLanguage = appLanguage,
     )
 }

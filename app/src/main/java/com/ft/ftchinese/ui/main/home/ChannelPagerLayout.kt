@@ -8,6 +8,7 @@ import androidx.compose.material.Tab
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -59,7 +60,7 @@ fun ChannelPagerLayout(
                     },
                     // Equivalent of fun getPageTitle(position: Int): CharSequence
                     text = {
-                        Text(text = tab.title)
+                        Text(text = tab.titleId?.let { stringResource(it) } ?: tab.title)
                     }
                 )
             }

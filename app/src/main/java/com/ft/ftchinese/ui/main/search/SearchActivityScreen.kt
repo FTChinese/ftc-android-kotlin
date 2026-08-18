@@ -5,8 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.components.rememberBaseUrl
+import com.ft.ftchinese.store.AppLanguageManager
 import com.ft.ftchinese.ui.components.rememberSearchInputState
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -21,11 +23,13 @@ fun SearchActivityScreen(
 ) {
 
     val accountState = userViewModel.accountLiveData.observeAsState()
+    val appLanguage = AppLanguageManager.current(LocalContext.current)
 
     val baseUrl = rememberBaseUrl(account = accountState.value)
 
     val searchState = rememberSearchState(
-        scaffoldState = scaffoldState
+        scaffoldState = scaffoldState,
+        appLanguage = appLanguage,
     )
 
     val barState = rememberSearchInputState()

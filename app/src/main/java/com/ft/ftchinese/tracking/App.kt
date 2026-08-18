@@ -6,6 +6,7 @@ import com.ft.ftchinese.repository.ApiConfig
 import com.ft.ftchinese.repository.Endpoint
 import com.ft.ftchinese.repository.PushClient
 import com.ft.ftchinese.ui.util.StripePaymentSheetKeyboardWorkaround
+import com.ft.ftchinese.store.AppLanguageManager
 
 private const val TAG = "App"
 private const val API_LOG_PREFIX = "[FTCApi]"
@@ -20,6 +21,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        AppLanguageManager.apply(this)
         Log.i(
             TAG,
             "$API_LOG_PREFIX authBaseUrl=${ApiConfig.ofAuth.baseUrl} authMode=${ApiConfig.ofAuth.mode} buildType=${BuildConfig.BUILD_TYPE} flavor=${BuildConfig.FLAVOR} debug=${BuildConfig.DEBUG} pushRegister=${Endpoint.pushRegister}"

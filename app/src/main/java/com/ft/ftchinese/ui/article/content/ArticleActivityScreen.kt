@@ -55,6 +55,7 @@ import com.ft.ftchinese.ui.util.AccountAction
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.util.ShareUtils
 import com.ft.ftchinese.ui.util.toast
+import com.ft.ftchinese.store.AppLanguageManager
 import com.ft.ftchinese.ui.web.FtcJsEventListener
 import com.ft.ftchinese.ui.web.FtcWebView
 import com.ft.ftchinese.ui.web.TeaserNavigationGuard
@@ -86,11 +87,13 @@ fun ArticleActivityScreen(
     val startTime = rememberStartTime()
 
     val context = LocalContext.current
+    val appLanguage = AppLanguageManager.current(context)
     val scope = rememberCoroutineScope()
 
     val articleState = rememberArticleState(
         scaffoldState = scaffoldState,
-        scope = scope
+        scope = scope,
+        appLanguage = appLanguage,
     )
 
     // Find current article teaser by md5 hash.

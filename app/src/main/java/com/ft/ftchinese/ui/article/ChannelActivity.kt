@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -52,7 +52,7 @@ private const val TAG = "ChannelActivity"
  * It is similar to MainActivity except that it does not wrap a TabLayout.
  * Use cases: column channel, editor's choice, archive list.
  */
-class ChannelActivity : ComponentActivity() {
+class ChannelActivity : AppCompatActivity() {
     private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {

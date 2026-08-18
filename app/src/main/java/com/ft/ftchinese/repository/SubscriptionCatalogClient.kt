@@ -9,19 +9,10 @@ import com.ft.ftchinese.model.fetch.HttpResp
 import com.ft.ftchinese.model.subscriptioncatalog.SubscriptionCatalog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 object SubscriptionCatalogClient {
     private const val TAG = "SubscriptionCatalog"
     private const val PURCHASE_FLOW_TAG = "FTCPurchaseFlow"
-
-    private fun preferredLanguageTag(): String {
-        return try {
-            Locale.getDefault().toLanguageTag()
-        } catch (_: Exception) {
-            "zh-CN"
-        }
-    }
 
     private fun catalogUrl(
         api: ApiConfig,
@@ -61,6 +52,7 @@ object SubscriptionCatalogClient {
         tier: Tier? = null,
         offerHint: String? = null,
         discountFrom: String? = null,
+        languageTag: String = "zh-CN",
     ): HttpResp<SubscriptionCatalog> {
         val url = catalogUrl(api, ccode, tier, offerHint, discountFrom)
         Log.i(
@@ -71,8 +63,8 @@ object SubscriptionCatalogClient {
         )
         return Fetch()
             .setApiKey()
-            .addHeader("Accept-Language", preferredLanguageTag())
-            .addHeader("X-Preferred-Language", preferredLanguageTag())
+            .addHeader("Accept-Language", languageTag)
+            .addHeader("X-Preferred-Language", languageTag)
             .apply {
                 if (!userId.isNullOrBlank()) {
                     setUserId(userId)
@@ -89,6 +81,7 @@ object SubscriptionCatalogClient {
         tier: Tier? = null,
         offerHint: String? = null,
         discountFrom: String? = null,
+        languageTag: String = "zh-CN",
     ): FetchResult<SubscriptionCatalog> {
         return try {
             val response = withContext(Dispatchers.IO) {
@@ -99,6 +92,7 @@ object SubscriptionCatalogClient {
                     tier = tier,
                     offerHint = offerHint,
                     discountFrom = discountFrom,
+                    languageTag = languageTag,
                 )
             }
 

@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -40,7 +40,7 @@ import androidx.compose.runtime.SideEffect
  * UI for a wx-only user to link to an email account.
  * This is called in multiple places; therefore made into a separate navigation app.
  */
-class WxLinkEmailActivity : ComponentActivity() {
+class WxLinkEmailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

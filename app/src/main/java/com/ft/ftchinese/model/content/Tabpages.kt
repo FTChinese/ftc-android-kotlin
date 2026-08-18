@@ -4,6 +4,7 @@ import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.HTML_TYPE_COMPLETE
 import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.R
 
 // TabPages supply the data for TagPagerAdapter under a BottomNavigationView item.
 object TabPages {
@@ -12,6 +13,7 @@ object TabPages {
 
         ChannelSource(
             title = "首页",
+            titleId = R.string.channel_home,
             name = "news_home",
             path = "",
             query = "maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001",
@@ -20,6 +22,7 @@ object TabPages {
 
         ChannelSource(
             title = "中国",
+            titleId = R.string.channel_china,
             name = "news_china",
             path = "/channel/china.html",
             query = "",
@@ -27,6 +30,7 @@ object TabPages {
 
         ChannelSource(
             title = "标准订阅",
+            titleId = R.string.channel_standard_subscription,
             name = "news_standard_only",
             path = "/channel/standardsubscription.html",
             query = "ad=no&001",
@@ -35,6 +39,7 @@ object TabPages {
 
         ChannelSource(
             title = "高端订阅",
+            titleId = R.string.channel_premium_subscription,
             name = "news_premium_only",
             path = "/channel/premiumsubscription.html",
             query = "ad=no&showEnglishAudio=yes&018",

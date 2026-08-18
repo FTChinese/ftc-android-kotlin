@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.auth
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -32,7 +32,7 @@ import com.ft.ftchinese.ui.theme.OColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.SideEffect
 
-class PasswordActivity : ComponentActivity() {
+class PasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

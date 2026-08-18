@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -46,7 +46,7 @@ import com.ft.ftchinese.ui.web.TeaserNavigationGuard
  */
 private const val TAG = "ArticleActivity"
 
-class ArticleActivity : ComponentActivity() {
+class ArticleActivity : AppCompatActivity() {
     private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {

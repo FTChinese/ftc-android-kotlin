@@ -66,7 +66,7 @@ fun WebContentLayout(
 
         ProgressLayout(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .weight(1f),
             loading = loading
         ) {

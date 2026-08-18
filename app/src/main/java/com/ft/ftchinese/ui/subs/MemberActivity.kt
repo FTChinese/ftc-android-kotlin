@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -32,7 +32,7 @@ import com.ft.ftchinese.ui.theme.OColor
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.runtime.SideEffect
 
-class MemberActivity : ComponentActivity() {
+class MemberActivity : AppCompatActivity() {
 
     private var refreshed: Boolean = false
     private lateinit var userViewModel: UserViewModel

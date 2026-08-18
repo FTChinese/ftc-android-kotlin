@@ -1,4 +1,7 @@
 <resources>
+    <string name="app_language_simplified">簡體中文</string>
+    <string name="app_language_traditional_taiwan">繁體中文（台灣）</string>
+    <string name="app_language_traditional_hong_kong">繁體中文（香港）</string>
     <!-- buttons and dialogs -->
     <string name="btn_accept">接受</string>
     <string name="btn_agree">同意</string>
@@ -64,6 +67,10 @@
 
     <!-- Inside app   -->
     <string name="app_name">FT中文網</string>
+    <string name="channel_home">首頁</string>
+    <string name="channel_china">中國</string>
+    <string name="channel_standard_subscription">標準訂閱</string>
+    <string name="channel_premium_subscription">高端訂閱</string>
     <string name="action_search">搜尋</string>
     <string name="action_listen_story">朗讀</string>
     <string name="action_favorite">收藏</string>

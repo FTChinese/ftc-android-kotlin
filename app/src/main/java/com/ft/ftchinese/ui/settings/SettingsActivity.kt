@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -28,6 +28,7 @@ import com.ft.ftchinese.ui.settings.about.AboutActivityScreen
 import com.ft.ftchinese.ui.settings.about.LegalDocActivityScreen
 import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
 import com.ft.ftchinese.ui.settings.fontsize.FontSizeActivityScreen
+import com.ft.ftchinese.ui.settings.language.LanguageActivityScreen
 import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.settings.overview.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
@@ -43,7 +44,7 @@ import androidx.compose.runtime.SideEffect
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
-class SettingsActivity : ComponentActivity() {
+class SettingsActivity : AppCompatActivity() {
     private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,6 +157,12 @@ fun SettingsApp(
                     route = SettingScreen.FontSize.name
                 ) {
                     FontSizeActivityScreen()
+                }
+
+                composable(
+                    route = SettingScreen.Language.name
+                ) {
+                    LanguageActivityScreen()
                 }
 
                 composable(

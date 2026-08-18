@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.content
 
 import android.os.Parcelable
+import androidx.annotation.StringRes
 import com.ft.ftchinese.model.reader.Permission
 import kotlinx.parcelize.Parcelize
 
@@ -20,7 +21,8 @@ data class ChannelSource (
     val path: String,
     val query: String,
     val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
-    val permission: Permission? = null // A predefined permission that overrides individual Teaser's permission.
+    val permission: Permission? = null, // A predefined permission that overrides individual Teaser's permission.
+    @StringRes val titleId: Int? = null
 
 ) : Parcelable {
 
@@ -38,7 +40,8 @@ data class ChannelSource (
             path = path,
             query = query,
             htmlType = htmlType,
-            permission = p
+            permission = p,
+            titleId = titleId
         )
     }
 
@@ -65,7 +68,8 @@ data class ChannelSource (
             name = "${name}_$pageNumber",
             path = path,
             query = qs,
-            htmlType = htmlType
+            htmlType = htmlType,
+            titleId = titleId
         )
     }
 
@@ -156,4 +160,3 @@ val pathToTitle = mapOf(
     "2018lunchwiththeft1" to "与FT共进午餐"
 
 )
-

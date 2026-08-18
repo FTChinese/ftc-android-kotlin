@@ -11,9 +11,11 @@ import com.ft.ftchinese.database.KeywordEntry
 import com.ft.ftchinese.database.SearchDb
 import com.ft.ftchinese.database.sqlQueryVacuum
 import com.ft.ftchinese.model.content.TemplateBuilder
+import com.ft.ftchinese.model.settings.AppLanguage
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.isKeywordForbidden
 import com.ft.ftchinese.store.FileStore
+import com.ft.ftchinese.store.AppLanguageManager
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
 import com.ft.ftchinese.ui.components.BaseState
@@ -28,6 +30,7 @@ class SearchState(
     connState: State<ConnectionState>,
     context: Context,
     private val isLight: Boolean,
+    private val appLanguage: AppLanguage,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
     private val cache = FileStore(context)
@@ -122,11 +125,12 @@ class SearchState(
         progress.value = true
 
         scope.launch {
-            val template = cache.readSearchTemplate()
+            val template = cache.readSearchTemplate(appLanguage)
                 htmlLoaded = TemplateBuilder(template)
                 .withUserInfo(account)
                 .withSearch(kw)
                 .withTheme(isLight)
+                .setAppLanguage(appLanguage)
                 .render()
 
             progress.value = false
@@ -143,12 +147,14 @@ fun rememberSearchState(
     scope: CoroutineScope = rememberCoroutineScope(),
     context: Context = LocalContext.current,
     isLight: Boolean = MaterialTheme.colors.isLight,
-) = remember(scaffoldState, connState, isLight) {
+    appLanguage: AppLanguage = AppLanguageManager.current(context),
+) = remember(scaffoldState, connState, isLight, appLanguage) {
     SearchState(
         scaffoldState = scaffoldState,
         scope = scope,
         connState = connState,
         context = context,
-        isLight = isLight
+        isLight = isLight,
+        appLanguage = appLanguage
     )
 }

@@ -10,6 +10,7 @@ enum class SettingScreen(
 ) {
     Overview(titleId = R.string.title_settings),
     FontSize(titleId = R.string.title_font_size),
+    Language(titleId = R.string.pref_language),
     ClearCache(titleId = R.string.pref_clear_cache),
     ClearHistory(titleId = R.string.pref_clear_history),
     Notification(titleId = R.string.fcm_pref),
@@ -30,6 +31,7 @@ enum class SettingScreen(
             when (route?.substringBefore("/")) {
                 Overview.name -> Overview
                 FontSize.name -> FontSize
+                Language.name -> Language
                 ClearCache.name -> ClearCache
                 ClearHistory.name -> ClearHistory
                 Notification.name -> Notification

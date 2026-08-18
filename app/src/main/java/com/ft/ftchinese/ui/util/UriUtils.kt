@@ -1,8 +1,7 @@
 package com.ft.ftchinese.ui.util
 
-import android.content.res.Resources
 import android.net.Uri
-import androidx.core.os.ConfigurationCompat
+import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Teaser
@@ -13,63 +12,37 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.HostConfig
 import com.ft.ftchinese.repository.currentFlavor
+import com.ft.ftchinese.App
+import com.ft.ftchinese.model.settings.AppLanguage
+import com.ft.ftchinese.store.AppLanguageManager
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.util.Date
-import java.util.Locale
 
 object UriUtils {
-    //
-    /**
-     * See https://en.wikipedia.org/wiki/ISO_15924 for how `script` is defined.
-     * See https://en.wikipedia.org/wiki/IETF_language_tag#Syntax_of_language_tags for how the laugnage tag is defined:
-     * language-<Script>-<REGION>
-     *  Since only the `language` is required, there might be devices omitting
-     *  any of the `script` or `region` tag, or both.
-     */
-    private val TRADITIONAL_CHINESE: Locale = Locale.Builder()
-        .setLanguage("zh")
-        .setRegion("TW")
-        .setScript("hant")
-        .build()
-
-    private val locale: Locale?
-        get() = runCatching {
-            ConfigurationCompat
-                .getLocales(Resources.getSystem().configuration)
-                .get(0)
-        }.getOrNull() ?: Locale.getDefault()
-
-    /**
-     * See https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
-     */
-    private val cnLangRegions = arrayOf("HK", "HKG", "MO", "MAC", "TW", "TWN", "SG", "SGP", "CHT")
-
-    /**
-     * The definition of locale varies greatly across manufacturers.
-     * Some contains the script field setting to `Hant`
-     * while some setting it to empty.
-     */
+    private const val DEBUG_TAG = "debug_app_language"
     public val isTraditionalCn: Boolean
-        get() = if (locale?.script.isNullOrBlank()) {
-            if (locale?.language.equals(Locale.CHINESE.language)) {
-                cnLangRegions.contains(locale?.country)
-            } else {
-                false
-            }
-        } else {
-            locale?.script == TRADITIONAL_CHINESE.script
-        }
+        get() = AppLanguageManager.current(App.instance) != AppLanguage.ZH_CN
 
     private val scriptSuffix: String
         get() = if (isTraditionalCn) "tc" else "sc"
 
     fun discoverHost(m: Membership?): String {
-        if (isTraditionalCn) {
-            return HostConfig.traditionalContentHosts.pick(m)
+        val language = AppLanguageManager.current(App.instance)
+        val traditional = language != AppLanguage.ZH_CN
+        val host = if (traditional) {
+            HostConfig.traditionalContentHosts.pick(m)
+        } else {
+            HostConfig.simplifiedContentHosts.pick(m)
         }
-
-        return HostConfig.simplifiedContentHosts.pick(m)
+        if (BuildConfig.DEBUG) {
+            Log.i(
+                DEBUG_TAG,
+                "content_server language=${language.serverTag} route=${if (traditional) "traditional" else "simplified"} " +
+                    "membership=${m?.webPrivilegeTier ?: "free"} host=$host"
+            )
+        }
+        return host
     }
 
     private fun teaserJsApiUrl(teaser: Teaser, account: Account?): String {
@@ -124,11 +97,18 @@ object UriUtils {
     }
 
     fun teaserUrl(teaser: Teaser, account: Account?): String? {
-        return if (teaser.hasJsAPI) {
+        val url = if (teaser.hasJsAPI) {
             teaserJsApiUrl(teaser, account)
         } else {
             teaserHtmlUrl(teaser, account)
         }
+        if (BuildConfig.DEBUG) {
+            Log.i(
+                DEBUG_TAG,
+                "content_request type=${teaser.type} id=${teaser.id} api=${teaser.hasJsAPI} url=$url"
+            )
+        }
+        return url
     }
 
     fun teaserAudioPageUrl(teaser: Teaser, account: Account?): String? {
@@ -193,11 +173,15 @@ object UriUtils {
     }
 
     fun articleCacheName(teaser: Teaser): String {
-        return if (teaser.hasJsAPI) {
+        val name = if (teaser.hasJsAPI) {
             "${teaser.type}_${teaser.id}_$scriptSuffix.json"
         } else {
             "${teaser.type}_${teaser.id}_$scriptSuffix.html"
         }
+        if (BuildConfig.DEBUG) {
+            Log.i(DEBUG_TAG, "content_cache type=${teaser.type} id=${teaser.id} name=$name")
+        }
+        return name
     }
 
     fun channelUrl(source: ChannelSource, account: Account?): String? {
@@ -214,7 +198,11 @@ object UriUtils {
             nativeHomeSubscription(source, account)?.let {
                 builder.appendQueryParameter("subscription", it)
             }
-            appendUtm(builder).build().toString()
+            val url = appendUtm(builder).build().toString()
+            if (BuildConfig.DEBUG) {
+                Log.i(DEBUG_TAG, "channel_request name=${source.name} url=$url")
+            }
+            url
         } catch (e: Exception) {
             null
         }
@@ -241,7 +229,11 @@ object UriUtils {
             return null
         }
 
-        return "${source.name}_$scriptSuffix.html"
+        val name = "${source.name}_$scriptSuffix.html"
+        if (BuildConfig.DEBUG) {
+            Log.i(DEBUG_TAG, "channel_cache name=$name")
+        }
+        return name
     }
 
     fun appendUtm(builder: Uri.Builder): Uri.Builder {

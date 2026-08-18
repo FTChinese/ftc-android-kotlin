@@ -35,6 +35,8 @@ import com.ft.ftchinese.ui.article.screenshot.ScreenshotMeta
 import com.ft.ftchinese.ui.components.BaseState
 import com.ft.ftchinese.ui.util.*
 import com.ft.ftchinese.model.content.JsSnippets
+import com.ft.ftchinese.model.settings.AppLanguage
+import com.ft.ftchinese.store.AppLanguageManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,6 +52,7 @@ class ArticlesState(
     connState: State<ConnectionState>,
     context: Context,
     private val isLight: Boolean,
+    private val appLanguage: AppLanguage,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
 
     private val appContext = context.applicationContext
@@ -416,7 +419,7 @@ class ArticlesState(
         account: Account?
     ): String {
         val template = withContext(Dispatchers.IO) {
-            cache.readStoryTemplate()
+            cache.readStoryTemplate(appLanguage)
         }
 
         return withContext(Dispatchers.Default) {
@@ -442,6 +445,7 @@ class ArticlesState(
                 .withFollows(topics)
                 .withUserInfo(account)
                 .withTheme(isLight = isLight)
+                .setAppLanguage(appLanguage)
                 .withJs(jsSnippets)
                 .render()
         }
@@ -685,12 +689,14 @@ fun rememberArticleState(
     scope: CoroutineScope = rememberCoroutineScope(),
     context: Context = LocalContext.current,
     isLight: Boolean = MaterialTheme.colors.isLight,
-) = remember(scaffoldState, connState, isLight) {
+    appLanguage: AppLanguage = AppLanguageManager.current(context),
+) = remember(scaffoldState, connState, isLight, appLanguage) {
     ArticlesState(
         scaffoldState = scaffoldState,
         scope = scope,
         connState = connState,
         context = context,
-        isLight = isLight
+        isLight = isLight,
+        appLanguage = appLanguage
     )
 }

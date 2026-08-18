@@ -14,6 +14,7 @@ import com.ft.ftchinese.ui.repo.SubscriptionCatalogRepo
 import com.ft.ftchinese.ui.subs.SubscriptionEntryIntent
 import com.ft.ftchinese.ui.util.ConnectionState
 import com.ft.ftchinese.ui.util.connectivityState
+import com.ft.ftchinese.store.AppLanguageManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -23,6 +24,7 @@ class SubscriptionCatalogState(
     connState: State<ConnectionState>,
     context: Context,
 ) : BaseState(scaffoldState, scope, context.resources, connState) {
+    private val appContext = context.applicationContext
 
     var refreshing by mutableStateOf(false)
         private set
@@ -52,6 +54,7 @@ class SubscriptionCatalogState(
                 tier = entry?.tier,
                 offerHint = entry?.offerHint,
                 discountFrom = entry?.from,
+                languageTag = AppLanguageManager.current(appContext).serverTag,
             )) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)
@@ -86,6 +89,7 @@ class SubscriptionCatalogState(
                 tier = entry?.tier,
                 offerHint = entry?.offerHint,
                 discountFrom = entry?.from,
+                languageTag = AppLanguageManager.current(appContext).serverTag,
             )) {
                 is FetchResult.LocalizedError -> {
                     showSnackBar(result.msgId)

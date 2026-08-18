@@ -115,7 +115,7 @@ fun WebTabScreen(
         onClose = onClose
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxSize()
         ) {
             val nativeWebView = safeWebView
             if (nativeWebView == null) {

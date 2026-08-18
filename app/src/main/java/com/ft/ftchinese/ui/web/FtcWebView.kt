@@ -71,7 +71,7 @@ fun FtcWebView(
 
     Box(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
     ) {
         val nativeWebView = safeWebView
         if (nativeWebView == null) {
