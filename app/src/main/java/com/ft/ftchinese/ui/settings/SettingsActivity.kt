@@ -29,6 +29,7 @@ import com.ft.ftchinese.ui.settings.about.LegalDocActivityScreen
 import com.ft.ftchinese.ui.settings.fcm.FcmActivityScreen
 import com.ft.ftchinese.ui.settings.fontsize.FontSizeActivityScreen
 import com.ft.ftchinese.ui.settings.language.LanguageActivityScreen
+import com.ft.ftchinese.ui.settings.theme.ThemeActivityScreen
 import com.ft.ftchinese.ui.settings.overview.PreferenceActivityScreen
 import com.ft.ftchinese.ui.settings.overview.SettingScreen
 import com.ft.ftchinese.ui.settings.release.ReleaseActivityScreen
@@ -163,6 +164,12 @@ fun SettingsApp(
                     route = SettingScreen.Language.name
                 ) {
                     LanguageActivityScreen()
+                }
+
+                composable(
+                    route = SettingScreen.Theme.name
+                ) {
+                    ThemeActivityScreen()
                 }
 
                 composable(

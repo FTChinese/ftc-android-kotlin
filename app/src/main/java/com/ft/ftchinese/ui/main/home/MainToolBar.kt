@@ -52,6 +52,7 @@ import com.ft.ftchinese.ui.components.IconChatBot
 import com.ft.ftchinese.ui.components.IconSearch
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.store.AppLanguageManager
 import kotlinx.coroutines.delay
 
 private const val CHAT_FTC_HINT_PREFS = "chat_ftc_hint"
@@ -222,12 +223,17 @@ private fun ChatFTCHintBubble(
 
 @Composable
 fun BrandMastHead() {
+    val context = LocalContext.current
+    val traditional = AppLanguageManager.current(context) != com.ft.ftchinese.model.settings.AppLanguage.ZH_CN
+    val dark = !MaterialTheme.colors.isLight
+    val logo = when {
+        traditional && dark -> R.drawable.brand_masthead_traditional_dark
+        traditional -> R.drawable.brand_masthead_traditional_light
+        dark -> R.drawable.brand_masthead_dark
+        else -> R.drawable.brand_masthead_light
+    }
     Image(
-        painter = painterResource(id = if (MaterialTheme.colors.isLight) {
-            R.drawable.brand_masthead_light
-        } else {
-            R.drawable.brand_masthead_dark
-        }),
+        painter = painterResource(id = logo),
         contentDescription = "",
         contentScale = ContentScale.FillHeight,
         modifier = Modifier

@@ -17,6 +17,7 @@ import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.IconRightArrow
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.model.settings.AppLanguage
+import com.ft.ftchinese.model.settings.AppTheme
 
 data class SettingRow(
     val id: SettingScreen,
@@ -32,6 +33,7 @@ data class SettingRow(
             cacheSize: String,
             readCount: String,
             appLanguage: AppLanguage = AppLanguage.ZH_CN,
+            appTheme: AppTheme = AppTheme.SYSTEM,
         ): List<SettingRow> {
             return listOf(
                 SettingRow(
@@ -43,6 +45,12 @@ data class SettingRow(
                 SettingRow(
                     id = SettingScreen.Language,
                     summary = resources.getString(appLanguage.labelId),
+                    iconId = R.drawable.ic_settings_black_24dp,
+                    disclosure = true,
+                ),
+                SettingRow(
+                    id = SettingScreen.Theme,
+                    summary = resources.getString(appTheme.labelId),
                     iconId = R.drawable.ic_settings_black_24dp,
                     disclosure = true,
                 ),

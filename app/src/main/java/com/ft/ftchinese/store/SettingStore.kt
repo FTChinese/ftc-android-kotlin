@@ -5,11 +5,13 @@ import androidx.core.content.edit
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.enums.FontSize
 import com.ft.ftchinese.model.settings.AppLanguage
+import com.ft.ftchinese.model.settings.AppTheme
 
 private const val SETTING_PREF_NAME = "com.ft.ftchinese.settings"
 private const val PREF_FONT_SIZE = "font_size"
 private const val PREF_SELECTED_LANG = "selected_language"
 private const val PREF_APP_LANGUAGE = "app_language"
+private const val PREF_APP_THEME = "app_theme"
 
 class SettingStore private constructor(context: Context) {
     private val sharedPref = context.getSharedPreferences(SETTING_PREF_NAME, Context.MODE_PRIVATE)
@@ -55,6 +57,17 @@ class SettingStore private constructor(context: Context) {
     fun loadAppLanguage(): AppLanguage? {
         val tag = sharedPref.getString(PREF_APP_LANGUAGE, null) ?: return null
         return AppLanguage.fromServerTag(tag)
+    }
+
+    fun saveAppTheme(theme: AppTheme) {
+        sharedPref.edit(commit = true) {
+            putString(PREF_APP_THEME, theme.key)
+        }
+    }
+
+    fun loadAppTheme(): AppTheme? {
+        val key = sharedPref.getString(PREF_APP_THEME, null) ?: return null
+        return AppTheme.fromKey(key)
     }
 
     companion object {

@@ -10,6 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.ui.util.toast
 import com.ft.ftchinese.store.AppLanguageManager
+import com.ft.ftchinese.store.AppThemeManager
 
 @Composable
 fun PreferenceActivityScreen(
@@ -18,6 +19,7 @@ fun PreferenceActivityScreen(
 ) {
     val context = LocalContext.current
     val appLanguage = AppLanguageManager.current(context)
+    val appTheme = AppThemeManager.current(context)
 
     val scope = rememberCoroutineScope()
 
@@ -36,12 +38,14 @@ fun PreferenceActivityScreen(
         prefState.cacheSize,
         prefState.readEntries,
         appLanguage,
+        appTheme,
     ) {
         SettingRow.build(
             context.resources,
             cacheSize = prefState.cacheSize,
             readCount = prefState.readEntries,
             appLanguage = appLanguage,
+            appTheme = appTheme,
         )
     }
 

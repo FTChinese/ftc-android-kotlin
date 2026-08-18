@@ -7,6 +7,7 @@ import com.ft.ftchinese.repository.Endpoint
 import com.ft.ftchinese.repository.PushClient
 import com.ft.ftchinese.ui.util.StripePaymentSheetKeyboardWorkaround
 import com.ft.ftchinese.store.AppLanguageManager
+import com.ft.ftchinese.store.AppThemeManager
 
 private const val TAG = "App"
 private const val API_LOG_PREFIX = "[FTCApi]"
@@ -21,6 +22,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        AppThemeManager.apply(this)
         AppLanguageManager.apply(this)
         Log.i(
             TAG,
