@@ -18,6 +18,15 @@ private val duplicateNativeListMainScript = Regex(
     setOf(RegexOption.IGNORE_CASE)
 )
 
+private val nativeChineseWebScripts: String by lazy {
+    runCatching {
+        val assets = App.instance.assets
+        val trie = assets.open("chinese-web/trie.js").bufferedReader().use { it.readText() }
+        val converter = assets.open("chinese-web/convert-chinese.js").bufferedReader().use { it.readText() }
+        "$trie\n$converter"
+    }.getOrDefault("")
+}
+
 private fun sanitizeNativeListContent(html: String): String {
     return duplicateNativeListMainScript.replace(html, "")
 }
@@ -327,7 +336,13 @@ var androidUserAddress = ${addr.toJsonString()}
     }
 
     private fun injectPreferredLanguage(html: String): String {
-        val script = "<script>window.preferredLanguage = ${JSONObject.quote(preferredLanguageTag())};</script>"
+        val languageScript = "<script>window.preferredLanguage = ${JSONObject.quote(preferredLanguageTag())};</script>"
+        val converterScript = if (appLanguage != AppLanguage.ZH_CN) {
+            "<script>$nativeChineseWebScripts</script>"
+        } else {
+            ""
+        }
+        val script = languageScript + converterScript
         val headStart = html.indexOf("<head", ignoreCase = true)
         if (headStart >= 0) {
             val headEnd = html.indexOf('>', headStart)
