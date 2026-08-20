@@ -114,6 +114,7 @@ data class CheckoutIntent(
         fun ofStripe(
             source: Membership,
             target: StripePrice,
+            allowSameTierRenewalDiscount: Boolean = false,
         ): CheckoutIntent {
             if (source.vip) {
                 return vip
@@ -136,6 +137,11 @@ data class CheckoutIntent(
                         CheckoutIntent(
                             kind = IntentKind.CancelScheduledChange,
                             message = "当前仍保留${target.tier.label()}权益；取消已安排的降级后，下次续订将继续按${target.tier.label()}扣款"
+                        )
+                    } else if (source.cycle == target.periodCount.toCycle() && allowSameTierRenewalDiscount) {
+                        CheckoutIntent(
+                            kind = IntentKind.Downgrade,
+                            message = "当前订阅保持不变，下次续订起使用更优惠的价格"
                         )
                     } else if (source.cycle == target.periodCount.toCycle()) {
                         // Campaign coupons are applied when creating or changing a

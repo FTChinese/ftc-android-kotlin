@@ -149,7 +149,9 @@ fun buildCatalogStripeCartItem(
     }
     val intent = CheckoutIntent.ofStripe(
         source = membership,
-        target = recurring
+        target = recurring,
+        allowSameTierRenewalDiscount = hasCoupon &&
+            membership.normalizedPayMethod == com.ft.ftchinese.model.enums.PayMethod.STRIPE
     )
 
     return CartItemStripe(
@@ -157,7 +159,7 @@ fun buildCatalogStripeCartItem(
         recurring = recurring,
         trial = null,
         coupon = coupon.takeUnless {
-            intent.kind == IntentKind.Downgrade ||
+            (intent.kind == IntentKind.Downgrade && membership.tier != tier) ||
                 intent.kind == IntentKind.CancelScheduledChange
         },
     )

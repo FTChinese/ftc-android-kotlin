@@ -10,6 +10,7 @@ import com.ft.ftchinese.model.iapsubs.IapSubs
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.stripesubs.StripeSubs
 import com.ft.ftchinese.model.stripesubs.StripePendingChange
+import com.ft.ftchinese.model.stripesubs.StripeRenewal
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
@@ -40,6 +41,7 @@ private const val PREF_IS_VIP = "is_vip"
 private const val PREF_STD_ADDON = "std_addon"
 private const val PREF_PRM_ADDON = "prm_addon"
 private const val PREF_PENDING_STRIPE_CHANGE = "pending_stripe_change"
+private const val PREF_STRIPE_RENEWAL = "stripe_renewal"
 
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 private const val PREF_LOGIN_METHOD = "login_method"
@@ -123,6 +125,9 @@ class SessionManager private constructor(context: Context) {
             member.pendingStripeChange?.let {
                 putString(PREF_PENDING_STRIPE_CHANGE, marshaller.encodeToString(it))
             } ?: remove(PREF_PENDING_STRIPE_CHANGE)
+            member.renewal?.let {
+                putString(PREF_STRIPE_RENEWAL, marshaller.encodeToString(it))
+            } ?: remove(PREF_STRIPE_RENEWAL)
         }
     }
 
@@ -146,6 +151,12 @@ class SessionManager private constructor(context: Context) {
                     marshaller.decodeFromString<StripePendingChange>(raw)
                 }.getOrNull()
             }
+        val renewal = prefs.getString(PREF_STRIPE_RENEWAL, null)
+            ?.let { raw ->
+                runCatching {
+                    marshaller.decodeFromString<StripeRenewal>(raw)
+                }.getOrNull()
+            }
 
         return Membership(
             tier = Tier.fromString(tier),
@@ -161,6 +172,7 @@ class SessionManager private constructor(context: Context) {
             standardAddOn = stdAddOn,
             premiumAddOn = prmAddOn,
             pendingStripeChange = pendingStripeChange,
+            renewal = renewal,
         )
     }
 

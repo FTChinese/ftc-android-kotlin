@@ -11,6 +11,7 @@ import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 import com.ft.ftchinese.model.serializer.LenientBooleanSerializer
 import com.ft.ftchinese.model.serializer.LenientPayMethodSerializer
 import com.ft.ftchinese.model.stripesubs.StripePendingChange
+import com.ft.ftchinese.model.stripesubs.StripeRenewal
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -40,6 +41,7 @@ data class Membership(
     val premiumAddOn: Long = 0,
     val pendingStripeChange: StripePendingChange? = null,
     val vip: Boolean = false,
+    val renewal: StripeRenewal? = null,
 ) : Parcelable {
 
     fun toJsonString(): String {

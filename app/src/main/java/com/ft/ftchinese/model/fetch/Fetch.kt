@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.fetch
 
+import android.os.Build
 import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.App
@@ -144,6 +145,12 @@ class Fetch {
     fun setClient() = apply {
         headers["X-Client-Type"] = "android"
         headers["X-Client-Version"] = BuildConfig.VERSION_NAME
+        headers["X-App-Version-Code"] = BuildConfig.VERSION_CODE.toString()
+        headers["X-Android-Brand"] = Build.BRAND ?: ""
+        headers["X-Android-Manufacturer"] = Build.MANUFACTURER ?: ""
+        headers["X-Android-Model"] = Build.MODEL ?: ""
+        headers["X-Android-OS-Version"] = Build.VERSION.RELEASE ?: ""
+        headers["X-Android-Sdk-Int"] = Build.VERSION.SDK_INT.toString()
     }
 
     fun setUserId(uuid: String) = apply {

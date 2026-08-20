@@ -10,8 +10,8 @@ internal data class SubsOptionVisibility(
     val stripeAutoRenewUiState: StripeAutoRenewUiState?,
 )
 
-internal fun Membership.subsOptionVisibility(): SubsOptionVisibility {
-    val autoRenewUiState = stripeAutoRenewUiState()
+internal fun Membership.subsOptionVisibility(preferredLanguage: String = "zh"): SubsOptionVisibility {
+    val autoRenewUiState = stripeAutoRenewUiState(preferredLanguage)
 
     return SubsOptionVisibility(
         showStripeAutoRenewSwitch = autoRenewUiState.visible,

@@ -2,11 +2,22 @@ package com.ft.ftchinese.model.paywall
 
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import java.util.*
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 private val symbols = mapOf(
     "cny" to "¥",
+    "aud" to "A$",
+    "cad" to "C$",
+    "eur" to "€",
     "usd" to "$",
     "gbp" to "£",
+    "hkd" to "HK$",
+    "jpy" to "¥",
+    "mop" to "MOP$",
+    "nzd" to "NZ$",
+    "sgd" to "S$",
+    "twd" to "NT$",
 )
 
 fun getCurrencySymbol(currency: String): String {
@@ -22,6 +33,16 @@ fun convertCent(amount: Int): Double {
         .toBigDecimal()
         .divide(100.toBigDecimal())
         .toDouble()
+}
+
+/** Convert a Stripe amount in the currency's smallest unit to display units. */
+fun convertStripeAmount(currency: String, amountMinor: Int): BigDecimal {
+    val fractionDigits = runCatching {
+        Currency.getInstance(currency.uppercase(Locale.ROOT)).defaultFractionDigits
+    }.getOrDefault(2).coerceAtLeast(0)
+
+    return BigDecimal(amountMinor).movePointLeft(fractionDigits)
+        .setScale(fractionDigits, RoundingMode.UNNECESSARY)
 }
 
 data class MoneyParts(

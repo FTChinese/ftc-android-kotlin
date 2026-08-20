@@ -24,9 +24,11 @@ import com.ft.ftchinese.ui.components.ListItemTwoCol
 import com.ft.ftchinese.ui.components.SubHeading1
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.formatter.formatAmountOff
+import com.ft.ftchinese.ui.formatter.formatStripeAmount
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.ZonedDateTime
+import java.util.Locale
 
 @Composable
 fun StripeSubsDetails(
@@ -71,6 +73,20 @@ fun StripeSubsDetails(
             ListItemTwoCol(
                 lead = "下次续订方案",
                 tail = FormatHelper.getTier(context, targetTier)
+            )
+        }
+        subs.renewal?.let { renewal ->
+            val discount = renewal.discountPercent?.let {
+                val value = if (it % 1.0 == 0.0) {
+                    it.toInt().toString()
+                } else {
+                    String.format(Locale.ROOT, "%.1f", it)
+                }
+                "（优惠 $value%）"
+            }.orEmpty()
+            ListItemTwoCol(
+                lead = "下次续订价格",
+                tail = formatStripeAmount(context, renewal.currency, renewal.amountMinor) + discount
             )
         }
         ListItemTwoCol(

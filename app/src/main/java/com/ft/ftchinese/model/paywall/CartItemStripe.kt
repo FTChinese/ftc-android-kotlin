@@ -63,7 +63,7 @@ data class CartItemStripe(
         return SubParams(
             priceId = recurring.id,
             introductoryPriceId = trial?.id,
-            coupon = if (isDirectSubscriptionUpdate) null else coupon?.id,
+            coupon = coupon?.id,
             defaultPaymentMethod = if (isDirectSubscriptionUpdate) null else payMethod?.id,
             currency = recurring.currency.takeIf { it.isNotBlank() },
             ccode = ccode,

@@ -14,6 +14,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.store.AppLanguageManager
 import com.ft.ftchinese.ui.components.SubsRuleContent
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatus
 import com.ft.ftchinese.ui.subs.mysubs.SubsStatusCard
@@ -32,7 +33,8 @@ fun MemberScreen(
         ctx = context,
         m = member
     )
-    val optionVisibility = member.subsOptionVisibility()
+    val preferredLanguage = AppLanguageManager.current(context).serverTag
+    val optionVisibility = member.subsOptionVisibility(preferredLanguage)
 
     Column(
         modifier = Modifier
@@ -55,6 +57,7 @@ fun MemberScreen(
 
         SubsOptions(
             stripeAutoRenewUiState = optionVisibility.stripeAutoRenewUiState,
+            preferredLanguage = preferredLanguage,
             onStripeAutoRenewChange = onStripeAutoRenewChange,
             onClickRow = onSubsOption
         )

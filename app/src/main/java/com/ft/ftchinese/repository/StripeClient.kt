@@ -367,6 +367,7 @@ object StripeClient {
             .setLegacyApiKey()
             .post(api.stripeSubs)
             .setUserId(account.id)
+            .setClient()
             .noCache()
             .sendJson(params)
             .endJson<StripeSubsResult>()

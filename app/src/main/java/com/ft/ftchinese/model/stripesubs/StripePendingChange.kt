@@ -21,6 +21,10 @@ data class StripePendingChange(
 ) : Parcelable {
     val isDowngrade: Boolean
         get() = kind.equals("downgrade", ignoreCase = true)
+            || kind.equals("renewal_discount", ignoreCase = true)
+
+    val isRenewalDiscount: Boolean
+        get() = kind.equals("renewal_discount", ignoreCase = true)
 
     fun targets(tier: Tier?): Boolean {
         return targetTier != null && targetTier == tier

@@ -22,6 +22,7 @@ import com.ft.ftchinese.ui.subs.SubsActivity
 import com.ft.ftchinese.ui.util.AccountAction
 import com.ft.ftchinese.ui.util.IntentsUtil
 import com.ft.ftchinese.viewmodel.UserViewModel
+import com.ft.ftchinese.store.AppLanguageManager
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -90,10 +91,14 @@ fun MemberActivityScreen(
         return
     }
 
+    LaunchedEffect(account.id) {
+        memberState.refresh(account)
+    }
+
     if (showDialog) {
         CancelStripeDialog(
             bodyText = account.membership
-                .subsOptionVisibility()
+                .subsOptionVisibility(AppLanguageManager.current(context).serverTag)
                 .stripeAutoRenewUiState
                 ?.offConfirmation,
             onConfirm = {

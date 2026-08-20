@@ -28,9 +28,13 @@ enum class SubsOptionRow {
 @Composable
 fun SubsOptions(
     stripeAutoRenewUiState: StripeAutoRenewUiState?,
+    preferredLanguage: String = "zh",
     onStripeAutoRenewChange: (Boolean) -> Unit,
     onClickRow: (SubsOptionRow) -> Unit,
 ) {
+    val traditional = preferredLanguage.contains("Hant", ignoreCase = true) ||
+        preferredLanguage.contains("TW", ignoreCase = true) ||
+        preferredLanguage.contains("HK", ignoreCase = true)
 
     Card {
         Column(
@@ -49,9 +53,9 @@ fun SubsOptions(
             ) {
                 Text(
                     text = if (stripeAutoRenewUiState == null) {
-                        "购买订阅"
+                        if (traditional) "購買訂閱" else "购买订阅"
                     } else {
-                        "购买订阅或更改方案"
+                        if (traditional) "購買訂閱或更改方案" else "购买订阅或更改方案"
                     }
                 )
             }

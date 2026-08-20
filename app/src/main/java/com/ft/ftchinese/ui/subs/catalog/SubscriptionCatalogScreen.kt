@@ -684,6 +684,8 @@ internal fun planCheckoutState(
 
     val message = when {
         membership.vip -> if (zh) "VIP 无需订阅" else "VIP does not need a subscription"
+        pendingStripeChange?.isRenewalDiscount == true && currentTier ->
+            if (zh) "已安排下次续订起使用优惠价格" else "A lower renewal price is scheduled for your next renewal"
         pendingStripeChange?.isDowngrade == true && currentTier ->
             if (zh) {
                 "当前仍为$productTierLabel；下次续订已安排转为$pendingTierLabel，可选择保留当前方案"
@@ -694,7 +696,8 @@ internal fun planCheckoutState(
             if (zh) "已安排下次续订起转为$productTierLabel" else "Scheduled for the next renewal"
         activeApple ->
             if (zh) "当前为苹果自动续订，请在苹果设备上管理订阅" else "Current subscription is managed by Apple"
-        currentTier && membership.normalizedPayMethod == PayMethod.STRIPE ->
+        currentTier && membership.normalizedPayMethod == PayMethod.STRIPE &&
+            stripeIntentKind != IntentKind.Downgrade ->
             if (zh) "当前为信用卡/借记卡自动续订，不能重复购买同级别会员" else "Current card subscription cannot be purchased again"
         oneTimeCurrent && !enabled ->
             if (zh) "到期时间已超过最长续订期限，暂不能继续叠加购买" else "Renewal limit reached"
@@ -706,6 +709,10 @@ internal fun planCheckoutState(
     val actionText = when {
         stripeIntentKind == IntentKind.CancelScheduledChange ->
             if (zh) "保留高端续订" else "Keep Premium Renewal"
+        stripeIntentKind == IntentKind.Downgrade && pendingStripeChange?.isRenewalDiscount != true ->
+            stripeChangePlanLabel(product, preferredLanguage)
+        stripeIntentKind == IntentKind.Downgrade ->
+            if (zh) "已安排优惠续订" else "Renewal discount scheduled"
         pendingStripeChange?.targets(product.tier) == true ->
             if (zh) "已安排转为$productTierLabel" else "Scheduled"
         activeApple && currentTier -> currentPlanLabel(preferredLanguage)

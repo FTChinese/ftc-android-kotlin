@@ -1,5 +1,7 @@
 package com.ft.ftchinese.repository
 
+import android.os.Build
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
@@ -14,6 +16,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 object FtcPayClient {
+
+    private fun detailedPaymentError(
+        paymentMethod: String,
+        endpoint: String,
+        params: OrderParams,
+        statusCode: Int?,
+        code: String?,
+        message: String?,
+        exceptionName: String? = null,
+    ): String {
+        val detail = message?.trim()?.takeIf { it.isNotEmpty() } ?: "无错误消息"
+        return listOf(
+            "${paymentMethod}下单失败",
+            "HTTP=${statusCode ?: "unknown"} code=${code ?: "none"}",
+            "错误=$detail",
+            "异常=${exceptionName ?: "APIError"}",
+            "接口=$endpoint",
+            "priceId=${params.priceId}",
+            "discountId=${params.discountId ?: "none"}",
+            "ccode=${params.ccode ?: "none"} from=${params.from ?: "none"}",
+            "客户端=${BuildConfig.VERSION_NAME} Android=${Build.VERSION.SDK_INT}",
+            "设备=${Build.MANUFACTURER} ${Build.MODEL}"
+        ).joinToString("\n").take(1800)
+    }
 
     fun verifyOrder(account: Account, orderId: String):  VerificationResult? {
 
@@ -46,10 +72,20 @@ object FtcPayClient {
     }
 
     suspend fun asyncCreateWxOrder(account: Account, params: OrderParams): FetchResult<WxPayIntent> {
+        val api = ApiConfig.ofSubs(account.isTest)
         try {
             val wxOrder = withContext(Dispatchers.IO) {
                 createWxOrder(account, params)
-            } ?: return FetchResult.LocalizedError(R.string.toast_order_failed)
+            } ?: return FetchResult.TextError(
+                detailedPaymentError(
+                    paymentMethod = "微信支付",
+                    endpoint = api.wxOrder,
+                    params = params,
+                    statusCode = null,
+                    code = "empty_response",
+                    message = "服务器返回空响应",
+                )
+            )
 
             if (wxOrder.params.app == null) {
                 return FetchResult.TextError("WxPayIntent.params.app should not be null")
@@ -60,10 +96,29 @@ object FtcPayClient {
             return if (e.statusCode == 403) {
                 FetchResult.LocalizedError(R.string.duplicate_purchase)
             } else {
-                FetchResult.fromApi(e)
+                FetchResult.TextError(
+                    detailedPaymentError(
+                        paymentMethod = "微信支付",
+                        endpoint = api.wxOrder,
+                        params = params,
+                        statusCode = e.statusCode,
+                        code = e.code,
+                        message = e.message,
+                    )
+                )
             }
         } catch (e: Exception) {
-            return FetchResult.fromException(e)
+            return FetchResult.TextError(
+                detailedPaymentError(
+                    paymentMethod = "微信支付",
+                    endpoint = api.wxOrder,
+                    params = params,
+                    statusCode = null,
+                    code = null,
+                    message = e.message,
+                    exceptionName = e::class.simpleName,
+                )
+            )
         }
     }
 
@@ -82,20 +137,49 @@ object FtcPayClient {
     }
 
     suspend fun asyncCreateAliOrder(account: Account, params: OrderParams): FetchResult<AliPayIntent> {
+        val api = ApiConfig.ofSubs(account.isTest)
         try {
             val aliOrder = withContext(Dispatchers.IO) {
                 createAliOrder(account, params)
-            } ?: return FetchResult.LocalizedError(R.string.toast_order_failed)
+            } ?: return FetchResult.TextError(
+                detailedPaymentError(
+                    paymentMethod = "支付宝",
+                    endpoint = api.aliOrder,
+                    params = params,
+                    statusCode = null,
+                    code = "empty_response",
+                    message = "服务器返回空响应",
+                )
+            )
 
             return FetchResult.Success(aliOrder)
         } catch (e: APIError) {
             return if (e.statusCode == 403) {
                 FetchResult.LocalizedError(R.string.duplicate_purchase)
             } else {
-                FetchResult.fromApi(e)
+                FetchResult.TextError(
+                    detailedPaymentError(
+                        paymentMethod = "支付宝",
+                        endpoint = api.aliOrder,
+                        params = params,
+                        statusCode = e.statusCode,
+                        code = e.code,
+                        message = e.message,
+                    )
+                )
             }
         } catch (e: Exception) {
-            return FetchResult.fromException(e)
+            return FetchResult.TextError(
+                detailedPaymentError(
+                    paymentMethod = "支付宝",
+                    endpoint = api.aliOrder,
+                    params = params,
+                    statusCode = null,
+                    code = null,
+                    message = e.message,
+                    exceptionName = e::class.simpleName,
+                )
+            )
         }
     }
 
